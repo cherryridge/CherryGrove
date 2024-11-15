@@ -1,6 +1,6 @@
-#define GLEW_STATIC
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <FTGL/ftgl.h>
 #include <iostream>
 
 static unsigned int compile(const std::string& code, unsigned int type){
@@ -68,16 +68,35 @@ int main(){
             "void main(){\n"
             "    color = vec4(1.0, 1.0, 0.0, 0.5);\n"
             "}";
-    unsigned int shader = createShader(vertex, fragment);
-    glUseProgram(shader);
-    
+    unsigned int shader1 = createShader(vertex, fragment);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, 800, 600, 0);
+    glClearColor(0.73f, 0.753f, 0.95f, 1.0f);
+
+    FTGLPixmapFont* font = new FTGLPixmapFont("LXGWWenKai-Regular.ttf");
+    if(font->Error()){
+        std::cout << "Error loading font!" << std::endl;
+        return -1;
+    }
+    font->FaceSize(24);
+
     while(!glfwWindowShouldClose(window)){
         glClear(GL_COLOR_BUFFER_BIT);
+        glUseProgram(shader1);
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        
+        glUseProgram(0);
+        glPushMatrix();
+        glTranslatef(60.0f, 60.0f, 0.1f);
+        glScalef(6.0f, 6.0f, 3.0f);
+        font->Render("Hello World!");
+        glPopMatrix();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    delete font;
     glfwTerminate();
+    glfwDestroyWindow(window);
     return 0;
 }
