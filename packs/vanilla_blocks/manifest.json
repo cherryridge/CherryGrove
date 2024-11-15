@@ -1,0 +1,9 @@
+﻿{
+    "format_version": 1,
+    "namespace": "cg",
+    "name": "Vanilla Pack",
+    "description": "Cherry Grove's default pack",
+    "uuid": "829746ba-2b9a-478c-8dae-49c1f8e9be7a",
+    "version": [1, 0, 0],
+    "dependencies": []
+}
