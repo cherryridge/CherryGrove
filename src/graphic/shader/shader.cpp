@@ -1,4 +1,4 @@
-﻿#include <GL/glew.h>
+﻿/*#include <GL/glew.h>
 #include <fstream>
 #include <iostream>
 #include "shader.h"
@@ -46,4 +46,4 @@ unsigned int Shader::compile(const std::string& code, unsigned int type){
         return 0;
     }
     return id;
-}
+}*/

@@ -1,6 +1,5 @@
-﻿.vscode/
 build/
-vcpkg_installed/
+.vs/
 lib_archive/
 lib/
 include/
