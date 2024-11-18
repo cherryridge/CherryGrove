@@ -1,3 +1,6 @@
 ﻿.vscode/
 build/
 vcpkg_installed/
+lib_archive/
+lib/
+include/

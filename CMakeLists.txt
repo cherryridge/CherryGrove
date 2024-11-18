@@ -1,8 +1,16 @@
 set(ENV{LANG} "en_US.UTF-8")
-
+set(VCPKG_TARGET_TRIPLET "x64-windows")
+set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "vcpkg")
+set(CMAKE_MAKE_PROGRAM "E:/Bats/ninja.exe")
+set(CMAKE_C_COMPILER "E:/mingw64/bin/gcc.exe")
+set(CMAKE_CXX_COMPILER "E:/mingw64/bin/g++.exe")
+set(CMAKE_C_COMPILER_WORKS 1)
+set(CMAKE_CXX_COMPILER_WORKS 1)
 cmake_minimum_required(VERSION 3.30)
 
 project(CherryGrove VERSION 0.0.1 LANGUAGES CXX)
+
+set(LIBRARY_PATH "${CMAKE_SOURCE_DIR}/lib")
 
 find_package(GLEW CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
@@ -25,14 +33,12 @@ target_link_options(CherryGrove PRIVATE
     $<$<CONFIG:Debug>:-mconsole>
 )
 
-set(MINGW_BIN "$ENV{MINGW_HOME}/bin")
-string(REPLACE "\\" "/" MINGW_BIN "${MINGW_BIN}")
 install(
     TARGETS CherryGrove DESTINATION .
     RUNTIME_DEPENDENCIES
         PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-" "hvsifiletrust"
         POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
-        DIRECTORIES ${CMAKE_BINARY_DIR} ${MINGW_BIN}
+        DIRECTORIES ${CMAKE_BINARY_DIR}
     RUNTIME DESTINATION .
 )
 set(CPACK_GENERATOR "NSIS")

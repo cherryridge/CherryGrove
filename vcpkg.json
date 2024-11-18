@@ -1,7 +1,5 @@
 {
     "dependencies": [
-        "glew",
-        "glfw3",
-        "ftgl"
+        "bgfx"
     ]
 }
