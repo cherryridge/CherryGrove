@@ -1,5 +1,10 @@
-build/
 .vs/
-lib_archive/
-lib/
+assets/
+build/
 include/
+lib/
+lib_archive/
+others/
+shaders/
+*.aps
+*.user

@@ -1,16 +1,10 @@
-﻿#ifndef SHADER_H
-#define SHADER_H
+﻿#pragma once
+#include <bgfx/bgfx.h>
 
 class Shader{
-    private:
-        unsigned int id;
-        static unsigned int compile(const std::string& code, unsigned int type);
-    public:
-        Shader(const std::string& vertexShader, const std::string& fragmentShader);
-        Shader(FILE vertexShaderFile, FILE fragmentShaderFile);
-        bool attach();
-        bool detach();
-        
+public:
+	Shader(const char* vs_filename, const char* fs_filename);
+	bgfx::ProgramHandle program;
+private:
+	bgfx::ShaderHandle loadShader(const char* FILENAME);
 };
-
-#endif

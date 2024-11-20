@@ -55,19 +55,23 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalOptions>/Zc:__cplusplus /Zc:preprocessor %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <SubSystem>NotSet</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\bgfx\debug\bxDebug.lib;$(SolutionDir)lib\bgfx\debug\bimgDebug.lib;$(SolutionDir)lib\bgfx\debug\bgfxDebug.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
+    <ResourceCompile>
+      <Culture>0x7804</Culture>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -75,21 +79,25 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalOptions>/Zc:__cplusplus /Zc:preprocessor %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <SubSystem>NotSet</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\bgfx\release\bxRelease.lib;$(SolutionDir)lib\bgfx\release\bimgRelease.lib;$(SolutionDir)lib\bgfx\release\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
+    <ResourceCompile>
+      <Culture>0x7804</Culture>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\graphic\font\font.cpp" />
@@ -97,122 +105,12 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".gitignore" />
-    <None Include="include\bx\inline\allocator.inl" />
-    <None Include="include\bx\inline\bounds.inl" />
-    <None Include="include\bx\inline\bx.inl" />
-    <None Include="include\bx\inline\cpu.inl" />
-    <None Include="include\bx\inline\easing.inl" />
-    <None Include="include\bx\inline\endian.inl" />
-    <None Include="include\bx\inline\error.inl" />
-    <None Include="include\bx\inline\float4x4_t.inl" />
-    <None Include="include\bx\inline\handlealloc.inl" />
-    <None Include="include\bx\inline\hash.inl" />
-    <None Include="include\bx\inline\math.inl" />
-    <None Include="include\bx\inline\mpscqueue.inl" />
-    <None Include="include\bx\inline\mutex.inl" />
-    <None Include="include\bx\inline\os.inl" />
-    <None Include="include\bx\inline\pixelformat.inl" />
-    <None Include="include\bx\inline\readerwriter.inl" />
-    <None Include="include\bx\inline\ringbuffer.inl" />
-    <None Include="include\bx\inline\rng.inl" />
-    <None Include="include\bx\inline\simd128_langext.inl" />
-    <None Include="include\bx\inline\simd128_neon.inl" />
-    <None Include="include\bx\inline\simd128_ref.inl" />
-    <None Include="include\bx\inline\simd128_sse.inl" />
-    <None Include="include\bx\inline\simd128_swizzle.inl" />
-    <None Include="include\bx\inline\simd256_avx.inl" />
-    <None Include="include\bx\inline\simd256_ref.inl" />
-    <None Include="include\bx\inline\simd_ni.inl" />
-    <None Include="include\bx\inline\sort.inl" />
-    <None Include="include\bx\inline\spscqueue.inl" />
-    <None Include="include\bx\inline\string.inl" />
-    <None Include="include\bx\inline\typetraits.inl" />
-    <None Include="include\bx\inline\uint32_t.inl" />
-    <None Include="include\tinystl\LICENSE" />
-    <None Include="nsis.nsi" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\bgfx\bgfx.h" />
-    <ClInclude Include="include\bgfx\c99\bgfx.h" />
-    <ClInclude Include="include\bgfx\defines.h" />
-    <ClInclude Include="include\bgfx\embedded_shader.h" />
-    <ClInclude Include="include\bgfx\platform.h" />
-    <ClInclude Include="include\bimg\bimg.h" />
-    <ClInclude Include="include\bimg\decode.h" />
-    <ClInclude Include="include\bimg\encode.h" />
-    <ClInclude Include="include\bx\allocator.h" />
-    <ClInclude Include="include\bx\bounds.h" />
-    <ClInclude Include="include\bx\bx.h" />
-    <ClInclude Include="include\bx\commandline.h" />
-    <ClInclude Include="include\bx\config.h" />
-    <ClInclude Include="include\bx\constants.h" />
-    <ClInclude Include="include\bx\cpu.h" />
-    <ClInclude Include="include\bx\debug.h" />
-    <ClInclude Include="include\bx\easing.h" />
-    <ClInclude Include="include\bx\endian.h" />
-    <ClInclude Include="include\bx\error.h" />
-    <ClInclude Include="include\bx\file.h" />
-    <ClInclude Include="include\bx\filepath.h" />
-    <ClInclude Include="include\bx\float4x4_t.h" />
-    <ClInclude Include="include\bx\handlealloc.h" />
-    <ClInclude Include="include\bx\hash.h" />
-    <ClInclude Include="include\bx\macros.h" />
-    <ClInclude Include="include\bx\maputil.h" />
-    <ClInclude Include="include\bx\math.h" />
-    <ClInclude Include="include\bx\mpscqueue.h" />
-    <ClInclude Include="include\bx\mutex.h" />
-    <ClInclude Include="include\bx\os.h" />
-    <ClInclude Include="include\bx\pixelformat.h" />
-    <ClInclude Include="include\bx\platform.h" />
-    <ClInclude Include="include\bx\process.h" />
-    <ClInclude Include="include\bx\readerwriter.h" />
-    <ClInclude Include="include\bx\ringbuffer.h" />
-    <ClInclude Include="include\bx\rng.h" />
-    <ClInclude Include="include\bx\semaphore.h" />
-    <ClInclude Include="include\bx\settings.h" />
-    <ClInclude Include="include\bx\simd_t.h" />
-    <ClInclude Include="include\bx\sort.h" />
-    <ClInclude Include="include\bx\spscqueue.h" />
-    <ClInclude Include="include\bx\string.h" />
-    <ClInclude Include="include\bx\thread.h" />
-    <ClInclude Include="include\bx\timer.h" />
-    <ClInclude Include="include\bx\typetraits.h" />
-    <ClInclude Include="include\bx\uint32_t.h" />
-    <ClInclude Include="include\bx\url.h" />
-    <ClInclude Include="include\compat\freebsd\alloca.h" />
-    <ClInclude Include="include\compat\freebsd\dirent.h" />
-    <ClInclude Include="include\compat\freebsd\malloc.h" />
-    <ClInclude Include="include\compat\freebsd\signal.h" />
-    <ClInclude Include="include\compat\ios\malloc.h" />
-    <ClInclude Include="include\compat\linux\sal.h" />
-    <ClInclude Include="include\compat\mingw\alloca.h" />
-    <ClInclude Include="include\compat\mingw\dirent.h" />
-    <ClInclude Include="include\compat\mingw\sal.h" />
-    <ClInclude Include="include\compat\mingw\salieri.h" />
-    <ClInclude Include="include\compat\mingw\specstrings_strict.h" />
-    <ClInclude Include="include\compat\mingw\specstrings_undef.h" />
-    <ClInclude Include="include\compat\msvc\alloca.h" />
-    <ClInclude Include="include\compat\msvc\dirent.h" />
-    <ClInclude Include="include\compat\msvc\inttypes.h" />
-    <ClInclude Include="include\compat\msvc\pre1600\stdint.h" />
-    <ClInclude Include="include\compat\msvc\stdbool.h" />
-    <ClInclude Include="include\compat\osx\malloc.h" />
-    <ClInclude Include="include\glfw\glfw3.h" />
-    <ClInclude Include="include\glfw\glfw3native.h" />
-    <ClInclude Include="include\tinystl\allocator.h" />
-    <ClInclude Include="include\tinystl\buffer.h" />
-    <ClInclude Include="include\tinystl\hash.h" />
-    <ClInclude Include="include\tinystl\hash_base.h" />
-    <ClInclude Include="include\tinystl\new.h" />
-    <ClInclude Include="include\tinystl\stddef.h" />
-    <ClInclude Include="include\tinystl\string.h" />
-    <ClInclude Include="include\tinystl\traits.h" />
-    <ClInclude Include="include\tinystl\unordered_map.h" />
-    <ClInclude Include="include\tinystl\unordered_set.h" />
-    <ClInclude Include="include\tinystl\vector.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\graphic\font\font.h" />
     <ClInclude Include="src\graphic\shader\shader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CherryGrove.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
