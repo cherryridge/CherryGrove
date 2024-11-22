@@ -15,3 +15,4 @@ shaders/
 !*/shaders/
 *.aps
 *.user
+*.log

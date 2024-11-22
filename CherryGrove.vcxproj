@@ -146,12 +146,19 @@
   <ItemGroup>
     <ClCompile Include="src\graphic\font\font.cpp" />
     <ClCompile Include="src\graphic\shader\shader.cpp" />
+    <ClCompile Include="src\logger\logger.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\pack\packManager.cpp" />
+    <ClCompile Include="src\pack\packInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\graphic\font\font.h" />
     <ClInclude Include="src\graphic\shader\shader.h" />
+    <ClInclude Include="src\logger\logger.h" />
+    <ClInclude Include="src\pack\pack.h" />
+    <ClInclude Include="src\pack\packManager.h" />
+    <ClInclude Include="src\pack\packInstance.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CherryGrove.rc" />
