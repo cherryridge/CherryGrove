@@ -5,6 +5,10 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="RelDebug|x64">
+      <Configuration>RelDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
@@ -31,6 +35,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelDebug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -42,8 +53,15 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='RelDebug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\.$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelDebug|x64'">
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>build\.$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -61,13 +79,13 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/Zc:__cplusplus /Zc:preprocessor %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:__cplusplus /Zc:preprocessor /D "CG_CONSOLE" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\bgfx\debug\bxDebug.lib;$(SolutionDir)lib\bgfx\debug\bimgDebug.lib;$(SolutionDir)lib\bgfx\debug\bgfxDebug.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-debug.lib;$(SolutionDir)lib\bgfx\debug\bxDebug.lib;$(SolutionDir)lib\bgfx\debug\bimgDebug.lib;$(SolutionDir)lib\bgfx\debug\bgfxDebug.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <Culture>0x7804</Culture>
@@ -91,9 +109,35 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\bgfx\release\bxRelease.lib;$(SolutionDir)lib\bgfx\release\bimgRelease.lib;$(SolutionDir)lib\bgfx\release\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\bgfx\release\bxRelease.lib;$(SolutionDir)lib\bgfx\release\bimgRelease.lib;$(SolutionDir)lib\bgfx\release\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <Culture>0x7804</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelDebug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalOptions>/Zc:__cplusplus /Zc:preprocessor /D "CG_CONSOLE" %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\bgfx\release\bxRelease.lib;$(SolutionDir)lib\bgfx\release\bimgRelease.lib;$(SolutionDir)lib\bgfx\release\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <Culture>0x7804</Culture>

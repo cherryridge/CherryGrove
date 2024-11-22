@@ -5,6 +5,7 @@ include/
 lib/
 lib_archive/
 others/
+packing_resources/
 shaders/
 *.aps
 *.user
