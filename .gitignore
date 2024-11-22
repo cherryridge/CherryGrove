@@ -1,6 +1,4 @@
 .vs/
-assets/
-!*/assets/
 build/
 !*/build/
 include/
