@@ -1,7 +1,6 @@
-<p align="center">
-    ![CherryGrove Logo](tree/main/assets/icons/CherryGrove-trs-2048.png)
-    # CherryGrove
-</p>
+<p align="center"><img alt="CherryGrove Logo" width="480" src="assets/icons/CherryGrove-trs-2048.png" /></p>
+
+<h1 align="center">CherryGrove</h1>
 
 A highly moddable, high performance and highly free & open block game engine.
 
