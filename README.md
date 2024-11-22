@@ -19,4 +19,4 @@ A highly moddable, high performance and highly free & open block game engine.
 
 ## License
 
-©2024 LJM12914. Licensed under the [GPL-3.0-or-later](blob/main/LICENSE) license.
+©2024 LJM12914. Licensed under the [GPL-3.0-or-later](LICENSE) license.
