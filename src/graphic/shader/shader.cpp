@@ -7,6 +7,7 @@
 Shader::Shader(const char* vs_filename, const char* fs_filename) {
     bgfx::ShaderHandle vsh = loadShader(vs_filename);
     bgfx::ShaderHandle fsh = loadShader(fs_filename);
+    
     program = bgfx::createProgram(vsh, fsh, true);
 }
 
@@ -18,6 +19,7 @@ bgfx::ShaderHandle Shader::loadShader(const char* FILENAME) {
         case bgfx::RendererType::Direct3D12:
             shaderPath = "shaders/dx11/";
             break;
+        //Not implementing these in a while...
         case bgfx::RendererType::Gnm:
             //shaderPath = "shaders/pssl/";
             break;

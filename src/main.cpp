@@ -1,7 +1,6 @@
 #define V8_COMPRESS_POINTERS 1
 #define V8_31BIT_SMIS_ON_64BIT_ARCH 1
 #define V8_ENABLE_SANDBOX 1
-
 #define NOMINMAX
 #include <windows.h>
 #include <bgfx/bgfx.h>
@@ -122,12 +121,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     create_params.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
     v8::Isolate* isolate = v8::Isolate::New(create_params);
 
-    v8::Isolate::Scope isolate_scope(isolate);
+    //v8::Isolate::Scope isolate_scope(isolate);
     v8::HandleScope handle_scope(isolate);
     v8::Local<v8::Context> context = v8::Context::New(isolate);
     v8::Context::Scope context_scope(context);
 
-    v8::Local<v8::String> source1 = v8::String::NewFromUtf8Literal(isolate, "a = {}; a.g = function(){const h = 213; h = 21; return h}; a.h = a; a.h.h.h.h.h.h.h.h.h.h.h.g()");
+    v8::Local<v8::String> source1 = v8::String::NewFromUtf8Literal(isolate, "a = {}; a.g = function(){console.log('Hello World!')}; a.h = a; a.h.h.h.h.h.h.h.h.h.h.h.g()");
     v8::Local<v8::Script> script1 = v8::Script::Compile(context, source1).ToLocalChecked();
     v8::Local<v8::Value> result1 = script1->Run(context).ToLocalChecked();
     v8::String::Utf8Value utf8(isolate, result1);
@@ -171,6 +170,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         counter++;
         if (counter % 100 == 0) std::cout << "Rendered " << counter << " frames" << std::endl;
     }
+    isolate->Exit();
     isolate->Dispose();
     v8::V8::Dispose();
     v8::V8::DisposePlatform();
