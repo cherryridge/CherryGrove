@@ -1,55 +1,62 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <cstdint>
+
+using string = std::string;
+
+struct PackStatus {
+
+};
 
 struct PackMeta {
-	std::string name;
-	std::string shortName;
-	std::vector<std::string> authors;
-	std::string description;
+	string name;
+	string shortName;
+	std::vector<string> authors;
+	string description;
 };
 
 struct PackBehaviorNS {
-	std::string blockNS;
+	string blockNS;
 	bool blockNSWarnOnDuplication;
-	std::string structureNS;
+	string structureNS;
 	bool structureNSWarnOnDuplication;
-	std::string entityNS;
+	string entityNS;
 	bool entityNSWarnOnDuplication;
-	std::string compositeNS;
+	string compositeNS;
 	bool compositeNSWarnOnDuplication;
-	std::string itemNS;
+	string itemNS;
 	bool itemNSWarnOnDuplication;
-	std::string guiNS;
+	string guiNS;
 	bool guiNSWarnOnDuplication;
-	std::string achievementNS;
+	string achievementNS;
 	bool achievementNSWarnOnDuplication;
-	std::string tagNS;
+	string tagNS;
 	bool tagNSWarnOnDuplication;
 };
 
 struct PackOptionalNS {
-	std::string worldGenNS;
+	string worldGenNS;
 	bool worldGenNSWarnOnDuplication;
 };
 
 struct PackResourceNS {
-	std::string textureNS;
+	string textureNS;
 	bool textureNSWarnOnDuplication;
 	//Actually no plan to support this
-	std::string fontNS;
+	string fontNS;
 	bool fontNSWarnOnDuplication;
-	std::string textNS;
+	string textNS;
 	bool textNSWarnOnDuplication;
-	std::string soundNS;
+	string soundNS;
 	bool soundNSWarnOnDuplication;
 	//Don't add creative tabs here. It should be implemented by creative mode GUI pack.
-	std::string shaderNS;
+	string shaderNS;
 	bool shaderNSWarnOnDuplication;
 };
 
 struct PackConfig {
-	unsigned int id;
+	uint32_t id;
 	bool isGlobal;
 	PackMeta meta;
 	PackBehaviorNS behaviorNS;

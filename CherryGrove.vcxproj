@@ -85,7 +85,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-debug.lib;$(SolutionDir)lib\bgfx\debug\bxDebug.lib;$(SolutionDir)lib\bgfx\debug\bimgDebug.lib;$(SolutionDir)lib\bgfx\debug\bgfxDebug.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-debug.lib;$(SolutionDir)lib\bgfx\bxDebug.lib;$(SolutionDir)lib\bgfx\bimgDebug.lib;$(SolutionDir)lib\bgfx\bgfxDebug.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <Culture>0x7804</Culture>
@@ -111,7 +111,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\bgfx\release\bxRelease.lib;$(SolutionDir)lib\bgfx\release\bimgRelease.lib;$(SolutionDir)lib\bgfx\release\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\bgfx\bxRelease.lib;$(SolutionDir)lib\bgfx\bimgRelease.lib;$(SolutionDir)lib\bgfx\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <Culture>0x7804</Culture>
@@ -137,14 +137,16 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\bgfx\release\bxRelease.lib;$(SolutionDir)lib\bgfx\release\bimgRelease.lib;$(SolutionDir)lib\bgfx\release\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\bgfx\bxRelease.lib;$(SolutionDir)lib\bgfx\bimgRelease.lib;$(SolutionDir)lib\bgfx\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <Culture>0x7804</Culture>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\graphic\font\font.cpp" />
+    <ClCompile Include="src\input\keyboard\keyboard.cpp" />
+    <ClCompile Include="src\js\JSEngine.cpp" />
+    <ClCompile Include="src\graphic\gui\gui.cpp" />
     <ClCompile Include="src\graphic\shader\shader.cpp" />
     <ClCompile Include="src\logger\logger.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -152,8 +154,10 @@
     <ClCompile Include="src\pack\packInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\input\keyboard\keyboard.h" />
+    <ClInclude Include="src\input\keyboard\keydesc_win.h" />
+    <ClInclude Include="src\js\JSEngine.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="src\graphic\font\font.h" />
     <ClInclude Include="src\graphic\shader\shader.h" />
     <ClInclude Include="src\logger\logger.h" />
     <ClInclude Include="src\pack\pack.h" />
@@ -164,7 +168,7 @@
     <ResourceCompile Include="CherryGrove.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shaders\test.glsl" />
+    <None Include="src\shaders\test.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

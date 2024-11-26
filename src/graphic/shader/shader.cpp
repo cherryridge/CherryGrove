@@ -7,7 +7,6 @@
 Shader::Shader(const char* vs_filename, const char* fs_filename) {
 	bgfx::ShaderHandle vsh = loadShader(vs_filename);
 	bgfx::ShaderHandle fsh = loadShader(fs_filename);
-	
 	program = bgfx::createProgram(vsh, fsh, true);
 }
 
@@ -19,21 +18,14 @@ bgfx::ShaderHandle Shader::loadShader(const char* FILENAME) {
 		case bgfx::RendererType::Direct3D12:
 			shaderPath = "shaders/dx11/";
 			break;
-		//Not implementing these in a while...
-		case bgfx::RendererType::Gnm:
-			//shaderPath = "shaders/pssl/";
-			break;
 		case bgfx::RendererType::Metal:
-			//shaderPath = "shaders/metal/";
+			shaderPath = "shaders/metal/";
 			break;
 		case bgfx::RendererType::OpenGL:
-			//shaderPath = "shaders/glsl/";
-			break;
-		case bgfx::RendererType::OpenGLES:
-			//shaderPath = "shaders/essl/";
+			shaderPath = "shaders/glsl/";
 			break;
 		case bgfx::RendererType::Vulkan:
-			//shaderPath = "shaders/spirv/";
+			shaderPath = "shaders/spirv/";
 			break;
 	}
 	size_t shaderLen = strlen(shaderPath);
