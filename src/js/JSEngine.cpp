@@ -14,7 +14,7 @@
 #include <v8/v8-primitive.h>
 #include <v8/v8-script.h>
 
-#include "JSEngine.h"
+#include "JSEngine.hpp"
 
 using std::cout, std::endl;
 

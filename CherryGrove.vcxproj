@@ -90,6 +90,20 @@
     <ResourceCompile>
       <Culture>0x7804</Culture>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>cd $(SolutionDir)scripts
+compile_shaders.bat</Command>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -116,6 +130,20 @@
     <ResourceCompile>
       <Culture>0x7804</Culture>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>cd $(SolutionDir)scripts
+compile_shaders.bat</Command>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelDebug|x64'">
     <ClCompile>
@@ -142,9 +170,27 @@
     <ResourceCompile>
       <Culture>0x7804</Culture>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>cd $(SolutionDir)scripts
+compile_shaders.bat</Command>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\input\gamepad\gamepad.cpp" />
     <ClCompile Include="src\input\keyboard\keyboard.cpp" />
+    <ClCompile Include="src\input\mouse\cursor.cpp" />
+    <ClCompile Include="src\input\mouse\mouse.cpp" />
+    <ClCompile Include="src\input\mouse\scroll.cpp" />
     <ClCompile Include="src\js\JSEngine.cpp" />
     <ClCompile Include="src\graphic\gui\gui.cpp" />
     <ClCompile Include="src\graphic\shader\shader.cpp" />
@@ -154,21 +200,27 @@
     <ClCompile Include="src\pack\packInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\input\keyboard\keyboard.h" />
-    <ClInclude Include="src\input\keyboard\keydesc_win.h" />
-    <ClInclude Include="src\js\JSEngine.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="src\graphic\shader\shader.h" />
-    <ClInclude Include="src\logger\logger.h" />
-    <ClInclude Include="src\pack\pack.h" />
-    <ClInclude Include="src\pack\packManager.h" />
-    <ClInclude Include="src\pack\packInstance.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="CherryGrove.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shaders\test.frag" />
+    <None Include="src\shaders\test.vert" />
+    <None Include="src\shaders\varying.def.sc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\graphic\shader\shader.hpp" />
+    <ClInclude Include="src\input\gamepad\gamepad.hpp" />
+    <ClInclude Include="src\input\keyboard\keyboard.hpp" />
+    <ClInclude Include="src\input\keyboard\keydesc_win.hpp" />
+    <ClInclude Include="src\input\mouse\cursor.hpp" />
+    <ClInclude Include="src\input\mouse\mouse.hpp" />
+    <ClInclude Include="src\input\mouse\mousedesc_win.hpp" />
+    <ClInclude Include="src\input\mouse\scroll.hpp" />
+    <ClInclude Include="src\js\JSEngine.hpp" />
+    <ClInclude Include="src\logger\logger.hpp" />
+    <ClInclude Include="src\pack\pack.hpp" />
+    <ClInclude Include="src\pack\packInstance.hpp" />
+    <ClInclude Include="src\pack\packManager.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <ctime>
 #include <string>
-#include "logger.h"
+#include "logger.hpp"
 
 Logger::Logger() {
 	originalBuf = std::cout.rdbuf();

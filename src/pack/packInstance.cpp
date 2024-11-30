@@ -1,4 +1,4 @@
-#include "packInstance.h"
+#include "packInstance.hpp"
 
 PackInstance::PackInstance(const char* folderPath){
 

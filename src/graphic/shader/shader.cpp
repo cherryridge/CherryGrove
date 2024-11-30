@@ -2,16 +2,13 @@
 #include <bx/math.h>
 #include <cstdio>
 #include <iostream>
-#include "shader.h"
 
-Shader::Shader(const char* vs_filename, const char* fs_filename) {
-	bgfx::ShaderHandle vsh = loadShader(vs_filename);
-	bgfx::ShaderHandle fsh = loadShader(fs_filename);
-	program = bgfx::createProgram(vsh, fsh, true);
-}
+#include "shader.hpp"
 
-bgfx::ShaderHandle Shader::loadShader(const char* FILENAME) {
-	const char* shaderPath = "???";
+using std::string;
+
+static bgfx::ShaderHandle loadShader(const char* FILENAME) {
+	const char* shaderPath = "";
 	switch (bgfx::getRendererType()) {
 		case bgfx::RendererType::Noop:
 		case bgfx::RendererType::Direct3D11:
@@ -42,4 +39,10 @@ bgfx::ShaderHandle Shader::loadShader(const char* FILENAME) {
 	mem->data[mem->size - 1] = '\0';
 	fclose(file);
 	return bgfx::createShader(mem);
+}
+
+Shader::Shader(const string& vs_filename, const string& fs_filename) {
+	bgfx::ShaderHandle vsh = loadShader(vs_filename.c_str());
+	bgfx::ShaderHandle fsh = loadShader(fs_filename.c_str());
+	program = bgfx::createProgram(vsh, fsh, true);
 }
