@@ -51,6 +51,39 @@
     <ClCompile Include="src\input\gamepad\gamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphic\renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\texture\texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\gui\imgui\misc\cpp\imgui_stdlib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\gui\imgui\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\gui\imgui\imgui_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\gui\imgui\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\gui\imgui\imgui_tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\gui\imgui\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\gui\imgui\misc\freetype\imgui_freetype.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\gui\imgui\backends\imgui_impl_bgfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\gui\imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CherryGrove.rc">
@@ -61,6 +94,11 @@
     <None Include="src\shaders\test.frag" />
     <None Include="src\shaders\test.vert" />
     <None Include="src\shaders\varying.def.sc" />
+    <None Include="src\graphic\gui\imgui\backends\vulkan\generate_spv.sh" />
+    <None Include="src\graphic\gui\imgui\backends\vulkan\glsl_shader.frag" />
+    <None Include="src\graphic\gui\imgui\backends\vulkan\glsl_shader.vert" />
+    <None Include="src\graphic\gui\imgui\misc\debuggers\imgui.gdb" />
+    <None Include="src\graphic\gui\imgui\misc\debuggers\imgui.natstepfilter" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\input\mouse\mouse.hpp">
@@ -102,5 +140,53 @@
     <ClInclude Include="src\graphic\shader\shader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphic\renderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\texture\texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\misc\cpp\imgui_stdlib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\misc\single_file\imgui_single_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\imconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\imgui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\imgui_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\imstb_rectpack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\imstb_textedit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\imstb_truetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\misc\freetype\imgui_freetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\backends\imgui_impl_bgfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\backends\fs_ocornut_imgui.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\backends\vs_ocornut_imgui.bin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\gui\imgui\backends\imgui_impl_glfw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="src\graphic\gui\imgui\misc\debuggers\imgui.natvis" />
   </ItemGroup>
 </Project>
