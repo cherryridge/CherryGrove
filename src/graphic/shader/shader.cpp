@@ -41,8 +41,8 @@ static bgfx::ShaderHandle loadShader(const char* FILENAME) {
 	return bgfx::createShader(mem);
 }
 
-Shader::Shader(const string& vs_filename, const string& fs_filename) {
-	bgfx::ShaderHandle vsh = loadShader(vs_filename.c_str());
-	bgfx::ShaderHandle fsh = loadShader(fs_filename.c_str());
+Shader::Shader(const char* vs_filename, const char* fs_filename) {
+	bgfx::ShaderHandle vsh = loadShader(vs_filename);
+	bgfx::ShaderHandle fsh = loadShader(fs_filename);
 	program = bgfx::createProgram(vsh, fsh, true);
 }

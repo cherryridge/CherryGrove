@@ -8,12 +8,16 @@ A highly moddable, high performance and highly free & open block game engine.
 
 
 
-## Dependencies
+## Contributing
+
+
+
+## Used libraries
 
 - [glfw](https://www.glfw.org/)
 - [bgfx](https://github.com/bkaradzic/bgfx)
-- [stb](https://github.com/nothings/stb)
-- [Nuklear](https://github.com/Immediate-Mode-UI/Nuklear)
+- [stbi](https://github.com/nothings/stb)
+- [Dear ImGui](https://github.com/ocornut/imgui)
 - [v8](https://v8.dev/)
 - [libpng](http://www.libpng.org/pub/png/libpng.html)
 

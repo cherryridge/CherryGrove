@@ -5,5 +5,5 @@
 using std::cout, std::endl;
 
 void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
-	cout << xpos << " " << ypos << endl;
+	//cout << xpos << " " << ypos << endl;
 }
