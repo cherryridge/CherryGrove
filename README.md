@@ -2,7 +2,7 @@
 
 <h1 align="center">CherryGrove</h1>
 
-A highly moddable, high performance and highly free & open block game engine.
+A easily customizable, high performance block game "engine" made for the next generation.
 
 ## Building
 
