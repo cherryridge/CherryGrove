@@ -7,10 +7,10 @@ lib_archive/
 !*/lib_archive/
 others/
 !*/others/
-packing_resources/
-!*/packing_resources/
+packing_resources/VC_redist.x64.exe
 shaders/
 !*/shaders/
 *.aps
 *.user
 *.log
+imgui.ini

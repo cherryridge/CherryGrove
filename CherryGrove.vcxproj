@@ -77,7 +77,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc;$(SolutionDir)src\graphic\gui\imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc;$(SolutionDir)src\graphic\imgui</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/Zc:__cplusplus /Zc:preprocessor /D "CG_CONSOLE" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -115,7 +115,7 @@ compile_shaders.bat</Command>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc;$(SolutionDir)src\graphic\gui\imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc;$(SolutionDir)src\graphic\imgui</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/Zc:__cplusplus /Zc:preprocessor %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -155,7 +155,7 @@ compile_shaders.bat</Command>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc;$(SolutionDir)src\graphic\gui\imgui</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\compat\msvc;$(SolutionDir)src\graphic\imgui</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/Zc:__cplusplus /Zc:preprocessor /D "CG_CONSOLE" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -186,25 +186,27 @@ compile_shaders.bat</Command>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\graphic\gui\imgui\backends\imgui_impl_bgfx.cpp" />
-    <ClCompile Include="src\graphic\gui\imgui\backends\imgui_impl_glfw.cpp" />
-    <ClCompile Include="src\graphic\gui\imgui\imgui.cpp" />
-    <ClCompile Include="src\graphic\gui\imgui\imgui_demo.cpp" />
-    <ClCompile Include="src\graphic\gui\imgui\imgui_draw.cpp" />
-    <ClCompile Include="src\graphic\gui\imgui\imgui_tables.cpp" />
-    <ClCompile Include="src\graphic\gui\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\graphic\gui\imgui\misc\cpp\imgui_stdlib.cpp" />
-    <ClCompile Include="src\graphic\gui\imgui\misc\freetype\imgui_freetype.cpp" />
-    <ClCompile Include="src\graphic\renderer.cpp" />
-    <ClCompile Include="src\graphic\texture\texture.cpp" />
+    <ClCompile Include="src\graphic\imgui\backends\imgui_impl_bgfx.cpp" />
+    <ClCompile Include="src\graphic\imgui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\graphic\imgui\imgui.cpp" />
+    <ClCompile Include="src\graphic\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\graphic\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\graphic\imgui\imgui_tables.cpp" />
+    <ClCompile Include="src\graphic\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\graphic\imgui\misc\cpp\imgui_stdlib.cpp" />
+    <ClCompile Include="src\graphic\imgui\misc\freetype\imgui_freetype.cpp" />
+    <ClCompile Include="src\graphic\shader\ShaderPool.cpp" />
+    <ClCompile Include="src\graphic\texture\TexturePool.cpp" />
+    <ClCompile Include="src\graphic\Renderer.cpp" />
+    <ClCompile Include="src\graphic\texture\TextureFactory.cpp" />
+    <ClCompile Include="src\render\BlockRenderInfo.cpp" />
     <ClCompile Include="src\input\gamepad\gamepad.cpp" />
     <ClCompile Include="src\input\keyboard\keyboard.cpp" />
     <ClCompile Include="src\input\mouse\cursor.cpp" />
     <ClCompile Include="src\input\mouse\mouse.cpp" />
     <ClCompile Include="src\input\mouse\scroll.cpp" />
     <ClCompile Include="src\js\JSEngine.cpp" />
-    <ClCompile Include="src\graphic\gui\gui.cpp" />
-    <ClCompile Include="src\graphic\shader\shader.cpp" />
+    <ClCompile Include="src\graphic\shader\ShaderFactory.cpp" />
     <ClCompile Include="src\logger\logger.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pack\packManager.cpp" />
@@ -217,29 +219,32 @@ compile_shaders.bat</Command>
     <None Include="src\graphic\gui\imgui\backends\vulkan\generate_spv.sh" />
     <None Include="src\graphic\gui\imgui\backends\vulkan\glsl_shader.frag" />
     <None Include="src\graphic\gui\imgui\backends\vulkan\glsl_shader.vert" />
-    <None Include="src\graphic\gui\imgui\misc\debuggers\imgui.gdb" />
-    <None Include="src\graphic\gui\imgui\misc\debuggers\imgui.natstepfilter" />
+    <None Include="src\graphic\imgui\misc\debuggers\imgui.gdb" />
+    <None Include="src\graphic\imgui\misc\debuggers\imgui.natstepfilter" />
     <None Include="src\shaders\test.frag" />
     <None Include="src\shaders\test.vert" />
     <None Include="src\shaders\varying.def.sc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\graphic\gui\imgui\backends\fs_ocornut_imgui.bin.h" />
-    <ClInclude Include="src\graphic\gui\imgui\backends\imgui_impl_bgfx.h" />
-    <ClInclude Include="src\graphic\gui\imgui\backends\imgui_impl_glfw.h" />
-    <ClInclude Include="src\graphic\gui\imgui\backends\vs_ocornut_imgui.bin.h" />
-    <ClInclude Include="src\graphic\gui\imgui\imconfig.h" />
-    <ClInclude Include="src\graphic\gui\imgui\imgui.h" />
-    <ClInclude Include="src\graphic\gui\imgui\imgui_internal.h" />
-    <ClInclude Include="src\graphic\gui\imgui\imstb_rectpack.h" />
-    <ClInclude Include="src\graphic\gui\imgui\imstb_textedit.h" />
-    <ClInclude Include="src\graphic\gui\imgui\imstb_truetype.h" />
-    <ClInclude Include="src\graphic\gui\imgui\misc\cpp\imgui_stdlib.h" />
-    <ClInclude Include="src\graphic\gui\imgui\misc\freetype\imgui_freetype.h" />
+    <ClInclude Include="src\graphic\imgui\backends\fs_ocornut_imgui.bin.h" />
+    <ClInclude Include="src\graphic\imgui\backends\imgui_impl_bgfx.h" />
+    <ClInclude Include="src\graphic\imgui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="src\graphic\imgui\backends\vs_ocornut_imgui.bin.h" />
+    <ClInclude Include="src\graphic\imgui\imconfig.h" />
+    <ClInclude Include="src\graphic\imgui\imgui.h" />
+    <ClInclude Include="src\graphic\imgui\imgui_internal.h" />
+    <ClInclude Include="src\graphic\imgui\imstb_rectpack.h" />
+    <ClInclude Include="src\graphic\imgui\imstb_textedit.h" />
+    <ClInclude Include="src\graphic\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\graphic\imgui\misc\cpp\imgui_stdlib.h" />
+    <ClInclude Include="src\graphic\imgui\misc\freetype\imgui_freetype.h" />
     <ClInclude Include="src\graphic\gui\imgui\misc\single_file\imgui_single_file.h" />
-    <ClInclude Include="src\graphic\renderer.hpp" />
-    <ClInclude Include="src\graphic\shader\shader.hpp" />
-    <ClInclude Include="src\graphic\texture\texture.hpp" />
+    <ClInclude Include="src\graphic\shader\ShaderPool.hpp" />
+    <ClInclude Include="src\graphic\texture\TexturePool.hpp" />
+    <ClInclude Include="src\graphic\Renderer.hpp" />
+    <ClInclude Include="src\graphic\shader\ShaderFactory.hpp" />
+    <ClInclude Include="src\graphic\texture\TextureFactory.hpp" />
+    <ClInclude Include="src\render\BlockRenderInfo.hpp" />
     <ClInclude Include="src\input\gamepad\gamepad.hpp" />
     <ClInclude Include="src\input\keyboard\keyboard.hpp" />
     <ClInclude Include="src\input\keyboard\keydesc_win.hpp" />
@@ -254,7 +259,7 @@ compile_shaders.bat</Command>
     <ClInclude Include="src\pack\packManager.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="src\graphic\gui\imgui\misc\debuggers\imgui.natvis" />
+    <Natvis Include="src\graphic\imgui\misc\debuggers\imgui.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

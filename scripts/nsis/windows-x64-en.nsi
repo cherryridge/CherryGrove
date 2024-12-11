@@ -10,11 +10,11 @@ RequestExecutionLevel admin
 !define MUI_UNICON "..\..\assets\icons\CherryGrove-trs.ico"
 
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP "..\..\assets\icons\CherryGrove-header.bmp"
+!define MUI_HEADERIMAGE_BITMAP "..\..\packing_resources\CherryGrove-header.bmp"
 !define MUI_HEADERIMAGE_BITMAP_STRETCH "AspectFitHeight"
-!define MUI_WELCOMEFINISHPAGE_BITMAP "..\..\assets\icons\CherryGrove-page.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "..\..\packing_resources\CherryGrove-page.bmp"
 !define MUI_WELCOMEFINISHPAGE_BITMAP_STRETCH "NoStretchNoCropNoAlign"
-!define MUI_UNWELCOMEFINISHPAGE_BITMAP "..\..\assets\icons\CherryGrove-page.bmp"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "..\..\packing_resources\CherryGrove-page.bmp"
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP_STRETCH "NoStretchNoCropNoAlign"
 
 !define MUI_ABORTWARNING

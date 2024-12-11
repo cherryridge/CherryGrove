@@ -18,7 +18,7 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\shader\shader.cpp">
+    <ClCompile Include="src\graphic\shader\ShaderFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\pack\packManager.cpp">
@@ -28,9 +28,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\logger\logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphic\gui\gui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\js\JSEngine.cpp">
@@ -51,37 +48,46 @@
     <ClCompile Include="src\input\gamepad\gamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\renderer.cpp">
+    <ClCompile Include="src\graphic\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\texture\texture.cpp">
+    <ClCompile Include="src\graphic\texture\TextureFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\gui\imgui\misc\cpp\imgui_stdlib.cpp">
+    <ClCompile Include="src\graphic\imgui\misc\cpp\imgui_stdlib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\gui\imgui\imgui.cpp">
+    <ClCompile Include="src\graphic\imgui\imgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\gui\imgui\imgui_demo.cpp">
+    <ClCompile Include="src\graphic\imgui\imgui_demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\gui\imgui\imgui_draw.cpp">
+    <ClCompile Include="src\graphic\imgui\imgui_draw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\gui\imgui\imgui_tables.cpp">
+    <ClCompile Include="src\graphic\imgui\imgui_tables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\gui\imgui\imgui_widgets.cpp">
+    <ClCompile Include="src\graphic\imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\gui\imgui\misc\freetype\imgui_freetype.cpp">
+    <ClCompile Include="src\graphic\imgui\misc\freetype\imgui_freetype.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\gui\imgui\backends\imgui_impl_bgfx.cpp">
+    <ClCompile Include="src\graphic\imgui\backends\imgui_impl_bgfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\gui\imgui\backends\imgui_impl_glfw.cpp">
+    <ClCompile Include="src\graphic\imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render\BlockRenderInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\shader\ShaderPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\texture\TexturePool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -97,8 +103,8 @@
     <None Include="src\graphic\gui\imgui\backends\vulkan\generate_spv.sh" />
     <None Include="src\graphic\gui\imgui\backends\vulkan\glsl_shader.frag" />
     <None Include="src\graphic\gui\imgui\backends\vulkan\glsl_shader.vert" />
-    <None Include="src\graphic\gui\imgui\misc\debuggers\imgui.gdb" />
-    <None Include="src\graphic\gui\imgui\misc\debuggers\imgui.natstepfilter" />
+    <None Include="src\graphic\imgui\misc\debuggers\imgui.gdb" />
+    <None Include="src\graphic\imgui\misc\debuggers\imgui.natstepfilter" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\input\mouse\mouse.hpp">
@@ -137,56 +143,65 @@
     <ClInclude Include="src\input\gamepad\gamepad.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\shader\shader.hpp">
+    <ClInclude Include="src\graphic\shader\ShaderFactory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\renderer.hpp">
+    <ClInclude Include="src\graphic\Renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\texture\texture.hpp">
+    <ClInclude Include="src\graphic\texture\TextureFactory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\misc\cpp\imgui_stdlib.h">
+    <ClInclude Include="src\graphic\imgui\misc\cpp\imgui_stdlib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\graphic\gui\imgui\misc\single_file\imgui_single_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\imconfig.h">
+    <ClInclude Include="src\graphic\imgui\imconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\imgui.h">
+    <ClInclude Include="src\graphic\imgui\imgui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\imgui_internal.h">
+    <ClInclude Include="src\graphic\imgui\imgui_internal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\imstb_rectpack.h">
+    <ClInclude Include="src\graphic\imgui\imstb_rectpack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\imstb_textedit.h">
+    <ClInclude Include="src\graphic\imgui\imstb_textedit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\imstb_truetype.h">
+    <ClInclude Include="src\graphic\imgui\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\misc\freetype\imgui_freetype.h">
+    <ClInclude Include="src\graphic\imgui\misc\freetype\imgui_freetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\backends\imgui_impl_bgfx.h">
+    <ClInclude Include="src\graphic\imgui\backends\imgui_impl_bgfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\backends\fs_ocornut_imgui.bin.h">
+    <ClInclude Include="src\graphic\imgui\backends\fs_ocornut_imgui.bin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\backends\vs_ocornut_imgui.bin.h">
+    <ClInclude Include="src\graphic\imgui\backends\vs_ocornut_imgui.bin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\gui\imgui\backends\imgui_impl_glfw.h">
+    <ClInclude Include="src\graphic\imgui\backends\imgui_impl_glfw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render\BlockRenderInfo.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\shader\ShaderPool.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\texture\TexturePool.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="src\graphic\gui\imgui\misc\debuggers\imgui.natvis" />
+    <Natvis Include="src\graphic\imgui\misc\debuggers\imgui.natvis" />
   </ItemGroup>
 </Project>
