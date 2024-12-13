@@ -32,23 +32,37 @@ FunctionEnd                                                                     
 !define MUI_PAGE_CUSTOMFUNCTION_PRE warning
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
+!define MUI_FINISHPAGE_RUN $INSTDIR\CherryGrove.exe
+!define MUI_FINISHPAGE_RUN_TEXT "运行 CherryGrove"                                                   #DIF
+!define MUI_FINISHPAGE_RUN_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME ""
+!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "创建桌面快捷方式"                                                  #DIF
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION desktopshortcut
+!define MUI_FINISHPAGE_LINK "访问 CherryGrove 官网"                                                    #DIF
+!define MUI_FINISHPAGE_LINK_LOCATION https://cherrygrove.dev
+!define MUI_FINISHPAGE_LINK_COLOR 1879e7
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_UNPAGE_FINISH
 !insertmacro MUI_LANGUAGE "SimpChinese"                                                            #DIF
 
+Function desktopshortcut
+    CreateShortcut "$DESKTOP\CherryGrove.lnk" "$INSTDIR\CherryGrove.exe"
+FunctionEnd
+
 #region Branding
 OutFile "..\..\build\x64\CherryGrove_setup_chs_x64.exe"                                               #DIF
 InstallDir "$PROGRAMFILES64\CherryGrove"
 Name "CherryGrove"
-Caption "CherryGrove Installer"
+Caption "CherryGrove 安装程序"                                                                         #DIF
 BrandingText "CherryGrove (c) 2024 LJM12914"
 
 VIAddVersionKey /LANG=${LANG_SimpChinese} "ProductName" "CherryGrove"                              #DIF
 VIAddVersionKey /LANG=${LANG_SimpChinese} "CompanyName" "LJM12914"                                 #DIF
 VIAddVersionKey /LANG=${LANG_SimpChinese} "LegalCopyright" "(c) 2024 LJM12914"                     #DIF
-VIAddVersionKey /LANG=${LANG_SimpChinese} "FileDescription" "CherryGrove Installer"                #DIF
+VIAddVersionKey /LANG=${LANG_SimpChinese} "FileDescription" "CherryGrove 安装程序"                     #DIF
 VIAddVersionKey /LANG=${LANG_SimpChinese} "FileVersion" "${VERSION}.0"                             #DIF
 VIAddVersionKey /LANG=${LANG_SimpChinese} "ProductVersion" "${VERSION}.0"                          #DIF
 VIProductVersion "${VERSION}.0"
@@ -62,9 +76,11 @@ Section "MainSection" SEC01
     SetOutPath "$INSTDIR\assets"
     File /r "..\..\assets\*"
     SetOutPath "$INSTDIR"
-    CreateShortcut "$DESKTOP\CherryGrove.lnk" "$INSTDIR\CherryGrove.exe"
+
     CreateShortcut "$SMPROGRAMS\CherryGrove.lnk" "$INSTDIR\CherryGrove.exe"
+
     File "..\..\packing_resources\VC_redist.x64.exe"
+
     WriteUninstaller "$INSTDIR\uninstall.exe"
 
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CherryGrove" "DisplayName" "CherryGrove"

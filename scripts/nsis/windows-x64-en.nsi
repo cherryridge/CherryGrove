@@ -32,17 +32,31 @@ RequestExecutionLevel admin
 
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
+!define MUI_FINISHPAGE_RUN $INSTDIR\CherryGrove.exe
+!define MUI_FINISHPAGE_RUN_TEXT "Run CherryGrove"                                                  #DIF
+!define MUI_FINISHPAGE_RUN_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME ""
+!define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"                                   #DIF
+!define MUI_FINISHPAGE_SHOWREADME_FUNCTION desktopshortcut
+!define MUI_FINISHPAGE_LINK "CherryGrove's Official Website"                                       #DIF
+!define MUI_FINISHPAGE_LINK_LOCATION https://cherrygrove.dev
+!define MUI_FINISHPAGE_LINK_COLOR 1879e7
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_UNPAGE_FINISH
 !insertmacro MUI_LANGUAGE "English"                                                                #DIF
 
+Function desktopshortcut
+    CreateShortcut "$DESKTOP\CherryGrove.lnk" "$INSTDIR\CherryGrove.exe"
+FunctionEnd
+
 #region Branding
 OutFile "..\..\build\x64\CherryGrove_setup_en_x64.exe"                                                #DIF
 InstallDir "$PROGRAMFILES64\CherryGrove"
 Name "CherryGrove"
-Caption "CherryGrove Installer"
+Caption "CherryGrove Installer"                                                                    #DIF
 BrandingText "CherryGrove (c) 2024 LJM12914"
 
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "CherryGrove"                                  #DIF
@@ -62,9 +76,11 @@ Section "MainSection" SEC01
     SetOutPath "$INSTDIR\assets"
     File /r "..\..\assets\*"
     SetOutPath "$INSTDIR"
-    CreateShortcut "$DESKTOP\CherryGrove.lnk" "$INSTDIR\CherryGrove.exe"
+
     CreateShortcut "$SMPROGRAMS\CherryGrove.lnk" "$INSTDIR\CherryGrove.exe"
+
     File "..\..\packing_resources\VC_redist.x64.exe"
+
     WriteUninstaller "$INSTDIR\uninstall.exe"
 
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CherryGrove" "DisplayName" "CherryGrove"
