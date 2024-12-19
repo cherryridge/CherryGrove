@@ -260,20 +260,20 @@ namespace detail
 
 	// bitfieldInsert
 	template<typename genIUType>
-	GLM_FUNC_QUALIFIER genIUType bitfieldInsert(genIUType const& Base, genIUType const& Insert, int Offset, int Bits)
+	GLM_FUNC_QUALIFIER genIUType bitfieldInsert(genIUType const& Position, genIUType const& Insert, int Offset, int Bits)
 	{
 		GLM_STATIC_ASSERT(std::numeric_limits<genIUType>::is_integer, "'bitfieldInsert' only accept integer values");
 
-		return bitfieldInsert(vec<1, genIUType>(Base), vec<1, genIUType>(Insert), Offset, Bits).x;
+		return bitfieldInsert(vec<1, genIUType>(Position), vec<1, genIUType>(Insert), Offset, Bits).x;
 	}
 
 	template<length_t L, typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<L, T, Q> bitfieldInsert(vec<L, T, Q> const& Base, vec<L, T, Q> const& Insert, int Offset, int Bits)
+	GLM_FUNC_QUALIFIER vec<L, T, Q> bitfieldInsert(vec<L, T, Q> const& Position, vec<L, T, Q> const& Insert, int Offset, int Bits)
 	{
 		GLM_STATIC_ASSERT(std::numeric_limits<T>::is_integer, "'bitfieldInsert' only accept integer values");
 
 		T const Mask = detail::mask(static_cast<T>(Bits)) << Offset;
-		return (Base & ~Mask) | ((Insert << static_cast<T>(Offset)) & Mask);
+		return (Position & ~Mask) | ((Insert << static_cast<T>(Offset)) & Mask);
 	}
 
 #if GLM_COMPILER & GLM_COMPILER_VC

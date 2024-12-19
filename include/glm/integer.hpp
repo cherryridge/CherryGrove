@@ -122,7 +122,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 8.8 Integer Functions</a>
 	template<length_t L, typename T, qualifier Q>
 	GLM_FUNC_DECL vec<L, T, Q> bitfieldInsert(
-		vec<L, T, Q> const& Base,
+		vec<L, T, Q> const& Position,
 		vec<L, T, Q> const& Insert,
 		int Offset,
 		int Bits);
