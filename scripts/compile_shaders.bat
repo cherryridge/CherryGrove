@@ -25,7 +25,7 @@ for /R "%source_root%" %%F in (*.vert) do (
     set "dest_file_vk=%dest_root%\spirv\!relative_path!.bin"
     set "dest_file_mt=%dest_root%\metal\!relative_path!.bin"
     .\shadercDebug.exe -f %%F -o !dest_file_gl! --type v -p 440 --platform windows
-    .\shadercDebug.exe -f %%F -o !dest_file_dx! --type v -p s_5_0 --platform windows
+    .\shadercDebug.exe -f %%F -o !dest_file_dx! --type v -p s_5_0 --platform windows -O 3
     .\shadercDebug.exe -f %%F -o !dest_file_vk! --type v -p spirv16-13 --platform linux
     .\shadercDebug.exe -f %%F -o !dest_file_mt! --type v -p metal31-14 --platform osx
 )
@@ -40,7 +40,7 @@ for /R "%source_root%" %%F in (*.frag) do (
     set "dest_file_vk=%dest_root%\spirv\!relative_path!.bin"
     set "dest_file_mt=%dest_root%\metal\!relative_path!.bin"
     .\shadercDebug.exe -f %%F -o !dest_file_gl! --type f -p 440 --platform windows
-    .\shadercDebug.exe -f %%F -o !dest_file_dx! --type f -p s_5_0 --platform windows
+    .\shadercDebug.exe -f %%F -o !dest_file_dx! --type f -p s_5_0 --platform windows -O 3
     .\shadercDebug.exe -f %%F -o !dest_file_vk! --type f -p spirv16-13 --platform linux
     .\shadercDebug.exe -f %%F -o !dest_file_mt! --type f -p metal31-14 --platform osx
 )

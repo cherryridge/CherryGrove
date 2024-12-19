@@ -75,6 +75,9 @@ Section "MainSection" SEC01
     File /r "..\..\shaders\*"
     SetOutPath "$INSTDIR\assets"
     File /r "..\..\assets\*"
+    SetOutPath "$INSTDIR\test"
+    File /r "..\..\test\*"
+    SetOutPath "$INSTDIR\packs"
     SetOutPath "$INSTDIR"
 
     CreateShortcut "$SMPROGRAMS\CherryGrove.lnk" "$INSTDIR\CherryGrove.exe"

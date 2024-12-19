@@ -3,13 +3,15 @@ build/
 !*/build/
 lib/
 !*/lib/
-lib_archive/
-!*/lib_archive/
+lib_archive/source
+lib_archive/compiled
 others/
 !*/others/
 packing_resources/VC_redist.x64.exe
 shaders/
 !*/shaders/
+test/
+!*/test/
 *.aps
 *.user
 *.log
