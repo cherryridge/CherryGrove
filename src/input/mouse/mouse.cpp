@@ -1,10 +1,10 @@
-#include <glfw/glfw3.h>
+﻿#include <glfw/glfw3.h>
 #include <iostream>
 
 #include "mouse.hpp"
 #include "mousedesc_win.hpp"
 
-using std::string, std::cout, std::endl, std::map;
+using std::cout, std::endl;
 
 void mouseCallback(GLFWwindow* window, int button, int action, int mods){
 	auto p = mousedesc_win.find(button);

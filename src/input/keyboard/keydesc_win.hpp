@@ -3,9 +3,11 @@
 #include <unordered_map>
 #include <string>
 
+typedef int32_t i32;
+
 using std::unordered_map, std::string;
 
-static const unordered_map<int, string> keydesc_win = {
+static const unordered_map<i32, string> keydesc_win = {
 	{ GLFW_KEY_SPACE, "Space"},
 	{ GLFW_KEY_APOSTROPHE, "'"},
 	{ GLFW_KEY_COMMA, ","},

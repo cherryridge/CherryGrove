@@ -1,43 +1,18 @@
 #pragma once
-#include <bgfx/bgfx.h>
 #include <glfw/glfw3.h>
-#include <imgui.h>
-#include <iostream>
 #include <vector>
 
 using std::vector;
 
-class Renderer {
+class InputHandler {
 public:
-	Renderer(unsigned int width, unsigned int height, const char* title, const char* iconFilePath = nullptr);
-	~Renderer();
+	InputHandler(GLFWwindow* window);
 
-	//Common use
-public:
-	bool isAlive();
-	void close();
-private:
-	static unsigned int instanceCount;
-	bool windowAlive;
-
-	//GLFW
-public:
-	GLFWwindow* getWindow();
-	unsigned int getWidth();
-	void setWidth(int width);
-	unsigned int getHeight();
-	void setHeight(int height);
-	float getWindowScale();
-	double getAspectRatio();
-	void setAspectRatio(int widthRatio, int heightRatio);
-	const char* getTitle();
-	void setTitle(const char* newTitle);
-	//Not going to implement callback priority unless necessary.
-	void addKeyCB(GLFWkeyfun func/*, int priority*/);
+	void addKeyCB(GLFWkeyfun func);
 	void removeKeyCB(GLFWkeyfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
 	vector<GLFWkeyfun> keyCBs;
-	void addCharCB(GLFWcharfun func/*, int priority*/);
+	void addCharCB(GLFWcharfun func);
 	void removeCharCB(GLFWcharfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
 	vector<GLFWcharfun> charCBs;
@@ -81,9 +56,6 @@ public:
 	static vector<GLFWmonitorfun> monitorCBs;
 
 private:
-	GLFWwindow* window;
-	//Will change someday soon :)
-	static HWND getNativeHandle(GLFWwindow* window);
 	static void proxyKeyCB(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void proxyCharCB(GLFWwindow* window, unsigned int codepoint);
 	static void proxyCursorPosCB(GLFWwindow* window, double xpos, double ypos);
@@ -96,12 +68,4 @@ private:
 	static void proxyWindowFocusCB(GLFWwindow* window, int focused);
 	static void proxyWindowSizeCB(GLFWwindow* window, int width, int height);
 	static void proxyMonitorCB(GLFWmonitor* monitor, int event);
-
-	//ImGui
-public:
-	ImGuiContext* getGuiContext();
-	void startGuiFrame();
-	void submitGuiFrame();
-private:
-	ImGuiContext* context;
 };
