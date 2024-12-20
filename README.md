@@ -6,7 +6,7 @@ English | [中文](README.chs.md)
 
 An easily customizable, high performance scripting-based block game engine made for the next generation.
 
-## Merits
+## Goals
 
 1. None of actual gameplay content is built-in, so basically every aspect of gameplay is changeable.
 2. Highly customizable via JSON or JavaScript. Most of the gameplay definitions can be changed dynamically.
