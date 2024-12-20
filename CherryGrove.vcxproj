@@ -228,6 +228,7 @@ compile_shaders.bat</Command>
     <None Include="src\shaders\varying.def.sc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\debug\Logger.hpp" />
     <ClInclude Include="src\gameplay\base.hpp" />
     <ClInclude Include="src\graphic\Camera.hpp" />
     <ClInclude Include="src\graphic\renderInfo\vertex.hpp" />
@@ -258,7 +259,6 @@ compile_shaders.bat</Command>
     <ClInclude Include="src\input\mouse\mousedesc_win.hpp" />
     <ClInclude Include="src\input\mouse\scroll.hpp" />
     <ClInclude Include="src\pack\V8Wrapper.hpp" />
-    <ClInclude Include="src\debug\Logger.hpp" />
     <ClInclude Include="src\pack\J4mcWrapper.hpp" />
     <ClInclude Include="src\pack\pack.hpp" />
     <ClInclude Include="src\pack\PackManager.hpp" />

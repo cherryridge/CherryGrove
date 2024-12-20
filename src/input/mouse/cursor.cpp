@@ -1,9 +1,11 @@
-#include <glfw/glfw3.h>
+﻿#include <glfw/glfw3.h>
 #include <iostream>
+
+#include "../../debug/Logger.hpp"
 #include "cursor.hpp"
 
-using std::cout, std::endl;
+using Logger::lout, std::endl;
 
 void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
-	//cout << xpos << " " << ypos << endl;
+	//lout << xpos << " " << ypos << endl;
 }

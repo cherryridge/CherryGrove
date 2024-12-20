@@ -7,11 +7,12 @@
 #include <filesystem>
 
 #include "ShaderPool.hpp"
+#include "../debug/Logger.hpp"
 
 typedef uint32_t u32;
 typedef uint16_t u16;
 
-using std::unordered_map, std::unique_ptr, std::string, std::cout, std::endl, std::make_unique, std::move, std::ifstream, std::filesystem::file_size, std::filesystem::exists, std::exit, bgfx::RendererType, bgfx::ShaderHandle, bgfx::ProgramHandle, bgfx::destroy;
+using std::unordered_map, std::unique_ptr, std::string, Logger::lout, std::endl, std::make_unique, std::move, std::ifstream, std::filesystem::file_size, std::filesystem::exists, std::exit, bgfx::RendererType, bgfx::ShaderHandle, bgfx::ProgramHandle, bgfx::destroy;
 
 namespace ShaderPool {
 	u32 nextId;
@@ -62,25 +63,25 @@ namespace ShaderPool {
 			filePath = "shaders/spirv/";
 			break;
 		default:
-			cout << "No valid render backends, exit!" << endl;
+			lout << "No valid render backends, exit!" << endl;
 			exit(1);
 			break;
 		}
 		filePath += fileName;
 		if (!exists(filePath)) {
-			cout << "Error: Shader file not found: " << filePath << endl;
+			lout << "Error: Shader file not found: " << filePath << endl;
 			exit(1);
 		}
 		auto size = file_size(filePath);
 		ifstream file(filePath, std::ios::binary);
 		if (!file) {
-			cout << "Error: Failed to open shader file: " << filePath << endl;
+			lout << "Error: Failed to open shader file: " << filePath << endl;
 			exit(1);
 		}
 		const bgfx::Memory* memory = bgfx::alloc((u32)size + 1);
 		file.read(reinterpret_cast<char*>(memory->data), size);
 		if (!file) {
-			cout << "Error: Failed to read shader file: " << filePath << endl;
+			lout << "Error: Failed to read shader file: " << filePath << endl;
 			exit(1);
 		}
 		memory->data[memory->size - 1] = '\0';

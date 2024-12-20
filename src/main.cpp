@@ -25,7 +25,7 @@
 
 typedef uint16_t u16;
 
-using std::cout, std::endl, std::make_unique, std::unique_ptr, std::filesystem::exists;
+using Logger::lout, std::endl, std::make_unique, std::unique_ptr, std::filesystem::exists;
 
 glm::vec3 lookingAt = { 0.0f, 0.0f, 0.0f };
 glm::vec3 cameraPos = { 0.0f, 3.0f, 0.0f };
@@ -79,8 +79,8 @@ void keyCallback1(GLFWwindow* window, int key, int scancode, int action, int mod
 			//lookingAt -= glm::angleAxis(rotateAngle, glm::normalize(up)) * glm::normalize(lookingAt - cameraPos);
 			break;
 	}
-	cout << "Looking at: (" << lookingAt.x << ", " << lookingAt.y << ", " << lookingAt.z << ")" << endl;
-	cout << "Pos: (" << cameraPos.x << ", " << cameraPos.y << ", " << cameraPos.z << ")" << endl;
+	lout << "Looking at: (" << lookingAt.x << ", " << lookingAt.y << ", " << lookingAt.z << ")" << endl;
+	lout << "Pos: (" << cameraPos.x << ", " << cameraPos.y << ", " << cameraPos.z << ")" << endl;
 }
 
 //Whether the program is running as a console program or a Win32 window program.
@@ -90,22 +90,26 @@ int main(int argc, char* argv[]) {
 #else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	char** _argv = __argv;
-	cout << "Setting up logger..." << endl;
-	Logger logger;
 #endif
 #ifdef _DEBUG
 	//Hacks for auto compiling shaders every time the program starts, while Visual Studio build events does not trigger when nothing in the main code has changed since last build.
 	//Sadly only for Visual Studio debugging.
-	//cout << "Compiling shaders at runtime for debug..." << endl;
+	//lout << "Compiling shaders at runtime for debug..." << endl;
 	//SetCurrentDirectoryA("scripts");
 	//system("compile_shaders.bat");
 	//string path = _argv[0];
 	//string solutionRootDir = path.substr(0, path.find("\\build\\x64\\Debug"));
 	//SetCurrentDirectoryA(solutionRootDir.c_str());
 #endif
-	cout << "Program running at " << _argv[0] << endl;
+	cout << "Setting up logger..." << endl;
+#ifndef CG_CONSOLE
+	Logger::setToFile(true);
+#endif
+	lout << "Hello from Logger!" << endl;
 
-	cout << "Setting up main window..." << endl;
+	lout << "Program running at " << _argv[0] << endl;
+
+	lout << "Setting up main window..." << endl;
 	unique_ptr<Window> mainWindow = make_unique<Window>(2560, 1440, "CherryGrove");
 	PackManager::init(_argv[0]);
 	
@@ -120,22 +124,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ShaderPool::init();
 	auto testShader = ShaderPool::addShader("test.vert.bin", "test.frag.bin");
 
-
 	SoLoudWrapper::init();
-	//Do sound engine test if test files are present.
-	if (exists("test/a.wav") && exists("test/b.wav")) {
-		auto soundtest = SoLoudWrapper::addSound("test/a.wav");
-		auto sound2 = SoLoudWrapper::addSound("test/b.wav");
+	//Perform sound engine test if test files are present.
+	if (exists("test/a.ogg") && exists("test/b.ogg")) {
+		auto soundtest = SoLoudWrapper::addSound("test/a.ogg");
+		auto sound2 = SoLoudWrapper::addSound("test/b.ogg");
 		auto soundevent1 = SoLoudWrapper::addEvent(soundtest, 1.0f, 1.0f, 1.0f, true);
 		DiCoord d{ vec3(0.0f, 0.0f, 0.0f), 0 };
 		auto play = SoLoudWrapper::play(soundevent1, d, 0.0f, 1);
-		Sleep(500);
-		auto play2 = SoLoudWrapper::play(soundevent1, d, 0.0f, 1);
+		//Sleep(500);
+		//auto play2 = SoLoudWrapper::play(soundevent1, d, 0.0f, 1);
 		auto soundevent2 = SoLoudWrapper::addEvent(soundtest, 0.3f, 1.0f, 1.0f, true);
-		Sleep(500);
-		auto play3 = SoLoudWrapper::play(soundevent2, d, 0.0f, 1);
+		//Sleep(500);
+		//auto play3 = SoLoudWrapper::play(soundevent2, d, 0.0f, 1);
 		auto soundevent223 = SoLoudWrapper::addEvent(sound2, 3.0f, 1.0f, 1.0f, true);
-		auto play4 = SoLoudWrapper::play(soundevent223, d, 0.0f, 1);
+		//auto play4 = SoLoudWrapper::play(soundevent223, d, 0.0f, 1);
 	}
 
 	static Vertex
@@ -192,15 +195,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	bool showGuis = true, demoOpened = false, winPosInitialized = false;
 
 	mainWindow->getInput()->addKeyCB(keyCallback);
-	mainWindow->getInput()->addKeyCB(keyCallback1);
+	mainWindow->getInput()->addKeyCB(keyCallback1, false);
 	mainWindow->getInput()->addMouseButtonCB(mouseCallback);
 	mainWindow->getInput()->addScrollCB(scrollCallback);
 	mainWindow->getInput()->addCursorPosCB(cursorPosCallback);
 	mainWindow->setIcon("assets/icons/CherryGrove-trs-64.png");
 
 	while (mainWindow->isAlive()) {
+		mainWindow->startGuiFrame();
 		if (showGuis) {
-			mainWindow->startGuiFrame();
 			if(demoOpened) ImGui::ShowDemoWindow(&demoOpened);
 			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -224,8 +227,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			ImGui::Text("©2024 LJM12914. Licensed under GPL-3.0-or-later.");
 			ImGui::End();
 			ImGui::PopStyleColor(2);
-			mainWindow->submitGuiFrame();
 		}
+		mainWindow->submitGuiFrame();
 		mainWindow->startFrame();
 		//bgfx::setState(BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
 		bgfx::setViewRect(0, 0, 0, mainWindow->getWidth(), mainWindow->getHeight());
@@ -280,7 +283,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		mainWindow->addDrawcall(0, testShader);
 		mainWindow->submitFrame();
 		counter++;
-		//if (counter % 100 == 0) cout << "Rendered " << counter << " frames" << endl;
+		//if (counter % 100 == 0) lout << "Rendered " << counter << " frames" << endl;
 		mainWindow->update();
 		//SoLoudWrapper::update();
 	}
@@ -297,5 +300,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	PackManager::shutdown();
 	//bgfx::destroy(vertexBuffer2);
 	//bgfx::destroy(vertexIndexBuffer2);
+	Logger::shutdown();
 	return 0;
 }

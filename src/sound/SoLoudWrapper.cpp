@@ -4,10 +4,8 @@
 #include <soloud/soloud_wav.h>
 #include <soloud/soloud_wavstream.h>
 #include <unordered_map>
-#include <vector>
 #include <glm/glm.hpp>
 #include <memory>
-#include <string>
 #include <queue>
 #include <mutex>
 #include <filesystem>
@@ -16,6 +14,7 @@
 #include <variant>
 #include <condition_variable>
 
+#include "../debug/Logger.hpp"
 #include "../gameplay/base.hpp"
 #include "SoLoudWrapper.hpp"
 
@@ -25,7 +24,7 @@ typedef u32 SoundID;
 typedef u32 EventID;
 typedef u64 PlayID;
 
-using std::unordered_map, SoLoud::Soloud, std::make_unique, std::unique_ptr, std::cout, std::endl, SoLoud::Wav, SoLoud::WavStream, std::filesystem::exists, std::thread, std::queue, std::string, std::mutex, std::lock_guard, std::atomic, std::this_thread::sleep_for, std::chrono::milliseconds, std::variant, std::unique_lock, std::visit, std::decay_t, std::is_same_v, std::move, SoLoud::SO_NO_ERROR, std::condition_variable, std::vector;
+using std::unordered_map, SoLoud::Soloud, std::make_unique, std::unique_ptr, Logger::lout, std::endl, SoLoud::Wav, SoLoud::WavStream, std::filesystem::exists, std::thread, std::queue, std::mutex, std::atomic, std::variant, std::unique_lock, std::visit, std::move, SoLoud::SO_NO_ERROR, std::condition_variable;
 
 namespace SoLoudWrapper {
 	static void audioThreadFunc();
@@ -46,11 +45,11 @@ namespace SoLoudWrapper {
 	PlayID nextPlayId = 0;
 
 	void init() {
-		cout << "Initializing SoLoud..." << endl;
+		lout << "Initializing SoLoud..." << endl;
 		soLoudInstance = new Soloud();
 		if (soLoudInstance->init(Soloud::LEFT_HANDED_3D) != SO_NO_ERROR) throw ERROR_INIT;
-		cout << "SoLoud is running on " << soLoudInstance->getBackendString() << " with " << soLoudInstance->getBackendChannels() << " channels." << endl;
-		cout << "Creating worker thread..." << endl;
+		lout << "SoLoud is running on " << soLoudInstance->getBackendString() << " with " << soLoudInstance->getBackendChannels() << " channels." << endl;
+		lout << "Creating worker thread..." << endl;
 		audioThread = thread(&audioThreadFunc);
 	}
 
@@ -145,7 +144,7 @@ namespace SoLoudWrapper {
 	}
 
 	static void audioThreadFunc() {
-		cout << "Hello from audio thread!" << endl;
+		lout << "Hello from audio thread!" << endl;
 		while (isAlive) {
 			unique_lock<mutex> lock(queueMutex);
 			cv.wait(lock, [] { return !playStartQueue.empty() || !isAlive; });
@@ -163,10 +162,10 @@ namespace SoLoudWrapper {
 				else {
 					//todo
 				}
-				//Should implement background ticking manually. SoLoud seems to only provide the ability to pause and resume the sound automatically, but not resuming at a deltatime jump in progress. We need to manually jump.
+				//Should implement background ticking manually. SoLoud only provide the ability to pause and resume the sound automatically, but not resuming at a deltatime jump in progress. We need to manually jump.
 			}, soundInst);
-			cout << "New play request executed: Play " << playId << ", Event " << play->eventId << ", Sound " << sEvent->soundId << endl;
+			lout << "New play request executed: Play " << playId << ", Event " << play->eventId << ", Sound " << sEvent->soundId << endl;
 		}
-		cout << "Terminating audio thread!" << endl;
+		lout << "Terminating audio thread!" << endl;
 	}
 }

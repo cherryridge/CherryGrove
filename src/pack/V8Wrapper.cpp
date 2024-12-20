@@ -11,9 +11,10 @@
 #include <v8/v8-primitive.h>
 #include <v8/v8-script.h>
 
+#include "../debug/Logger.hpp"
 #include "V8Wrapper.hpp"
 
-using std::cout, std::endl, std::unique_ptr;
+using Logger::lout, std::endl, std::unique_ptr;
 
 namespace V8Wrapper {
 	v8::Isolate* V8Isolate;
@@ -49,12 +50,12 @@ namespace V8Wrapper {
 			v8::Local<v8::Script> script = v8::Script::Compile(context, local).ToLocalChecked();
 			v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
 			v8::String::Utf8Value utf8(V8Isolate, result);
-			cout << *utf8 << endl;
+			lout << *utf8 << endl;
 		}
-		else cout << "Expression evaluation failed: " << expression << endl;
+		else lout << "Expression evaluation failed: " << expression << endl;
 	}
 
 	void loadFile(const char* filePath) {
-		cout << "Load file todo" << endl;
+		lout << "Load file todo" << endl;
 	}
 }
