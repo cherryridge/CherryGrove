@@ -10,9 +10,11 @@
 #include <stb/stb_image.h>
 #define IMGUI_ENABLE_FREETYPE
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_bgfx.h>
 
+#include "../debug/Logger.hpp"
 #include "ShaderPool.hpp"
 #include "TexturePool.hpp"
 #include "Window.hpp"
@@ -20,7 +22,7 @@
 typedef uint16_t u16;
 typedef uint32_t u32;
 
-using std::cout, std::endl, std::make_unique, std::move;
+using Logger::lout, std::endl, std::make_unique, std::move;
 
 unsigned int Window::instanceCount = 0;
 
@@ -28,13 +30,13 @@ Window::Window(unsigned int width, unsigned int height, const char* title) {
 
 	//Initialize glfw
 	if (instanceCount == 0 && !glfwInit()) {
-		cout << "Failed to set up GLFW!" << endl;
+		lout << "Failed to set up GLFW!" << endl;
 		exit(-1);
 	}
 	window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 	if (!window) {
 		if(instanceCount == 0) glfwTerminate();
-		cout << "Failed to create GLFW window!" << endl;
+		lout << "Failed to create GLFW window!" << endl;
 		DebugBreak();
 	}
 	glfwMakeContextCurrent(window);
@@ -65,17 +67,19 @@ Window::Window(unsigned int width, unsigned int height, const char* title) {
 	glfwPollEvents();
 	//bgfx::setState(BGFX_STATE_BLEND_ALPHA | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
 	//bgfx::setViewClear(1, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x00000000, 1.0f, 0);
-	cout << "Used rendering backend: " << bgfx::getRendererName(bgfx::getRendererType()) << endl;
+	lout << "Used rendering backend: " << bgfx::getRendererName(bgfx::getRendererType()) << endl;
 
 	//Initialize ImGui
 	context = ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.LogFilename = NULL;
+	io.IniFilename = NULL;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	io.DisplaySize.x = width;
-	io.DisplaySize.y = height;
+	io.DisplaySize.x = (float)width;
+	io.DisplaySize.y = (float)height;
 	io.ConfigViewportsNoAutoMerge = true;
 	io.ConfigViewportsNoTaskBarIcon = true;
 	io.FontGlobalScale = _scale;
@@ -101,17 +105,17 @@ Window::Window(unsigned int width, unsigned int height, const char* title) {
 	//Initialize window input
 	input = make_unique<InputHandler>(window);
 	//Register input callbacks
-	input->addKeyCB(ImGui_ImplGlfw_KeyCallback);
-	input->addCharCB(ImGui_ImplGlfw_CharCallback);
-	input->addCursorPosCB(ImGui_ImplGlfw_CursorPosCallback);
-	input->addCursorEnterCB(ImGui_ImplGlfw_CursorEnterCallback);
-	input->addMouseButtonCB(ImGui_ImplGlfw_MouseButtonCallback);
-	input->addScrollCB(ImGui_ImplGlfw_ScrollCallback);
+	input->addKeyCB(ImGui_ImplGlfw_KeyCallback, false);
+	input->addCharCB(ImGui_ImplGlfw_CharCallback, false);
+	input->addCursorPosCB(ImGui_ImplGlfw_CursorPosCallback, false);
+	input->addCursorEnterCB(ImGui_ImplGlfw_CursorEnterCallback, false);
+	input->addMouseButtonCB(ImGui_ImplGlfw_MouseButtonCallback, false);
+	input->addScrollCB(ImGui_ImplGlfw_ScrollCallback, false);
 	//No dropping callbacks available
-	//addDropCB(ImGui_ImplGlfw_DropCallback);
-	input->addWindowFocusCB(ImGui_ImplGlfw_WindowFocusCallback);
+	//addDropCB(ImGui_ImplGlfw_DropCallback, false);
+	input->addWindowFocusCB(ImGui_ImplGlfw_WindowFocusCallback, false);
 	//No resize callbacks available
-	//addWindowSizeCB(ImGui_ImplGlfw_WindowSizeCallback);
+	//addWindowSizeCB(ImGui_ImplGlfw_WindowSizeCallback, false);
 	input->addMonitorCB(ImGui_ImplGlfw_MonitorCallback);
 
 	//Post process
@@ -156,7 +160,7 @@ GLFWwindow* Window::getWindow() const { return window; }
 
 void Window::setIcon(const char* filePath) {
 	stbi_set_flip_vertically_on_load(0);
-	cout << "Loading window icon from " << filePath << "..." << endl;
+	lout << "Loading window icon from " << filePath << "..." << endl;
 	int iconWidth, iconHeight;
 	unsigned char* iconData = stbi_load(filePath, &iconWidth, &iconHeight, nullptr, 4);
 	if (iconData) {
@@ -167,7 +171,7 @@ void Window::setIcon(const char* filePath) {
 		glfwSetWindowIcon(window, 1, &icon);
 		stbi_image_free(iconData);
 	}
-	else cout << "Load window icon data failed!" << endl;
+	else lout << "Load window icon data failed!" << endl;
 }
 
 HWND Window::getNativeHandle() const {
@@ -216,22 +220,20 @@ InputHandler* Window::getInput() const { return input.get(); }
 ImGuiContext* Window::getGuiContext() const { return context; }
 
 void Window::startGuiFrame() {
+	ImGui::SetCurrentContext(context);
 	bgfx::setViewRect(1, 0, 0, getWidth(), getHeight());
 	ImGui_Implbgfx_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-	//ImGuiIO& io = ImGui::GetIO();
-	//bool open = true;
-	//if (open) {
-	//	ImGui::Begin("Font Debug", &open);
-	//	ImGui::Image(io.Fonts->TexID, ImVec2(io.Fonts->TexWidth / 2.0f, io.Fonts->TexHeight));
-	//	ImGui::End();
-	//}
 }
 
 void Window::submitGuiFrame() {
 	ImGui::Render();
 	ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
+	//One internal window named Debug##Default will always be rendered by ImGui. We don't want to look for the name because this piece of code is performance intensive, instead we only look at the count and adjust the threshold between debug/release if needed.
+	//And mind you this is some very temporary code
+	if (context->WindowsActiveCount > 1) input->setHasGUI(true);
+	else input->setHasGUI(false);
 	//GLFWwindow* backup_current_context = glfwGetCurrentContext();
 	//ImGui::UpdatePlatformWindows();
 	//ImGui::RenderPlatformWindowsDefault();

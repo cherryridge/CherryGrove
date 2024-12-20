@@ -2,53 +2,55 @@
 #include <glfw/glfw3.h>
 #include <vector>
 
-using std::vector;
+using std::vector, std::pair;
 
 class InputHandler {
 public:
 	InputHandler(GLFWwindow* window);
 
-	void addKeyCB(GLFWkeyfun func);
+	void setHasGUI(bool hasGUI);
+
+	void addKeyCB(GLFWkeyfun func, bool noGUIOnly = true);
 	void removeKeyCB(GLFWkeyfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	vector<GLFWkeyfun> keyCBs;
-	void addCharCB(GLFWcharfun func);
+	vector<pair<GLFWkeyfun, bool>> keyCBs;
+	void addCharCB(GLFWcharfun func, bool noGUIOnly = true);
 	void removeCharCB(GLFWcharfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	vector<GLFWcharfun> charCBs;
-	void addCursorPosCB(GLFWcursorposfun func);
+	vector<pair<GLFWcharfun, bool>> charCBs;
+	void addCursorPosCB(GLFWcursorposfun func, bool noGUIOnly = true);
 	void removeCursorPosCB(GLFWcursorposfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	vector<GLFWcursorposfun> cursorposCBs;
-	void addCursorEnterCB(GLFWcursorenterfun func);
+	vector<pair<GLFWcursorposfun, bool>> cursorposCBs;
+	void addCursorEnterCB(GLFWcursorenterfun func, bool noGUIOnly = true);
 	void removeCursorEnterCB(GLFWcursorenterfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	vector<GLFWcursorenterfun> cursorenterCBs;
-	void addMouseButtonCB(GLFWmousebuttonfun func);
+	vector<pair<GLFWcursorenterfun, bool>> cursorenterCBs;
+	void addMouseButtonCB(GLFWmousebuttonfun func, bool noGUIOnly = true);
 	void removeMouseButtonCB(GLFWmousebuttonfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	vector<GLFWmousebuttonfun> mousebuttonCBs;
-	void addScrollCB(GLFWscrollfun func);
+	vector<pair<GLFWmousebuttonfun, bool>> mousebuttonCBs;
+	void addScrollCB(GLFWscrollfun func, bool noGUIOnly = true);
 	void removeScrollCB(GLFWscrollfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	vector<GLFWscrollfun> scrollCBs;
-	//void addJoystickCB(GLFWjoystickfun func);
+	vector<pair<GLFWscrollfun, bool>> scrollCBs;
+	//void addJoystickCB(GLFWjoystickfun func, bool noGUIOnly = true);
 	//void removeJoystickCB(GLFWjoystickfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	//vector<GLFWjoystickfun> joystickCBs;
+	//vector<pair<GLFWjoystickfun, bool>> joystickCBs;
 
-	void addDropCB(GLFWdropfun func);
+	void addDropCB(GLFWdropfun func, bool noGUIOnly = true);
 	void removeDropCB(GLFWdropfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	vector<GLFWdropfun> dropCBs;
-	void addWindowFocusCB(GLFWwindowfocusfun func);
+	vector<pair<GLFWdropfun, bool>> dropCBs;
+	void addWindowFocusCB(GLFWwindowfocusfun func, bool noGUIOnly = true);
 	void removeWindowFocusCB(GLFWwindowfocusfun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	vector<GLFWwindowfocusfun> windowFocusCBs;
-	void addWindowSizeCB(GLFWwindowsizefun func);
+	vector<pair<GLFWwindowfocusfun, bool>> windowFocusCBs;
+	void addWindowSizeCB(GLFWwindowsizefun func, bool noGUIOnly = true);
 	void removeWindowSizeCB(GLFWwindowsizefun func);
 	//INTERNAL USE ONLY. DO NOT MODIFY!
-	vector<GLFWwindowsizefun> windowSizeCBs;
+	vector<pair<GLFWwindowsizefun, bool>> windowSizeCBs;
 	//Global
 	static void addMonitorCB(GLFWmonitorfun func);
 	static void removeMonitorCB(GLFWmonitorfun func);
@@ -56,6 +58,7 @@ public:
 	static vector<GLFWmonitorfun> monitorCBs;
 
 private:
+	bool hasGUI;
 	static void proxyKeyCB(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void proxyCharCB(GLFWwindow* window, unsigned int codepoint);
 	static void proxyCursorPosCB(GLFWwindow* window, double xpos, double ypos);
