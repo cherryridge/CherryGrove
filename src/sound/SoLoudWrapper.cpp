@@ -152,19 +152,19 @@ namespace SoLoudWrapper {
 			const PlayID playId = playStartQueue.front();
 			playStartQueue.pop();
 			lock.unlock();
-			const PlayInfo* play = &playInfos[playId];
-			const SoundEvent* sEvent = &eventRegistry[play->eventId];
-			const auto& soundInst = soundRegistry[sEvent->soundId];
+			const PlayInfo& play = playInfos[playId];
+			const SoundEvent& sEvent = eventRegistry[play.eventId];
+			const auto& soundInst = soundRegistry[sEvent.soundId];
 			visit([&play, &sEvent](auto& soundInst) {
-				if (sEvent->is2D) {
-					const SoLoud::handle handle = soLoudInstance->play(*soundInst, sEvent->volume);
+				if (sEvent.is2D) {
+					const SoLoud::handle handle = soLoudInstance->play(*soundInst, sEvent.volume);
 				}
 				else {
 					//todo
 				}
 				//Should implement background ticking manually. SoLoud only provide the ability to pause and resume the sound automatically, but not resuming at a deltatime jump in progress. We need to manually jump.
 			}, soundInst);
-			lout << "New play request executed: Play " << playId << ", Event " << play->eventId << ", Sound " << sEvent->soundId << endl;
+			lout << "New play request executed: Play " << playId << ", Event " << play.eventId << ", Sound " << sEvent.soundId << endl;
 		}
 		lout << "Terminating audio thread!" << endl;
 	}

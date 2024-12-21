@@ -22,7 +22,7 @@ namespace Logger {
 	LoggerCout lout;
 
 	void shutdown() {
-		lout << "Terminating logger and reverting cout to console!" << endl;
+		lout << "Terminating logger! (Cout will be reverted to console)" << endl;
 		cout.rdbuf(consoleBuffer);
 		logFile.close();
 	}

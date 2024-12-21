@@ -237,12 +237,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		float proj[16];
 		bx::mtxProj(proj, fov, mainWindow->getAspectRatio(), nearPlane, farPlane, bgfx::getCaps()->homogeneousDepth);
 		bgfx::setViewTransform(0, view, proj);
-		//float mtx1[16];
-		//bx::mtxRotateXY(mtx1, counter * 0.01f, counter * 0.01f);
-		//bgfx::setTransform(mtx1);
-		//bgfx::setVertexBuffer(0, vertexBuffer2);
-		//bgfx::setIndexBuffer(vertexIndexBuffer2);
-		//shaderPool.useShader(0, shader);
+
 		float mtx2[16];
 		bx::mtxRotateXY(mtx2, 0.002f * counter, 0.002f * counter);
 		bgfx::setTransform(mtx2);

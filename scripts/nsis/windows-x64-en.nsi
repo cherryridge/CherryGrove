@@ -70,6 +70,23 @@ VIProductVersion "${VERSION}.0"
 
 Section "MainSection" SEC01
     SetOutPath "$INSTDIR"
+    FileOpen $2 "README.txt" w                                                                     #DIF
+    ${If} $2 != ""
+        FileWrite $2 "Folder Introduction:$\r$\n"                                                  #DIF
+        FileWrite $2 "assets: Stores assets necessary for CherryGrove to run, including fonts and logos. Not for adding packs.$\r$\n"#DIF
+        FileWrite $2 "packs: Stores content packs. Here is the place to add packs to CherryGrove, in format of folder or .zip archive. Ensure that manifest.json of the pack is one folder away from packs folder.$\r$\n"#DIF
+        FileWrite $2 "shaders: Stores shaders necessary for CherryGrove to run. Not for adding shader packs. Add them to packs folder instead.$\r$\n"#DIF
+        FileWrite $2 "test (may not exist): Stores test files for the development version of CherryGrove.$\r$\n"#DIF
+        FileWrite $2 "$\r$\n"
+        FileWrite $2 "File Introduction:$\r$\n"                                                    #DIF
+        FileWrite $2 "CherryGrove.exe: CherryGrove program.$\r$\n"                                 #DIF
+        FileWrite $2 "uninstall.exe: Program for uninstalling CherryGrove.$\r$\n"                  #DIF
+        FileWrite $2 "$\r$\n"
+        FileWrite $2 "For more information, please visit our official website: https://cherrygrove.dev.$\r$\n"#DIF
+        FileWrite $2 "This software is open source and is licensed under GPL-3.0-or-later.$\r$\n"  #DIF
+        FileClose $2
+    ${EndIf}
+    File "..\..\LICENSE"
     File "..\..\build\x64\Release\CherryGrove.exe"
     SetOutPath "$INSTDIR\shaders"
     File /r "..\..\shaders\*"

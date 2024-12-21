@@ -70,6 +70,23 @@ VIProductVersion "${VERSION}.0"
 
 Section "MainSection" SEC01
     SetOutPath "$INSTDIR"
+    FileOpen $2 "必读信息.txt" w                                                                       #DIF
+    ${If} $2 != ""
+        FileWrite $2 "文件夹介绍：$\r$\n"                                                                #DIF
+        FileWrite $2 "assets：存放 CherryGrove 基本运行所需要的文件，包括字体、Logo 等。不是用来放置内容包的地方。$\r$\n"            #DIF
+        FileWrite $2 "packs：存放内容包的地方，也是普通用户唯一需要修改的地方。允许放入文件夹或 .zip 压缩包，放入文件夹时，需要保证在 pack 目录中点进一次文件夹就能看到内容包的 manifest.json。$\r$\n"#DIF
+        FileWrite $2 "shaders：存放 CherryGrove 基本运行所需要的着色器。不是用来放置内容包/光影包的地方！请把光影包也放到 packs 文件夹中。$\r$\n"#DIF
+        FileWrite $2 "test（可能不存在）：存放开发版 CherryGrove 的测试用途文件，需要了解代码中的测试内容才能正确使用该文件夹。$\r$\n"         #DIF
+        FileWrite $2 "$\r$\n"
+        FileWrite $2 "文件介绍：$\r$\n"                                                                 #DIF
+        FileWrite $2 "CherryGrove.exe：CherryGrove 软件。$\r$\n"                                       #DIF
+        FileWrite $2 "uninstall.exe：卸载 CherryGrove 需要的程序。双击打开以卸载本软件。$\r$\n"                        #DIF
+        FileWrite $2 "$\r$\n"
+        FileWrite $2 "更多信息，请访问官方网站：https://cherrygrove.dev。$\r$\n"                                 #DIF
+        FileWrite $2 "本软件以 GPL-3.0-or-later 许可证免费开源。如果你付费获得该软件，请立即差评并举报店铺。$\r$\n"                  #DIF
+        FileClose $2
+    ${EndIf}
+    File "..\..\LICENSE"
     File "..\..\build\x64\Release\CherryGrove.exe"
     SetOutPath "$INSTDIR\shaders"
     File /r "..\..\shaders\*"
