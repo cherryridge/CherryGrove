@@ -85,7 +85,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\soloud\soloud_debug.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-debug.lib;$(SolutionDir)lib\freetype\freetypeDebug.lib;$(SolutionDir)lib\bgfx\bxDebug.lib;$(SolutionDir)lib\bgfx\bimgDebug.lib;$(SolutionDir)lib\bgfx\bgfxDebug.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\njsv\nlohmann_json_schema_validator_debug.lib;$(SolutionDir)lib\soloud\soloud_debug.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-debug.lib;$(SolutionDir)lib\freetype\freetypeDebug.lib;$(SolutionDir)lib\bgfx\bxDebug.lib;$(SolutionDir)lib\bgfx\bimgDebug.lib;$(SolutionDir)lib\bgfx\bgfxDebug.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <Culture>0x7804</Culture>
@@ -125,7 +125,7 @@ compile_shaders.bat</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\soloud\soloud_release.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\freetype\freetypeRelease.lib;$(SolutionDir)lib\bgfx\bxRelease.lib;$(SolutionDir)lib\bgfx\bimgRelease.lib;$(SolutionDir)lib\bgfx\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\njsv\nlohmann_json_schema_validator_release.lib;$(SolutionDir)lib\soloud\soloud_release.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\freetype\freetypeRelease.lib;$(SolutionDir)lib\bgfx\bxRelease.lib;$(SolutionDir)lib\bgfx\bimgRelease.lib;$(SolutionDir)lib\bgfx\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <Culture>0x7804</Culture>
@@ -151,7 +151,7 @@ compile_shaders.bat</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BX_CONFIG_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BX_CONFIG_DEBUG;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -165,7 +165,7 @@ compile_shaders.bat</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\soloud\soloud_release.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\freetype\freetypeRelease.lib;$(SolutionDir)lib\bgfx\bxRelease.lib;$(SolutionDir)lib\bgfx\bimgRelease.lib;$(SolutionDir)lib\bgfx\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;Winmm.lib;Dbghelp.lib;Opengl32.lib;$(SolutionDir)lib\njsv\nlohmann_json_schema_validator_release.lib;$(SolutionDir)lib\soloud\soloud_release.lib;$(SolutionDir)lib\glfw\glfw3.lib;$(SolutionDir)lib\v8\v8_monolith-win64-release.lib;$(SolutionDir)lib\freetype\freetypeRelease.lib;$(SolutionDir)lib\bgfx\bxRelease.lib;$(SolutionDir)lib\bgfx\bimgRelease.lib;$(SolutionDir)lib\bgfx\bgfxRelease.lib;$(CoreLibraryDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <Culture>0x7804</Culture>
@@ -186,6 +186,7 @@ compile_shaders.bat</Command>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\components\Ecs.cpp" />
     <ClCompile Include="src\graphic\Camera.cpp" />
     <ClCompile Include="src\gui\imgui\backends\imgui_impl_bgfx.cpp" />
     <ClCompile Include="src\gui\imgui\backends\imgui_impl_glfw.cpp" />
@@ -205,10 +206,12 @@ compile_shaders.bat</Command>
     <ClCompile Include="src\input\mouse\cursor.cpp" />
     <ClCompile Include="src\input\mouse\mouse.cpp" />
     <ClCompile Include="src\input\mouse\scroll.cpp" />
-    <ClCompile Include="src\pack\V8Wrapper.cpp" />
+    <ClCompile Include="src\pack\json\block\BlockProcs.cpp" />
+    <ClCompile Include="src\pack\json\JsonParser.cpp" />
+    <ClCompile Include="src\pack\json\manifest\ManifestProcs.cpp" />
+    <ClCompile Include="src\pack\js\V8Wrapper.cpp" />
     <ClCompile Include="src\debug\Logger.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\pack\J4mcWrapper.cpp" />
     <ClCompile Include="src\pack\PackManager.cpp" />
     <ClCompile Include="src\sound\SoLoudWrapper.cpp" />
   </ItemGroup>
@@ -228,6 +231,7 @@ compile_shaders.bat</Command>
     <None Include="src\shaders\varying.def.sc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\components\Ecs.hpp" />
     <ClInclude Include="src\debug\Logger.hpp" />
     <ClInclude Include="src\gameplay\base.hpp" />
     <ClInclude Include="src\graphic\Camera.hpp" />
@@ -258,13 +262,13 @@ compile_shaders.bat</Command>
     <ClInclude Include="src\input\mouse\mouse.hpp" />
     <ClInclude Include="src\input\mouse\mousedesc_win.hpp" />
     <ClInclude Include="src\input\mouse\scroll.hpp" />
-    <ClInclude Include="src\pack\V8Wrapper.hpp" />
-    <ClInclude Include="src\pack\J4mcWrapper.hpp" />
+    <ClInclude Include="src\pack\json\block\BlockProcs.hpp" />
+    <ClInclude Include="src\pack\json\JsonParser.hpp" />
+    <ClInclude Include="src\pack\json\jsontypes.hpp" />
+    <ClInclude Include="src\pack\json\manifest\ManifestProcs.hpp" />
+    <ClInclude Include="src\pack\js\V8Wrapper.hpp" />
     <ClInclude Include="src\pack\pack.hpp" />
     <ClInclude Include="src\pack\PackManager.hpp" />
-    <ClInclude Include="src\pack\json_schema\base.hpp" />
-    <ClInclude Include="src\pack\json_schema\block.hpp" />
-    <ClInclude Include="src\pack\json_schema\manifest.hpp" />
     <ClInclude Include="src\sound\SoLoudWrapper.hpp" />
   </ItemGroup>
   <ItemGroup>

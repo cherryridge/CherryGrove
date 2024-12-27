@@ -12,8 +12,9 @@ An easily customizable, high performance scripting-based block game engine made 
 2. Highly customizable via JSON or JavaScript. Most of the gameplay definitions can be changed dynamically.
    - Also it's not difficult to develop your own modding API in C++.
 3. High performance due to V8 engine and various intrinsic components that can be quickly accessed by packs.
-4. Abilities and plans to support various platforms: Windows, Linux, Mac, Android, iOS, Web (emscripten).
-5. Completely free and open source, licensed under [GPL-3.0-or-later](LICENSE).
+4. Integrate camera presets and offline-rendering to provide tools for animation creation.
+5. Abilities and plans to support various platforms: Windows, Linux, Mac, Android, iOS, Web (emscripten).
+6. Completely free and open source, licensed under [GPL-3.0-or-later](LICENSE).
 
 ## Building
 
@@ -33,6 +34,7 @@ CherryGrove @ 0.0.1 (*Not released yet*)
 - [glm](https://github.com/g-truc/glm) @ 1.0.1 (0af55cc)
 - [EnTT](https://github.com/skypjack/entt) @ 42d9628
 - [JSON for Modern C++](https://github.com/nlohmann/json) @ 3.11.3 (9cca280)
+- [JSON schema validator for JSON for Modern C++](https://github.com/pboettch/json-schema-validator) @ fbd72de
 - [boost](https://boost.org) @ 1.87.0 (c89e626)
 - [SoLoud](https://solhsa.com/soloud/index.html) @ 20200207 (c8e339f)
 

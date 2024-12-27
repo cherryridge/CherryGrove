@@ -55,11 +55,11 @@ namespace SoLoudWrapper {
 	SoundID addSound(const char* filePath, bool stream = false, bool preload = false);
 	//Will NOT remove sound events that use the sound instance.
 	//This method is NOT recommended to use.
-	void removeSound(SoundID soundId);
+	bool removeSound(SoundID soundId);
 
 	EventID addEvent(SoundID soundId, float volume, float pitch, float distance, bool is2D = false, AttenuationAlgorithm atnl = AttenuationAlgorithm::Inverse, bool useDoppler = true);
 	const SoundEvent* getEvent(EventID eventId);
-	void removeEvent(EventID eventId);
+	bool removeEvent(EventID eventId);
 
 	PlayID play(EventID eventId, DiCoord coordinate, float iniProgress, u32 loopCount);
 	void pause(PlayID playId);

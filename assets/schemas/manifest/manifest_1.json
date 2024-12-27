@@ -1,0 +1,93 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema",
+    "type": "object",
+    "required": [
+        "formatVersion",
+        "nameSpace",
+        "uuid",
+        "minEngineVersion",
+        "version"
+    ],
+    "properties": {
+        "formatVersion": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "nameSpace": {
+            "type": "string"
+        },
+        "uuid": {
+            "type": "string",
+            "format": "uuid"
+        },
+        "name": {
+            "type": "string",
+            "default": "Content Pack"
+        },
+        "description": {
+            "type": "string",
+            "default": "This content pack has no description."
+        },
+        "authors": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "minEngineVersion": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "configs": {
+            "type": "object",
+            "properties": {
+                "warnOnNSDupe": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "alwaysLoad": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "licenseLibre": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "allowUnsafeExecution": {
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "default": {
+                "warnOnNSDupe": true,
+                "alwaysLoad": false,
+                "licenseLibre": false,
+                "allowUnsafeExecution": false
+            }
+        },
+        "dependencies": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "uuid",
+                    "version"
+                ],
+                "properties": {
+                    "uuid": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                }
+            }
+        }
+    }
+}

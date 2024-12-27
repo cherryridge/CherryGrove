@@ -22,7 +22,7 @@
 typedef uint16_t u16;
 typedef uint32_t u32;
 
-using Logger::lout, std::endl, std::make_unique, std::move;
+using Logger::lout, Logger::lerr, std::endl, std::make_unique, std::move;
 
 unsigned int Window::instanceCount = 0;
 
@@ -30,26 +30,28 @@ Window::Window(unsigned int width, unsigned int height, const char* title) {
 
 	//Initialize glfw
 	if (instanceCount == 0 && !glfwInit()) {
-		lout << "Failed to set up GLFW!" << endl;
+		lerr << "[Window] Failed to set up GLFW!" << endl;
 		exit(-1);
 	}
 	window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 	if (!window) {
 		if(instanceCount == 0) glfwTerminate();
-		lout << "Failed to create GLFW window!" << endl;
+		lerr << "[Window] Failed to create GLFW window!" << endl;
 		DebugBreak();
 	}
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 	float _scale;
 	glfwGetWindowContentScale(window, &_scale, nullptr);
+	HWND hwnd = getNativeHandle();
 
 	//Initialize bgfx
 	bgfx::Init config;
 	bgfx::PlatformData pdata;
-	HWND hwnd = getNativeHandle();
-	//Temporary IME disabling code!!!
-	ImmAssociateContext(hwnd, nullptr);
+	#if _WIN32
+		//Temporary IME disabling code!!!
+		ImmAssociateContext(hwnd, nullptr);
+	#endif
 	pdata.nwh = hwnd;
 	//makes bgfx autoselect its rendering backend.
 	config.type = bgfx::RendererType::Count;
@@ -72,8 +74,8 @@ Window::Window(unsigned int width, unsigned int height, const char* title) {
 	//Initialize ImGui
 	context = ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.LogFilename = NULL;
-	io.IniFilename = NULL;
+	io.LogFilename = nullptr;
+	io.IniFilename = nullptr;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -171,7 +173,7 @@ void Window::setIcon(const char* filePath) {
 		glfwSetWindowIcon(window, 1, &icon);
 		stbi_image_free(iconData);
 	}
-	else lout << "Load window icon data failed!" << endl;
+	else lerr << "[Window] Load window icon data failed!" << endl;
 }
 
 HWND Window::getNativeHandle() const {

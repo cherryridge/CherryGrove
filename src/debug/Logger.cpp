@@ -1,4 +1,5 @@
 ﻿#include <ctime>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -11,19 +12,22 @@
 
 typedef uint32_t u32;
 
-using std::cout, std::endl, std::string, std::ofstream, std::mutex, std::to_string, std::stringstream, std::lock_guard, std::thread, std::streambuf;
+using std::cout, std::cerr, std::endl, std::string, std::ofstream, std::mutex, std::to_string, std::stringstream, std::streambuf, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory;
 
 namespace Logger {
 	bool toFile = false;
+	mutex loggerMutex;
 	ofstream logFile;
-	streambuf* consoleBuffer;
-	mutex coutMutex;
+	streambuf* coutBuffer;
+	streambuf* cerrBuffer;
 	thread_local stringstream threadBuffer;
 	LoggerCout lout;
+	thread_local stringstream threadBufferErr;
+	LoggerCerr lerr;
 
 	void shutdown() {
-		lout << "Terminating logger! (Cout will be reverted to console)" << endl;
-		cout.rdbuf(consoleBuffer);
+		lout << "Terminating logger! (cout will be reverted to console)" << endl;
+		cout.rdbuf(coutBuffer);
 		logFile.close();
 	}
 	
@@ -32,22 +36,39 @@ namespace Logger {
 	void setToFile(bool _toFile) {
 		if (toFile != _toFile) {
 			if (_toFile) {
-				consoleBuffer = cout.rdbuf();
+				coutBuffer = cout.rdbuf();
+				cerrBuffer = cerr.rdbuf();
 				time_t timestamp;
 				time(&timestamp);
-				string logFileName = "CherryGrove-";
+				if (!exists("logs") || !is_directory("logs")) {
+					if (!create_directory("logs")) {
+						lerr << "[Logger] Failed to create /logs directory!" << endl;
+						//Refuse to redirect logs to prevent data loss.
+						return;
+					}
+				}
+				string logFileName = "logs/CherryGrove-";
 				logFileName += to_string(timestamp);
 				logFileName += ".log";
-				lout << "Writing log to file " << logFileName << "!" << endl;
 				logFile = ofstream(logFileName);
-				cout.rdbuf(logFile.rdbuf());
+				if (!logFile.is_open()) {
+					lerr << "[Logger] Failed to open log file: " << logFileName << "\n";
+					//Refuse to redirect logs to prevent data loss.
+					return;
+				}
+				else {
+					lout << "Writing log to " << logFileName << "!" << endl;
+					cout.rdbuf(logFile.rdbuf());
+					cerr.rdbuf(logFile.rdbuf());
+				}
 			}
 			else {
 				lout << "Writing log to console!" << endl;
-				cout.rdbuf(consoleBuffer);
+				cout.rdbuf(coutBuffer);
+				cerr.rdbuf(cerrBuffer);
 			}
 			toFile = _toFile;
 		}
-		else lout << "[Logger] Output not changed." << endl;
+		else lout << "Logger output not changed." << endl;
 	}
 }

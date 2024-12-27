@@ -7,8 +7,4 @@ class Camera {
 public:
 	Camera();
 	~Camera();
-
-private:
-	vec3 position;
-	vec2 rotation;
 };

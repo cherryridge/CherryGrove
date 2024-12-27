@@ -54,7 +54,7 @@ FunctionEnd
 
 #region Branding
 OutFile "..\..\build\x64\CherryGrove_setup_en_x64.exe"                                                #DIF
-InstallDir "$PROGRAMFILES64\CherryGrove"
+InstallDir "$APPDATA\CherryGrove"
 Name "CherryGrove"
 Caption "CherryGrove Installer"                                                                    #DIF
 BrandingText "CherryGrove (c) 2024 LJM12914"
@@ -75,6 +75,8 @@ Section "MainSection" SEC01
         FileWrite $2 "Folder Introduction:$\r$\n"                                                  #DIF
         FileWrite $2 "assets: Stores assets necessary for CherryGrove to run, including fonts and logos. Not for adding packs.$\r$\n"#DIF
         FileWrite $2 "packs: Stores content packs. Here is the place to add packs to CherryGrove, in format of folder or .zip archive. Ensure that manifest.json of the pack is one folder away from packs folder.$\r$\n"#DIF
+        FileWrite $2 "saves: Stores saves.$\r$\n"                                                  #DIF
+        FileWrite $2 "captures: Stores screenshots and screen recordings.$\r$\n"                   #DIF
         FileWrite $2 "shaders: Stores shaders necessary for CherryGrove to run. Not for adding shader packs. Add them to packs folder instead.$\r$\n"#DIF
         FileWrite $2 "test (may not exist): Stores test files for the development version of CherryGrove.$\r$\n"#DIF
         FileWrite $2 "$\r$\n"
@@ -88,18 +90,18 @@ Section "MainSection" SEC01
     ${EndIf}
     File "..\..\LICENSE"
     File "..\..\build\x64\Release\CherryGrove.exe"
-    SetOutPath "$INSTDIR\shaders"
-    File /r "..\..\shaders\*"
+    File "..\..\packing_resources\VC_redist.x64.exe"
     SetOutPath "$INSTDIR\assets"
     File /r "..\..\assets\*"
+    SetOutPath "$INSTDIR\captures"
+    SetOutPath "$INSTDIR\packs"
+    SetOutPath "$INSTDIR\saves"
+    SetOutPath "$INSTDIR\shaders"
+    File /r "..\..\shaders\*"
     SetOutPath "$INSTDIR\test"
     File /r "..\..\test\*"
-    SetOutPath "$INSTDIR\packs"
-    SetOutPath "$INSTDIR"
 
     CreateShortcut "$SMPROGRAMS\CherryGrove.lnk" "$INSTDIR\CherryGrove.exe"
-
-    File "..\..\packing_resources\VC_redist.x64.exe"
 
     WriteUninstaller "$INSTDIR\uninstall.exe"
 

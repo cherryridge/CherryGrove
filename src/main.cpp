@@ -1,5 +1,5 @@
 ﻿#pragma execution_character_set("utf-8")
-#define NOMINMAX
+//#define NOMINMAX
 #include <bgfx/bgfx.h>
 #include <bx/math.h>
 #include <iostream>
@@ -25,7 +25,7 @@
 
 typedef uint16_t u16;
 
-using Logger::lout, std::endl, std::make_unique, std::unique_ptr, std::filesystem::exists;
+using Logger::lout, std::endl, std::make_unique, std::unique_ptr, std::filesystem::exists, std::filesystem::current_path, std::filesystem::canonical, std::filesystem::path;
 
 glm::vec3 lookingAt = { 0.0f, 0.0f, 0.0f };
 glm::vec3 cameraPos = { 0.0f, 3.0f, 0.0f };
@@ -90,28 +90,37 @@ int main(int argc, char* argv[]) {
 #else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	char** _argv = __argv;
-#endif
-#ifdef _DEBUG
-	//Hacks for auto compiling shaders every time the program starts, while Visual Studio build events does not trigger when nothing in the main code has changed since last build.
-	//Sadly only for Visual Studio debugging.
-	//lout << "Compiling shaders at runtime for debug..." << endl;
-	//SetCurrentDirectoryA("scripts");
-	//system("compile_shaders.bat");
-	//string path = _argv[0];
-	//string solutionRootDir = path.substr(0, path.find("\\build\\x64\\Debug"));
-	//SetCurrentDirectoryA(solutionRootDir.c_str());
-#endif
+#endif //CG_CONSOLE
+
+	if (!IsDebuggerPresent()) {
+		path exePath(_argv[0]);
+		path exeDir = canonical(exePath).parent_path();
+		current_path(exeDir);
+	}
 	cout << "Setting up logger..." << endl;
+
 #ifndef CG_CONSOLE
 	Logger::setToFile(true);
 #endif
+
+#ifdef _DEBUG
+	if (IsDebuggerPresent()) {
+		//Hacks for auto compiling shaders every time the program starts, while Visual Studio build events does not trigger when nothing in the main code has changed since last build.
+		//Sadly only for Visual Studio debugging.
+		//lout << "Compiling shaders at runtime for debug..." << endl;
+		//current_path("scripts");
+		//system("compile_shaders.bat");
+		//current_path("..");
+	}
+#endif //_DEBUG
+
 	lout << "Hello from Logger!" << endl;
 
-	lout << "Program running at " << _argv[0] << endl;
+	lout << "Working directory: " << current_path() << endl;
 
 	lout << "Setting up main window..." << endl;
 	unique_ptr<Window> mainWindow = make_unique<Window>(2560, 1440, "CherryGrove");
-	PackManager::init(_argv[0]);
+	PackManager::init();
 	
 	TexturePool::init("s_texture");
 	auto debugpx = TexturePool::addTexture("assets/textures/debug+x.png");
@@ -184,12 +193,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	};
 	bgfx::VertexLayout layout;
 	layout.begin().add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float, true).add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true).end();
-	bgfx::DynamicVertexBufferHandle vbpx = bgfx::createDynamicVertexBuffer(bgfx::makeRef(vpx, sizeof(vpx)), layout);
-	bgfx::DynamicVertexBufferHandle vbnx = bgfx::createDynamicVertexBuffer(bgfx::makeRef(vnx, sizeof(vnx)), layout);
-	bgfx::DynamicVertexBufferHandle vbpy = bgfx::createDynamicVertexBuffer(bgfx::makeRef(vpy, sizeof(vpy)), layout);
-	bgfx::DynamicVertexBufferHandle vbny = bgfx::createDynamicVertexBuffer(bgfx::makeRef(vny, sizeof(vny)), layout);
-	bgfx::DynamicVertexBufferHandle vbpz = bgfx::createDynamicVertexBuffer(bgfx::makeRef(vpz, sizeof(vpz)), layout);
-	bgfx::DynamicVertexBufferHandle vbnz = bgfx::createDynamicVertexBuffer(bgfx::makeRef(vnz, sizeof(vnz)), layout);
+	bgfx::VertexBufferHandle vbpx = bgfx::createVertexBuffer(bgfx::makeRef(vpx, sizeof(vpx)), layout);
+	bgfx::VertexBufferHandle vbnx = bgfx::createVertexBuffer(bgfx::makeRef(vnx, sizeof(vnx)), layout);
+	bgfx::VertexBufferHandle vbpy = bgfx::createVertexBuffer(bgfx::makeRef(vpy, sizeof(vpy)), layout);
+	bgfx::VertexBufferHandle vbny = bgfx::createVertexBuffer(bgfx::makeRef(vny, sizeof(vny)), layout);
+	bgfx::VertexBufferHandle vbpz = bgfx::createVertexBuffer(bgfx::makeRef(vpz, sizeof(vpz)), layout);
+	bgfx::VertexBufferHandle vbnz = bgfx::createVertexBuffer(bgfx::makeRef(vnz, sizeof(vnz)), layout);
 	bgfx::IndexBufferHandle indexBuffer = bgfx::createIndexBuffer(bgfx::makeRef(indexBufferData, sizeof(indexBufferData)));
 	unsigned int counter = 0;
 	bool showGuis = true, demoOpened = false, winPosInitialized = false;

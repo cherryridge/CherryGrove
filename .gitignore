@@ -5,8 +5,12 @@ lib/
 !*/lib/
 lib_archive/source
 lib_archive/compiled
+logs/
+!*/logs/
 others/
 !*/others/
+packs/
+!*/packs/
 packing_resources/VC_redist.x64.exe
 shaders/
 !*/shaders/
@@ -14,5 +18,3 @@ test/
 !*/test/
 *.aps
 *.user
-*.log
-imgui.ini

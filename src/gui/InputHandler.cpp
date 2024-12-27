@@ -10,6 +10,7 @@ using std::vector, std::make_pair;
 vector<GLFWmonitorfun> InputHandler::monitorCBs;
 
 InputHandler::InputHandler(GLFWwindow* window) {
+	hasGUI = true;
 	glfwSetWindowUserPointer(window, this);
 	glfwSetKeyCallback(window, proxyKeyCB);
 	glfwSetCharCallback(window, proxyCharCB);

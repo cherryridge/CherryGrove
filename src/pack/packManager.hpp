@@ -1,9 +1,17 @@
 #pragma once
+#include <string>
+#include <array>
+#include <nlohmann/json.hpp>
 
-#include "V8Wrapper.hpp"
-#include "J4mcWrapper.hpp"
+#include "pack.hpp"
+
+typedef uint8_t u8;
+
+using std::string, nlohmann::json, std::array;
 
 namespace PackManager {
-	void init(const char* _workingDirectory);
+	void init();
 	void shutdown();
+
+	void refreshPacks(const char* rootDir = "packs");
 };
