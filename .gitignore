@@ -4,7 +4,7 @@ build/
 lib/
 !*/lib/
 lib_archive/source
-lib_archive/compiled
+lib_archive/compiled_backup
 logs/
 !*/logs/
 others/
@@ -12,6 +12,7 @@ others/
 packs/
 !*/packs/
 packing_resources/VC_redist.x64.exe
+scripts/shadercDebug.exe
 shaders/
 !*/shaders/
 test/
