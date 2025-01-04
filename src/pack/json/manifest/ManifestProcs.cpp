@@ -4,12 +4,12 @@
 #include <boost/uuid.hpp>
 
 #include "ManifestProcs.hpp"
-#include "../JsonParser.hpp"
+#include "../Json.hpp"
 #include "../jsontypes.hpp"
 
 typedef int32_t i32;
 
-using std::string, nlohmann::json, boost::uuids::string_generator, std::unique_ptr, std::make_unique, std::move;
+using std::string, nlohmann::json, boost::uuids::string_generator, std::make_unique, std::move;
 
 namespace ManifestProcs {
 
@@ -26,12 +26,12 @@ namespace ManifestProcs {
 		return result;
 	}
 	static u16 processPackFlagsv1(const json& input) {
-		u16 packFlags = 0u;
-		if (input["allowUnsafeExecution"].get<bool>()) packFlags |= PACK_ALLOW_UNSAFE_EXECUTION;
-		if (input["alwaysLoad"].get<bool>()) packFlags |= PACK_ALWAYS_LOAD;
-		if (input["licenseLibre"].get<bool>()) packFlags |= PACK_LICENSE_LIBRE;
-		if (input["warnOnNSDupe"].get<bool>()) packFlags |= PACK_WARN_ON_NS_DUPE;
-		return packFlags;
+		u16 configFlags = 0u;
+		if (input["allowUnsafeExecution"].get<bool>()) configFlags |= PACK_CONFIG_ALLOW_UNSAFE_EXECUTION;
+		if (input["alwaysLoad"].get<bool>()) configFlags |= PACK_CONFIG_ALWAYS_LOAD;
+		if (input["licenseLibre"].get<bool>()) configFlags |= PACK_CONFIG_LICENSE_LIBRE;
+		if (input["warnOnNSDupe"].get<bool>()) configFlags |= PACK_CONFIG_WARN_ON_NS_DUPE;
+		return configFlags;
 	}
 	static ManifestJSON processv1(const json& input) {
 		ManifestJSON result;
@@ -39,7 +39,7 @@ namespace ManifestProcs {
 		result.uuid_f = gen(input["uuid"].get<string>());
 		result.packVersion = input["version"].get<u32>();
 		result.minEngineVersion = input["minEngineVersion"].get<u32>();
-		result.packFlags = processPackFlagsv1(input["configs"].get<json>());
+		result.configFlags = processPackFlagsv1(input["configs"].get<json>());
 		vector<string> metadata;
 		metadata.push_back(input["nameSpace"].get<string>());
 		metadata.push_back(input["name"].get<string>());

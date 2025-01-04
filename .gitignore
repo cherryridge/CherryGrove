@@ -11,10 +11,9 @@ others/
 !*/others/
 packs/
 !*/packs/
+packing_resources/shaders/
 packing_resources/VC_redist.x64.exe
 scripts/shadercDebug.exe
-shaders/
-!*/shaders/
 test/
 !*/test/
 *.aps

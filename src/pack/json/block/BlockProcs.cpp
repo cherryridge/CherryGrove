@@ -1,6 +1,6 @@
 ﻿
 
-namespace JsonParser { namespace BlockProcs {
+namespace BlockProcs {
 	
 
-}}
+}

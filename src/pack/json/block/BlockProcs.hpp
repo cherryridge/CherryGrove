@@ -1,7 +1,5 @@
 #pragma once
 
+namespace BlockProcs {
 
-
-namespace JsonParser { namespace BlockProcs {
-
-}}
+}

@@ -97,7 +97,7 @@ Section "MainSection" SEC01
     SetOutPath "$INSTDIR\packs"
     SetOutPath "$INSTDIR\saves"
     SetOutPath "$INSTDIR\shaders"
-    File /r "..\..\shaders\*"
+    File /r "..\..\packing_resources\shaders\*"
     SetOutPath "$INSTDIR\test"
     File /r "..\..\test\*"
 

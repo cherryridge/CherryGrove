@@ -12,7 +12,7 @@
 //#include <glm/gtx/quaternion.hpp>
 
 #include "debug/Logger.hpp"
-#include "graphic/Window.hpp"
+#include "gui/Window.hpp"
 #include "graphic/TexturePool.hpp"
 #include "graphic/ShaderPool.hpp"
 #include "pack/PackManager.hpp"
@@ -121,6 +121,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	lout << "Setting up main window..." << endl;
 	unique_ptr<Window> mainWindow = make_unique<Window>(2560, 1440, "CherryGrove");
 	PackManager::init();
+	PackManager::refreshPacks();
 	
 	TexturePool::init("s_texture");
 	auto debugpx = TexturePool::addTexture("assets/textures/debug+x.png");
@@ -134,6 +135,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	auto testShader = ShaderPool::addShader("test.vert.bin", "test.frag.bin");
 
 	SoLoudWrapper::init();
+	auto click = SoLoudWrapper::addEvent(SoLoudWrapper::addSound("assets/sounds/click1.ogg"), 2.0f, 1.0f, 0.0f, true);
 	//Perform sound engine test if test files are present.
 	if (exists("test/a.ogg") && exists("test/b.ogg")) {
 		auto soundtest = SoLoudWrapper::addSound("test/a.ogg");
@@ -210,31 +212,53 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	mainWindow->getInput()->addCursorPosCB(cursorPosCallback);
 	mainWindow->setIcon("assets/icons/CherryGrove-trs-64.png");
 
+	lout << bgfx::getCaps()->limits.maxTextureSize << endl;
+
 	while (mainWindow->isAlive()) {
 		mainWindow->startGuiFrame();
 		if (showGuis) {
 			if(demoOpened) ImGui::ShowDemoWindow(&demoOpened);
 			ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20.0f, 10.0f));
 			ImGui::Begin(" ", &showGuis, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
 			ImVec2 size = ImGui::GetWindowSize();
 			ImGui::SetWindowPos(ImVec2((mainWindow->getWidth() - size.x) / 2.0f, (mainWindow->getHeight() - size.y) / 2.0f));
-			//ImGuiIO& io = ImGui::GetIO();
-			//ImGui::PushFont(io.Fonts->Fonts[1]);
+			ImGuiIO& io = ImGui::GetIO();
+			ImGui::PushFont(io.Fonts->Fonts[1]);
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 50.0f));
 			ImGui::Text("CherryGrove");
-			//ImGui::PopFont();
-			//ImGui::PushFont(io.Fonts->Fonts[0]);
-			if (ImGui::Button(reinterpret_cast<const char*>(u8"存档"))) showGuis = false;
-			ImGui::Button(reinterpret_cast<const char*>(u8"内容包"));
-			ImGui::Button(reinterpret_cast<const char*>(u8"设置"));
-			if (ImGui::Button(reinterpret_cast<const char*>(u8"退出"))) mainWindow->close();
-			//ImGui::PopFont();
+			ImGui::PopStyleVar();
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 30.0f));
+			ImGui::PopFont();
+			auto wSize = ImGui::GetWindowSize();
+			ImGui::SetCursorPosX((wSize.x - 240.0f) / 2);
+			DiCoord d{ vec3(0.0f, 0.0f, 0.0f), 0 };
+			if (ImGui::Button(reinterpret_cast<const char*>(u8"存档"), ImVec2(240.0f, 80.0f))) {
+				SoLoudWrapper::play(click, d, 0.0f, 1);
+				showGuis = false;
+			}
+			ImGui::SetCursorPosX((wSize.x - 240.0f) / 2);
+			if (ImGui::Button(reinterpret_cast<const char*>(u8"内容包"), ImVec2(240.0f, 80.0f))) {
+				SoLoudWrapper::play(click, d, 0.0f, 1);
+			}
+			ImGui::SetCursorPosX((wSize.x - 240.0f) / 2);
+			if (ImGui::Button(reinterpret_cast<const char*>(u8"设置"), ImVec2(240.0f, 80.0f))) {
+				SoLoudWrapper::play(click, d, 0.0f, 1);
+			}
+			ImGui::SetCursorPosX((wSize.x - 240.0f) / 2);
+			if (ImGui::Button(reinterpret_cast<const char*>(u8"退出"), ImVec2(240.0f, 80.0f))) {
+				SoLoudWrapper::play(click, d, 0.0f, 1);
+				mainWindow->close();
+			}
+			ImGui::PopStyleVar();
 			ImGui::End();
 			ImGui::Begin("  ", &showGuis, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
 			if (!winPosInitialized) ImGui::SetWindowPos(ImVec2(10.0f, mainWindow->getHeight() - 60.0f));
 			winPosInitialized = true;
-			ImGui::Text("©2024 LJM12914. Licensed under GPL-3.0-or-later.");
+			ImGui::Text("©2025 LJM12914. Licensed under GPL-3.0-or-later.");
 			ImGui::End();
+			ImGui::PopStyleVar(1);
 			ImGui::PopStyleColor(2);
 		}
 		mainWindow->submitGuiFrame();

@@ -4,27 +4,27 @@
 #include <vector>
 #include <memory>
 #include <optional>
-#include <nlohmann/json.hpp>
 
 #include "pack.hpp"
 #include "../debug/Logger.hpp"
 #include "js/V8Wrapper.hpp"
-#include "json/JsonParser.hpp"
+#include "json/Json.hpp"
 #include "json/jsontypes.hpp"
+#include "PackStatus.hpp"
 #include "PackManager.hpp"
 
-typedef uint8_t u8;
-typedef uint16_t u16;
-
-using Logger::lout, std::string, std::vector, std::optional, std::filesystem::current_path, std::filesystem::directory_iterator, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::is_regular_file, std::filesystem::path, std::filesystem::create_directory, std::move, nlohmann::json, JsonParser::getPatchedJSON;
-
 namespace PackManager {
+
+	typedef uint8_t u8;
+	typedef uint16_t u16;
+
+	using Logger::lout, std::string, std::vector, std::optional, std::filesystem::current_path, std::filesystem::directory_iterator, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::is_regular_file, std::filesystem::path, std::filesystem::create_directory, std::move, Json::getPatchedJSON, PackStatus::PackStatusFlag;
+
 	vector<PackDesc> registry;
 
 	void init() {
 		V8Wrapper::init(current_path().string().c_str());
-		JsonParser::init();
-		refreshPacks();
+		Json::init();
 	}
 
 	void shutdown() {
@@ -56,19 +56,8 @@ namespace PackManager {
 		return featureFlags;
 	}
 
-	static void getStatus(const char* rootDir) {
-
-	}
-
-	static void setStatus(PackIdentifier id) {
-
-	}
-
-	static u16 getStatusFlags(PackIdentifier id) {
-		u16 result = 0u;
-		//todo
-		return result;
-	}
+	//Store all packs' status to file.
+	static void saveStatus() { for (u32 i = 0; i < registry.size(); i++) PackStatus::saveStatus(PackStatusFlag(registry[i].uuid_f, registry[i].packVersion, registry[i].statusFlags)); }
 
 	//Get packs.
 	void refreshPacks(const char* rootDir) {
@@ -78,11 +67,13 @@ namespace PackManager {
 			return;
 		}
 		else {
+			PackStatus::refreshStatus(rootDir);
 			lout << "[PackManager] Loading packs!" << endl;
 			//Probably not going to implement pack diff :)//We just reload every pack description for now.
 			registry.clear();
 			for (const auto& directory : directory_iterator(rootDir)) {
 				path dirPathR = directory.path();
+				if (is_regular_file(dirPathR)) continue;
 				lout << "[PackManager] found folder: " << dirPathR << endl;
 				PackDesc result;
 				string manifestPath = dirPathR.string() + "\\manifest.json";
@@ -95,10 +86,10 @@ namespace PackManager {
 				result.featureFlags = getFeatureFlags(dirPathR);
 				result.metadata = manifest.metadata;
 				result.minEngineVersion = manifest.minEngineVersion;
-				result.packFlags = manifest.packFlags;
+				result.configFlags = manifest.configFlags;
 				result.packVersion = manifest.packVersion;
 				result.uuid_f = manifest.uuid_f;
-				result.statusFlags = getStatusFlags(PackIdentifier(result.uuid_f, result.packVersion));
+				result.statusFlags = PackStatus::getStatusFlags(PackIdentifier(result.uuid_f, result.packVersion));
 				registry.emplace_back(move(result));
 			}
 			lout << "[PackManager] Found " << registry.size() << " pack" << (registry.size() == 1 ? "" : "s") << "." << endl;

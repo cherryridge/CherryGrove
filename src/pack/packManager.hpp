@@ -1,13 +1,14 @@
 #pragma once
 #include <string>
-#include <array>
-#include <nlohmann/json.hpp>
+#include <boost/uuid.hpp>
 
-#include "pack.hpp"
+#include "json/jsontypes.hpp"
 
 typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
 
-using std::string, nlohmann::json, std::array;
+using boost::uuids::uuid, std::string, std::to_string;
 
 namespace PackManager {
 	void init();

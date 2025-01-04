@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 set "source_root=..\src\shaders"
-set "dest_root=..\shaders"
+set "dest_root=..\packing_resources\shaders"
 pushd "%source_root%" >nul 2>&1
 set "source_root=%CD%"
 popd >nul

@@ -17,7 +17,8 @@ using std::vector, std::string, boost::uuids::uuid, std::tuple, std::unique_ptr,
 
 #define BASE_FV u32 formatVersion;
 
-constexpr auto FV = "formatVersion";
+constexpr u32 LATEST_FORMAT_VERSION = 1;
+constexpr u32 LATEST_FORMAT_VERSION_INTERNAL = 1;
 
 /* Adding a Schema
  * 1. Add enum entry to `SchemaType`.
@@ -47,7 +48,7 @@ struct ManifestJSON {
 	uuid uuid_f;
 	u32 packVersion;
 	u32 minEngineVersion;
-	u16 packFlags;
+	u16 configFlags;
 	vector<PackIdentifier> dependencies;
 };
 

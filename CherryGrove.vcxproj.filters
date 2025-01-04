@@ -42,7 +42,7 @@
     <ClCompile Include="src\input\gamepad\gamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphic\Window.cpp">
+    <ClCompile Include="src\gui\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\imgui\misc\cpp\imgui_stdlib.cpp">
@@ -90,13 +90,22 @@
     <ClCompile Include="src\components\Ecs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\pack\json\JsonParser.cpp">
+    <ClCompile Include="src\pack\json\Json.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\pack\json\manifest\ManifestProcs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\pack\json\block\BlockProcs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\save\SaveManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pack\PackStatus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphic\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -148,7 +157,7 @@
     <ClInclude Include="src\input\gamepad\gamepad.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\Window.hpp">
+    <ClInclude Include="src\gui\Window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\imgui\misc\cpp\imgui_stdlib.h">
@@ -223,7 +232,7 @@
     <ClInclude Include="src\components\Ecs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\pack\json\JsonParser.hpp">
+    <ClInclude Include="src\pack\json\Json.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\pack\json\manifest\ManifestProcs.hpp">
@@ -233,6 +242,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\pack\json\jsontypes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\save\SaveManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pack\PackStatus.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphic\Renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
