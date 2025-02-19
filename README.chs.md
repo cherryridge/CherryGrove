@@ -44,4 +44,4 @@ CherryGrove @ 0.0.1 (*未发布*)
 
 ## 许可
 
-© 2024 LJM12914。以 [GPL-3.0-or-later](LICENSE) 协议授予许可。
+© 2025 LJM12914。以 [GPL-3.0-or-later](LICENSE) 协议授予许可。

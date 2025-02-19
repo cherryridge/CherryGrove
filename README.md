@@ -49,4 +49,4 @@ Currently the repository and organization is maintained solely by [LJM12914](htt
 
 ## License
 
-©2024 LJM12914. Licensed under [GPL-3.0-or-later](LICENSE).
+©2025 LJM12914. Licensed under [GPL-3.0-or-later](LICENSE).
