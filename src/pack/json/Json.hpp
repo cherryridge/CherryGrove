@@ -11,14 +11,14 @@
 //Forward inclusion.
 #include "manifest/ManifestProcs.hpp"
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/debug.hpp"
 
 namespace Json {
 
 	typedef uint8_t u8;
 	typedef uint32_t u32;
 
-	using Logger::lout, Logger::lerr, nlohmann::json, std::optional, std::nullopt, std::get, std::tuple, nlohmann::json_schema::json_validator, nlohmann::json_schema::default_string_format_check, std::string, std::to_string, std::unique_ptr, std::get, std::exception, std::filesystem::path;
+	using nlohmann::json, std::optional, std::nullopt, std::get, std::tuple, nlohmann::json_schema::json_validator, nlohmann::json_schema::default_string_format_check, std::string, std::to_string, std::unique_ptr, std::get, std::exception, std::filesystem::path;
 	using namespace ManifestProcs;
 
 	void init();

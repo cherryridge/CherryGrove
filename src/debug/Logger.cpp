@@ -7,23 +7,25 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <unordered_map>
 
 #include "Logger.hpp"
 
-typedef uint32_t u32;
-
-using std::cout, std::cerr, std::endl, std::string, std::ofstream, std::mutex, std::to_string, std::stringstream, std::streambuf, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory;
-
 namespace Logger {
+	typedef uint32_t u32;
+
+	using std::cout, std::cerr, std::endl, std::string, std::ofstream, std::mutex, std::to_string, std::stringstream, std::streambuf, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::thread;
+
 	bool toFile = false;
 	mutex loggerMutex;
 	ofstream logFile;
 	streambuf* coutBuffer;
 	streambuf* cerrBuffer;
-	thread_local stringstream threadBuffer;
+	thread_local stringstream threadBufferOdi;
 	LoggerCout lout;
 	thread_local stringstream threadBufferErr;
 	LoggerCerr lerr;
+	unordered_map<thread::id, string> threadNames;
 
 	void shutdown() {
 		lout << "Terminating logger! (cout will be reverted to console)" << endl;

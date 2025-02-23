@@ -2,90 +2,89 @@
 #include <unordered_map>
 #include <iostream>
 #include <fstream>
-#include <memory>
 #include <string>
 #include <filesystem>
 
+#include "../debug/debug.hpp"
 #include "ShaderPool.hpp"
-#include "../debug/Logger.hpp"
-
-typedef uint32_t u32;
-typedef uint16_t u16;
-
-using std::unordered_map, std::unique_ptr, std::string, Logger::lerr, std::endl, std::make_unique, std::move, std::ifstream, std::filesystem::file_size, std::filesystem::exists, std::exit, bgfx::RendererType, bgfx::ShaderHandle, bgfx::ProgramHandle, bgfx::destroy;
 
 namespace ShaderPool {
-	u32 nextId;
-	unordered_map<u32, unique_ptr<ProgramHandle>> registry;
-	ShaderHandle loadShader(const char* fileName);
+	typedef uint32_t u32;
+	typedef uint16_t u16;
+	typedef u16 ShaderID;
+
+	using std::unordered_map, std::string, std::ifstream, std::filesystem::file_size, std::filesystem::exists, bgfx::RendererType, bgfx::ShaderHandle, bgfx::ProgramHandle, bgfx::destroy;
+
+	static ShaderID nextId;
+	static unordered_map<ShaderID, ProgramHandle> registry;
+	static ShaderHandle loadShader(const char* fileName);
 
 	void init() { nextId = 0; }
 
-	void shutdown() { for (u32 i = 0; i < registry.size(); i++) destroy(*registry[i].get()); }
+	void shutdown() { for (const auto& shader : registry) destroy(shader.second); }
 
-	u32 addShader(const char* vsFileName, const char* fsFileName) {
-		ShaderHandle vsh = loadShader(vsFileName);
-		ShaderHandle fsh = loadShader(fsFileName);
-		ProgramHandle program = bgfx::createProgram(vsh, fsh, true);
-		registry.emplace(nextId, make_unique<ProgramHandle>(move(program)));
+	ShaderID addShader(const char* vsFileName, const char* fsFileName) {
+		auto vsh = loadShader(vsFileName), fsh = loadShader(fsFileName);
+		registry.emplace(nextId, bgfx::createProgram(vsh, fsh, true));
 		nextId++;
 		return nextId - 1;
 	}
 
-	ProgramHandle getShader(u32 shaderId) {
+	const ProgramHandle& getShader(ShaderID shaderId) {
 		auto p = registry.find(shaderId);
-		if (p == registry.end()) throw ERROR_SHADER_NOT_EXIST;
-		return *(p->second.get());
+		if (p == registry.end()) {
+			lerr << "[ShaderPool] Failed to get shader " << shaderId << "!" << endl;
+			Fatal::exit(Fatal::BGFX_GET_SHADER_FAILED);
+		}
+		return p->second;
 	}
 
-	void removeShader(u32 id) {
+	void removeShader(ShaderID id) {
 		auto p = registry.find(id);
-		if (p == registry.end()) throw ERROR_SHADER_NOT_EXIST;
-		destroy(*(p->second));
+		if (p == registry.end()) return;
+		destroy(p->second);
 		registry.erase(p);
 	}
 
 	static ShaderHandle loadShader(const char* fileName) {
-		string filePath = "";
-		//todo: Use C++ exceptions on ALL of those `exit(1)`!
+		string filePath = "shaders/";
 		switch (bgfx::getRendererType()) {
 		case RendererType::Direct3D11:
 		case RendererType::Direct3D12:
-			filePath = "shaders/dx11/";
+			filePath += "dx11/";
 			break;
 		case RendererType::Metal:
-			filePath = "shaders/metal/";
+			filePath += "metal/";
 			break;
 		case RendererType::OpenGL:
-			filePath = "shaders/glsl/";
+			filePath += "glsl/";
 			break;
 		case RendererType::Vulkan:
-			filePath = "shaders/spirv/";
+			filePath += "spirv/";
 			break;
 		default:
 			lerr << "[ShaderPool] No valid render backends!" << endl;
-			exit(1);
+			Fatal::exit(Fatal::BGFX_NO_VALID_RENDER_BACKEND);
 			break;
 		}
 		filePath += fileName;
 		if (!exists(filePath)) {
 			lerr << "[ShaderPool] Shader file not found: " << filePath << endl;
-			exit(1);
+			Fatal::exit(Fatal::BGFX_SHADER_FILE_NOT_FOUND);
 		}
 		auto size = file_size(filePath);
 		ifstream file(filePath, std::ios::binary);
 		if (!file) {
 			lerr << "[ShaderPool] Failed to open shader file: " << filePath << endl;
-			exit(1);
+			Fatal::exit(Fatal::BGFX_OPEN_SHADER_FILE_FAILED);
 		}
 		const bgfx::Memory* memory = bgfx::alloc((u32)size + 1);
 		file.read(reinterpret_cast<char*>(memory->data), size);
 		if (!file) {
 			lerr << "[ShaderPool] Failed to read shader file: " << filePath << endl;
-			exit(1);
+			Fatal::exit(Fatal::BGFX_READ_SHADER_FILE_FAILED);
 		}
 		memory->data[memory->size - 1] = '\0';
 		return bgfx::createShader(memory);
 	}
-
 }

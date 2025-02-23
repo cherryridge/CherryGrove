@@ -1,12 +1,11 @@
-﻿#include <iostream>
-#include <string>
+﻿#include <string>
 #include <filesystem>
 #include <vector>
 #include <memory>
 #include <optional>
 
 #include "pack.hpp"
-#include "../debug/Logger.hpp"
+#include "../debug/debug.hpp"
 #include "js/V8Wrapper.hpp"
 #include "json/Json.hpp"
 #include "json/jsontypes.hpp"
@@ -18,13 +17,14 @@ namespace PackManager {
 	typedef uint8_t u8;
 	typedef uint16_t u16;
 
-	using Logger::lout, std::string, std::vector, std::optional, std::filesystem::current_path, std::filesystem::directory_iterator, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::is_regular_file, std::filesystem::path, std::filesystem::create_directory, std::move, Json::getPatchedJSON, PackStatus::PackStatusFlag;
+	using std::string, std::vector, std::optional, std::filesystem::current_path, std::filesystem::directory_iterator, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::is_regular_file, std::filesystem::path, std::filesystem::create_directory, std::move, Json::getPatchedJSON, PackStatus::PackStatusFlag;
 
 	vector<PackDesc> registry;
 
 	void init() {
 		V8Wrapper::init(current_path().string().c_str());
 		Json::init();
+		refreshPacks();
 	}
 
 	void shutdown() {

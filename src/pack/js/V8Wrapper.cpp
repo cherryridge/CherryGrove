@@ -1,5 +1,4 @@
-﻿#include <iostream>
-#define V8_COMPRESS_POINTERS 1
+﻿#define V8_COMPRESS_POINTERS 1
 #define V8_31BIT_SMIS_ON_64BIT_ARCH 1
 #define V8_ENABLE_SANDBOX 1
 #include <v8/v8.h>
@@ -11,10 +10,10 @@
 #include <v8/v8-primitive.h>
 #include <v8/v8-script.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/debug.hpp"
 #include "V8Wrapper.hpp"
 
-using Logger::lout, Logger::lerr, std::endl, std::unique_ptr;
+using std::unique_ptr;
 
 namespace V8Wrapper {
 	void loadFile(const char* filePath);

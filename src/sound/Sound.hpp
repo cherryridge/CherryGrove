@@ -1,23 +1,14 @@
 #pragma once
-#include <unordered_map>
 
-#include "../gameplay/base.hpp"
+#include "../components/Components.hpp"
 
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef u32 SoundID;
-typedef u32 EventID;
-typedef u64 PlayID;
-
-using std::unordered_map;
-
-namespace SoLoudWrapper {
-	constexpr u8 ERROR_INIT = 1u;
-	constexpr u8 ERROR_FILE_NOT_EXIST = 2u;
-	constexpr u8 ERROR_SOUNDID_NOT_EXIST = 3u;
-	constexpr u8 ERROR_EVENTID_NOT_EXIST = 4u;
+namespace Sound {
+	typedef uint16_t u16;
+	typedef uint32_t u32;
+	typedef uint64_t u64;
+	typedef u32 SoundID;
+	typedef u32 EventID;
+	typedef u64 PlayID;
 
 	enum AttenuationAlgorithm {
 		Inverse,
@@ -29,8 +20,9 @@ namespace SoLoudWrapper {
 
 	struct PlayInfo {
 		EventID eventId;
-		DiCoord position;
+		Components::CoordinatesComponent position;
 		float progress;
+		//`0`: Looping forever.
 		u32 loopCount;
 	};
 
@@ -50,7 +42,7 @@ namespace SoLoudWrapper {
 
 	void init();
 	void shutdown();
-	void update(DiCoord receiverCoord);
+	void update(Components::CoordinatesComponent receiverCoord);
 
 	SoundID addSound(const char* filePath, bool stream = false, bool preload = false);
 	//Will NOT remove sound events that use the sound instance.
@@ -61,9 +53,11 @@ namespace SoLoudWrapper {
 	const SoundEvent* getEvent(EventID eventId);
 	bool removeEvent(EventID eventId);
 
-	PlayID play(EventID eventId, DiCoord coordinate, float iniProgress, u32 loopCount);
+
+	PlayID play(EventID eventId, Components::CoordinatesComponent coordinate = Components::CoordinatesComponent{ 0.0f, 0.0f, 0.0f, 0 }, float iniProgress = 0.0f, u32 loopCount = 1);
 	void pause(PlayID playId);
 	void resume(PlayID playId, float progress);
 	void stop(PlayID playId);
 
+	void test();
 };

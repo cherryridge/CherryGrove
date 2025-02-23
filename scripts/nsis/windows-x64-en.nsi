@@ -57,11 +57,11 @@ OutFile "..\..\build\x64\CherryGrove_setup_en_x64.exe"                          
 InstallDir "$APPDATA\CherryGrove"
 Name "CherryGrove"
 Caption "CherryGrove Installer"                                                                    #DIF
-BrandingText "CherryGrove (c) 2024 LJM12914"
+BrandingText "CherryGrove (c) 2025 LJM12914"
 
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "CherryGrove"                                  #DIF
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "LJM12914"                                     #DIF
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(c) 2024 LJM12914"                         #DIF
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(c) 2025 LJM12914"                         #DIF
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "CherryGrove Installer"                    #DIF
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${VERSION}.0"                                 #DIF
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${VERSION}.0"                              #DIF
@@ -97,7 +97,7 @@ Section "MainSection" SEC01
     SetOutPath "$INSTDIR\packs"
     SetOutPath "$INSTDIR\saves"
     SetOutPath "$INSTDIR\shaders"
-    File /r "..\..\packing_resources\shaders\*"
+    File /r "..\..\shaders\*"
     SetOutPath "$INSTDIR\test"
     File /r "..\..\test\*"
 

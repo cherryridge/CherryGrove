@@ -1,11 +1,10 @@
 ﻿#include <glfw/glfw3.h>
-#include <iostream>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/debug.hpp"
 #include "keyboard.hpp"
 #include "keydesc_win.hpp"
 
-using std::string, Logger::lout, std::endl;
+using std::string;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	auto p = keydesc_win.find(key);

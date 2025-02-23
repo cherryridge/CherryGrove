@@ -10,32 +10,32 @@
 #include <mutex>
 #include <filesystem>
 #include <thread>
-#include <iostream>
 #include <variant>
 #include <condition_variable>
 
-#include "../debug/Logger.hpp"
-#include "../gameplay/base.hpp"
-#include "SoLoudWrapper.hpp"
+#include "../debug/debug.hpp"
+#include "../CherryGrove.hpp"
+#include "../gui/MainWindow.hpp"
+#include "../components/Components.hpp"
+#include "Sound.hpp"
 
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef u32 SoundID;
-typedef u32 EventID;
-typedef u64 PlayID;
+namespace Sound {
+	typedef uint32_t u32;
+	typedef uint64_t u64;
+	typedef u32 SoundID;
+	typedef u32 EventID;
+	typedef u64 PlayID;
+	
+	using std::unordered_map, SoLoud::Soloud, std::make_unique, std::unique_ptr, SoLoud::Wav, SoLoud::WavStream, std::filesystem::exists, std::thread, std::queue, std::mutex, std::atomic, std::variant, std::unique_lock, std::move, SoLoud::SO_NO_ERROR, std::condition_variable, std::get_if, std::filesystem::is_directory, std::filesystem::is_regular_file, Components::CoordinatesComponent;
 
-using std::unordered_map, SoLoud::Soloud, std::make_unique, std::unique_ptr, Logger::lout, Logger::lerr, std::endl, SoLoud::Wav, SoLoud::WavStream, std::filesystem::exists, std::thread, std::queue, std::mutex, std::atomic, std::variant, std::unique_lock, std::move, SoLoud::SO_NO_ERROR, std::condition_variable, std::get_if, std::filesystem::is_directory, std::filesystem::is_regular_file;
+	static void audioLoop();
 
-namespace SoLoudWrapper {
-	static void audioThreadFunc();
-
-	atomic<bool> isAlive = true;
-	Soloud* soLoudInstance;
+	unique_ptr<Soloud> soLoudInstance;
 
 	thread audioThread;
 	queue<PlayID> playStartQueue;
 	mutex queueMutex;
-	condition_variable cv;
+	condition_variable audioSignal;
 
 	unordered_map<SoundID, variant<unique_ptr<Wav>, unique_ptr<WavStream>>> soundRegistry;
 	unordered_map<EventID, SoundEvent> eventRegistry;
@@ -46,23 +46,38 @@ namespace SoLoudWrapper {
 	PlayID nextPlayId = 1;
 
 	void init() {
-		lout << "Initializing SoLoud..." << endl;
-		soLoudInstance = new Soloud();
-		if (soLoudInstance->init(Soloud::LEFT_HANDED_3D) != SO_NO_ERROR) throw ERROR_INIT;
+		soLoudInstance = make_unique<Soloud>();
+		if (soLoudInstance->init(Soloud::LEFT_HANDED_3D) != SO_NO_ERROR) {
+			lerr << "[Sound] Initialization failed!" << endl;
+			Fatal::exit(Fatal::SOLOUD_INITIALIZATION_FALILED);
+		}
 		lout << "SoLoud is running on " << soLoudInstance->getBackendString() << " with " << soLoudInstance->getBackendChannels() << " channels." << endl;
 		lout << "Creating audio thread..." << endl;
-		audioThread = thread(&audioThreadFunc);
+		audioThread = thread(&audioLoop);
+	}
+
+	void test() {
+		auto soundtest = addSound("test/a.ogg");
+		auto sound2 = addSound("test/b.ogg");
+		auto soundevent1 = addEvent(soundtest, 1.0f, 1.0f, 1.0f, true);
+		auto play1 = play(soundevent1);
+		//Sleep(500);
+		//auto play2 = play(soundevent1);
+		auto soundevent2 = addEvent(soundtest, 0.3f, 1.0f, 1.0f, true);
+		//Sleep(500);
+		//auto play3 = play(soundevent2);
+		auto soundevent223 = addEvent(sound2, 3.0f, 1.0f, 1.0f, true);
+		//auto play4 = play(soundevent223);
 	}
 
 	void shutdown() {
-		isAlive = false;
-		cv.notify_one();
+		audioSignal.notify_one();
 		audioThread.join();
 		soundRegistry.clear();
 		soLoudInstance->deinit();
 	}
 
-	void update(DiCoord receiverCoord) {
+	void update(CoordinatesComponent receiverCoord) {
 		//todo: Put new arguments to every 3D sound.
 		//todo: Manual background ticking & kill sound that exists in a different dimension
 		soLoudInstance->update3dAudio();
@@ -72,7 +87,7 @@ namespace SoLoudWrapper {
 
 	SoundID addSound(const char* filePath, bool stream, bool preload) {
 		if (!exists(filePath) || !is_regular_file(filePath)) {
-			lerr << "[SoLoud] SoundEngine: File " << filePath << " not found!" << endl;
+			lerr << "[Sound] File " << filePath << " not found!" << endl;
 			return 0;
 		}
 		if (stream) {
@@ -104,7 +119,7 @@ namespace SoLoudWrapper {
 	EventID addEvent(SoundID soundId, float volume, float pitch, float distance, bool is2D, AttenuationAlgorithm atnl, bool useDoppler) {
 		const auto p = soundRegistry.find(soundId);
 		if (p == soundRegistry.end()) {
-			lerr << "[SoLoud] SoundEngine: SoundID " << soundId << " not found!" << endl;
+			lerr << "[Sound] SoundID " << soundId << " not found!" << endl;
 			return 0;
 		}
 		const SoundEvent event{ soundId, volume, pitch, distance, atnl, useDoppler, is2D, 0 };
@@ -128,10 +143,10 @@ namespace SoLoudWrapper {
 
 	//SoundEventPlay (`PlayInfo`)
 
-	PlayID play(EventID eventId, DiCoord coordinate, float iniProgress, u32 loopCount) {
+	PlayID play(EventID eventId, CoordinatesComponent coordinate, float iniProgress, u32 loopCount) {
 		const auto p = eventRegistry.find(eventId);
 		if (p == eventRegistry.end()) {
-			lerr << "[SoLoud] SoundEngine: EventID " << eventId << " not found!" << endl;
+			lerr << "[Sound] EventID " << eventId << " not found!" << endl;
 			return 0;
 		}
 		const PlayInfo play{eventId, coordinate, iniProgress, loopCount};
@@ -139,7 +154,7 @@ namespace SoLoudWrapper {
 		unique_lock lock(queueMutex);
 		playStartQueue.push(nextPlayId);
 		lock.unlock();
-		cv.notify_one();
+		audioSignal.notify_one();
 		nextPlayId++;
 		return nextPlayId - 1;
 	}
@@ -156,12 +171,17 @@ namespace SoLoudWrapper {
 
 	}
 
-	static void audioThreadFunc() {
+	//Worker thread
+
+	static void audioLoop() {
+		lout << "Audio" << flush;
 		lout << "Hello from audio thread!" << endl;
-		while (isAlive) {
-			unique_lock<mutex> lock(queueMutex);
-			cv.wait(lock, [] { return !playStartQueue.empty() || !isAlive; });
-			if (!isAlive) break;
+		while (CherryGrove::isCGAlive) {
+			//Audio thread will block on this line if the main thread is committing new play data.
+			unique_lock lock(queueMutex);
+			//Not necessary to introduce CVs.
+			audioSignal.wait(lock, []() { return !playStartQueue.empty() || !CherryGrove::isCGAlive; });
+			if (!CherryGrove::isCGAlive) break;
 			const PlayID playId = playStartQueue.front();
 			playStartQueue.pop();
 			lock.unlock();
@@ -173,9 +193,9 @@ namespace SoLoudWrapper {
 					const SoLoud::handle handle = soLoudInstance->play(*soundInst, sEvent.volume);
 				}
 				else {
-					//todo
+					//todo: Play 2D
 				}
-				//Should implement background ticking manually. SoLoud only provide the ability to pause and resume the sound automatically, but not resuming at a deltatime jump in progress. We need to manually jump.
+				//todo: Should implement background ticking manually. SoLoud only provide the ability to pause and resume the sound automatically, but not resuming at a deltatime jump in progress. We need to manually jump.
 			}, soundInst);
 			lout << "Started: Play " << playId << ", Event " << play.eventId << ", Sound " << sEvent.soundId << endl;
 		}

@@ -186,10 +186,19 @@ compile_shaders.bat</Command>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\components\Ecs.cpp" />
+    <ClCompile Include="src\CherryGrove.cpp" />
+    <ClCompile Include="src\components\block\BlockRender.hpp" />
+    <ClCompile Include="src\components\block\BlockCoordinates.hpp" />
+    <ClCompile Include="src\components\entity\Camera.cpp" />
+    <ClCompile Include="src\components\entity\Rotation.cpp" />
+    <ClCompile Include="src\components\identity\ID.hpp" />
+    <ClCompile Include="src\components\identity\Tag.hpp" />
+    <ClCompile Include="src\debug\Fatal.cpp" />
+    <ClCompile Include="src\gameplay\MainGame.cpp" />
     <ClCompile Include="src\gameplay\save\SaveManager.cpp" />
-    <ClCompile Include="src\graphic\Camera.cpp" />
     <ClCompile Include="src\graphic\Renderer.cpp" />
+    <ClCompile Include="src\gui\Guis.cpp" />
+    <ClCompile Include="src\gui\GuiUtils.cpp" />
     <ClCompile Include="src\gui\imgui\backends\imgui_impl_bgfx.cpp" />
     <ClCompile Include="src\gui\imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="src\gui\imgui\imgui.cpp" />
@@ -201,8 +210,8 @@ compile_shaders.bat</Command>
     <ClCompile Include="src\gui\imgui\misc\freetype\imgui_freetype.cpp" />
     <ClCompile Include="src\graphic\ShaderPool.cpp" />
     <ClCompile Include="src\graphic\TexturePool.cpp" />
-    <ClCompile Include="src\gui\Window.cpp" />
-    <ClCompile Include="src\gui\InputHandler.cpp" />
+    <ClCompile Include="src\input\InputHandler.cpp" />
+    <ClCompile Include="src\gui\MainWindow.cpp" />
     <ClCompile Include="src\input\gamepad\gamepad.cpp" />
     <ClCompile Include="src\input\keyboard\keyboard.cpp" />
     <ClCompile Include="src\input\mouse\cursor.cpp" />
@@ -216,7 +225,7 @@ compile_shaders.bat</Command>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pack\PackManager.cpp" />
     <ClCompile Include="src\pack\PackStatus.cpp" />
-    <ClCompile Include="src\sound\SoLoudWrapper.cpp" />
+    <ClCompile Include="src\sound\Sound.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CherryGrove.rc" />
@@ -229,18 +238,29 @@ compile_shaders.bat</Command>
     <None Include="src\graphic\gui\imgui\backends\vulkan\glsl_shader.vert" />
     <None Include="src\gui\imgui\misc\debuggers\imgui.gdb" />
     <None Include="src\gui\imgui\misc\debuggers\imgui.natstepfilter" />
-    <None Include="src\shaders\test.frag" />
-    <None Include="src\shaders\test.vert" />
+    <None Include="src\shaders\base.frag" />
+    <None Include="src\shaders\base.vert" />
     <None Include="src\shaders\varying.def.sc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\components\Ecs.hpp" />
+    <ClInclude Include="src\CherryGrove.hpp" />
+    <ClInclude Include="src\components\Components.hpp" />
+    <ClInclude Include="src\components\entity\Acceleration.hpp" />
+    <ClInclude Include="src\components\entity\Camera.hpp" />
+    <ClInclude Include="src\components\entity\Health.hpp" />
+    <ClInclude Include="src\components\entity\Rotation.hpp" />
+    <ClInclude Include="src\components\entity\Velocity.hpp" />
+    <ClInclude Include="src\debug\debug.hpp" />
+    <ClInclude Include="src\debug\Fatal.hpp" />
     <ClInclude Include="src\debug\Logger.hpp" />
-    <ClInclude Include="src\gameplay\base.hpp" />
+    <ClInclude Include="src\components\entity\Coordinates.hpp" />
+    <ClInclude Include="src\debug\Mocks.hpp" />
+    <ClInclude Include="src\gameplay\MainGame.hpp" />
     <ClInclude Include="src\gameplay\save\SaveManager.hpp" />
-    <ClInclude Include="src\graphic\Camera.hpp" />
     <ClInclude Include="src\graphic\Renderer.hpp" />
     <ClInclude Include="src\graphic\renderInfo\vertex.hpp" />
+    <ClInclude Include="src\gui\Guis.hpp" />
+    <ClInclude Include="src\gui\GuiUtils.hpp" />
     <ClInclude Include="src\gui\imgui\backends\fs_ocornut_imgui.bin.h" />
     <ClInclude Include="src\gui\imgui\backends\imgui_impl_bgfx.h" />
     <ClInclude Include="src\gui\imgui\backends\imgui_impl_glfw.h" />
@@ -254,12 +274,11 @@ compile_shaders.bat</Command>
     <ClInclude Include="src\gui\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="src\gui\imgui\misc\freetype\imgui_freetype.h" />
     <ClInclude Include="src\graphic\gui\imgui\misc\single_file\imgui_single_file.h" />
-    <ClInclude Include="src\gui\InputHandler.hpp" />
-    <ClInclude Include="src\graphic\renderInfo\cubemesh.hpp" />
+    <ClInclude Include="src\input\InputHandler.hpp" />
+    <ClInclude Include="src\gui\MainWindow.hpp" />
     <ClInclude Include="src\Mesh.hpp" />
     <ClInclude Include="src\graphic\ShaderPool.hpp" />
     <ClInclude Include="src\graphic\TexturePool.hpp" />
-    <ClInclude Include="src\gui\Window.hpp" />
     <ClInclude Include="src\input\gamepad\gamepad.hpp" />
     <ClInclude Include="src\input\keyboard\keyboard.hpp" />
     <ClInclude Include="src\input\keyboard\keydesc_win.hpp" />
@@ -275,7 +294,7 @@ compile_shaders.bat</Command>
     <ClInclude Include="src\pack\pack.hpp" />
     <ClInclude Include="src\pack\PackManager.hpp" />
     <ClInclude Include="src\pack\PackStatus.hpp" />
-    <ClInclude Include="src\sound\SoLoudWrapper.hpp" />
+    <ClInclude Include="src\sound\Sound.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\gui\imgui\misc\debuggers\imgui.natvis" />

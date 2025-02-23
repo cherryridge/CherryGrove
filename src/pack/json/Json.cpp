@@ -1,19 +1,18 @@
 ﻿#include <nlohmann/json.hpp>
-#include <iostream>
 #include <string>
 #include <fstream>
 #include <filesystem>
 #include <optional>
 #include <memory>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/debug.hpp"
 #include "manifest/ManifestProcs.hpp"
 #include "jsontypes.hpp"
 #include "Json.hpp"
 
 typedef uint32_t u32;
 
-using Logger::lout, Logger::lerr, std::optional, std::nullopt, std::endl, nlohmann::json, std::string, std::filesystem::exists, std::filesystem::is_regular_file, std::filesystem::path, std::ofstream, std::ifstream, std::istreambuf_iterator, std::move;
+using std::optional, std::nullopt, nlohmann::json, std::string, std::filesystem::exists, std::filesystem::is_regular_file, std::filesystem::path, std::ofstream, std::ifstream, std::istreambuf_iterator, std::move;
 
 namespace Json {
 	ProcessorReg processorRegistry;
@@ -84,6 +83,4 @@ namespace Json {
 		stream << output.dump(4);
 		stream.close();
 	}
-
-	
 }

@@ -2,14 +2,13 @@
 #include <filesystem>
 #include <fstream>
 #include <unordered_map>
-#include <iostream>
 #include <exception>
 #include <nlohmann/json.hpp>
 #include <boost/uuid.hpp>
 #include <nlohmann/json-schema.hpp>
 
 #include "json/Json.hpp"
-#include "../../debug/Logger.hpp"
+#include "../../debug/debug.hpp"
 #include "json/jsontypes.hpp"
 #include "pack.hpp"
 #include "PackStatus.hpp"
@@ -18,7 +17,7 @@ namespace PackStatus {
 
 	typedef uint16_t u16;
 
-	using Logger::lout, Logger::lerr, std::endl, std::unordered_map, std::string, nlohmann::json, nlohmann::json_schema::json_validator, nlohmann::json_schema::default_string_format_check, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::is_regular_file, std::filesystem::create_directory, std::ofstream, Json::getJSON, Json::deduceFormatVersion, boost::uuids::string_generator, std::exception;
+	using std::unordered_map, std::string, nlohmann::json, nlohmann::json_schema::json_validator, nlohmann::json_schema::default_string_format_check, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::is_regular_file, std::filesystem::create_directory, std::ofstream, Json::getJSON, Json::deduceFormatVersion, boost::uuids::string_generator, std::exception;
 
 	unordered_map<PackIdentifier, u16> statusCache;
 
