@@ -1,10 +1,12 @@
-#pragma once
+﻿#pragma once
 #include <glfw/glfw3.h>
 #include <atomic>
 
 namespace InputHandler {
-//APIs
 	extern std::atomic<bool> hasGUI;
+
+	void init();
+	void shutdown();
 
 	void addKeyCB(GLFWkeyfun func, bool noGUIOnly = true);
 	void removeKeyCB(GLFWkeyfun func);
@@ -38,6 +40,4 @@ namespace InputHandler {
 
 	void addMonitorCB(GLFWmonitorfun func);
 	void removeMonitorCB(GLFWmonitorfun func);
-
-	void init(GLFWwindow* window);
 }

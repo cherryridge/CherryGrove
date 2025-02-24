@@ -10,6 +10,7 @@
 #include "../debug/debug.hpp"
 #include "../sound/Sound.hpp"
 #include "../CherryGrove.hpp"
+#include "../gameplay/MainGame.hpp"
 #include "MainWindow.hpp"
 #include "GuiUtils.hpp"
 #include "Guis.hpp"
@@ -39,19 +40,20 @@ namespace Guis {
 			{
 				PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 30.0f));
 				ImVec2 btnSize(240.0f, 80.0f);
-				centerButton(u8"存档", btnSize, []() {
+				centerButton(u8"存档（调试）", btnSize, []() {
 					Sound::play(click);
-					});
+					MainGame::start();
+				});
 				centerButton(u8"内容包", btnSize, []() {
 					Sound::play(click);
-					});
+				});
 				centerButton(u8"设置", btnSize, []() {
 					Sound::play(click);
-					});
+				});
 				centerButton(u8"退出", btnSize, []() {
 					Sound::play(click);
 					CherryGrove::isCGAlive = false;
-					});
+				});
 				PopStyleVar();
 			}
 			endWindow();
@@ -90,7 +92,8 @@ namespace Guis {
 		i32 width, height;
 		glfwGetWindowSize(MainWindow::window, &width, &height);
 		cache = {(u32)width, (u32)height, (float)width / height};
-		for (const auto& gui : visibleGuis) {
+		unordered_set<GuiWindow> visibleGuisBuffer = visibleGuis;
+		for (const auto& gui : visibleGuisBuffer) {
 			if (guiRegistry.find(gui) != guiRegistry.end()) guiRegistry[gui]();
 			else lerr << "[GUI] Did you forget to emplace the GUI? " << gui << endl;
 		}

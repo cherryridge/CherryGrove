@@ -43,7 +43,7 @@ namespace MainWindow {
 	}
 
 	void initInputHandler() {
-		InputHandler::init(window);
+		InputHandler::init();
 		InputHandler::addKeyCB(keyCallback);
 		InputHandler::addMouseButtonCB(mouseCallback);
 		InputHandler::addScrollCB(scrollCallback);
@@ -51,12 +51,13 @@ namespace MainWindow {
 	}
 
 	void update() {
-		glfwPollEvents();
+		glfwWaitEvents();
 		if (iconReady) { setIcon(); }
 		if (glfwWindowShouldClose(window)) { CherryGrove::isCGAlive = false; }
 	}
 
 	void close() {
+		glfwPollEvents();
 		glfwSetWindowShouldClose(window, 1);
 		glfwDestroyWindow(window);
 		glfwTerminate();

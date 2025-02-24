@@ -2,12 +2,13 @@
 #include <atomic>
 #include <vector>
 
+#include "../gui/MainWindow.hpp"
 #include "InputHandler.hpp"
 
 namespace InputHandler {
 	typedef uint32_t u32;
 
-	using std::atomic, std::vector, std::pair, std::make_pair;
+	using std::atomic, std::vector, std::pair, std::make_pair, MainWindow::window;
 
 	atomic<bool> hasGUI(true);
 
@@ -101,7 +102,7 @@ namespace InputHandler {
 	static void proxyMonitorCB(GLFWmonitor* monitor, int event) { for (u32 i = 0; i < monitorCBs.size(); i++) monitorCBs[i](monitor, event); }
 
 //Controls
-	void init(GLFWwindow* window) {
+	void init() {
 		glfwSetKeyCallback(window, proxyKeyCB);
 		glfwSetCharCallback(window, proxyCharCB);
 		glfwSetCursorPosCallback(window, proxyCursorPosCB);
@@ -112,5 +113,18 @@ namespace InputHandler {
 		glfwSetWindowFocusCallback(window, proxyWindowFocusCB);
 		glfwSetWindowSizeCallback(window, proxyWindowSizeCB);
 		glfwSetMonitorCallback(proxyMonitorCB);
+	}
+
+	void shutdown() {
+		glfwSetKeyCallback(window, NULL);
+		glfwSetCharCallback(window, NULL);
+		glfwSetCursorPosCallback(window, NULL);
+		glfwSetCursorEnterCallback(window, NULL);
+		glfwSetMouseButtonCallback(window, NULL);
+		glfwSetScrollCallback(window, NULL);
+		glfwSetDropCallback(window, NULL);
+		glfwSetWindowFocusCallback(window, NULL);
+		glfwSetWindowSizeCallback(window, NULL);
+		glfwSetMonitorCallback(NULL);
 	}
 }

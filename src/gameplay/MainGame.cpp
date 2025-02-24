@@ -6,6 +6,7 @@
 
 #include "../components/Components.hpp"
 #include "../debug/debug.hpp"
+#include "../gui/Guis.hpp"
 #include "../graphic/Renderer.hpp"
 #include "MainGame.hpp"
 
@@ -28,6 +29,7 @@ namespace MainGame {
 	void start() {
 		using namespace Components;
 		gameStarted = true;
+		Guis::setVisible(Guis::wMainMenu, false);
 		gameThread = thread(&gameLoop);
 		//Temporary code to spawn player entity
 		playerEntity = gameRegistry.create();

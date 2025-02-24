@@ -2,6 +2,7 @@
 #include <glfw/glfw3.h>
 
 #include "debug/debug.hpp"
+#include "input/InputHandler.hpp"
 #include "gui/MainWindow.hpp"
 #include "graphic/Renderer.hpp"
 #include "sound/Sound.hpp"
@@ -62,6 +63,7 @@ namespace CherryGrove {
 		Sound::shutdown();
 		Renderer::waitShutdown();
 		PackManager::shutdown();
+		InputHandler::shutdown();
 		MainWindow::close();
 		Logger::shutdown();
 	}

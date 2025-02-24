@@ -203,7 +203,7 @@ namespace Renderer {
 							bgfx::submit(0, ShaderPool::getShader(cube.faces[i].shaderId));
 						}
 					}
-					});
+				});
 				//Render translucent parts
 
 			}
