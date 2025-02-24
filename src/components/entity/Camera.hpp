@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <bx/math.h>
 #include <entt/entt.hpp>
 
@@ -18,6 +18,6 @@ namespace Components {
 
 	namespace Camera {
 		//array<float, 16>
-		float* getProjMtx(const entt::registry& registry, const entt::entity& entity, float aspectRatio);
+		float* getProjMtx(const entt::entity& entity, float aspectRatio);
 	}
 }

@@ -2,7 +2,6 @@
 #include <glfw/glfw3.h>
 
 #include "debug/debug.hpp"
-#include "input/InputHandler.hpp"
 #include "gui/MainWindow.hpp"
 #include "graphic/Renderer.hpp"
 #include "sound/Sound.hpp"
@@ -53,18 +52,26 @@ namespace CherryGrove {
 
 	//Main loop.
 	//Set `isCGAlive` to `false` directly to exit the program.
-	//Check for condition updates in `MainWindow::update()` instead.
+	//Check for window updates in `MainWindow::update()` instead.
 	static void hold() {
-		while (isCGAlive) { MainWindow::update(); }
+		bool rendererTested = false;
+		while (isCGAlive) {
+			MainWindow::update();
+			if (!rendererTested && Renderer::initialized) {
+				Renderer::test();
+				rendererTested = true;
+			}
+		}
+		//Just want to ensure it's false
+		isCGAlive = false;
 		exit();
 	}
 
 	static void exit() {
-		Sound::shutdown();
 		Renderer::waitShutdown();
-		PackManager::shutdown();
-		InputHandler::shutdown();
 		MainWindow::close();
+		PackManager::shutdown();
+		Sound::shutdown();
 		Logger::shutdown();
 	}
 }

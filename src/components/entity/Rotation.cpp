@@ -1,22 +1,23 @@
 ﻿#include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include "../../gameplay/MainGame.hpp"
 #include "../Components.hpp"
 
 namespace Components::Rotation {
 	using namespace Components;
 
-	void setRotation(entt::registry& registry, const entt::entity& entity, double yaw, double pitch) {
-		registry.patch<RotationComponent>(entity, [&yaw, &pitch](RotationComponent& component) {
+	void setRotation(const entt::entity& entity, double yaw, double pitch) {
+		MainGame::gameRegistry.patch<RotationComponent>(entity, [&yaw, &pitch](RotationComponent& component) {
 			if (yaw != 10000.0) component.yaw = yaw;
 			if (pitch != 10000.0) component.pitch = pitch;
 		});
 	}
 
-	float* getViewMtx(const entt::registry& registry, const entt::entity& entity) {
+	float* getViewMtx(const entt::entity& entity) {
 		//Use `CoordinatesComponent` directly for camera position until `CameraOffsetComponent` or `EyeComponent` is implemented.
-		auto& coords = registry.get<CoordinatesComponent>(entity);
-		auto& rotation = registry.get<RotationComponent>(entity);
+		auto& coords = MainGame::gameRegistry.get<CoordinatesComponent>(entity);
+		auto& rotation = MainGame::gameRegistry.get<RotationComponent>(entity);
 		static float result[16];
 		glm::vec3
 			lookingAt(

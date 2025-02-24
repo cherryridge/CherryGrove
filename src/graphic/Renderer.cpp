@@ -32,7 +32,7 @@ namespace Renderer {
 
 	using std::thread, std::atomic, std::unique_lock, MainGame::gameRegistry, MainGame::playerEntity, MainGame::registryMutex;
 
-	atomic<bool> bgfxInited(false);
+	atomic<bool> initialized(false);
 	static void renderLoop();
 	thread rendererThread;
 	
@@ -78,8 +78,6 @@ namespace Renderer {
 		ShaderPool::init();
 		TexturePool::init("s_texture");
 		baseShader = ShaderPool::addShader("base.vert.bin", "base.frag.bin");
-
-		bgfxInited = true;
 	}
 
 	static void initImGui() {
@@ -105,7 +103,7 @@ namespace Renderer {
 		io.Fonts->Clear();
 		io.FontGlobalScale = 1.0f;
 		io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", scaledFontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-		io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 2.4f * scaledFontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+		io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 1.4f * scaledFontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 		io.Fonts->Build();
 		ImGui::StyleColorsDark();
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -127,14 +125,30 @@ namespace Renderer {
 		InputHandler::addMonitorCB(ImGui_ImplGlfw_MonitorCallback);
 	}
 
+	static void shutDownImGui() {
+		//Must be in sync with the `add*` calls above in `initImGui()`!
+		InputHandler::removeKeyCB(ImGui_ImplGlfw_KeyCallback);
+		InputHandler::removeCharCB(ImGui_ImplGlfw_CharCallback);
+		InputHandler::removeCursorPosCB(ImGui_ImplGlfw_CursorPosCallback);
+		InputHandler::removeCursorEnterCB(ImGui_ImplGlfw_CursorEnterCallback);
+		InputHandler::removeMouseButtonCB(ImGui_ImplGlfw_MouseButtonCallback);
+		InputHandler::removeScrollCB(ImGui_ImplGlfw_ScrollCallback);
+		InputHandler::removeWindowFocusCB(ImGui_ImplGlfw_WindowFocusCallback);
+		InputHandler::removeMonitorCB(ImGui_ImplGlfw_MonitorCallback);
+		ImGui_Implbgfx_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext(context);
+	}
+
 	void test() {
-		TexturePool::TextureID
-		debugpx = TexturePool::addTexture("assets/textures/debug+x.png"),
-		debugnx = TexturePool::addTexture("assets/textures/debug-x.png"),
-		debugpy = TexturePool::addTexture("assets/textures/debug+y.png"),
-		debugny = TexturePool::addTexture("assets/textures/debug-y.png"),
-		debugpz = TexturePool::addTexture("assets/textures/debug+z.png"),
-		debugnz = TexturePool::addTexture("assets/textures/debug-z.png");
+		using namespace TexturePool;
+		TextureID
+		debugpx = addTexture("assets/textures/debug+x.png"),
+		debugnx = addTexture("assets/textures/debug-x.png"),
+		debugpy = addTexture("assets/textures/debug+y.png"),
+		debugny = addTexture("assets/textures/debug-y.png"),
+		debugpz = addTexture("assets/textures/debug+z.png"),
+		debugnz = addTexture("assets/textures/debug-z.png");
 	}
 
 	static void renderLoop() {
@@ -143,9 +157,10 @@ namespace Renderer {
 		lout << "Hello from renderer thread!" << endl;
 		while (CherryGrove::isCGAlive) {
 		//Initialize bgfx in the same thread.
-			if (!bgfxInited) {
+			if (!initialized) {
 				initBgfxForRendererThread();
 				initImGui();
+				initialized = true;
 				continue;
 			}
 		//Blocks this thread if MainGame is updating the world.
@@ -174,7 +189,7 @@ namespace Renderer {
 				//Render opaque parts/blocks?
 					//Prepare render environment
 				bgfx::setViewRect(0, 0, 0, width, height);
-				bgfx::setViewTransform(0, Rotation::getViewMtx(gameRegistry, playerEntity), Camera::getProjMtx(gameRegistry, playerEntity, (float)width / height));
+				bgfx::setViewTransform(0, Rotation::getViewMtx(playerEntity), Camera::getProjMtx(playerEntity, (float)width / height));
 
 				//Prepare for block render template (make them global?)
 				bgfx::VertexLayout layout;
@@ -214,9 +229,7 @@ namespace Renderer {
 		}
 		lout << "Terminating renderer thread!" << endl;
 		bgfx::renderFrame();
-		ImGui_Implbgfx_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext(context);
+		shutDownImGui();
 		TexturePool::shutdown();
 		ShaderPool::shutdown();
 		bgfx::shutdown();

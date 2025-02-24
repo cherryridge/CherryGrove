@@ -6,7 +6,6 @@ namespace InputHandler {
 	extern std::atomic<bool> hasGUI;
 
 	void init();
-	void shutdown();
 
 	void addKeyCB(GLFWkeyfun func, bool noGUIOnly = true);
 	void removeKeyCB(GLFWkeyfun func);

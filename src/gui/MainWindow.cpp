@@ -51,9 +51,12 @@ namespace MainWindow {
 	}
 
 	void update() {
-		glfwWaitEvents();
+		if (glfwWindowShouldClose(window)) {
+			CherryGrove::isCGAlive = false;
+			return;
+		}
 		if (iconReady) { setIcon(); }
-		if (glfwWindowShouldClose(window)) { CherryGrove::isCGAlive = false; }
+		glfwWaitEvents();
 	}
 
 	void close() {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <entt/entt.hpp>
 #include <bx/math.h>
 
@@ -16,10 +16,10 @@ namespace Components {
 		constexpr bx::Vec3 up = { 0.0f, 1.0f, 0.0f };
 
 		//10000.0 is dummy value for not changing the field.
-		void setRotation(const entt::registry& registry, const entt::entity& entity, double yaw = 10000.0, double pitch = 10000);
+		void setRotation(const entt::entity& entity, double yaw = 10000.0, double pitch = 10000);
 
 		//array<float, 16>
 		//Entity must have a `CoordinatesComponent` by now.
-		float* getViewMtx(const entt::registry& registry, const entt::entity& entity);
+		float* getViewMtx(const entt::entity& entity);
 	}
 }

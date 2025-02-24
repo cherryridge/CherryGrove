@@ -21,7 +21,7 @@ namespace Components {
 		//Selection box size, if no selection box should be displayed, set to (0.0f).
 		glm::vec3 sSize;
 		glm::vec3 pivot;
-		//(rotationX, rotationY, rotationZ), if no rotation, set to (0.0f). 
+		//(rotationX, rotationY, rotationZ), if no rotation, set to (0.0f).
 		glm::vec3 rotation;
 		//(up, down, north, east, south, west)
 		std::array<CubeFace, 6> faces;

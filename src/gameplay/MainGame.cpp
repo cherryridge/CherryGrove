@@ -18,6 +18,7 @@ namespace MainGame {
 	using namespace std::this_thread;
 
 	static void gameLoop();
+	static void tick();
 
 	atomic<bool> gameStarted = false;
 	atomic<bool> gamePaused = false;
@@ -36,6 +37,8 @@ namespace MainGame {
 		gameRegistry.emplace<CameraComponent>(playerEntity, 60.0f);
 		gameRegistry.emplace<CoordinatesComponent>(playerEntity, 0.0, 0.0, 0.0, (u32)0);
 		gameRegistry.emplace<RotationComponent>(playerEntity, 0.0, 0.0);
+		//Test code to spawn a block
+
 	}
 
 	void pause() { gamePaused = true; }
@@ -44,12 +47,12 @@ namespace MainGame {
 		gameStarted = false;
 		gamePaused = false;
 		gameThread.join();
+		gameRegistry.destroy(playerEntity);
 	}
 
 	//Worker thread, which runs the main game loop at desired rate.
 	//Temporary, will be configurable
 	constexpr i32 tps = 20;
-	static void tick();
 
 	static void gameLoop() {
 		lout << "Game" << flush;
@@ -62,12 +65,13 @@ namespace MainGame {
 	}
 
 	static void tick() {
-		//Process player input
+	//Process player input
 
-		//Update world
+	//Update world
 		unique_lock lock(registryMutex);
-		sleep_for(50ms);
-		//Unblock Renderer thread to allow render
+		//Simulates tick
+		sleep_for(20ms);
+	//Unblock Renderer thread to allow render
 		lock.unlock();
 	}
 }

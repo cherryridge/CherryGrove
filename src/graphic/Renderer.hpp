@@ -1,8 +1,11 @@
 ﻿#pragma once
+#include <atomic>
 #include <array>
 #include "renderInfo/vertex.hpp"
 
 namespace Renderer {
+	extern std::atomic<bool> initialized;
+	
 	//Must be called after `MainWindow::initInputHandler`.
 	void start();
 	void waitShutdown();
