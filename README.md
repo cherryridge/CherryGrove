@@ -4,7 +4,7 @@ English | [中文](README.chs.md)
 
 <h1 align="center">CherryGrove</h1>
 
-An easily customizable, high performance scripting-based block game engine made for the next generation.
+An highly customizable scripting-based block game framework made for the next generation.
 
 ## Goals
 
