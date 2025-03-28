@@ -1,5 +1,4 @@
-#pragma once
-#include <cstdint>
+﻿#pragma once
 
 namespace Components {
 	struct HealthComponent {

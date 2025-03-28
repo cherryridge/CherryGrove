@@ -17,7 +17,8 @@ namespace Components {
 	};
 
 	namespace Camera {
-		//array<float, 16>
-		float* getProjMtx(const entt::entity& entity, float aspectRatio);
+		void getProjMtx(float* result, const entt::entity& entity, float aspectRatio);
+
+		void setFov(const entt::entity& entity, float fov);
 	}
 }

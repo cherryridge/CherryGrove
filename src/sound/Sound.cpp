@@ -131,7 +131,7 @@ namespace Sound {
 	const SoundEvent* getEvent(EventID eventId) {
 		const auto p = eventRegistry.find(eventId);
 		if (p == eventRegistry.end()) return nullptr;
-		return &(p->second);
+		return &p->second;
 	}
 
 	bool removeEvent(EventID eventId) {

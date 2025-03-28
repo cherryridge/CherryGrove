@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+#include <limits>
+
 #include "block/BlockCoordinates.hpp"
 #include "block/BlockRender.hpp"
 

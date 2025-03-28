@@ -4,7 +4,7 @@
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <glfw/glfw3.h>
-#if _WIN32
+#ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
 #include <glfw/glfw3native.h>
@@ -22,34 +22,39 @@
 #include "../input/InputHandler.hpp"
 #include "../gui/Guis.hpp"
 #include "../gui/MainWindow.hpp"
-#include "../gameplay/MainGame.hpp"
+#include "../MainGame.hpp"
 #include "../components/Components.hpp"
 #include "Renderer.hpp"
 
 namespace Renderer {
 	typedef int32_t i32;
 	typedef uint32_t u32;
-
 	using std::thread, std::atomic, std::unique_lock, MainGame::gameRegistry, MainGame::playerEntity, MainGame::registryMutex;
 
 	atomic<bool> initialized(false);
+	atomic<bool> sizeUpdateSignal(true);
+	i32 cachedWidth, cachedHeight;
+	float cachedAspectRatio;
 	static void renderLoop();
 	thread rendererThread;
-	
+	bgfx::VertexBufferHandle vertexBuffer;
+	bgfx::IndexBufferHandle indexBuffer;
 	ImGuiContext* context;
-	ShaderPool::ShaderID baseShader;
 
 	void start() { rendererThread = thread(&renderLoop); }
 
 	void waitShutdown() { rendererThread.join(); }
 
-	static void initBgfxForRendererThread() {
+	static void initBgfx_r() {
 		bgfx::Init config;
 		bgfx::PlatformData pdata;
-		#if _WIN32
+		#ifdef _WIN32
 		auto handle = glfwGetWin32Window(MainWindow::window);
 		//Temporary IME disabling code!!!
-		ImmAssociateContext(handle, nullptr);
+		MainWindow::runOnMainThread([]() {
+			auto handle = glfwGetWin32Window(MainWindow::window);
+			ImmAssociateContext(handle, nullptr);
+		});
 		#endif
 		pdata.nwh = handle;
 		//Let bgfx auto select rendering backend.
@@ -62,25 +67,25 @@ namespace Renderer {
 		config.resolution.height = height;
 		config.resolution.reset = BGFX_RESET_VSYNC;
 		config.platformData = pdata;
-		bgfx::renderFrame();
 		if (!bgfx::init(config)) {
 			lerr << "[Renderer] Failed to initialize bgfx!" << endl;
 			Fatal::exit(Fatal::BGFX_INITIALIZATION_FALILED);
 		}
-		bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x5BD093FF, 1.0f, 0);
-		bgfx::setDebug(BGFX_DEBUG_TEXT);
 		lout << "Using rendering backend: " << bgfx::getRendererName(bgfx::getRendererType()) << endl;
 		auto caps = bgfx::getCaps();
-		//todo
-		lout << "Capabilities: " << endl;
 
 	//Initialize pools
 		ShaderPool::init();
 		TexturePool::init("s_texture");
-		baseShader = ShaderPool::addShader("base.vert.bin", "base.frag.bin");
+
+	//Initialize vertex layout
+		bgfx::VertexLayout layout;
+		layout.begin().add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float, true).add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true).end();
+		vertexBuffer = bgfx::createVertexBuffer(bgfx::makeRef(&blockVerticesTemplate, sizeof(blockVerticesTemplate)), layout);
+		indexBuffer = bgfx::createIndexBuffer(bgfx::makeRef(&blockIndicesTemplate, sizeof(blockIndicesTemplate)));
 	}
 
-	static void initImGui() {
+	static void initImGui_r() {
 		i32 width, height;
 		glfwGetWindowSize(MainWindow::window, &width, &height);
 		context = ImGui::CreateContext();
@@ -110,45 +115,15 @@ namespace Renderer {
 		style.WindowRounding = 0.0f;
 		style.WindowTitleAlign = ImVec2(0.5f, 0.0f);
 		ImGui_ImplGlfw_InitForOther(MainWindow::window, false);
-		ImGui_Implbgfx_Init(1);
-		InputHandler::addKeyCB(ImGui_ImplGlfw_KeyCallback, false);
-		InputHandler::addCharCB(ImGui_ImplGlfw_CharCallback, false);
-		InputHandler::addCursorPosCB(ImGui_ImplGlfw_CursorPosCallback, false);
-		InputHandler::addCursorEnterCB(ImGui_ImplGlfw_CursorEnterCallback, false);
-		InputHandler::addMouseButtonCB(ImGui_ImplGlfw_MouseButtonCallback, false);
-		InputHandler::addScrollCB(ImGui_ImplGlfw_ScrollCallback, false);
-		//No dropping callbacks available
-		//addDropCB(ImGui_ImplGlfw_DropCallback, false);
-		InputHandler::addWindowFocusCB(ImGui_ImplGlfw_WindowFocusCallback, false);
-		//No resize callbacks available
-		//addWindowSizeCB(ImGui_ImplGlfw_WindowSizeCallback, false);
-		InputHandler::addMonitorCB(ImGui_ImplGlfw_MonitorCallback);
+		ImGui_Implbgfx_Init(guiViewId);
+		InputHandler::submitImGuiCBs(ImGui_ImplGlfw_KeyCallback, ImGui_ImplGlfw_CharCallback, ImGui_ImplGlfw_CursorPosCallback, ImGui_ImplGlfw_CursorEnterCallback, ImGui_ImplGlfw_MouseButtonCallback, ImGui_ImplGlfw_ScrollCallback, ImGui_ImplGlfw_WindowFocusCallback, ImGui_ImplGlfw_MonitorCallback);
+		InputHandler::sendToImGui = true;
 	}
 
 	static void shutDownImGui() {
-		//Must be in sync with the `add*` calls above in `initImGui()`!
-		InputHandler::removeKeyCB(ImGui_ImplGlfw_KeyCallback);
-		InputHandler::removeCharCB(ImGui_ImplGlfw_CharCallback);
-		InputHandler::removeCursorPosCB(ImGui_ImplGlfw_CursorPosCallback);
-		InputHandler::removeCursorEnterCB(ImGui_ImplGlfw_CursorEnterCallback);
-		InputHandler::removeMouseButtonCB(ImGui_ImplGlfw_MouseButtonCallback);
-		InputHandler::removeScrollCB(ImGui_ImplGlfw_ScrollCallback);
-		InputHandler::removeWindowFocusCB(ImGui_ImplGlfw_WindowFocusCallback);
-		InputHandler::removeMonitorCB(ImGui_ImplGlfw_MonitorCallback);
 		ImGui_Implbgfx_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext(context);
-	}
-
-	void test() {
-		using namespace TexturePool;
-		TextureID
-		debugpx = addTexture("assets/textures/debug+x.png"),
-		debugnx = addTexture("assets/textures/debug-x.png"),
-		debugpy = addTexture("assets/textures/debug+y.png"),
-		debugny = addTexture("assets/textures/debug-y.png"),
-		debugpz = addTexture("assets/textures/debug+z.png"),
-		debugnz = addTexture("assets/textures/debug-z.png");
 	}
 
 	static void renderLoop() {
@@ -158,77 +133,76 @@ namespace Renderer {
 		while (CherryGrove::isCGAlive) {
 		//Initialize bgfx in the same thread.
 			if (!initialized) {
-				initBgfxForRendererThread();
-				initImGui();
+				initBgfx_r();
+				initImGui_r();
 				initialized = true;
 				continue;
 			}
-		//Blocks this thread if MainGame is updating the world.
-			//unique_lock lock(registryMutex);
+		//Process renderer-cycle input events.
+			InputHandler::processInputRenderer();
 		//Prepare for rendering
-			u32 width = MainWindow::getWidth(), height = MainWindow::getHeight();
-			//A temporary very slow approach for user resizing
-			bgfx::reset(width, height);
+		    //Refresh window size
+			if (sizeUpdateSignal) {
+				glfwGetWindowSize(MainWindow::window, &cachedWidth, &cachedHeight);
+				cachedAspectRatio = (float)cachedWidth / cachedHeight;
+				bgfx::reset(cachedWidth, cachedHeight);
+				sizeUpdateSignal = false;
+			}
+			bgfx::setDebug(BGFX_DEBUG_STATS | BGFX_DEBUG_PROFILER | BGFX_DEBUG_TEXT);
 		//Render GUI
-			ImGui::SetCurrentContext(context);
-			//View 1 is for GUI, view 0 is for other graphics.
-			bgfx::setViewClear(1, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x5bd093ff);
-			bgfx::setViewRect(1, 0, 0, width, height);
+			bgfx::setViewClear(guiViewId, BGFX_CLEAR_NONE, 0x00000000);
+			bgfx::setViewRect(guiViewId, 0, 0, cachedWidth, cachedHeight);
 			ImGui_Implbgfx_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
-			Guis::render();
+			Guis::render(cachedWidth, cachedHeight);
 			ImGui::Render();
 			ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
-			//One internal window named `Debug##Default` will always be rendered by ImGui.
-			//We don't want to look for the name because this piece of code is performance intensive,
-			//instead we only look at the count and adjust the threshold between debug/release if needed.
-			InputHandler::hasGUI = context->WindowsActiveCount > 1;
-		//If game is started, render the game
+		//Render game content
+			bgfx::setViewClear(gameViewId, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x5bd093ff);
+			bgfx::setViewRect(gameViewId, 0, 0, cachedWidth, cachedHeight);
 			if (MainGame::gameStarted) {
-				//Render opaque parts/blocks?
-					//Prepare render environment
-				bgfx::setViewRect(0, 0, 0, width, height);
-				bgfx::setViewTransform(0, Rotation::getViewMtx(playerEntity), Camera::getProjMtx(playerEntity, (float)width / height));
-
-				//Prepare for block render template (make them global?)
-				bgfx::VertexLayout layout;
-				layout.begin().add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float, true).add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true).end();
-				bgfx::VertexBufferHandle vertexBuffer = bgfx::createVertexBuffer(bgfx::makeRef(&blockVertexTemplate, sizeof(blockVertexTemplate)), layout);
-				bgfx::IndexBufferHandle indexBuffer = bgfx::createIndexBuffer(bgfx::makeRef(&blockIndicesTemplate, sizeof(blockIndicesTemplate)));
-
+			//Prepare render environment
+				float view[16]{}, proj[16]{};
+				Rotation::getViewMtx(view, playerEntity);
+				Camera::getProjMtx(proj, playerEntity, cachedAspectRatio);
+				bgfx::setViewTransform(gameViewId, view, proj);
+			//Render opaque parts/blocks?
+				//Wait for the lock
+				//unique_lock lock(MainGame::registryMutex);
 				//Get all renderable blocks
 				auto group = gameRegistry.group<const BlockCoordinatesComponent, const BlockRenderComponent>();
-				group.each([&vertexBuffer, &indexBuffer](entt::entity entity, const BlockCoordinatesComponent& coords, const BlockRenderComponent& renderData) {
-					float transform[16]{};
-					//Block transform
-					bx::mtxTranslate(transform, (float)coords.x, (float)coords.y, (float)coords.z);
+				group.each([](entt::entity entity, const BlockCoordinatesComponent& coords, const BlockRenderComponent& renderData) {
+					float worldSpaceTranslate[16]{};
+					bx::mtxTranslate(worldSpaceTranslate, (float)coords.x, (float)coords.y, (float)coords.z);
 					for (const auto& [cubeIndex, cube] : renderData.subcubes) {
+						float subcubeTransform[16]{};
 						//Subcube translate
-						bx::mtxTranslate(transform, cube.origin.x, cube.origin.y, cube.origin.z);
+						bx::mtxTranslate(subcubeTransform, cube.origin.x, cube.origin.y, cube.origin.z);
 						//todo: Subcube rotation
 						//bx::mtxRotateXYZ(transform, );
-						for (i32 i = 0; i < 6; i++) {
-							//Cubeface translate
-							//bx::mtxTranslate(transform, );
+						for (i32 i = 0; i < 6; i++) if(cube.faces[i].shaderId) {
+							float transform[16]{};
+							bx::mtxMul(transform, worldSpaceTranslate, subcubeTransform);
 							bgfx::setTransform(transform);
 							bgfx::setVertexBuffer(0, vertexBuffer, i * 4, 4);
-							bgfx::setIndexBuffer(indexBuffer, i * 6, 6);
+							bgfx::setIndexBuffer(indexBuffer);
 							TexturePool::useTexture(cube.faces[i].textureId);
-							bgfx::submit(0, ShaderPool::getShader(cube.faces[i].shaderId));
+							bgfx::submit(gameViewId, ShaderPool::getShader(cube.faces[i].shaderId));
 						}
 					}
 				});
-				//Render translucent parts
+				//lock.unlock();
+			//Render translucent blocks
 
 			}
-		//Else we must remind bgfx of view 0 actually exists, or we will be in trouble
-			else bgfx::touch(0);
+			//We must remind bgfx of view 0 actually exists, or we will be in trouble.
+			//We don't need to check the game's status. In the early development, it's really easy to make a mistake and not submitting any draw calls to this view.
+			bgfx::touch(gameViewId);
 		//Update screen!
 			bgfx::frame();
 		}
 		lout << "Terminating renderer thread!" << endl;
-		bgfx::renderFrame();
 		shutDownImGui();
 		TexturePool::shutdown();
 		ShaderPool::shutdown();

@@ -18,28 +18,13 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\pack\PackManager.cpp">
+    <ClCompile Include="src\pack\Pack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\debug\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\pack\js\V8Wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\input\keyboard\keyboard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\input\mouse\mouse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\input\mouse\cursor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\input\mouse\scroll.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\input\gamepad\gamepad.cpp">
+    <ClCompile Include="src\file\js\V8Wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\imgui\misc\cpp\imgui_stdlib.cpp">
@@ -78,16 +63,16 @@
     <ClCompile Include="src\sound\Sound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\pack\json\Json.cpp">
+    <ClCompile Include="src\file\json\Json.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\pack\json\manifest\ManifestProcs.cpp">
+    <ClCompile Include="src\pack\parser\manifest\ManifestProcs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\pack\json\block\BlockProcs.cpp">
+    <ClCompile Include="src\pack\parser\block\BlockProcs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gameplay\save\SaveManager.cpp">
+    <ClCompile Include="src\save\WorldList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\pack\PackStatus.cpp">
@@ -102,7 +87,7 @@
     <ClCompile Include="src\gui\Guis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gameplay\MainGame.cpp">
+    <ClCompile Include="src\MainGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\components\block\BlockRender.hpp">
@@ -135,6 +120,51 @@
     <ClCompile Include="src\gui\GuiUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\components\entity\Coordinates.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\intrinsic\Escape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\intrinsic\ChangeRotation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\components\entity\Velocity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\components\entity\Acceleration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\ImGuiAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\sources\boolInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\sources\mouseMove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\sources\scroll.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\sources\mock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\sources\joystick.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\sources\touch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file\FileDrop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file\config\OptionsFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\intrinsic\Movement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CherryGrove.rc">
@@ -142,9 +172,9 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shaders\base.frag" />
-    <None Include="src\shaders\base.vert" />
-    <None Include="src\shaders\varying.def.sc" />
+    <None Include="src\shader\base.frag" />
+    <None Include="src\shader\base.vert" />
+    <None Include="src\shader\varying.def.sc" />
     <None Include="src\graphic\gui\imgui\backends\vulkan\generate_spv.sh" />
     <None Include="src\graphic\gui\imgui\backends\vulkan\glsl_shader.frag" />
     <None Include="src\graphic\gui\imgui\backends\vulkan\glsl_shader.vert" />
@@ -154,34 +184,10 @@
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\input\mouse\mouse.hpp">
+    <ClInclude Include="src\pack\Pack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\input\mouse\mousedesc_win.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\input\mouse\cursor.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\input\mouse\scroll.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\pack\PackManager.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\pack\pack.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\pack\js\V8Wrapper.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\input\keyboard\keydesc_win.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\input\keyboard\keyboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\input\gamepad\gamepad.hpp">
+    <ClInclude Include="src\file\js\V8Wrapper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\imgui\misc\cpp\imgui_stdlib.h">
@@ -232,9 +238,6 @@
     <ClInclude Include="src\Mesh.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphic\renderInfo\vertex.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\sound\Sound.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -244,19 +247,19 @@
     <ClInclude Include="src\debug\Logger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\pack\json\Json.hpp">
+    <ClInclude Include="src\file\json\Json.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\pack\json\manifest\ManifestProcs.hpp">
+    <ClInclude Include="src\pack\parser\manifest\ManifestProcs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\pack\json\block\BlockProcs.hpp">
+    <ClInclude Include="src\pack\parser\block\BlockProcs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\pack\json\jsontypes.hpp">
+    <ClInclude Include="src\pack\parser\schemaTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gameplay\save\SaveManager.hpp">
+    <ClInclude Include="src\save\WorldList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\pack\PackStatus.hpp">
@@ -277,7 +280,7 @@
     <ClInclude Include="src\debug\debug.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gameplay\MainGame.hpp">
+    <ClInclude Include="src\MainGame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\debug\Mocks.hpp">
@@ -308,6 +311,48 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\GuiUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\sources\boolInput.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\intrinsic\Escape.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\intrinsic\ChangeRotation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\inputBase.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\sources\scroll.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\sources\mouseMove.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\sources\touch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\sources\joystick.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\ImGuiAdapter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\sources\mock.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file\FileDrop.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\file\config\OptionsFile.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\intrinsic\Movement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\save\saveBase.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

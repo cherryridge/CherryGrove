@@ -1,19 +1,41 @@
 ﻿#pragma once
 #include <atomic>
 #include <array>
-#include "renderInfo/vertex.hpp"
+#include <imgui.h>
 
 namespace Renderer {
+	typedef uint8_t u8;
+
 	extern std::atomic<bool> initialized;
+	extern std::atomic<bool> sizeUpdateSignal;
 	
 	//Must be called after `MainWindow::initInputHandler`.
 	void start();
 	void waitShutdown();
 
-	void test();
+	inline constexpr u8 guiViewId        = 1u;
+	inline constexpr u8 gameViewId       = 0u;
+
+	struct Vertex {
+		float x; float y; float z;
+		//Texture coordinates are normalized from `i16` during conversion.
+		float u; float v;
+	};
+
+	//Debug only.
+	struct d_ColoredVertex {
+		float x; float y; float z; float r; float g; float b; float a;
+	};
+
+	struct NormalVertex {
+		float x; float y; float z;
+		//Texture coordinates are normalized from `i16` during conversion.
+		float u; float v;
+		float nx; float ny; float nz;
+	};
 
 	//(up, down, north, east, south, west)
-	constexpr std::array<Vertex, 24> blockVertexTemplate = {
+	inline constexpr std::array<Vertex, 24> blockVerticesTemplate = {
 		//Up
 		Vertex{ 0.0f, 1.0f, 0.0f, 0.0f, 0.0f },
 		Vertex{ 1.0f, 1.0f, 0.0f, 1.0f, 0.0f },
@@ -46,12 +68,5 @@ namespace Renderer {
 		Vertex{ 0.0f, 0.0f, 1.0f, 1.0f, 1.0f },
 	};
 
-	constexpr std::array<int32_t, 36> blockIndicesTemplate = {
-		 0,  2,  1,  1,  2,  3,
-		 4,  6,  5,  5,  6,  7,
-		 8, 10,  9,  9, 10, 11,
-		12, 14, 13, 13, 14, 15,
-		16, 18, 17, 17, 18, 19,
-		20, 22, 21, 21, 22, 23,
-	};
+	inline constexpr std::array<int16_t, 6> blockIndicesTemplate = { 0, 2, 1, 1, 2, 3 };
 }

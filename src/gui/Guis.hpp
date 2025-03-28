@@ -1,13 +1,13 @@
 ﻿#pragma once
-#include <cstdint>
 
 namespace Guis {
-	typedef uint32_t u32;
+	typedef int32_t i32;
 
 	enum GuiWindow {
 		wMainMenu,
 		wCopyright,
 		wVersion,
+		wDebugMenu,
 		wSaves,
 		wContentPacks,
 		wSettings,
@@ -15,14 +15,13 @@ namespace Guis {
 		wContentPackDetails,
 		wAbout,
 		wInventory,
-		wDebug,
 		
 		wCount
 	};
 
 	struct WindowInfoCache {
-		u32 width;
-		u32 height;
+		i32 width;
+		i32 height;
 		float aspectRatio;
 	};
 
@@ -33,5 +32,5 @@ namespace Guis {
 	void init();
 
 	void setVisible(GuiWindow gui, bool visible = true);
-	void render();
+	void render(i32 width, i32 height);
 }

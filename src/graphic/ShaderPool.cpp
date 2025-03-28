@@ -19,7 +19,11 @@ namespace ShaderPool {
 	static unordered_map<ShaderID, ProgramHandle> registry;
 	static ShaderHandle loadShader(const char* fileName);
 
-	void init() { nextId = 0; }
+	void init() {
+		//Shader ID `0` is for **NOT RENDERING THE OBJECT**!
+		nextId = 1;
+		addShader("base.vert.bin", "base.frag.bin");
+	}
 
 	void shutdown() { for (const auto& shader : registry) destroy(shader.second); }
 
@@ -49,23 +53,23 @@ namespace ShaderPool {
 	static ShaderHandle loadShader(const char* fileName) {
 		string filePath = "shaders/";
 		switch (bgfx::getRendererType()) {
-		case RendererType::Direct3D11:
-		case RendererType::Direct3D12:
-			filePath += "dx11/";
-			break;
-		case RendererType::Metal:
-			filePath += "metal/";
-			break;
-		case RendererType::OpenGL:
-			filePath += "glsl/";
-			break;
-		case RendererType::Vulkan:
-			filePath += "spirv/";
-			break;
-		default:
-			lerr << "[ShaderPool] No valid render backends!" << endl;
-			Fatal::exit(Fatal::BGFX_NO_VALID_RENDER_BACKEND);
-			break;
+			case RendererType::Direct3D11:
+			case RendererType::Direct3D12:
+				filePath += "dx11/";
+				break;
+			case RendererType::Metal:
+				filePath += "metal/";
+				break;
+			case RendererType::OpenGL:
+				filePath += "glsl/";
+				break;
+			case RendererType::Vulkan:
+				filePath += "spirv/";
+				break;
+			default:
+				lerr << "[ShaderPool] No valid render backends!" << endl;
+				Fatal::exit(Fatal::BGFX_NO_VALID_RENDER_BACKEND);
+				break;
 		}
 		filePath += fileName;
 		if (!exists(filePath)) {

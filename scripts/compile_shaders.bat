@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set "source_root=..\src\shaders"
+set "source_root=..\src\shader"
 set "dest_root=..\shaders"
 
 if not exist %dest_root% (mkdir "%dest_root%")

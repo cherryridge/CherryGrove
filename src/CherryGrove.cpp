@@ -1,12 +1,14 @@
 ﻿#include <atomic>
-#include <glfw/glfw3.h>
 
 #include "debug/debug.hpp"
+#include "MainGame.hpp"
 #include "gui/MainWindow.hpp"
 #include "graphic/Renderer.hpp"
 #include "sound/Sound.hpp"
 #include "gui/Guis.hpp"
-#include "pack/PackManager.hpp"
+#include "pack/Pack.hpp"
+#include "input/intrinsic/Escape.hpp"
+#include "input/intrinsic/ChangeRotation.hpp"
 #include "CherryGrove.hpp"
 
 namespace CherryGrove {
@@ -22,12 +24,9 @@ namespace CherryGrove {
 		lout << "Main" << flush;
 
 	//Initialize libraries
-		lout << "Setting up CherryGrove window..." << endl;
+		lout << "Setting up CherryGrove window & initializing input handler..." << endl;
 		MainWindow::initGlfw(2560, 1440, "CherryGrove");
 		MainWindow::loadIcon("assets/icons/CherryGrove-trs-64.png");
-
-		lout << "Initialzing input handler..." << endl;
-		MainWindow::initInputHandler();
 
 		lout << "Initializing bgfx & ImGui..." << endl;
 		Renderer::start();
@@ -40,12 +39,17 @@ namespace CherryGrove {
 		Guis::init();
 
 		lout << "Initializing pack manager..." << endl;
-		PackManager::init();
+		Pack::init();
 		
 	//Set up main menu
 		Guis::setVisible(Guis::wMainMenu);
 		Guis::setVisible(Guis::wCopyright);
 		Guis::setVisible(Guis::wVersion);
+
+	//Set up intrinsic inputs
+		//todo: Input should be able to be processed by any of the three threads:
+		//Main, Renderer, Game
+		InputHandler::BoolInput::addBoolInput(InputHandler::BoolInput::BIEventStart, { "", "escape", 10 }, IntrinsicInput::escapeCB, GLFW_KEY_ESCAPE);
 
 		hold();
 	}
@@ -54,23 +58,22 @@ namespace CherryGrove {
 	//Set `isCGAlive` to `false` directly to exit the program.
 	//Check for window updates in `MainWindow::update()` instead.
 	static void hold() {
-		bool rendererTested = false;
 		while (isCGAlive) {
 			MainWindow::update();
-			if (!rendererTested && Renderer::initialized) {
-				Renderer::test();
-				rendererTested = true;
+			if (MainGame::gameStopSignal) {
+				MainGame::exit();
+				//We must immediately set it to false because we can't guarantee next time here the boolean is already set to false by the Game thread.
+				MainGame::gameStopSignal = false;
 			}
 		}
-		//Just want to ensure it's false
-		isCGAlive = false;
 		exit();
 	}
 
 	static void exit() {
 		Renderer::waitShutdown();
+		if(MainGame::gameStarted) MainGame::exit();
 		MainWindow::close();
-		PackManager::shutdown();
+		Pack::shutdown();
 		Sound::shutdown();
 		Logger::shutdown();
 	}

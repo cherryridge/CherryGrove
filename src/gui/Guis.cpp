@@ -1,16 +1,13 @@
 ﻿#pragma execution_character_set("utf-8")
-#include <cstdint>
 #include <functional>
 #include <unordered_set>
 #include <unordered_map>
-#include <glfw/glfw3.h>
-#include <glm/glm.hpp>
 #include <imgui.h>
 
 #include "../debug/debug.hpp"
 #include "../sound/Sound.hpp"
 #include "../CherryGrove.hpp"
-#include "../gameplay/MainGame.hpp"
+#include "../MainGame.hpp"
 #include "MainWindow.hpp"
 #include "GuiUtils.hpp"
 #include "Guis.hpp"
@@ -18,6 +15,7 @@
 namespace Guis {
 	typedef int32_t i32;
 	typedef uint32_t u32;
+
 	using Sound::EventID, std::unordered_map, std::unordered_set, std::function;
 
 	EventID click;
@@ -29,7 +27,7 @@ namespace Guis {
 		using namespace ImGui;
 		using namespace Utils;
 		void render() {
-			centerWindow("mainmenu");
+			centerWindow("MainMenu");
 			{
 				PushFont(GetIO().Fonts->Fonts[1]);
 				PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 80.0f));
@@ -64,7 +62,7 @@ namespace Guis {
 		using namespace ImGui;
 		using namespace Utils;
 		void render() {
-			blWindow("copyright");
+			blWindow("Copyright");
 			Text(reinterpret_cast<const char*>(u8"© 2025 LJM12914. Licensed under GPL-3.0-or-later."));
 			endWindow();
 		}
@@ -74,8 +72,32 @@ namespace Guis {
 		using namespace ImGui;
 		using namespace Utils;
 		void render() {
-			brWindow("version");
+			brWindow("Version");
 			Text(reinterpret_cast<const char*>(u8"0.0.1"));
+			endWindow();
+		}
+	}
+
+	namespace DebugMenu {
+		using namespace ImGui;
+		using namespace Utils;
+		void render() {
+			tlWindow("DebugMenu");
+			auto& coords = MainGame::gameRegistry.get<Components::CoordinatesComponent>(MainGame::playerEntity);
+			std::string coordsStr = "(";
+			coordsStr += std::to_string(coords.x);
+			coordsStr += ", ";
+			coordsStr += std::to_string(coords.y);
+			coordsStr += ", ";
+			coordsStr += std::to_string(coords.z);
+			coordsStr += ")";
+			Text(coordsStr.c_str());
+			auto& rotation = MainGame::gameRegistry.get<Components::RotationComponent>(MainGame::playerEntity);
+			std::string rotationStr = "Yaw: ";
+			rotationStr += std::to_string(rotation.yaw);
+			rotationStr += " Pitch: ";
+			rotationStr += std::to_string(rotation.pitch);
+			Text(rotationStr.c_str());
 			endWindow();
 		}
 	}
@@ -86,12 +108,11 @@ namespace Guis {
 		guiRegistry.emplace(GuiWindow::wMainMenu, &MainMenu::render);
 		guiRegistry.emplace(GuiWindow::wCopyright, &Copyright::render);
 		guiRegistry.emplace(GuiWindow::wVersion, &Version::render);
+		guiRegistry.emplace(GuiWindow::wDebugMenu, &DebugMenu::render);
 	}
 
-	void render() {
-		i32 width, height;
-		glfwGetWindowSize(MainWindow::window, &width, &height);
-		cache = {(u32)width, (u32)height, (float)width / height};
+	void render(i32 width, i32 height) {
+		cache = {width, height, (float)width / height};
 		unordered_set<GuiWindow> visibleGuisBuffer = visibleGuis;
 		for (const auto& gui : visibleGuisBuffer) {
 			if (guiRegistry.find(gui) != guiRegistry.end()) guiRegistry[gui]();

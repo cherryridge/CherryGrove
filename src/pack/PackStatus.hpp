@@ -1,11 +1,14 @@
-#pragma once
+﻿#pragma once
 #include <string>
+#include <boost/uuid.hpp>
 
-#include "pack.hpp"
+#include "Pack.hpp"
 
 namespace PackStatus {
+	typedef uint16_t u16;
+	typedef uint32_t u32;
 
-	using std::string, std::to_string;
+	using std::string, std::to_string, boost::uuids::uuid;
 
 	struct PackStatusFlag {
 		uuid uuid_f;
@@ -14,10 +17,10 @@ namespace PackStatus {
 	};
 
 	void refreshStatus(const char* rootDir);
-	u16 getStatusFlags(const PackIdentifier& id);
+	u16 getStatusFlags(const Pack::PackIdentifier& id);
 	void saveStatus(const PackStatusFlag& raw);
 
-	const auto configSchema_raw = string(R"(
+	inline const auto configSchema_raw = string(R"(
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"type": "object",

@@ -16,6 +16,12 @@ namespace Guis::Utils {
 		drawList->PushClipRectFullScreen();
 	}
 
+	void tlWindow(const char* id) {
+		windowBase(id);
+		auto size = GetWindowSize();
+		SetWindowPos(ImVec2(0.0f, 0.0f));
+	}
+
 	void blWindow(const char* id) {
 		windowBase(id);
 		auto size = GetWindowSize();

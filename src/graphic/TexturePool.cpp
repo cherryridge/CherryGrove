@@ -1,8 +1,10 @@
 ﻿#include <bgfx/bgfx.h>
 #include <stb/stb_image.h>
+#include <optional>
 #include <unordered_map>
 #include <memory>
 
+#include "../debug/debug.hpp"
 #include "TexturePool.hpp"
 
 //MASSIVE todo: store texture in one texture atlas and use textureId to index coordinates.
@@ -12,7 +14,9 @@ namespace TexturePool {
 	typedef uint32_t u32;
 	typedef u32 TextureID;
 
-	using std::unordered_map, bgfx::UniformHandle, bgfx::createUniform, bgfx::destroy;
+	using std::unordered_map, bgfx::UniformHandle, bgfx::createUniform, bgfx::destroy, std::optional, std::move;
+
+	TextureID addTexture(const char* filePath, bool noVerticalFilp);
 
 	unordered_map<TextureID, Texture> registry;
 	TextureID nextId;
@@ -20,7 +24,8 @@ namespace TexturePool {
 
 	void init(const char* samplerName) {
 		sampler = createUniform(samplerName, bgfx::UniformType::Sampler);
-		nextId = 1;
+		nextId = 0;
+		addTexture("assets/textures/missing.png");
 	}
 
 	void shutdown() {
@@ -35,25 +40,44 @@ namespace TexturePool {
 		Texture texture{};
 		if (!noVerticalFilp) stbi_set_flip_vertically_on_load(1);
 		else stbi_set_flip_vertically_on_load(0);
-		texture.raw = stbi_load(filePath, &texture.height, &texture.width, &texture.bitsPerPixel, 4);
+		int _height, _width, _bpp;
+		texture.raw = stbi_load(filePath, &_height, &_width, &_bpp, 4);
+		if (_height > _I16_MAX) {
+			lerr << "Texture height overflow (highest 32767): " << filePath << endl;
+			return 0;
+		}
+		if (_width > _I16_MAX) {
+			lerr << "Texture width overflow (highest 32767): " << filePath << endl;
+			return 0;
+		}
+		texture.height = _height;
+		texture.width = _width;
+		texture.bitsPerPixel = _bpp;
 		texture.handle = bgfx::createTexture2D(
-			uint16_t(texture.width),
-			uint16_t(texture.height),
+			texture.width,
+			texture.height,
 			false, 1,
-			bgfx::TextureFormat::RGBA8,
+			//Temporary!
+			_bpp == 3 ? bgfx::TextureFormat::RGB8 : bgfx::TextureFormat::RGBA8,
 			BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT,
 			bgfx::makeRef(texture.raw, texture.height * texture.width * texture.bitsPerPixel)
 		);
-		registry.emplace(nextId, texture);
+		registry.emplace(nextId, move(texture));
 		nextId++;
 		return nextId - 1;
 	}
 
 	void useTexture(TextureID id, u8 textureDataIndex) {
 		auto p = registry.find(id);
-		//todo: A special internal texture ided `0` will be added shortly to allow fallback (probably black and purple-ish?).
-		if (p == registry.end()) return; //throw ERROR_TEXTURE_NOT_EXIST;
+		//Fallback to a missing texture. See `init()`.
+		if (p == registry.end()) bgfx::setTexture(textureDataIndex, sampler, registry[0].handle);
 		bgfx::setTexture(textureDataIndex, sampler, p->second.handle);
+	}
+
+	optional<const Texture*> getTexture(TextureID id) {
+		auto p = registry.find(id);
+		if (p == registry.end()) return std::nullopt;
+		return &(p->second);
 	}
 
 	void removeTexture(TextureID id) {

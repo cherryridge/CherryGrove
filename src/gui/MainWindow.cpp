@@ -4,15 +4,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 #include <glfw/glfw3.h>
+#include <queue>
 
 #include "../input/InputHandler.hpp"
 #include "../debug/debug.hpp"
 #include "../graphic/Renderer.hpp"
+#include "../MainGame.hpp"
 #include "../sound/Sound.hpp"
-#include "../input/keyboard/keyboard.hpp"
-#include "../input/mouse/mouse.hpp"
-#include "../input/mouse/scroll.hpp"
-#include "../input/mouse/cursor.hpp"
 #include "../CherryGrove.hpp"
 #include "Guis.hpp"
 #include "MainWindow.hpp"
@@ -22,11 +20,16 @@
 namespace MainWindow {
 	typedef int32_t i32;
 	typedef uint32_t u32;
-	using std::thread, std::atomic;
+	using std::thread, std::atomic, std::queue;
 
-	atomic<bool> iconReady(false);
-	GLFWimage icon;
 	GLFWwindow* window;
+
+//Window icon
+	static atomic<bool> iconReadySignal(false);
+	static GLFWimage icon;
+
+//Main thread runner
+	static queue<void(*)()> taskQueue;
 
 	void initGlfw(u32 width, u32 height, const char* title) {
 		if (!glfwInit()) {
@@ -40,14 +43,7 @@ namespace MainWindow {
 			Fatal::exit(Fatal::GLFW_CREATE_WINDOW_FAILED);
 		}
 		glfwMakeContextCurrent(window);
-	}
-
-	void initInputHandler() {
 		InputHandler::init();
-		InputHandler::addKeyCB(keyCallback);
-		InputHandler::addMouseButtonCB(mouseCallback);
-		InputHandler::addScrollCB(scrollCallback);
-		InputHandler::addCursorPosCB(cursorPosCallback);
 	}
 
 	void update() {
@@ -55,39 +51,32 @@ namespace MainWindow {
 			CherryGrove::isCGAlive = false;
 			return;
 		}
-		if (iconReady) { setIcon(); }
+		auto size = taskQueue.size();
+		for (i32 i = 0; i < size; i++) {
+			taskQueue.front()();
+			taskQueue.pop();
+		}
+		if (iconReadySignal) {
+			glfwSetWindowIcon(window, 1, &icon);
+			iconReadySignal = false;
+		}
 		glfwWaitEvents();
 	}
 
-	void close() {
+	void wakeUp() { glfwPostEmptyEvent(); }
+
+	void immediateUpdate() {
+		glfwPostEmptyEvent();
 		glfwPollEvents();
+	}
+
+	void close() {
 		glfwSetWindowShouldClose(window, 1);
 		glfwDestroyWindow(window);
 		glfwTerminate();
 	}
 
-	u32 getWidth(){
-		i32 width;
-		glfwGetWindowSize(window, &width, nullptr);
-		return width;
-	}
-
-	u32 getHeight(){
-		i32 height;
-		glfwGetWindowSize(window, nullptr, &height);
-		return height;
-	}
-
-	float getAspectRatio() {
-		i32 width, height;
-		glfwGetWindowSize(window, &width, &height);
-		return (float)width / height;
-	}
-
-	void setWidth(i32 width) { glfwSetWindowSize(window, width, getHeight()); }
-
-	void setHeight(i32 height) { glfwSetWindowSize(window, getWidth(), height); }
-
+//Window icon
 	static void s_loadIcon(const char* filePath) {
 		stbi_set_flip_vertically_on_load(0);
 		i32 iconWidth, iconHeight;
@@ -96,22 +85,17 @@ namespace MainWindow {
 			icon.width = iconWidth;
 			icon.height = iconHeight;
 			icon.pixels = iconData;
-			iconReady = true;
+			iconReadySignal = true;
 		}
 		else lerr << "[Window] Load window icon data failed!" << endl;
 	}
 
 	void loadIcon(const char* filePath) {
 		lout << "Loading window icon from " << filePath << endl;
-		//fixme: stbi can't fopen the icon when running in a detached thread.
-		//This is not a concurrent stbi_load conflict.
 		thread fileReadThread(&s_loadIcon, filePath);
 		fileReadThread.detach();
 	}
 
-	void setIcon() {
-		glfwSetWindowIcon(window, 1, &icon);
-		//Prevent setting icon infinitely.
-		iconReady = false;
-	}
+//Main thread runner
+	void runOnMainThread(void(*callback)()) { taskQueue.push(callback); }
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <bgfx/bgfx.h>
 
 namespace ShaderPool {
@@ -6,7 +6,7 @@ namespace ShaderPool {
 	typedef uint16_t u16;
 	typedef u16 ShaderID;
 
-	constexpr u8 ERROR_SHADER_NOT_EXIST = 1u;
+	inline constexpr u8 ERROR_SHADER_NOT_EXIST = 1u;
 
 	void init();
 	void shutdown();
