@@ -1,0 +1,45 @@
+[submodule "libs/bgfx"]
+	path = libs/bgfx
+    url = https://github.com/bkaradzic/bgfx
+[submodule "libs/glfw"]
+	path = libs/glfw
+	url = https://github.com/glfw/glfw
+[submodule "libs/bx"]
+	path = libs/bx
+	url = https://github.com/bkaradzic/bx
+[submodule "libs/bimg"]
+	path = libs/bimg
+	url = https://github.com/bkaradzic/bimg
+[submodule "libs/stb"]
+	path = libs/stb
+	url = https://github.com/nothings/stb
+[submodule "libs/imgui"]
+	path = libs/imgui
+	url = https://github.com/ocornut/imgui
+[submodule "libs/freetype"]
+	path = libs/freetype
+	url = https://github.com/freetype/freetype
+[submodule "libs/imgui_impl_bgfx"]
+	path = libs/imgui_impl_bgfx
+	url = https://gist.github.com/pr0g/aff79b71bf9804ddb03f39ca7c0c3bbb
+[submodule "libs/glm"]
+	path = libs/glm
+	url = https://github.com/g-truc/glm
+[submodule "libs/entt"]
+	path = libs/entt
+	url = https://github.com/skypjack/entt
+[submodule "libs/json"]
+	path = libs/json
+	url = https://github.com/nlohmann/json
+[submodule "libs/json_schema_validator"]
+	path = libs/json_schema_validator
+	url = https://github.com/pboettch/json-schema-validator
+[submodule "libs/soloud"]
+	path = libs/soloud
+	url = https://github.com/jarikomppa/soloud
+[submodule "libs/boost"]
+	path = libs/boost
+	url = https://github.com/boostorg/boost
+[submodule "libs/luajit"]
+	path = libs/luajit
+	url = https://github.com/LuaJIT/LuaJIT

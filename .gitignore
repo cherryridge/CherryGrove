@@ -1,4 +1,3 @@
-.vs/
 build/
 !*/build/
 lib/
@@ -21,3 +20,15 @@ test/
 *.user
 /options.json
 /cpp.hint
+
+
+
+.vs/
+.idea/
+out/
+!*/out/
+bin/
+!*/bin/
+build/
+!*/build/
+CMakeSettings.json
