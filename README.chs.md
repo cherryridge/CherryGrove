@@ -17,26 +17,9 @@
 6. 完全免费开源，并使用 [GPL-3.0-or-later](LICENSE) 协议授权。
 7. 对于某些人和商家来说，可以用来信息差变现和打商业广告而不用担心法律问题。:)
 
-## 构建
+## 文档
 
-### 构建依赖
-
-以下是 CherryGrove 的依赖列表。请注意：CherryGrove 仍在活跃开发中，该列表可能会有变动。
-
-CherryGrove @ 0.0.1 (*未发布*)
-
-- [glfw](https://www.glfw.org/) @ 3.4 (7b6aead)
-- [bgfx](https://github.com/bkaradzic/bgfx) @ 69acf28 ([bimg](https://github.com/bkaradzic/bimg) @ 0d1c78e, [bx](https://github.com/bkaradzic/bx) @ 7014882)
-- [stbi](https://github.com/nothings/stb) @ 5c20573
-- [Dear ImGui](https://github.com/ocornut/imgui) @ docking @ 14d213c
-- [v8](https://v8.dev/) @ 6142bd1
-- [FreeType](https://freetype.org/) @ 2.13.3 (42608f77)
-- [pr0g's imgui_impl_bgfx](https://gist.github.com/pr0g/aff79b71bf9804ddb03f39ca7c0c3bbb) @ a8dce22
-- [glm](https://github.com/g-truc/glm) @ 1.0.1 (0af55cc)
-- [EnTT](https://github.com/skypjack/entt) @ 42d9628
-- [JSON for Modern C++](https://github.com/nlohmann/json) @ 3.11.3 (9cca280)
-- [boost](https://boost.org) @ 1.87.0 (c89e626)
-- [SoLoud](https://solhsa.com/soloud/index.html) @ 20200207 (c8e339f)
+文档位于 https://docs.cherrygrove.dev（中文版尚未发布，可先查阅英文版）。
 
 ## 贡献
 
