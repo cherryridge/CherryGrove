@@ -1,7 +1,9 @@
 ﻿#define V8_COMPRESS_POINTERS 1
 #define V8_31BIT_SMIS_ON_64BIT_ARCH 1
 #define V8_ENABLE_SANDBOX 1
+#ifdef DEBUG
 #define V8_ENABLE_CHECKS 1
+#endif
 #include <v8/v8.h>
 #include <v8/libplatform/libplatform.h>
 #include <v8/v8-context.h>
