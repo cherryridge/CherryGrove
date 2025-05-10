@@ -6,15 +6,15 @@ RequestExecutionLevel admin
 
 !define VERSION "0.0.1"
 
-!define MUI_ICON "..\..\..\assets\icons\CherryGrove-trs.ico"
-!define MUI_UNICON "..\..\..\assets\icons\CherryGrove-trs.ico"
+!define MUI_ICON "..\..\assets\icons\CherryGrove-trs.ico"
+!define MUI_UNICON "..\..\assets\icons\CherryGrove-trs.ico"
 
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP "..\CherryGrove-header.bmp"
+!define MUI_HEADERIMAGE_BITMAP "CherryGrove-header.bmp"
 !define MUI_HEADERIMAGE_BITMAP_STRETCH "AspectFitHeight"
-!define MUI_WELCOMEFINISHPAGE_BITMAP "..\CherryGrove-page.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "CherryGrove-page.bmp"
 !define MUI_WELCOMEFINISHPAGE_BITMAP_STRETCH "NoStretchNoCropNoAlign"
-!define MUI_UNWELCOMEFINISHPAGE_BITMAP "..\CherryGrove-page.bmp"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "CherryGrove-page.bmp"
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP_STRETCH "NoStretchNoCropNoAlign"
 
 !define MUI_ABORTWARNING
@@ -25,7 +25,7 @@ RequestExecutionLevel admin
 !define MUI_LICENSEPAGE_BUTTON "Next >"                                                            #DIF
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "..\..\..\LICENSE"
+!insertmacro MUI_PAGE_LICENSE "..\..\LICENSE"
 
 
 
@@ -53,7 +53,7 @@ Function desktopshortcut
 FunctionEnd
 
 #region Branding
-OutFile "..\..\..\CherryGrove_setup_en_x64.exe"                                                    #DIF
+OutFile "CherryGrove_setup_en_win64.exe"                                                           #DIF
 InstallDir "$APPDATA\CherryGrove"
 Name "CherryGrove"
 Caption "CherryGrove Installer"                                                                    #DIF
@@ -70,36 +70,18 @@ VIProductVersion "${VERSION}.0"
 
 Section "MainSection" SEC01
     SetOutPath "$INSTDIR"
-    FileOpen $2 "README.txt" w                                                                     #DIF
-    ${If} $2 != ""
-        FileWrite $2 "Folder Introduction:$\r$\n"                                                  #DIF
-        FileWrite $2 "assets: Stores assets necessary for CherryGrove to run, including fonts and logos. Not for adding packs.$\r$\n"#DIF
-        FileWrite $2 "packs: Stores content packs. Here is the place to add packs to CherryGrove, in format of folder or .zip archive. Ensure that manifest.json of the pack is one folder away from packs folder.$\r$\n"#DIF
-        FileWrite $2 "saves: Stores saves.$\r$\n"                                                  #DIF
-        FileWrite $2 "captures: Stores screenshots and screen recordings.$\r$\n"                   #DIF
-        FileWrite $2 "shaders: Stores shaders necessary for CherryGrove to run. Not for adding shader packs. Add them to packs folder instead.$\r$\n"#DIF
-        FileWrite $2 "test (may not exist): Stores test files for the development version of CherryGrove.$\r$\n"#DIF
-        FileWrite $2 "$\r$\n"
-        FileWrite $2 "File Introduction:$\r$\n"                                                    #DIF
-        FileWrite $2 "CherryGrove.exe: CherryGrove program.$\r$\n"                                 #DIF
-        FileWrite $2 "uninstall.exe: Program for uninstalling CherryGrove.$\r$\n"                  #DIF
-        FileWrite $2 "$\r$\n"
-        FileWrite $2 "For more information, please visit our official website: https://cherrygrove.dev.$\r$\n"#DIF
-        FileWrite $2 "This software is open source and is licensed under GPL-3.0-or-later.$\r$\n"  #DIF
-        FileClose $2
-    ${EndIf}
-    File "..\..\..\LICENSE"
-    File "..\..\..\build\x64\Release\CherryGrove.exe"
-    File "..\..\..\packing_resources\VC_redist.x64.exe"
+    File "..\..\LICENSE"
+    File "..\readmes\README.txt"                                                                   #DIF
+    File "..\..\out\windows-x64-release\Release\CherryGrove.exe"
     SetOutPath "$INSTDIR\assets"
-    File /r "..\..\..\assets\*"
+    File /r "..\..\assets\*"
     SetOutPath "$INSTDIR\captures"
     SetOutPath "$INSTDIR\packs"
     SetOutPath "$INSTDIR\saves"
     SetOutPath "$INSTDIR\shaders"
-    File /r "..\..\..\shaders\*"
+    File /r "..\..\out\windows-x64-release\Release\shaders\*"
     SetOutPath "$INSTDIR\test"
-    File /r "..\..\..\test\*"
+    File /r "..\..\test\*"
 
     CreateShortcut "$SMPROGRAMS\CherryGrove.lnk" "$INSTDIR\CherryGrove.exe"
 
@@ -113,9 +95,6 @@ Section "MainSection" SEC01
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CherryGrove" "DisplayIcon" "$INSTDIR\CherryGrove.exe"
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CherryGrove" "NoModify" 1
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CherryGrove" "NoRepair" 1
-    
-    ExecWait '"$INSTDIR\VC_redist.x64.exe" /quiet /norestart'
-    Delete "$INSTDIR\VC_redist.x64.exe"
 SectionEnd
 
 Section "Uninstall"

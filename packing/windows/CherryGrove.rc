@@ -91,13 +91,13 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 
-MAINICON                ICON                    "assets\\icons\\CherryGrove-trs.ico"
+MAINICON                ICON                    "..\\..\\assets\\icons\\CherryGrove-trs.ico"
 
-IDI_ICON2               ICON                    "assets\\icons\\CherryGrove-trs.ico"
+IDI_ICON2               ICON                    "..\\..\\assets\\icons\\CherryGrove-trs.ico"
 
-IDI_ICON1               ICON                    "assets\\icons\\CherryGrove-trs.ico"
+IDI_ICON1               ICON                    "..\\..\\assets\\icons\\CherryGrove-trs.ico"
 
-IDI_APP_ICON            ICON                    "assets\\icons\\CherryGrove-trs.ico"
+IDI_APP_ICON            ICON                    "..\\..\\assets\\icons\\CherryGrove-trs.ico"
 
 #endif    // Chinese (Simplified, China) resources
 /////////////////////////////////////////////////////////////////////////////

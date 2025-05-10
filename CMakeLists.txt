@@ -43,16 +43,11 @@ add_subdirectory("libs/zlib_ng")
 
 add_executable(${PROJECT_NAME} ${CG_SOURCES} ${IMGUI_SOURCES})
 
-if(MSVC)
-	target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
-endif()
+target_compile_definitions(${PROJECT_NAME} PRIVATE $<IF:$<CONFIG:Debug>,Debug,NDEBUG>)
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC "BX_CONFIG_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
 target_compile_definitions(${PROJECT_NAME} PUBLIC "$<$<CONFIG:Debug>:DEBUG=1>")
 target_compile_definitions(${PROJECT_NAME} PUBLIC "$<$<CONFIG:Release>:NDEBUG=1>")
-
-target_compile_definitions(${PROJECT_NAME} PUBLIC ASSETS_FOLDER="${CMAKE_SOURCE_DIR}/assets/")
-#target_compile_definitions(${PROJECT_NAME} PUBLIC ASSETS_FOLDER="./assets/")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     "libs/boost/assert/include"
@@ -95,6 +90,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${SOLOUD_LIB}
     ${V8_LIB}
 )
+
+if(WIN32)
+	target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
+	target_link_libraries(${PROJECT_NAME} PRIVATE dbghelp)
+	target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows")
+	target_sources(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows/CherryGrove.rc")
+endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/assets")
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets"  "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets")
