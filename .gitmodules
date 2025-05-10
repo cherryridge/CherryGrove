@@ -1,45 +1,71 @@
-[submodule "libs/bgfx"]
-	path = libs/bgfx
-    url = https://github.com/bkaradzic/bgfx
-[submodule "libs/glfw"]
-	path = libs/glfw
-	url = https://github.com/glfw/glfw
-[submodule "libs/bx"]
-	path = libs/bx
-	url = https://github.com/bkaradzic/bx
-[submodule "libs/bimg"]
-	path = libs/bimg
-	url = https://github.com/bkaradzic/bimg
-[submodule "libs/stb"]
-	path = libs/stb
-	url = https://github.com/nothings/stb
-[submodule "libs/imgui"]
-	path = libs/imgui
-	url = https://github.com/ocornut/imgui
-[submodule "libs/freetype"]
-	path = libs/freetype
-	url = https://github.com/freetype/freetype
-[submodule "libs/imgui_impl_bgfx"]
-	path = libs/imgui_impl_bgfx
-	url = https://gist.github.com/pr0g/aff79b71bf9804ddb03f39ca7c0c3bbb
+﻿[submodule "libs/json"]
+	path = libs/json
+    url = https://github.com/nlohmann/json
+
 [submodule "libs/glm"]
 	path = libs/glm
 	url = https://github.com/g-truc/glm
+
 [submodule "libs/entt"]
 	path = libs/entt
 	url = https://github.com/skypjack/entt
-[submodule "libs/json"]
-	path = libs/json
-	url = https://github.com/nlohmann/json
+
+[submodule "libs/stb/stb"]
+	path = libs/stb/stb
+	url = https://github.com/nothings/stb
+
+[submodule "libs/boost/uuid"]
+	path = libs/boost/uuid
+	url = https://github.com/boostorg/uuid
+
+[submodule "libs/boost/assert"]
+	path = libs/boost/assert
+	url = https://github.com/boostorg/assert
+
+[submodule "libs/boost/config"]
+	path = libs/boost/config
+	url = https://github.com/boostorg/config
+
+[submodule "libs/boost/detail"]
+	path = libs/boost/detail
+	url = https://github.com/boostorg/detail
+
+[submodule "libs/boost/exception"]
+	path = libs/boost/exception
+	url = https://github.com/boostorg/exception
+
+[submodule "libs/boost/pfr"]
+	path = libs/boost/pfr
+	url = https://github.com/boostorg/pfr
+
+[submodule "libs/boost/throw_exception"]
+	path = libs/boost/throw_exception
+	url = https://github.com/boostorg/throw_exception
+
+[submodule "libs/boost/type_traits"]
+	path = libs/boost/type_traits
+	url = https://github.com/boostorg/type_traits
+
+[submodule "libs/boost/utility"]
+	path = libs/boost/utility
+	url = https://github.com/boostorg/utility
+
 [submodule "libs/json_schema_validator"]
 	path = libs/json_schema_validator
 	url = https://github.com/pboettch/json-schema-validator
-[submodule "libs/soloud"]
-	path = libs/soloud
-	url = https://github.com/jarikomppa/soloud
-[submodule "libs/boost"]
-	path = libs/boost
-	url = https://github.com/boostorg/boost
-[submodule "libs/luajit"]
-	path = libs/luajit
-	url = https://github.com/LuaJIT/LuaJIT
+
+[submodule "libs/glfw"]
+	path = libs/glfw
+	url = https://github.com/glfw/glfw
+
+[submodule "libs/freetype"]
+	path = libs/freetype
+	url = https://github.com/freetype/freetype
+
+[submodule "libs/cgnbt"]
+	path = libs/cgnbt
+	url = https://github.com/CherryRidge/CGNBT
+
+[submodule "libs/zlib_ng"]
+	path = libs/zlib_ng
+	url = https://github.com/zlib-ng/zlib-ng

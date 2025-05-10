@@ -5,7 +5,7 @@
 #include <boost/uuid.hpp>
 
 #include "ManifestProcs.hpp"
-#include "../../file/json/Json.hpp"
+#include "../../../file/json/Json.hpp"
 #include "../schemaTypes.hpp"
 
 namespace ManifestProcs {

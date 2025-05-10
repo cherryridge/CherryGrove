@@ -1,34 +1,33 @@
-build/
-!*/build/
-lib/
-!*/lib/
-lib_archive/source
-lib_archive/compiled_backup
-logs/
-!*/logs/
-others/
-!*/others/
-packs/
-!*/packs/
-packing_resources/VC_redist.x64.exe
-scripts/shadercDebug.exe
-shaders/
-!*/shaders/
-test/
-!*/test/
-*.aps
-*.user
-/options.json
-/cpp.hint
+# OS artifacts
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
 
-
-
+# Build system generated files/folders
+.vscode/
 .vs/
+*.suo
+*.user
+*.VC.db
 .idea/
+*.iws
+*.iml
+*.ipr
+.netrwhist
+.vimcache
+
 out/
 !*/out/
-bin/
-!*/bin/
-build/
-!*/build/
-CMakeSettings.json
+
+# Local-only folders
+others/
+!*/others/
+
+# Test-purpose folders
+saves/
+!*/saves/
+packs/
+!*/packs/
+test/
+!*/test/
+/options.json

@@ -4,7 +4,7 @@
 #include <mutex>
 #include <map>
 
-#include "../../debug/debug.hpp"
+#include "../debug/debug.hpp"
 
 #include "../file/json/Json.hpp"
 

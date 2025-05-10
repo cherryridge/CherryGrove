@@ -1,6 +1,6 @@
 $input v_texcoord0
-#include "../../lib_archive/source/bgfx/src/bgfx_shader.sh"
-#include "../../lib_archive/source/bgfx/examples/common/shaderlib.sh"
+#include "../../libs/bgfx_shader/bgfx_shader.sh"
+#include "../../libs/bgfx_shader/shaderlib.sh"
 
 SAMPLER2D(s_texture, 0);
 

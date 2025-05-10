@@ -1,0 +1,17 @@
+文件夹介绍：
+assets：存放 CherryGrove 基本运行所需要的文件，包括字体、Logo 等。不是用来放置内容包的地方，不要随意修改。
+captures：存放屏幕截图和屏幕录制的地方。
+logs：存放 CherryGrove 运行日志的地方。如果遇到错误，这些文件或许有发现 bug 的线索。
+packs：存放内容包的地方。允许放入文件夹或 .zip 压缩包，放入文件夹时，需要保证在 pack 目录中点进一次文件夹就能看到内容包的 manifest.json。
+saves：存放存档的地方。
+
+test（可能不存在）：存放开发版 CherryGrove 的测试用途文件，需要了解代码中的测试内容才能正确使用该文件夹。
+
+文件介绍：
+CherryGrove.exe：CherryGrove 软件。
+LICENSE：随附的一份 GPL-3.0-or-later 许可证原文。
+options.cgb：CherryGrove 保存的软件设置，使用 CGNBT 二进制格式存储，请不要使用记事本等编辑器编辑。
+uninstall.exe：卸载 CherryGrove 需要的程序。双击打开以卸载本软件。
+
+更多信息，请访问官方网站：https://cherrygrove.dev。
+本软件以 GPL-3.0-or-later 许可证免费开源。如果你付费获得该软件，请立即差评并举报店铺。

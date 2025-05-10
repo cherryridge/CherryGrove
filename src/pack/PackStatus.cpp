@@ -9,7 +9,7 @@
 #include <nlohmann/json-schema.hpp>
 
 #include "../file/json/Json.hpp"
-#include "../../debug/debug.hpp"
+#include "../debug/debug.hpp"
 #include "parser/schemaTypes.hpp"
 #include "pack.hpp"
 #include "PackStatus.hpp"
@@ -42,14 +42,14 @@ namespace PackStatus {
 		if (!_status) return;
 		const json status = _status.value(), schemaJSON = json::parse(configSchema_raw);
 		json_schema::json_validator validator(nullptr, json_schema::default_string_format_check);
-		try { validator.set_root_schema(schemaJSON); }
+		validator.set_root_schema(schemaJSON);
+		try { const auto default_patch = validator.validate(status); }
 		//We currently empty `config.json` directly if any error happened during validation.
 		catch (exception e) {
 			lerr << "[PackStatus] config.json is invalid, emptying it: " << e.what() << endl;
 			Json::saveJSON(temp);
 			return;
 		}
-		const auto default_patch = validator.validate(status);
 		const u32 formatVersion = deduceFormatVersion(status, temp.c_str());
 		if (formatVersion < LATEST_FORMAT_VERSION_INTERNAL) {
 			//todo: Upgrade config file if LFVI is no longer 1 (which may take 1 year toevolve :) ).

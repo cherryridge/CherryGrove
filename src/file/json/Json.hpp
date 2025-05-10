@@ -56,7 +56,7 @@ namespace Json {
 		auto processors = get<T>(processorRegistry).get();
 		auto p = processors->find(formatVersion);
 		if (p == processors->end()) {
-			lerr << "[JSON] `formatVersion`: " << formatVersion << " is invalid/deprecated!LatestformatVersion is " << LATEST_FORMAT_VERSION << endl;
+			lerr << "[JSON] `formatVersion`: " << formatVersion << " is invalid/deprecated! LatestformatVersion is " << LATEST_FORMAT_VERSION << endl;
 			return nullopt;
 		}
 		return p->second(patchedResult);

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../components/Components.hpp"
 
@@ -10,7 +10,7 @@ namespace Sound {
 	typedef u32 EventID;
 	typedef u64 PlayID;
 
-	enum AttenuationAlgorithm {
+	enum struct AttenuationAlgorithm {
 		Inverse,
 		Exponential,
 		Linear,
