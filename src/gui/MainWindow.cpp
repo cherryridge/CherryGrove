@@ -3,7 +3,7 @@
 #include <thread>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <queue>
 
 #include "../input/InputHandler.hpp"

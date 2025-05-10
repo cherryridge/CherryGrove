@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <atomic>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace InputHandler {
 	extern std::atomic<bool> sendToImGui;

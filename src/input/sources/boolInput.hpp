@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <array>
 #include <map>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 #include "../inputBase.hpp"
 

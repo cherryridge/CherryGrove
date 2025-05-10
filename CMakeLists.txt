@@ -43,7 +43,7 @@ add_subdirectory("libs/zlib_ng")
 
 add_executable(${PROJECT_NAME} ${CG_SOURCES} ${IMGUI_SOURCES})
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE $<IF:$<CONFIG:Debug>,Debug,NDEBUG>)
+target_compile_definitions(${PROJECT_NAME} PRIVATE $<IF:$<CONFIG:Debug>,DEBUG,NDEBUG>)
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC "BX_CONFIG_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
 target_compile_definitions(${PROJECT_NAME} PUBLIC "$<$<CONFIG:Debug>:DEBUG=1>")

@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <array>
 #include <entt/entt.hpp>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 #include "debug/debug.hpp"
 
