@@ -67,12 +67,12 @@ namespace Renderer {
 			#ifdef USE_WAYLAND
 				pdata.ndt = glfwGetWaylandDisplay();
 			#else
-				pd.ndt = glfwGetX11Display();
-				pd.nwh = reinterpret_cast<void*>(glfwGetX11Window(MainWindow::window));
+				pdata.ndt = glfwGetX11Display();
+				pdata.nwh = reinterpret_cast<void*>(glfwGetX11Window(MainWindow::window));
 			#endif
 		#elif defined(__APPLE__)
-			pd.ndt = nullptr;
-			pd.nwh = glfwGetCocoaWindow(window);
+			pdata.ndt = nullptr;
+			pdata.nwh = glfwGetCocoaWindow(window);
 		#endif
 		//Let bgfx auto select rendering backend.
 		config.type = bgfx::RendererType::Count;
