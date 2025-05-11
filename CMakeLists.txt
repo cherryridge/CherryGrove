@@ -41,6 +41,12 @@ set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "")
 set(WITH_GTEST          OFF CACHE BOOL "")
 add_subdirectory("libs/zlib_ng")
 
+if(UNIX AND NOT APPLE)
+	find_package(ALSA REQUIRED)
+	find_package(JACK REQUIRED)
+	find_package(Threads REQUIRED)
+endif()
+
 add_executable(${PROJECT_NAME} ${CG_SOURCES} ${IMGUI_SOURCES})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<IF:$<CONFIG:Debug>,DEBUG,NDEBUG>)
@@ -96,6 +102,13 @@ if(WIN32)
 	target_link_libraries(${PROJECT_NAME} PRIVATE dbghelp)
 	target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows")
 	target_sources(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows/CherryGrove.rc")
+elseif(UNIX AND NOT APPLE)
+	target_link_libraries(${PROJECT_NAME} PRIVATE
+		${ALSA_LIBRARIES}
+		${JACK_LIBRARIES}
+		Threads::Threads
+		dl
+	)
 endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/assets")

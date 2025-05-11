@@ -11,7 +11,7 @@
 #include "../file/json/Json.hpp"
 #include "../debug/debug.hpp"
 #include "parser/schemaTypes.hpp"
-#include "pack.hpp"
+#include "Pack.hpp"
 #include "PackStatus.hpp"
 
 namespace PackStatus {
