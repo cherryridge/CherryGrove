@@ -339,6 +339,46 @@ void ImGui::TextWrappedV(const char* fmt, va_list args)
         PopTextWrapPos();
 }
 
+void ImGui::TextAligned(float align_x, float size_x, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    TextAlignedV(align_x, size_x, fmt, args);
+    va_end(args);
+}
+
+// align_x: 0.0f = left, 0.5f = center, 1.0f = right.
+// size_x : 0.0f = shortcut for GetContentRegionAvail().x
+// FIXME-WIP: Works but API is likely to be reworked. This is designed for 1 item on the line. (#7024)
+void ImGui::TextAlignedV(float align_x, float size_x, const char* fmt, va_list args)
+{
+    ImGuiWindow* window = GetCurrentWindow();
+    if (window->SkipItems)
+        return;
+
+    const char* text, *text_end;
+    ImFormatStringToTempBufferV(&text, &text_end, fmt, args);
+    const ImVec2 text_size = CalcTextSize(text, text_end);
+    size_x = CalcItemSize(ImVec2(size_x, 0.0f), 0.0f, text_size.y).x;
+
+    ImVec2 pos(window->DC.CursorPos.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
+    ImVec2 pos_max(pos.x + size_x, window->ClipRect.Max.y);
+    ImVec2 size(ImMin(size_x, text_size.x), text_size.y);
+    window->DC.CursorMaxPos.x = ImMax(window->DC.CursorMaxPos.x, pos.x + text_size.x);
+    window->DC.IdealMaxPos.x = ImMax(window->DC.IdealMaxPos.x, pos.x + text_size.x);
+    if (align_x > 0.0f && text_size.x < size_x)
+        pos.x += ImTrunc((size_x - text_size.x) * align_x);
+    RenderTextEllipsis(window->DrawList, pos, pos_max, pos_max.x, text, text_end, &text_size);
+
+    const ImVec2 backup_max_pos = window->DC.CursorMaxPos;
+    ItemSize(size);
+    ItemAdd(ImRect(pos, pos + size), 0);
+    window->DC.CursorMaxPos.x = backup_max_pos.x; // Cancel out extending content size because right-aligned text would otherwise mess it up.
+
+    if (size_x < text_size.x && IsItemHovered(ImGuiHoveredFlags_NoNavOverride | ImGuiHoveredFlags_AllowWhenDisabled | ImGuiHoveredFlags_ForTooltip))
+        SetTooltip("%.*s", (int)(text_end - text), text);
+}
+
 void ImGui::LabelText(const char* label, const char* fmt, ...)
 {
     va_list args;
@@ -1696,7 +1736,7 @@ void ImGui::SeparatorTextEx(ImGuiID id, const char* label, const char* label_end
             window->DrawList->AddLine(ImVec2(sep2_x1, seps_y), ImVec2(sep2_x2, seps_y), separator_col, separator_thickness);
         if (g.LogEnabled)
             LogSetNextTextDecoration("---", NULL);
-        RenderTextEllipsis(window->DrawList, label_pos, ImVec2(bb.Max.x, bb.Max.y + style.ItemSpacing.y), bb.Max.x, bb.Max.x, label, label_end, &label_size);
+        RenderTextEllipsis(window->DrawList, label_pos, ImVec2(bb.Max.x, bb.Max.y + style.ItemSpacing.y), bb.Max.x, label, label_end, &label_size);
     }
     else
     {
@@ -5167,8 +5207,6 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     // Otherwise request text input ahead for next frame.
     if (g.ActiveId == id && clear_active_id)
         ClearActiveID();
-    else if (g.ActiveId == id)
-        g.WantTextInputNextFrame = 1;
 
     // Render frame
     if (!is_multiline)
@@ -5349,12 +5387,16 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
                 draw_window->DrawList->AddLine(cursor_screen_rect.Min, cursor_screen_rect.GetBL(), GetColorU32(ImGuiCol_InputTextCursor), 1.0f); // FIXME-DPI: Cursor thickness (#7031)
 
             // Notify OS of text input position for advanced IME (-1 x offset so that Windows IME can cover our cursor. Bit of an extra nicety.)
-            if (!is_readonly)
+            // This is required for some backends (SDL3) to start emitting character/text inputs.
+            // As per #6341, make sure we don't set that on the deactivating frame.
+            if (!is_readonly && g.ActiveId == id)
             {
-                g.PlatformImeData.WantVisible = true;
-                g.PlatformImeData.InputPos = ImVec2(cursor_screen_pos.x - 1.0f, cursor_screen_pos.y - g.FontSize);
-                g.PlatformImeData.InputLineHeight = g.FontSize;
-                g.PlatformImeViewport = window->Viewport->ID;
+                ImGuiPlatformImeData* ime_data = &g.PlatformImeData; // (this is a public struct, passed to io.Platform_SetImeDataFn() handler)
+                ime_data->WantVisible = true;
+                ime_data->WantTextInput = true;
+                ime_data->InputPos = ImVec2(cursor_screen_pos.x - 1.0f, cursor_screen_pos.y - g.FontSize);
+                ime_data->InputLineHeight = g.FontSize;
+                ime_data->ViewportId = window->Viewport->ID;
             }
         }
     }
@@ -6874,9 +6916,22 @@ void ImGui::TreeNodeDrawLineToChildNode(const ImVec2& target_pos)
     float x1 = ImTrunc(parent_data->DrawLinesX1);
     float x2 = ImTrunc(target_pos.x - g.Style.ItemInnerSpacing.x);
     float y = ImTrunc(target_pos.y);
-    parent_data->DrawLinesToNodesY2 = ImMax(parent_data->DrawLinesToNodesY2, y);
-    if (x1 < x2)
+    float rounding = (g.Style.TreeLinesRounding > 0.0f) ? ImMin(x2 - x1, g.Style.TreeLinesRounding) : 0.0f;
+    parent_data->DrawLinesToNodesY2 = ImMax(parent_data->DrawLinesToNodesY2, y - rounding);
+    if (x1 >= x2)
+        return;
+    if (rounding > 0.0f)
+    {
+        x1 += 0.5f + rounding;
+        window->DrawList->PathArcToFast(ImVec2(x1, y - rounding), rounding, 6, 3);
+        if (x1 < x2)
+            window->DrawList->PathLineTo(ImVec2(x2, y));
+        window->DrawList->PathStroke(GetColorU32(ImGuiCol_TreeLines), ImDrawFlags_None, g.Style.TreeLinesSize);
+    }
+    else
+    {
         window->DrawList->AddLine(ImVec2(x1, y), ImVec2(x2, y), GetColorU32(ImGuiCol_TreeLines), g.Style.TreeLinesSize);
+    }
 }
 
 // Draw vertical line of the hierarchy
@@ -6892,7 +6947,7 @@ void ImGui::TreeNodeDrawLineToTreePop(const ImGuiTreeNodeStackData* data)
         if (g.CurrentTable)
             y2_full = ImMax(g.CurrentTable->RowPosY2, y2_full);
         y2_full = ImTrunc(y2_full - g.Style.ItemSpacing.y - g.FontSize * 0.5f);
-        if (y2 + g.Style.ItemSpacing.y < y2_full) // FIXME: threshold to use ToNodes Y2 instead of Full Y2 when close by ItemSpacing.y
+        if (y2 + (g.Style.ItemSpacing.y + g.Style.TreeLinesRounding) < y2_full) // FIXME: threshold to use ToNodes Y2 instead of Full Y2 when close by ItemSpacing.y
             y2 = y2_full;
     }
     y2 = ImMin(y2, window->ClipRect.Max.y);
@@ -10578,13 +10633,12 @@ void ImGui::TabItemLabelAndCloseButton(ImDrawList* draw_list, const ImRect& bb, 
 #endif
 
     // Render text label (with clipping + alpha gradient) + unsaved marker
-    ImRect text_pixel_clip_bb(bb.Min.x + frame_padding.x, bb.Min.y + frame_padding.y, bb.Max.x - frame_padding.x, bb.Max.y);
-    ImRect text_ellipsis_clip_bb = text_pixel_clip_bb;
+    ImRect text_ellipsis_clip_bb(bb.Min.x + frame_padding.x, bb.Min.y + frame_padding.y, bb.Max.x - frame_padding.x, bb.Max.y);
 
     // Return clipped state ignoring the close button
     if (out_text_clipped)
     {
-        *out_text_clipped = (text_ellipsis_clip_bb.Min.x + label_size.x) > text_pixel_clip_bb.Max.x;
+        *out_text_clipped = (text_ellipsis_clip_bb.Min.x + label_size.x) > text_ellipsis_clip_bb.Max.x;
         //draw_list->AddCircle(text_ellipsis_clip_bb.Min, 3.0f, *out_text_clipped ? IM_COL32(255, 0, 0, 255) : IM_COL32(0, 255, 0, 255));
     }
 
@@ -10630,15 +10684,22 @@ void ImGui::TabItemLabelAndCloseButton(ImDrawList* draw_list, const ImRect& bb, 
     // This is all rather complicated
     // (the main idea is that because the close button only appears on hover, we don't want it to alter the ellipsis position)
     // FIXME: if FramePadding is noticeably large, ellipsis_max_x will be wrong here (e.g. #3497), maybe for consistency that parameter of RenderTextEllipsis() shouldn't exist..
-    float ellipsis_max_x = close_button_visible ? text_pixel_clip_bb.Max.x : bb.Max.x - 1.0f;
+    float ellipsis_max_x = text_ellipsis_clip_bb.Max.x;
     if (close_button_visible || unsaved_marker_visible)
     {
-        text_pixel_clip_bb.Max.x -= close_button_visible ? (button_sz) : (button_sz * 0.80f);
-        text_ellipsis_clip_bb.Max.x -= unsaved_marker_visible ? (button_sz * 0.80f) : 0.0f;
-        ellipsis_max_x = text_pixel_clip_bb.Max.x;
+        const bool visible_without_hover = unsaved_marker_visible || (is_contents_visible ? g.Style.TabCloseButtonMinWidthSelected : g.Style.TabCloseButtonMinWidthUnselected) < 0.0f;
+        if (visible_without_hover)
+        {
+            text_ellipsis_clip_bb.Max.x -= button_sz * 0.90f;
+            ellipsis_max_x -= button_sz * 0.90f;
+        }
+        else
+        {
+            text_ellipsis_clip_bb.Max.x -= button_sz * 1.00f;
+        }
     }
     LogSetNextTextDecoration("/", "\\");
-    RenderTextEllipsis(draw_list, text_ellipsis_clip_bb.Min, text_ellipsis_clip_bb.Max, text_pixel_clip_bb.Max.x, ellipsis_max_x, label, NULL, &label_size);
+    RenderTextEllipsis(draw_list, text_ellipsis_clip_bb.Min, text_ellipsis_clip_bb.Max, ellipsis_max_x, label, NULL, &label_size);
 
 #if 0
     if (!is_contents_visible)

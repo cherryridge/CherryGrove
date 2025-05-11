@@ -1,4 +1,4 @@
-﻿// dear imgui: FreeType font builder (used as a replacement for the stb_truetype builder)
+// dear imgui: FreeType font builder (used as a replacement for the stb_truetype builder)
 // (headers)
 
 #pragma once
@@ -43,11 +43,11 @@ namespace ImGuiFreeType
     // If you need to dynamically select between multiple builders:
     // - you can manually assign this builder with 'atlas->FontBuilderIO = ImGuiFreeType::GetBuilderForFreeType()'
     // - prefer deep-copying this into your own ImFontBuilderIO instance if you use hot-reloading that messes up static data.
-    const ImFontBuilderIO*    GetBuilderForFreeType();
+    IMGUI_API const ImFontBuilderIO*    GetBuilderForFreeType();
 
     // Override allocators. By default ImGuiFreeType will use IM_ALLOC()/IM_FREE()
     // However, as FreeType does lots of allocations we provide a way for the user to redirect it to a separate memory heap if desired.
-    void                      SetAllocatorFunctions(void* (*alloc_func)(size_t sz, void* user_data), void (*free_func)(void* ptr, void* user_data), void* user_data = nullptr);
+    IMGUI_API void                      SetAllocatorFunctions(void* (*alloc_func)(size_t sz, void* user_data), void (*free_func)(void* ptr, void* user_data), void* user_data = nullptr);
 
     // Obsolete names (will be removed soon)
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS

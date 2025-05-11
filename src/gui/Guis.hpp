@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <cstdint>
 
 namespace Guis {
 	typedef int32_t i32;
