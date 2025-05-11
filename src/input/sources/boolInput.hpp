@@ -11,19 +11,19 @@ namespace InputHandler::BoolInput {
 	//However, no safety check is enforced.
 	typedef i32 BoolInputID;
 
-	enum BIEventType {
-		BIEventStart,
-		BIEventPersist,
-		BIEventEnd
+	enum struct BIEType {
+		Start,
+		Persist,
+		End
 	};
 
-	enum BIStatus {
-		BIInactive,
+	enum struct BIStatus {
+		Inactive,
 		//Instant state, will go to `BIRepeat`
-		BIPress,
-		BIRepeat,
+		Press,
+		Repeat,
 		//Instant state, will go to `BIInactive`
-		BIRelease
+		Release
 	};
 
 	struct BISource {
@@ -57,8 +57,8 @@ namespace InputHandler::BoolInput {
 
 	inline constexpr const char* findBoolInputName(BoolInputID inputCode);
 
-	void addBoolInput(BIEventType type, const InputEventInfo& info, BICallback cb, BoolInputID defaultBinding = emptyBISource);
-	bool removeBoolInput(BIEventType type, BICallback cb);
+	void addBoolInput(BIEType type, const InputEventInfo& info, BICallback cb, BoolInputID defaultBinding = emptyBISource);
+	bool removeBoolInput(BIEType type, BICallback cb);
 
 	void changeBinding();
 	void resetBinding();

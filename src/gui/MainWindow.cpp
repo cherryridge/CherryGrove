@@ -36,6 +36,8 @@ namespace MainWindow {
 			lerr << "[Window] Failed to set up GLFW!" << endl;
 			Fatal::exit(Fatal::GLFW_INITIALIZATION_FALILED);
 		}
+		//Disable OpenGL context.
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 		if (!window) {
 			glfwTerminate();
@@ -97,5 +99,5 @@ namespace MainWindow {
 	}
 
 //Main thread runner
-	void runOnMainThread(void(*callback)()) { taskQueue.push(callback); }
+	void runOnMainThread(void(*function)()) { taskQueue.push(function); }
 }

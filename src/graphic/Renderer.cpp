@@ -4,8 +4,16 @@
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include <GLFW/glfw3.h>
-#ifdef _WIN32
-#define GLFW_EXPOSE_NATIVE_WIN32
+#if defined(_WIN32)
+	#define GLFW_EXPOSE_NATIVE_WIN32
+#elif defined(__linux__)
+	#if defined(USE_WAYLAND)
+		#define GLFW_EXPOSE_NATIVE_WAYLAND
+	#else
+		#define GLFW_EXPOSE_NATIVE_X11
+	#endif
+#elif defined(__APPLE__)
+	#define GLFW_EXPOSE_NATIVE_COCOA
 #endif
 #include <GLFW/glfw3native.h>
 #include <stb/stb_image.h>
@@ -48,15 +56,24 @@ namespace Renderer {
 	static void initBgfx_r() {
 		bgfx::Init config;
 		bgfx::PlatformData pdata;
-		#ifdef _WIN32
-		auto handle = glfwGetWin32Window(MainWindow::window);
-		//Temporary IME disabling code!!!
-		MainWindow::runOnMainThread([]() {
-			auto handle = glfwGetWin32Window(MainWindow::window);
-			ImmAssociateContext(handle, nullptr);
-		});
+		#if defined(_WIN32)
+			pdata.ndt = nullptr;
+			pdata.nwh = glfwGetWin32Window(MainWindow::window);
+			//Temporary IME disabling code!!!
+			MainWindow::runOnMainThread([]() {
+				ImmAssociateContext(glfwGetWin32Window(MainWindow::window), nullptr);
+			});
+		#elif defined(__linux__)
+			#ifdef USE_WAYLAND
+				pdata.ndt = glfwGetWaylandDisplay();
+			#else
+				pd.ndt = glfwGetX11Display();
+				pd.nwh = reinterpret_cast<void*>(glfwGetX11Window(MainWindow::window));
+			#endif
+		#elif defined(__APPLE__)
+			pd.ndt = nullptr;
+			pd.nwh = glfwGetCocoaWindow(window);
 		#endif
-		pdata.nwh = handle;
 		//Let bgfx auto select rendering backend.
 		config.type = bgfx::RendererType::Count;
 		//Control for switching backend temporaily for debug.
@@ -141,7 +158,7 @@ namespace Renderer {
 		//Process renderer-cycle input events.
 			InputHandler::processInputRenderer();
 		//Prepare for rendering
-		    //Refresh window size
+			//Refresh window size
 			if (sizeUpdateSignal) {
 				glfwGetWindowSize(MainWindow::window, &cachedWidth, &cachedHeight);
 				cachedAspectRatio = (float)cachedWidth / cachedHeight;

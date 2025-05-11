@@ -52,12 +52,12 @@ namespace MainGame {
 
 		MainWindow::runOnMainThread([]() {
 			using namespace InputHandler;
-			BoolInput::addBoolInput(BoolInput::BIEventPersist, { "", "forward", 10 }, IntrinsicInput::forward, GLFW_KEY_W);
-			BoolInput::addBoolInput(BoolInput::BIEventPersist, { "", "backward", 10 }, IntrinsicInput::backward, GLFW_KEY_S);
-			BoolInput::addBoolInput(BoolInput::BIEventPersist, { "", "left", 10 }, IntrinsicInput::left, GLFW_KEY_A);
-			BoolInput::addBoolInput(BoolInput::BIEventPersist, { "", "right", 10 }, IntrinsicInput::right, GLFW_KEY_D);
-			BoolInput::addBoolInput(BoolInput::BIEventPersist, { "", "up", 10 }, IntrinsicInput::up, GLFW_KEY_SPACE);
-			BoolInput::addBoolInput(BoolInput::BIEventPersist, { "", "down", 10 }, IntrinsicInput::down, GLFW_KEY_LEFT_SHIFT);
+			BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "forward", 10 }, IntrinsicInput::forward, GLFW_KEY_W);
+			BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "backward", 10 }, IntrinsicInput::backward, GLFW_KEY_S);
+			BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "left", 10 }, IntrinsicInput::left, GLFW_KEY_A);
+			BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "right", 10 }, IntrinsicInput::right, GLFW_KEY_D);
+			BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "up", 10 }, IntrinsicInput::up, GLFW_KEY_SPACE);
+			BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "down", 10 }, IntrinsicInput::down, GLFW_KEY_LEFT_SHIFT);
 			MouseMove::addMouseMove({ "", "moveCamera", 10 }, IntrinsicInput::changeRotationCB);
 			glfwSetInputMode(MainWindow::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		});
@@ -106,12 +106,12 @@ namespace MainGame {
 		//Clear input callbacks (todo: will be changed to use clear())
 		MainWindow::runOnMainThread([]() {
 			using namespace InputHandler;
-			BoolInput::removeBoolInput(BoolInput::BIEventPersist, IntrinsicInput::forward);
-			BoolInput::removeBoolInput(BoolInput::BIEventPersist, IntrinsicInput::backward);
-			BoolInput::removeBoolInput(BoolInput::BIEventPersist, IntrinsicInput::left);
-			BoolInput::removeBoolInput(BoolInput::BIEventPersist, IntrinsicInput::right);
-			BoolInput::removeBoolInput(BoolInput::BIEventPersist, IntrinsicInput::up);
-			BoolInput::removeBoolInput(BoolInput::BIEventPersist, IntrinsicInput::down);
+			BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::forward);
+			BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::backward);
+			BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::left);
+			BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::right);
+			BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::up);
+			BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::down);
 			MouseMove::removeMouseMove(IntrinsicInput::changeRotationCB);
 			glfwSetInputMode(MainWindow::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		});

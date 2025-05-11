@@ -49,7 +49,7 @@ namespace CherryGrove {
 	//Set up intrinsic inputs
 		//todo: Input should be able to be processed by any of the three threads:
 		//Main, Renderer, Game
-		InputHandler::BoolInput::addBoolInput(InputHandler::BoolInput::BIEventStart, { "", "escape", 10 }, IntrinsicInput::escapeCB, GLFW_KEY_ESCAPE);
+		InputHandler::BoolInput::addBoolInput(InputHandler::BoolInput::BIEType::Start, { "", "escape", 10 }, IntrinsicInput::escapeCB, GLFW_KEY_ESCAPE);
 
 		hold();
 	}

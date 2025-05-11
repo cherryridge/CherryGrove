@@ -2,7 +2,7 @@
 #define V8_31BIT_SMIS_ON_64BIT_ARCH 1
 #define V8_ENABLE_SANDBOX 1
 #ifdef DEBUG
-#define V8_ENABLE_CHECKS 1
+	#define V8_ENABLE_CHECKS 1
 #endif
 #include <v8/v8.h>
 #include <v8/libplatform/libplatform.h>
@@ -19,7 +19,7 @@
 using std::unique_ptr;
 
 namespace V8Wrapper {
-	void loadFile(const char* filePath);
+	static void loadFile(const char* filePath);
 	v8::Isolate* V8Isolate;
 	v8::Isolate::CreateParams createParams;
 	unique_ptr<v8::Platform> platform;

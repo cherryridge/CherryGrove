@@ -50,45 +50,45 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC "$<$<CONFIG:Debug>:DEBUG=1>")
 target_compile_definitions(${PROJECT_NAME} PUBLIC "$<$<CONFIG:Release>:NDEBUG=1>")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-    "libs/boost/assert/include"
-    "libs/boost/config/include"
-    "libs/boost/detail/include"
-    "libs/boost/exception/include"
-    "libs/boost/pfr/include"
+	"libs/boost/assert/include"
+	"libs/boost/config/include"
+	"libs/boost/detail/include"
+	"libs/boost/exception/include"
+	"libs/boost/pfr/include"
 	"libs/boost/throw_exception/include"
-    "libs/boost/type_traits/include"
-    "libs/boost/utility/include"
-    "libs/boost/uuid/include"
-    "libs/entt/single_include"
-    "libs/glm"
-    "libs/json/single_include"
-    "libs/stb"
+	"libs/boost/type_traits/include"
+	"libs/boost/utility/include"
+	"libs/boost/uuid/include"
+	"libs/entt/single_include"
+	"libs/glm"
+	"libs/json/single_include"
+	"libs/stb"
 
 	"libs/cgnbt/include"
 
-    "libs/freetype/include"
-    "libs/glfw/include"
+	"libs/freetype/include"
+	"libs/glfw/include"
 	"libs/json_schema_validator/src"
 	"libs/zlib_ng"
 
-    "libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/include"
-    "libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/include"
-    "libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/include"
+	"libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/include"
+	"libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/include"
+	"libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/include"
 
-    "libs/imgui"
+	"libs/imgui"
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    freetype
-    glfw
-    nlohmann_json_schema_validator
+	freetype
+	glfw
+	nlohmann_json_schema_validator
 	zlibstatic
 
-    ${BGFX_BGFX_LIB}
-    ${BGFX_BX_LIB}
-    ${BGFX_BIMG_LIB}
-    ${SOLOUD_LIB}
-    ${V8_LIB}
+	${BGFX_BGFX_LIB}
+	${BGFX_BX_LIB}
+	${BGFX_BIMG_LIB}
+	${SOLOUD_LIB}
+	${V8_LIB}
 )
 
 if(WIN32)

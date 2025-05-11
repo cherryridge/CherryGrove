@@ -29,7 +29,7 @@ namespace InputHandler::BoolInput {
 
 	void init() {
 		for (auto& bi : boolInputDesc) {
-			biStatus.emplace(bi.inputCode, BIInactive);
+			biStatus.emplace(bi.inputCode, BIStatus::Inactive);
 			multimap<EventPriority, BIEvent> start, persist, end;
 			biStartRegistry.emplace(bi.inputCode, move(start));
 			biPersistRegistry.emplace(bi.inputCode, move(persist));
@@ -45,7 +45,7 @@ namespace InputHandler::BoolInput {
 				case GLFW_PRESS: {
 					lock_guard lock(biStatusMutex);
 					auto p = biStatus.find(key);
-					if (p != biStatus.end()) p->second = BIPress;
+					if (p != biStatus.end()) p->second = BIStatus::Press;
 					//lout << "press" << endl;
 					break;
 				}
@@ -53,7 +53,7 @@ namespace InputHandler::BoolInput {
 				case GLFW_RELEASE: {
 					lock_guard lock(biStatusMutex);
 					auto p = biStatus.find(key);
-					if (p != biStatus.end()) p->second = BIRelease;
+					if (p != biStatus.end()) p->second = BIStatus::Release;
 					//lout << "rel" << endl;
 					break;
 				}
@@ -68,14 +68,14 @@ namespace InputHandler::BoolInput {
 				case GLFW_PRESS: {
 					lock_guard lock(biStatusMutex);
 					auto p = biStatus.find(button);
-					if (p != biStatus.end()) p->second = BIPress;
+					if (p != biStatus.end()) p->second = BIStatus::Press;
 					break;
 				}
 				case GLFW_REPEAT: break;
 				case GLFW_RELEASE: {
 					lock_guard lock(biStatusMutex);
 					auto p = biStatus.find(button);
-					if (p != biStatus.end()) p->second = BIRelease;
+					if (p != biStatus.end()) p->second = BIStatus::Release;
 					break;
 				}
 			}
@@ -90,21 +90,21 @@ namespace InputHandler::BoolInput {
 		else return nullptr;
 	}
 
-	void addBoolInput(BIEventType type, const InputEventInfo& info, BICallback cb, BoolInputID defaultBinding) {
-		auto& eventRegistry = type == BIEventStart ? biStartRegistry : type == BIEventPersist ? biPersistRegistry : biEndRegistry;
+	void addBoolInput(BIEType type, const InputEventInfo& info, BICallback cb, BoolInputID defaultBinding) {
+		auto& eventRegistry = type == BIEType::Start ? biStartRegistry : type == BIEType::Persist ? biPersistRegistry : biEndRegistry;
 		auto p = eventRegistry.find(defaultBinding);
 		if (biStatus.find(defaultBinding) != biStatus.end()) {
-			lock_guard eventRegistryLock(type == BIEventStart ? biStartMutex : type == BIEventPersist ? biPersistMutex : biEndMutex);
+			lock_guard eventRegistryLock(type == BIEType::Start ? biStartMutex : type == BIEType::Persist ? biPersistMutex : biEndMutex);
 			BIEvent event(info, cb, defaultBinding);
 			(p->second).emplace(info.priority, event);
 		}
 		else lerr << "[InputHandler] Passed invalid bool input ID: " << defaultBinding << endl;
 	}
 
-	bool removeBoolInput(BIEventType type, BICallback cb) {
-		for (auto& [iid, map] : (type == BIEventStart ? biStartRegistry : type == BIEventPersist ? biPersistRegistry : biEndRegistry)) {
+	bool removeBoolInput(BIEType type, BICallback cb) {
+		for (auto& [iid, map] : (type == BIEType::Start ? biStartRegistry : type == BIEType::Persist ? biPersistRegistry : biEndRegistry)) {
 			for (auto it = map.begin(); it != map.end(); it++) if (it->second.cb == cb) {
-				lock_guard eventRegistryLock(type == BIEventStart ? biStartMutex : type == BIEventPersist ? biPersistMutex : biEndMutex);
+				lock_guard eventRegistryLock(type == BIEType::Start ? biStartMutex : type == BIEType::Persist ? biPersistMutex : biEndMutex);
 				map.erase(it);
 				return true;
 			}
@@ -123,10 +123,10 @@ namespace InputHandler::BoolInput {
 	void s_process() {
 		//lout << "Processing Bool Input" << endl;
 		for (const auto& [id, status] : biStatus) switch (status) {
-			case BIPress: {
-				{ //Change the status to `BIRepeat` instantly.
+			case BIStatus::Press: {
+				{ //Change the status to `Repeat` instantly.
 					lock_guard lock(biStatusMutex);
-					biStatus[id] = BIRepeat;
+					biStatus[id] = BIStatus::Repeat;
 				}
 				auto p = biStartRegistry.find(id);
 				if (p != biStartRegistry.end()) for (const auto& [priority, event] : p->second) {
@@ -137,7 +137,7 @@ namespace InputHandler::BoolInput {
 				}
 				break;
 			}
-			case BIRepeat: {
+			case BIStatus::Repeat: {
 				auto p = biPersistRegistry.find(id);
 				if (p != biPersistRegistry.end()) for (const auto& [priority, event] : p->second) {
 					//lout << "BI Repeat " << event.info.name << endl;
@@ -147,10 +147,10 @@ namespace InputHandler::BoolInput {
 				}
 				break;
 			}
-			case BIRelease: {
+			case BIStatus::Release: {
 				{ //Change the status to `BIInactive` instantly.
 					lock_guard lock(biStatusMutex);
-					biStatus[id] = BIInactive;
+					biStatus[id] = BIStatus::Inactive;
 				}
 				auto p = biEndRegistry.find(id);
 				if (p != biEndRegistry.end()) for (const auto& [priority, event] : p->second) {
@@ -161,7 +161,8 @@ namespace InputHandler::BoolInput {
 				}
 				break;
 			}
-			case BIInactive: default: break;
+			//case BIStatus::Inactive:
+			default: break;
 		}
 	}
 }
