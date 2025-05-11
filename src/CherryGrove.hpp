@@ -2,7 +2,7 @@
 #include <atomic>
 
 namespace CherryGrove {
-	extern std::atomic<bool> isCGAlive;
+    extern std::atomic<bool> isCGAlive;
 
-	void launch();
+    void launch();
 }

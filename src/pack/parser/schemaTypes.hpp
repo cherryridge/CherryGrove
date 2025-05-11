@@ -24,27 +24,27 @@ inline constexpr uint32_t LATEST_FORMAT_VERSION_INTERNAL = 1;
  */
 
 enum SchemaType {
-	Manifest,
-	//Component,
-	//Block,
-	//Geometry,
-	//Entity,
-	//Item,
-	//Structure,
-	//todo
-	Count
+    Manifest,
+    //Component,
+    //Block,
+    //Geometry,
+    //Entity,
+    //Item,
+    //Structure,
+    //todo
+    Count
 };
 
 //Actual types.
 //The newest internal versions. We *should* keep formatVersion away from anywhere beyond the process functions and use them as a bridge.
 struct ManifestJSON {
-	//`0`: nameSpace, `1`: name, `2`: description, `[2, size()-1]`: authors
-	std::vector<std::string> metadata;
-	boost::uuids::uuid uuid_f;
-	uint32_t packVersion;
-	uint32_t minEngineVersion;
-	uint16_t configFlags;
-	std::vector<Pack::PackIdentifier> dependencies;
+    //`0`: nameSpace, `1`: name, `2`: description, `[2, size()-1]`: authors
+    std::vector<std::string> metadata;
+    boost::uuids::uuid uuid_f;
+    uint32_t packVersion;
+    uint32_t minEngineVersion;
+    uint16_t configFlags;
+    std::vector<Pack::PackIdentifier> dependencies;
 };
 
 //Deduce return type.
@@ -61,6 +61,6 @@ template <typename T>
 using ProcessorPtr = std::unique_ptr<ProcessorMap<T>>;
 
 using ProcessorReg = std::tuple<
-	ProcessorPtr<ManifestJSON>
+    ProcessorPtr<ManifestJSON>
 
 >;

@@ -16,6 +16,8 @@ Thumbs.db
 .netrwhist
 .vimcache
 
+build/
+!*/build/
 out/
 !*/out/
 

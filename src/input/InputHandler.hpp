@@ -10,7 +10,7 @@
 #include "sources/scroll.hpp"
 
 namespace InputHandler {
-	void init();
-	void processInputGame();
-	void processInputRenderer();
+    void init();
+    void processInputGame();
+    void processInputRenderer();
 }

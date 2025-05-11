@@ -3,17 +3,17 @@
 #include <GLFW/glfw3.h>
 
 namespace MainWindow {
-	typedef uint32_t u32;
+    typedef uint32_t u32;
 
-	extern GLFWwindow* window;
+    extern GLFWwindow* window;
 
-	void initGlfw(u32 width, u32 height, const char* title);
-	void update();
-	void wakeUp();
-	void immediateUpdate();
-	void close();
+    void initGlfw(u32 width, u32 height, const char* title);
+    void update();
+    void wakeUp();
+    void immediateUpdate();
+    void close();
 
-	void loadIcon(const char* filePath);
+    void loadIcon(const char* filePath);
 
-	void runOnMainThread(void(*callback)());
+    void runOnMainThread(void(*callback)());
 }
