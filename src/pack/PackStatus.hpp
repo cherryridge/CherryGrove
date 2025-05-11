@@ -14,6 +14,8 @@ namespace PackStatus {
 		uuid uuid_f;
 		u32 packVersion;
 		u16 statusFlags;
+		PackStatusFlag(const uuid& uuid_f, u32 packVersion, u16 statusFlags)
+		: uuid_f(uuid_f), packVersion(packVersion), statusFlags(statusFlags) {}
 	};
 
 	void refreshStatus(const char* rootDir);

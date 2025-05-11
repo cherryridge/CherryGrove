@@ -1,7 +1,7 @@
 ﻿#include <unordered_map>
 #include <map>
 #include <mutex>
-
+#include <algorithm>
 #include "../../debug/debug.hpp"
 #include "../../CherryGrove.hpp"
 
@@ -31,9 +31,9 @@ namespace InputHandler::BoolInput {
 		for (auto& bi : boolInputDesc) {
 			biStatus.emplace(bi.inputCode, BIStatus::Inactive);
 			multimap<EventPriority, BIEvent> start, persist, end;
-			biStartRegistry.emplace(bi.inputCode, move(start));
-			biPersistRegistry.emplace(bi.inputCode, move(persist));
-			biEndRegistry.emplace(bi.inputCode, move(end));
+			biStartRegistry.emplace(bi.inputCode, std::move(start));
+			biPersistRegistry.emplace(bi.inputCode, std::move(persist));
+			biEndRegistry.emplace(bi.inputCode, std::move(end));
 		}
 	}
 

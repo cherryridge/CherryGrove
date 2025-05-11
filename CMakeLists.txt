@@ -206,3 +206,20 @@ foreach(SHADER_PATH IN LISTS FRAG_SHADER_SOURCES)
 		VERBATIM
 	)
 endforeach()
+
+if(APPLE)
+	find_library(COREAUDIO_LIBRARY CoreAudio)
+	find_library(AUDIO_TOOLBOX_LIBRARY AudioToolbox)
+	find_library(METAL_LIBRARY Metal)
+	find_library(FOUNDATION_LIBRARY Foundation)
+	find_library(QUARTZCORE_LIBRARY QuartzCore)
+
+	target_link_libraries(${PROJECT_NAME} PRIVATE
+		${COREAUDIO_LIBRARY}
+		${AUDIO_TOOLBOX_LIBRARY}
+		${METAL_LIBRARY}
+		${FOUNDATION_LIBRARY}
+		${QUARTZCORE_LIBRARY}
+	)
+endif()
+

@@ -37,11 +37,17 @@ namespace Pack {
 	//#define PACK_FEATURE_FONT 
 
 	struct PackIdentifier {
-		//Yep, not saving space here as well ;-)
 		uuid uuid_f;
 		u32 packVersion;
 
-		bool operator==(const PackIdentifier& other) const { return this->packVersion == other.packVersion && this->uuid_f == other.uuid_f; }
+		PackIdentifier() = default;
+
+		PackIdentifier(const uuid& uuid_, u32 version)
+			: uuid_f(uuid_), packVersion(version) {}
+
+		bool operator==(const PackIdentifier& other) const {
+			return this->packVersion == other.packVersion && this->uuid_f == other.uuid_f;
+		}
 	};
 
 	struct PackDesc {
