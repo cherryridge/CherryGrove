@@ -46,9 +46,9 @@
 	lout << "Working directory: " << current_path() << endl;
 	lout << "Trying to get unique instance lock..." << endl;
 
+	string lockFilePath = current_path().string();
+	lockFilePath += "\\running";
 	#ifdef _WIN32
-		string lockFilePath = current_path().string();
-		lockFilePath += "\\running";
 		HANDLE lockFile = CreateFileA(
 			lockFilePath.c_str(),
 			GENERIC_READ | GENERIC_WRITE,
@@ -63,11 +63,9 @@
 		}
 		else goto failure;
 	#else
-		string lockFilePath = current_path().string();
-		lockFilePath += "\\running";
 		i32 lockFile = open(lockFilePath.c_str(), O_CREAT | O_RDWR, 0666);
-		if (fd >= 0) {
-			bool locked = lockf(fd, F_TLOCK, 0) == 0;
+		if (lockFile >= 0) {
+			bool locked = lockf(lockFile, F_TLOCK, 0) == 0;
 			if (!locked) goto failure;
 		}
 		else goto failure;
