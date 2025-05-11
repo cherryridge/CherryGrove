@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <limits>
 #include <entt/entt.hpp>
 
 namespace Components {

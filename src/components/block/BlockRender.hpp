@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 #include <array>
+#include <limits>
 
 #include "../../debug/debug.hpp"
 #include "../../graphic/TexturePool.hpp"
@@ -28,7 +29,7 @@ namespace Components {
 			auto texture = _texture.value();
 			if (tStart.x > texture->width || tEnd.x > texture->width || tStart.y > texture->height || tEnd.y > texture->height) lerr << "[CubeFace] Texture coordinates overflow in texture dimensions." << endl;
 			//todo: Cap the value instead of blowing up :)
-			if (tStart.x > _I16_MAX || tStart.y > _I16_MAX || dx > _I16_MAX || dy > _I16_MAX || dx < _I16_MIN || dy < _I16_MIN) lerr << "[CubeFace] Texture coordinates overflow in short type." << endl;
+			if (tStart.x > std::numeric_limits<int16_t>::max() || tStart.y > std::numeric_limits<int16_t>::max() || dx > std::numeric_limits<int16_t>::max() || dy > std::numeric_limits<int16_t>::max() || dx < std::numeric_limits<int16_t>::min() || dy < std::numeric_limits<int16_t>::min()) lerr << "[CubeFace] Texture coordinates overflow in short type." << endl;
 			texCoords.x = (float)tStart.x / texture->width;
 			texCoords.y = (float)tStart.y / texture->height;
 			texCoords.z = (float)dx;

@@ -2,6 +2,7 @@
 #include <stb/stb_image.h>
 #include <optional>
 #include <unordered_map>
+#include <limits>
 #include <memory>
 
 #include "../debug/debug.hpp"
@@ -11,10 +12,11 @@
 //as well as dynamically managing texture size, allowing registering 32x32 or bigger texture.
 namespace TexturePool {
 	typedef uint8_t u8;
+	typedef int16_t i16;
 	typedef uint32_t u32;
 	typedef u32 TextureID;
 
-	using std::unordered_map, bgfx::UniformHandle, bgfx::createUniform, bgfx::destroy, std::optional, std::move;
+	using std::unordered_map, bgfx::UniformHandle, bgfx::createUniform, bgfx::destroy, std::optional, std::move, std::numeric_limits;
 
 	TextureID addTexture(const char* filePath, bool noVerticalFilp);
 
@@ -42,12 +44,12 @@ namespace TexturePool {
 		else stbi_set_flip_vertically_on_load(0);
 		int _height, _width, _bpp;
 		texture.raw = stbi_load(filePath, &_height, &_width, &_bpp, 4);
-		if (_height > _I16_MAX) {
-			lerr << "Texture height overflow (highest 32767): " << filePath << endl;
+		if (_height > numeric_limits<i16>::max()) {
+			lerr << "Texture height overflow (highest " << numeric_limits<i16>::max() << "): " << filePath << endl;
 			return 0;
 		}
-		if (_width > _I16_MAX) {
-			lerr << "Texture width overflow (highest 32767): " << filePath << endl;
+		if (_width > numeric_limits<i16>::max()) {
+			lerr << "Texture width overflow (highest " << numeric_limits<i16>::max() << "): " << filePath << endl;
 			return 0;
 		}
 		texture.height = _height;
