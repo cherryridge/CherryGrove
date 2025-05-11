@@ -20,7 +20,7 @@ namespace Json {
 
 	void init() {
 		ProcessorPtr<ManifestJSON> manifest = ManifestProcs::getProcessors();
-		get<SchemaType::Manifest>(processorRegistry) = move(manifest);
+		get<SchemaType::Manifest>(processorRegistry) = std::move(manifest);
 	}
 
 	string getSchemaFilePath(SchemaType type, const json& input, const char* filePath) {

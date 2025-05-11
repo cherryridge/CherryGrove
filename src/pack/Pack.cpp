@@ -84,7 +84,7 @@ namespace Pack {
 			result.packVersion = manifest.packVersion;
 			result.uuid_f = manifest.uuid_f;
 			result.statusFlags = PackStatus::getStatusFlags(PackIdentifier(result.uuid_f, result.packVersion));
-			registry.emplace_back(move(result));
+			registry.emplace_back(std::move(result));
 		}
 		lout << "[Pack] Found " << registry.size() << " pack" << (registry.size() == 1 ? "" : "s") << "." << endl;
 	}

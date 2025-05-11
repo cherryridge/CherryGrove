@@ -72,7 +72,7 @@ namespace Renderer {
 			#endif
 		#elif defined(__APPLE__)
 			pdata.ndt = nullptr;
-			pdata.nwh = glfwGetCocoaWindow(window);
+			pdata.nwh = glfwGetCocoaWindow(MainWindow::window);
 		#endif
 		//Let bgfx auto select rendering backend.
 		config.type = bgfx::RendererType::Count;

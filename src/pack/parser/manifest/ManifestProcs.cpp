@@ -55,6 +55,6 @@ namespace ManifestProcs {
 	ProcessorPtr<ManifestJSON> getProcessors() {
 		ProcessorMap<ManifestJSON> result;
 		result.emplace(1, processv1);
-		return make_unique<ProcessorMap<ManifestJSON>>(move(result));
+		return make_unique<ProcessorMap<ManifestJSON>>(std::move(result));
 	}
 }
