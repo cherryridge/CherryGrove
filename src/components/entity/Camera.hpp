@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <bx/math.h>
 #include <entt/entt.hpp>
 
 namespace Components {

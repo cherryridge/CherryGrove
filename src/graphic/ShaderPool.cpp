@@ -1,11 +1,12 @@
-﻿#include <bgfx/bgfx.h>
-#include <unordered_map>
+﻿#include <unordered_map>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <filesystem>
+#include <bgfx/bgfx.h>
 
-#include "../debug/debug.hpp"
+#include "../debug/Logger.hpp"
+#include "../debug/Fatal.hpp"
 #include "ShaderPool.hpp"
 
 namespace ShaderPool {

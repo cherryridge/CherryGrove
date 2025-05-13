@@ -3,18 +3,15 @@
 #include <mutex>
 #include <algorithm>
 
-#include "../../debug/debug.hpp"
+#include "../../debug/Logger.hpp"
 #include "../../CherryGrove.hpp"
-
 #include "../ImGuiAdapter.hpp"
-
 #include "../inputBase.hpp"
-
 #include "boolInput.hpp"
 
 namespace InputHandler::BoolInput {
     typedef int32_t i32;
-    using std::unordered_map, std::multimap, std::mutex, std::unique_lock, std::lock_guard, std::move;
+    using std::unordered_map, std::multimap, std::mutex, std::lock_guard, std::move;
 
     //This is not a continuous map. See `BoolInputID`.
     static unordered_map<BoolInputID, BIStatus> biStatus;

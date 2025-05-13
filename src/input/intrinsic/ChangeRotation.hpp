@@ -2,7 +2,8 @@
 #include <map>
 #include <atomic>
 
-#include "../InputHandler.hpp"
+#include "../inputBase.hpp"
+#include "../sources/mouseMove.hpp"
 
 namespace IntrinsicInput {
     using namespace InputHandler;

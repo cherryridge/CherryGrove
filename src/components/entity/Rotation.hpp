@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <limits>
 #include <bx/math.h>
 #include <entt/entt.hpp>
 

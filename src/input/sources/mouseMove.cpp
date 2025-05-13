@@ -1,21 +1,15 @@
-﻿#include <GLFW/glfw3.h>
-#include <atomic>
-#include <mutex>
+﻿#include <mutex>
 #include <map>
+#include <GLFW/glfw3.h>
 
-#include "../../debug/debug.hpp"
-#include "../../gui/MainWindow.hpp"
 #include "../../CherryGrove.hpp"
-
 #include "../ImGuiAdapter.hpp"
-
 #include "../inputBase.hpp"
-
 #include "mouseMove.hpp"
 
 namespace InputHandler::MouseMove {
     typedef int32_t i32;
-    using std::atomic, std::mutex, std::multimap, std::lock_guard;
+    using std::mutex, std::multimap, std::lock_guard;
 
     static multimap<EventPriority, MMEvent> mmRegistry;
     static mutex mmMutex;

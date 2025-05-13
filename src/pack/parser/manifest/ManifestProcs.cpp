@@ -1,11 +1,10 @@
-﻿#include <nlohmann/json.hpp>
-#include <memory>
+﻿#include <memory>
 #include <vector>
 #include <string>
+#include <nlohmann/json.hpp>
 #include <boost/uuid.hpp>
 
 #include "ManifestProcs.hpp"
-#include "../../../file/json/Json.hpp"
 #include "../schemaTypes.hpp"
 
 namespace ManifestProcs {

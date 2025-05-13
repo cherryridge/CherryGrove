@@ -1,8 +1,7 @@
 ﻿#include <filesystem>
 #include <string>
 
-#include "../debug/debug.hpp"
-
+#include "../debug/Logger.hpp"
 #include "FileDrop.hpp"
 
 namespace FileDrop {

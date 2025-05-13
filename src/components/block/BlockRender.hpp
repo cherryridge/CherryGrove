@@ -1,10 +1,11 @@
 ﻿#pragma once
 #include <unordered_map>
-#include <glm/glm.hpp>
 #include <array>
+#include <cstdint>
 #include <limits>
+#include <glm/glm.hpp>
 
-#include "../../debug/debug.hpp"
+#include "../../debug/Logger.hpp"
 #include "../../graphic/TexturePool.hpp"
 
 namespace Components {
@@ -69,7 +70,6 @@ namespace Components {
 
     struct BlockRenderComponent {
         std::unordered_map<uint32_t, SubCube> subcubes;
-
 
         BlockRenderComponent() = default;
         //Single cube convention

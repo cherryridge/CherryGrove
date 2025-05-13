@@ -1,4 +1,5 @@
 ﻿
+#include "Logger.hpp"
 #include "Fatal.hpp"
 
 namespace Fatal {

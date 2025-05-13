@@ -2,6 +2,7 @@
 #include <string>
 #include <boost/uuid.hpp>
 
+#include "parser/schemaTypes.hpp"
 #include "Pack.hpp"
 
 namespace PackStatus {

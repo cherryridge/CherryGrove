@@ -1,14 +1,13 @@
-﻿#pragma execution_character_set("utf-8")
+﻿#pragma execution_character_set(push, "utf-8")
 #include <functional>
 #include <unordered_set>
 #include <unordered_map>
 #include <imgui.h>
 
-#include "../debug/debug.hpp"
+#include "../debug/Logger.hpp"
 #include "../sound/Sound.hpp"
 #include "../CherryGrove.hpp"
 #include "../MainGame.hpp"
-#include "MainWindow.hpp"
 #include "GuiUtils.hpp"
 #include "Guis.hpp"
 
@@ -63,7 +62,7 @@ namespace Guis {
         using namespace Utils;
         void render() {
             blWindow("Copyright");
-            Text(reinterpret_cast<const char*>(u8"© 2025 LJM12914. Licensed under GPL-3.0-or-later."));
+            TextUnformatted(reinterpret_cast<const char*>(u8"© 2025 LJM12914. Licensed under GPL-3.0-or-later."));
             endWindow();
         }
     }
@@ -73,7 +72,7 @@ namespace Guis {
         using namespace Utils;
         void render() {
             brWindow("Version");
-            Text(reinterpret_cast<const char*>(u8"0.0.1"));
+            TextUnformatted(reinterpret_cast<const char*>(u8"0.0.1"));
             endWindow();
         }
     }
@@ -91,13 +90,13 @@ namespace Guis {
             coordsStr += ", ";
             coordsStr += std::to_string(coords.z);
             coordsStr += ")";
-            Text(coordsStr.c_str());
+            TextUnformatted(coordsStr.c_str());
             auto& rotation = MainGame::gameRegistry.get<Components::RotationComponent>(MainGame::playerEntity);
             std::string rotationStr = "Yaw: ";
             rotationStr += std::to_string(rotation.yaw);
             rotationStr += " Pitch: ";
             rotationStr += std::to_string(rotation.pitch);
-            Text(rotationStr.c_str());
+            TextUnformatted(rotationStr.c_str());
             endWindow();
         }
     }

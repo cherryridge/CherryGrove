@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <cstdint>
 
 namespace FileDrop {
     typedef int32_t i32;

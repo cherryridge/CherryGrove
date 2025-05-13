@@ -2,9 +2,8 @@
 
 #include "../../MainGame.hpp"
 #include "../../components/entity/Coordinates.hpp"
-
-#include "../InputHandler.hpp"
-
+#include "../inputBase.hpp"
+#include "../sources/boolInput.hpp"
 #include "Movement.hpp"
 
 namespace IntrinsicInput {

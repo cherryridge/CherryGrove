@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include <GLFW/glfw3.h>
 #include <map>
+#include <GLFW/glfw3.h>
 
 #include "../inputBase.hpp"
 

@@ -1,17 +1,17 @@
-﻿#pragma execution_character_set("utf-8")
+﻿#pragma execution_character_set(push, "utf-8")
 #include <filesystem>
 #include <iostream>
 #include <string>
 #include <locale>
 #ifdef _WIN32
-    #define NOMINMAX
     #include <windows.h>
 #else
     #include <fcntl.h>
     #include <unistd.h>
 #endif
 
-#include "debug/debug.hpp"
+#include "debug/Logger.hpp"
+#include "debug/Fatal.hpp"
 #include "CherryGrove.hpp"
 
 #ifdef _WIN32
@@ -23,7 +23,7 @@
 #endif
 
     typedef int32_t i32;
-    using std::filesystem::current_path, std::filesystem::canonical, std::filesystem::remove, std::filesystem::path, std::locale, std::string, std::cout;
+    using std::filesystem::current_path, std::filesystem::canonical, std::filesystem::remove, std::filesystem::path, std::locale, std::string, std::cout, std::endl;
 
     //Set working directory to parent directory of the executable file
     #ifdef _WIN32

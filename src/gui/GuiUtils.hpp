@@ -1,6 +1,7 @@
 ﻿#pragma once
-#include <imgui.h>
 #include <functional>
+
+#include <imgui.h>
 
 namespace Guis::Utils {
     inline constexpr ImVec2 zero2(0.0f, 0.0f);

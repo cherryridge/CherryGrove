@@ -1,12 +1,7 @@
 ﻿#include <atomic>
 
-#include "../../debug/debug.hpp"
-
 #include "../../components/entity/Rotation.hpp"
 #include "../../MainGame.hpp"
-
-#include "../InputHandler.hpp"
-
 #include "ChangeRotation.hpp"
 
 namespace IntrinsicInput {

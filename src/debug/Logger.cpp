@@ -4,10 +4,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <memory>
 #include <thread>
 #include <mutex>
-#include <unordered_map>
 
 #include "Logger.hpp"
 

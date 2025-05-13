@@ -1,10 +1,4 @@
-﻿#define WITH_WINMM
-#include <soloud/soloud.h>
-#include <soloud/soloud_thread.h>
-#include <soloud/soloud_wav.h>
-#include <soloud/soloud_wavstream.h>
-#include <unordered_map>
-#include <glm/glm.hpp>
+﻿#include <unordered_map>
 #include <memory>
 #include <queue>
 #include <mutex>
@@ -12,21 +6,19 @@
 #include <thread>
 #include <variant>
 #include <condition_variable>
+#include <glm/glm.hpp>
+#include <soloud/soloud.h>
+#include <soloud/soloud_thread.h>
+#include <soloud/soloud_wav.h>
+#include <soloud/soloud_wavstream.h>
 
-#include "../debug/debug.hpp"
+#include "../debug/Logger.hpp"
+#include "../debug/Fatal.hpp"
 #include "../CherryGrove.hpp"
-#include "../gui/MainWindow.hpp"
-#include "../components/Components.hpp"
 #include "Sound.hpp"
 
 namespace Sound {
-    typedef uint32_t u32;
-    typedef uint64_t u64;
-    typedef u32 SoundID;
-    typedef u32 EventID;
-    typedef u64 PlayID;
-    
-    using std::unordered_map, SoLoud::Soloud, std::make_unique, std::unique_ptr, SoLoud::Wav, SoLoud::WavStream, std::filesystem::exists, std::thread, std::queue, std::mutex, std::atomic, std::variant, std::unique_lock, std::move, SoLoud::SO_NO_ERROR, std::condition_variable, std::get_if, std::filesystem::is_directory, std::filesystem::is_regular_file, Components::CoordinatesComponent;
+    using std::unordered_map, SoLoud::Soloud, std::make_unique, std::unique_ptr, SoLoud::Wav, SoLoud::WavStream, std::filesystem::exists, std::thread, std::queue, std::mutex, std::variant, std::unique_lock, std::move, SoLoud::SO_NO_ERROR, std::condition_variable, std::filesystem::is_regular_file, Components::CoordinatesComponent;
 
     static void audioLoop();
 

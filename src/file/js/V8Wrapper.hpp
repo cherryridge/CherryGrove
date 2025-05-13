@@ -1,12 +1,4 @@
 ﻿#pragma once
-#include <string>
-#include <v8/libplatform/libplatform.h>
-#include <v8/v8-context.h>
-#include <v8/v8-initialization.h>
-#include <v8/v8-isolate.h>
-#include <v8/v8-local-handle.h>
-#include <v8/v8-primitive.h>
-#include <v8/v8-script.h>
 
 namespace V8Wrapper{
     //Hello CherryGrove from V8!
@@ -16,4 +8,4 @@ namespace V8Wrapper{
     void shutdown();
 
     void evalToStdout(const char* expression);
-};
+}

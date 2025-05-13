@@ -1,23 +1,15 @@
 ﻿#include <GLFW/glfw3.h>
-#include <filesystem>
-#include <map>
-#include <thread>
-#include <unordered_map>
 
-#include "../debug/debug.hpp"
+#include "../debug/Logger.hpp"
 #include "../file/json/Json.hpp"
 #include "../file/FileDrop.hpp"
 #include "../graphic/Renderer.hpp"
 #include "../gui/MainWindow.hpp"
 #include "../CherryGrove.hpp"
-
-#include "inputBase.hpp"
-
 #include "ImGuiAdapter.hpp"
-
 #include "sources/boolInput.hpp"
 #include "sources/mouseMove.hpp"
-
+#include "sources/scroll.hpp"
 #include "InputHandler.hpp"
 
 namespace InputHandler {

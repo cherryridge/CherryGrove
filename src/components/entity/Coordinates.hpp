@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <atomic>
+#include <cstdint>
 #include <entt/entt.hpp>
 
 namespace Components {

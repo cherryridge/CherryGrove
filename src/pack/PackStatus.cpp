@@ -4,12 +4,12 @@
 #include <unordered_map>
 #include <exception>
 #include <vector>
-#include <nlohmann/json.hpp>
 #include <boost/uuid.hpp>
+#include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
 
+#include "../debug/Logger.hpp"
 #include "../file/json/Json.hpp"
-#include "../debug/debug.hpp"
 #include "parser/schemaTypes.hpp"
 #include "Pack.hpp"
 #include "PackStatus.hpp"

@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include <atomic>
 
-#include "../InputHandler.hpp"
+#include "../inputBase.hpp"
+#include "../sources/boolInput.hpp"
 
 namespace IntrinsicInput {
     using namespace InputHandler;

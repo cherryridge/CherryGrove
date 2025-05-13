@@ -1,15 +1,15 @@
 ﻿#pragma once
-#include <nlohmann/json.hpp>
-#include <nlohmann/json-schema.hpp>
 #include <optional>
 #include <tuple>
 #include <string>
 #include <memory>
 #include <filesystem>
 #include <exception>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json-schema.hpp>
 
-#include "../../pack/parser/manifest/ManifestProcs.hpp"
-#include "../../debug/debug.hpp"
+#include "../../pack/parser/schemaTypes.hpp"
+#include "../../debug/Logger.hpp"
 
 namespace Json {
     typedef uint8_t u8;
@@ -56,7 +56,7 @@ namespace Json {
         auto processors = get<T>(processorRegistry).get();
         auto p = processors->find(formatVersion);
         if (p == processors->end()) {
-            lerr << "[JSON] `formatVersion`: " << formatVersion << " is invalid/deprecated! LatestformatVersion is " << LATEST_FORMAT_VERSION << endl;
+            lerr << "[JSON] `formatVersion`: " << formatVersion << " is invalid/deprecated! Latest formatVersion is " << LATEST_FORMAT_VERSION << endl;
             return nullopt;
         }
         return p->second(patchedResult);

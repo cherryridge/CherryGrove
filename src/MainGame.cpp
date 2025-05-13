@@ -2,22 +2,17 @@
 #include <mutex>
 #include <atomic>
 #include <chrono>
-#include <unordered_map>
-#include <array>
 #include <entt/entt.hpp>
 #include <GLFW/glfw3.h>
 
-#include "debug/debug.hpp"
-
+#include "debug/Logger.hpp"
 #include "input/InputHandler.hpp"
 #include "input/intrinsic/ChangeRotation.hpp"
 #include "input/intrinsic/Movement.hpp"
-
 #include "components/Components.hpp"
 #include "graphic/TexturePool.hpp"
 #include "gui/Guis.hpp"
 #include "gui/MainWindow.hpp"
-#include "graphic/Renderer.hpp"
 #include "MainGame.hpp"
 
 namespace MainGame {
@@ -130,7 +125,7 @@ namespace MainGame {
             auto startTime = steady_clock::now();
             if (!gamePaused) tick();
             auto endTime = steady_clock::now();
-            auto elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+            auto elapsedTime = duration_cast<microseconds>(endTime - startTime);
             if (elapsedTime < 20000us) sleep_for(20000us - elapsedTime);
         }
         lout << "Game loop terminated!" << endl;

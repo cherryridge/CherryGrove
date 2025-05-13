@@ -13,7 +13,7 @@
 #include <v8/v8-primitive.h>
 #include <v8/v8-script.h>
 
-#include "../../debug/debug.hpp"
+#include "../../debug/Logger.hpp"
 #include "V8Wrapper.hpp"
 
 using std::unique_ptr;

@@ -9,7 +9,7 @@
 using std::endl, std::flush;
 
 namespace Logger {
-    using std::cout, std::cerr, std::ostream, std::enable_if, std::is_function, std::stringstream, std::this_thread::get_id, std::lock_guard, std::mutex, std::unordered_map, std::string, std::thread;
+    using std::cout, std::cerr, std::ostream, std::enable_if, std::is_function, std::stringstream, std::this_thread::get_id, std::lock_guard, std::mutex, std::unordered_map, std::string, std::thread, std::lock_guard;
 
     void shutdown();
 
@@ -26,7 +26,7 @@ namespace Logger {
                 //Use l* << <Content> << endl to output thread-safe content.
                 //l* << endl will result in nothing.
                 if (!threadBufferOdi.str().empty()) {
-                    lock_guard guard(loggerMutex);
+                    lock_guard<mutex> guard(loggerMutex);
                     cout << threadBufferOdi.str() << endl << flush;
                     threadBufferOdi.str("");
                     threadBufferOdi.clear();
@@ -35,7 +35,7 @@ namespace Logger {
             else if (manip == static_cast<ostream& (*)(ostream&)>(flush)) {
                 //Use l* << <Name> << flush to set a customized name for this thread.
                 if (!threadBufferOdi.str().empty()) {
-                    lock_guard guard(loggerMutex);
+                    lock_guard<mutex> guard(loggerMutex);
                     string tBstr = threadBufferOdi.str(), name = tBstr.substr(tBstr.find_first_of(' ') + 1);
                     auto p = threadNames.find(get_id());
                     if (p == threadNames.end()) threadNames.emplace(get_id(), name);
@@ -81,7 +81,7 @@ namespace Logger {
                 //Use l* << <Content> << endl to output thread-safe content.
                 //l* << endl will result in nothing.
                 if (!threadBufferErr.str().empty()) {
-                    lock_guard guard(loggerMutex);
+                    lock_guard<mutex> guard(loggerMutex);
                     //No need to flush because `cerr` will automatically empty the buffer to the screen.
                     cerr << threadBufferErr.str() << endl;
                     threadBufferErr.str("");
@@ -91,7 +91,7 @@ namespace Logger {
             else if (manip == static_cast<ostream & (*)(ostream&)>(flush)) {
                 //Use l* << <Name> << flush to set a customized name for this thread.
                 if (!threadBufferErr.str().empty()) {
-                    lock_guard guard(loggerMutex);
+                    lock_guard<mutex> guard(loggerMutex);
                     string tBstr = threadBufferErr.str(), name = tBstr.substr(tBstr.find_first_of(' ') + 1);
                     auto p = threadNames.find(get_id());
                     if (p == threadNames.end()) threadNames.emplace(get_id(), name);

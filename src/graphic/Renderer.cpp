@@ -23,21 +23,23 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_bgfx.h>
 
-#include "../debug/debug.hpp"
+#include "../debug/Logger.hpp"
+#include "../debug/Fatal.hpp"
+#include "../components/Components.hpp"
 #include "../CherryGrove.hpp"
 #include "ShaderPool.hpp"
 #include "TexturePool.hpp"
 #include "../input/InputHandler.hpp"
+#include "../input/ImGuiAdapter.hpp"
 #include "../gui/Guis.hpp"
 #include "../gui/MainWindow.hpp"
 #include "../MainGame.hpp"
-#include "../components/Components.hpp"
 #include "Renderer.hpp"
 
 namespace Renderer {
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::thread, std::atomic, std::unique_lock, MainGame::gameRegistry, MainGame::playerEntity, MainGame::registryMutex;
+    using std::thread, std::atomic, MainGame::gameRegistry, MainGame::playerEntity;
 
     atomic<bool> initialized(false);
     atomic<bool> sizeUpdateSignal(true);
@@ -144,6 +146,7 @@ namespace Renderer {
     }
 
     static void renderLoop() {
+        using Components::BlockRenderComponent, Components::BlockCoordinatesComponent;
         using namespace Components;
         lout << "Renderer" << flush;
         lout << "Hello from renderer thread!" << endl;

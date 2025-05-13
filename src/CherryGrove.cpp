@@ -1,6 +1,6 @@
 ﻿#include <atomic>
 
-#include "debug/debug.hpp"
+#include "debug/Logger.hpp"
 #include "MainGame.hpp"
 #include "gui/MainWindow.hpp"
 #include "graphic/Renderer.hpp"
@@ -8,7 +8,6 @@
 #include "gui/Guis.hpp"
 #include "pack/Pack.hpp"
 #include "input/intrinsic/Escape.hpp"
-#include "input/intrinsic/ChangeRotation.hpp"
 #include "CherryGrove.hpp"
 
 namespace CherryGrove {

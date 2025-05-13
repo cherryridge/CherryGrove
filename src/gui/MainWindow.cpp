@@ -7,15 +7,10 @@
 #include <queue>
 
 #include "../input/InputHandler.hpp"
-#include "../debug/debug.hpp"
-#include "../graphic/Renderer.hpp"
-#include "../MainGame.hpp"
-#include "../sound/Sound.hpp"
+#include "../debug/Logger.hpp"
+#include "../debug/Fatal.hpp"
 #include "../CherryGrove.hpp"
-#include "Guis.hpp"
 #include "MainWindow.hpp"
-
-#include <fstream>
 
 namespace MainWindow {
     typedef int32_t i32;

@@ -1,8 +1,5 @@
 ﻿#pragma once
 #include <cstdint>
-#include <cstdlib>
-
-#include "Logger.hpp"
 
 namespace Fatal {
     typedef int32_t i32;

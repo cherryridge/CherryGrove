@@ -1,11 +1,10 @@
-﻿#include <bgfx/bgfx.h>
-#include <stb/stb_image.h>
-#include <optional>
+﻿#include <optional>
 #include <unordered_map>
 #include <limits>
-#include <memory>
+#include <bgfx/bgfx.h>
+#include <stb/stb_image.h>
 
-#include "../debug/debug.hpp"
+#include "../debug/Logger.hpp"
 #include "TexturePool.hpp"
 
 //MASSIVE todo: store texture in one texture atlas and use textureId to index coordinates.

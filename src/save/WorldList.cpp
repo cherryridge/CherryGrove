@@ -4,10 +4,7 @@
 #include <mutex>
 #include <map>
 
-#include "../debug/debug.hpp"
-
-#include "../file/json/Json.hpp"
-
+#include "../debug/Logger.hpp"
 #include "saveBase.hpp"
 #include "WorldList.hpp"
 

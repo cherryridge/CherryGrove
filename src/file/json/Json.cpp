@@ -1,15 +1,12 @@
-﻿#include <nlohmann/json.hpp>
-#include <string>
+﻿#include <string>
 #include <fstream>
 #include <filesystem>
 #include <optional>
-#include <memory>
+#include <nlohmann/json.hpp>
 
-#include "../../debug/debug.hpp"
-
+#include "../../debug/Logger.hpp"
 #include "../../pack/parser/manifest/ManifestProcs.hpp"
 #include "../../pack/parser/schemaTypes.hpp"
-
 #include "Json.hpp"
 
 namespace Json {

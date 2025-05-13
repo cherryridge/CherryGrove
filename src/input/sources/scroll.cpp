@@ -1,14 +1,10 @@
-﻿#include <GLFW/glfw3.h>
-#include <map>
+﻿#include <map>
 #include <mutex>
+#include <GLFW/glfw3.h>
 
-#include "../../debug/debug.hpp"
 #include "../../CherryGrove.hpp"
-
 #include "../ImGuiAdapter.hpp"
-
 #include "../inputBase.hpp"
-
 #include "scroll.hpp"
 
 namespace InputHandler::Scroll {

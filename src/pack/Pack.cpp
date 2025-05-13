@@ -1,10 +1,9 @@
 ﻿#include <string>
 #include <filesystem>
 #include <vector>
-#include <memory>
 #include <optional>
 
-#include "../debug/debug.hpp"
+#include "../debug/Logger.hpp"
 #include "../file/js/V8Wrapper.hpp"
 #include "../file/json/Json.hpp"
 #include "parser/schemaTypes.hpp"
