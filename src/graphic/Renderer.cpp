@@ -3,18 +3,15 @@
 #include <bx/math.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
-#include <GLFW/glfw3.h>
 #if defined(_WIN32)
     #define GLFW_EXPOSE_NATIVE_WIN32
 #elif defined(__linux__)
-    #if defined(USE_WAYLAND)
-        #define GLFW_EXPOSE_NATIVE_WAYLAND
-    #else
-        #define GLFW_EXPOSE_NATIVE_X11
-    #endif
+    #define GLFW_EXPOSE_NATIVE_WAYLAND
+    #define GLFW_EXPOSE_NATIVE_X11
 #elif defined(__APPLE__)
     #define GLFW_EXPOSE_NATIVE_COCOA
 #endif
+#include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <stb/stb_image.h>
 #define IMGUI_ENABLE_FREETYPE
@@ -66,12 +63,17 @@ namespace Renderer {
                 ImmAssociateContext(glfwGetWin32Window(MainWindow::window), nullptr);
             });
         #elif defined(__linux__)
-            #ifdef USE_WAYLAND
+            const char* sessionType = secure_getenv("XDG_SESSION_TYPE");
+            if((sessionType && strcmp(sessionType, "wayland") == 0) || getenv("WAYLAND_DISPLAY")) {
                 pdata.ndt = glfwGetWaylandDisplay();
-            #else
+                pdata.nwh = reinterpret_cast<void*>(glfwGetWaylandWindow(MainWindow::window));
+                pdata.type = bgfx::NativeWindowHandleType::Wayland;
+            }
+            else{
                 pdata.ndt = glfwGetX11Display();
                 pdata.nwh = reinterpret_cast<void*>(glfwGetX11Window(MainWindow::window));
-            #endif
+                pdata.type = bgfx::NativeWindowHandleType::Default;
+            }
         #elif defined(__APPLE__)
             pdata.ndt = nullptr;
             pdata.nwh = glfwGetCocoaWindow(MainWindow::window);
@@ -80,6 +82,8 @@ namespace Renderer {
         config.type = bgfx::RendererType::Count;
         //Control for switching backend temporaily for debug.
         //config.type = bgfx::RendererType::Vulkan;
+        //Let bgfx auto select adapter.
+        config.vendorId = BGFX_PCI_ID_NONE;
         i32 width, height;
         glfwGetWindowSize(MainWindow::window, &width, &height);
         config.resolution.width = width;

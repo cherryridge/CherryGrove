@@ -39,6 +39,8 @@ set(SOLOUD_LIB "${CMAKE_SOURCE_DIR}/libs/soloud/$<IF:$<CONFIG:Debug>,debug,relea
 set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>v8_monolith$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 
 add_subdirectory("libs/freetype")
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "")
+set(GLFW_INSTALL OFF CACHE BOOL "")
 add_subdirectory("libs/glfw")
 add_subdirectory("libs/json")
 set(ENV{NLOHMANN_JSON_VERSION} "v3.12.0")
@@ -48,6 +50,9 @@ set(ZLIB_ENABLE_TESTS   OFF CACHE BOOL "")
 set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "")
 set(WITH_GTEST          OFF CACHE BOOL "")
 add_subdirectory("libs/zlib_ng")
+
+set(ZLIBNG_ROOT "${CMAKE_SOURCE_DIR}/libs/zlib-ng" CACHE PATH "")
+add_subdirectory("libs/cgnbt")
 
 if(UNIX AND NOT APPLE)
     find_package(ALSA REQUIRED)
