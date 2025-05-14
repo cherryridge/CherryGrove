@@ -39,7 +39,7 @@ namespace CherryGrove {
 
         lout << "Initializing pack manager..." << endl;
         Pack::init();
-        
+
     //Set up main menu
         Guis::setVisible(Guis::wMainMenu);
         Guis::setVisible(Guis::wCopyright);
