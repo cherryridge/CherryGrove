@@ -2,15 +2,21 @@
 
 project("CherryGrove")
 
+#------------Basic-----------------
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-cmake_policy(SET CMP0091 NEW)
+set(CMAKE_FIND_USE_PACKAGE_REGISTRY FALSE)
+set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY FALSE)
+#----------------------------------
+
+#------------MSVC------------------
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /Zc:preprocessor")
+    cmake_policy(SET CMP0091 NEW)
     add_compile_definitions(
         WIN32_LEAN_AND_MEAN
         NOMINMAX
@@ -24,12 +30,18 @@ if(MSVC)
         endif()
     endforeach()
 endif()
+#----------------------------------
 
+#------------Clangd----------------
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+#----------------------------------
 
+#------------Files-----------------
 file(GLOB_RECURSE CG_SOURCES CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
 file(GLOB_RECURSE IMGUI_SOURCES CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/libs/imgui/*.cpp")
+#----------------------------------
 
+#------------Dep:Prebuilt----------
 set(BGFX_BGFX_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bgfx$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 set(BGFX_BX_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bx$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 set(BGFX_BIMG_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bimg$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
@@ -37,7 +49,9 @@ set(BGFX_BIMG_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,rele
 set(SOLOUD_LIB "${CMAKE_SOURCE_DIR}/libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>soloud_static_x64$<$<CONFIG:Debug>:_d>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 
 set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>v8_monolith$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
+#----------------------------------
 
+#------------Dep:3rdparty----------
 add_subdirectory("libs/freetype")
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "")
 set(GLFW_INSTALL OFF CACHE BOOL "")
@@ -50,10 +64,14 @@ set(ZLIB_ENABLE_TESTS   OFF CACHE BOOL "")
 set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "")
 set(WITH_GTEST          OFF CACHE BOOL "")
 add_subdirectory("libs/zlib_ng")
+#----------------------------------
 
-set(ZLIBNG_ROOT "${CMAKE_SOURCE_DIR}/libs/zlib-ng" CACHE PATH "")
+#------------Dep:Internal----------
+set(CGNBT_HAS_ZLIBNG ON CACHE BOOL "")
 add_subdirectory("libs/cgnbt")
+#----------------------------------
 
+#------------Dep:System------------
 if(UNIX AND NOT APPLE)
     find_package(ALSA REQUIRED)
     find_package(PkgConfig REQUIRED)
@@ -66,12 +84,18 @@ elseif(APPLE)
     find_library(FOUNDATION_LIBRARY Foundation)
     find_library(QUARTZCORE_LIBRARY QuartzCore)
 endif()
+#----------------------------------
 
+#------------CherryGrove-----------
 add_executable(${PROJECT_NAME} ${CG_SOURCES} ${IMGUI_SOURCES})
+#----------------------------------
 
+#------------Build:Marco-----------
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<IF:$<CONFIG:Debug>,DEBUG,NDEBUG>)
 target_compile_definitions(${PROJECT_NAME} PRIVATE "BX_CONFIG_DEBUG=$<IF:$<CONFIG:Debug>,1,0>")
+#----------------------------------
 
+#------------Inclusions------------
 target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/boost/assert/include"
     "libs/boost/config/include"
@@ -87,8 +111,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/json/single_include"
     "libs/stb"
 
-    "libs/cgnbt/include"
-
     "libs/freetype/include"
     "libs/glfw/include"
     "libs/json_schema_validator/src"
@@ -98,10 +120,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/include"
     "libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/include"
 
+    "libs/cgnbt/include"
+
     "libs/imgui"
 )
+#----------------------------------
 
+#------------Link------------------
 target_link_libraries(${PROJECT_NAME} PRIVATE
+    CGNBT
+
     freetype
     glfw
     nlohmann_json_schema_validator
@@ -113,7 +141,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${SOLOUD_LIB}
     ${V8_LIB}
 )
+#----------------------------------
 
+#------------Link:System-----------
 if(WIN32)
     target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
     target_link_libraries(${PROJECT_NAME} PRIVATE dbghelp)
@@ -135,7 +165,9 @@ elseif(APPLE)
         ${QUARTZCORE_LIBRARY}
     )
 endif()
+#----------------------------------
 
+#------------Debug:CopyFile--------
 if(EXISTS "${CMAKE_SOURCE_DIR}/assets")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets"  "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets")
 endif()
@@ -151,7 +183,9 @@ endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/options.json")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/options.json"  "$<TARGET_FILE_DIR:${PROJECT_NAME}>/options.json")
 endif()
+#----------------------------------
 
+#------------Debug:Shader----------
 file(GLOB VERT_SHADER_SOURCES CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/shader/*.vert")
 foreach(SHADER_PATH IN LISTS VERT_SHADER_SOURCES)
     get_filename_component(SHADER_NAME "${SHADER_PATH}" NAME)
@@ -222,3 +256,4 @@ foreach(SHADER_PATH IN LISTS FRAG_SHADER_SOURCES)
         VERBATIM
     )
 endforeach()
+#----------------------------------
