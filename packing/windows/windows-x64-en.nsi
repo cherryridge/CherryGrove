@@ -72,14 +72,14 @@ Section "MainSection" SEC01
     SetOutPath "$INSTDIR"
     File "..\..\LICENSE"
     File "..\readmes\README.txt"                                                                   #DIF
-    File "..\..\out\windows-x64-release\Release\CherryGrove.exe"
+    File "..\..\out\windows-x64-release\CherryGrove.exe"
     SetOutPath "$INSTDIR\assets"
     File /r "..\..\assets\*"
     SetOutPath "$INSTDIR\captures"
     SetOutPath "$INSTDIR\packs"
     SetOutPath "$INSTDIR\saves"
     SetOutPath "$INSTDIR\shaders"
-    File /r "..\..\out\windows-x64-release\Release\shaders\*"
+    File /r "..\..\out\windows-x64-release\shaders\*"
     SetOutPath "$INSTDIR\test"
     File /r "..\..\test\*"
 

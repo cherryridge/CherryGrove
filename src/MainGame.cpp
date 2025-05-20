@@ -132,7 +132,7 @@ namespace MainGame {
     }
 
     static void tick() {
-        //Process player input
+    //Process player input
         InputHandler::processInputGame();
     //Update world
         unique_lock lock(registryMutex);
