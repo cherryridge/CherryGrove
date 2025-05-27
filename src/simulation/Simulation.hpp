@@ -3,7 +3,7 @@
 #include <mutex>
 #include <entt/entt.hpp>
 
-namespace MainGame {
+namespace Simulation {
     extern std::atomic<bool> gameStarted;
     //Signals the Main thread to call `exit`.
     extern std::atomic<bool> gameStopSignal;

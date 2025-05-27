@@ -3,19 +3,18 @@
 #include <atomic>
 #include <chrono>
 #include <entt/entt.hpp>
-#include <GLFW/glfw3.h>
 
-#include "debug/Logger.hpp"
-#include "input/InputHandler.hpp"
-#include "input/intrinsic/ChangeRotation.hpp"
-#include "input/intrinsic/Movement.hpp"
-#include "components/Components.hpp"
-#include "graphic/TexturePool.hpp"
-#include "gui/Guis.hpp"
-#include "gui/MainWindow.hpp"
-#include "MainGame.hpp"
+#include "../debug/Logger.hpp"
+#include "../input/InputHandler.hpp"
+#include "../input/intrinsic/ChangeRotation.hpp"
+#include "../input/intrinsic/Movement.hpp"
+#include "../components/Components.hpp"
+#include "../graphic/TexturePool.hpp"
+#include "../gui/Gui.hpp"
+#include "../gui/Window.hpp"
+#include "Simulation.hpp"
 
-namespace MainGame {
+namespace Simulation {
     typedef int32_t i32;
     typedef uint32_t u32;
     using std::atomic, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds;
@@ -41,24 +40,24 @@ namespace MainGame {
     void start() {
         gameStarted = true;
 
-        Guis::setVisible(Guis::wMainMenu, false);
-        Guis::setVisible(Guis::wCopyright, false);
-        Guis::setVisible(Guis::wVersion, false);
+        Gui::setVisible(Gui::wMainMenu, false);
+        Gui::setVisible(Gui::wCopyright, false);
+        Gui::setVisible(Gui::wVersion, false);
 
-        MainWindow::runOnMainThread([]() {
+        Window::runOnMainThread([]() {
             using namespace InputHandler;
-            BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "forward", 10 }, IntrinsicInput::forward, GLFW_KEY_W);
-            BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "backward", 10 }, IntrinsicInput::backward, GLFW_KEY_S);
-            BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "left", 10 }, IntrinsicInput::left, GLFW_KEY_A);
-            BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "right", 10 }, IntrinsicInput::right, GLFW_KEY_D);
-            BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "up", 10 }, IntrinsicInput::up, GLFW_KEY_SPACE);
-            BoolInput::addBoolInput(BoolInput::BIEType::Persist, { "", "down", 10 }, IntrinsicInput::down, GLFW_KEY_LEFT_SHIFT);
+            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "forward", 10 }, IntrinsicInput::forward, GLFW_KEY_W);
+            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "backward", 10 }, IntrinsicInput::backward, GLFW_KEY_S);
+            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "left", 10 }, IntrinsicInput::left, GLFW_KEY_A);
+            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "right", 10 }, IntrinsicInput::right, GLFW_KEY_D);
+            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "up", 10 }, IntrinsicInput::up, GLFW_KEY_SPACE);
+            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "down", 10 }, IntrinsicInput::down, GLFW_KEY_LEFT_SHIFT);
             MouseMove::addMouseMove({ "", "moveCamera", 10 }, IntrinsicInput::changeRotationCB);
-            glfwSetInputMode(MainWindow::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(Window::windowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         });
 
         //Temporary code to show debug menu
-        Guis::setVisible(Guis::wDebugMenu);
+        Gui::setVisible(Gui::wDebugMenu);
         gameThread = thread(&gameLoop);
 
         //Temporary code to spawn player entity
@@ -99,23 +98,23 @@ namespace MainGame {
         gameRegistry.clear();
 
         //Clear input callbacks (todo: will be changed to use clear())
-        MainWindow::runOnMainThread([]() {
+        Window::runOnMainThread([]() {
             using namespace InputHandler;
-            BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::forward);
-            BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::backward);
-            BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::left);
-            BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::right);
-            BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::up);
-            BoolInput::removeBoolInput(BoolInput::BIEType::Persist, IntrinsicInput::down);
+            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::forward);
+            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::backward);
+            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::left);
+            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::right);
+            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::up);
+            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::down);
             MouseMove::removeMouseMove(IntrinsicInput::changeRotationCB);
-            glfwSetInputMode(MainWindow::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(Window::windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         });
 
         //Go back to main menu
-        Guis::setVisible(Guis::wDebugMenu, false);
-        Guis::setVisible(Guis::wMainMenu);
-        Guis::setVisible(Guis::wCopyright);
-        Guis::setVisible(Guis::wVersion);
+        Gui::setVisible(Gui::wDebugMenu, false);
+        Gui::setVisible(Gui::wMainMenu);
+        Gui::setVisible(Gui::wCopyright);
+        Gui::setVisible(Gui::wVersion);
     }
 
     static void gameLoop() {

@@ -1,166 +1,284 @@
-﻿#include <unordered_map>
-#include <map>
-#include <mutex>
-#include <algorithm>
+﻿#include <algorithm>
+#include <array>
+#include <bitset>
+#include <limits>
+#include <shared_mutex>
+#include <SDL3/SDL.h>
 
 #include "../../debug/Logger.hpp"
 #include "../../CherryGrove.hpp"
-#include "../ImGuiAdapter.hpp"
+#include "../InputHandler.hpp"
 #include "../inputBase.hpp"
 #include "boolInput.hpp"
 
 namespace InputHandler::BoolInput {
+    typedef uint8_t u8;
     typedef int32_t i32;
-    using std::unordered_map, std::multimap, std::mutex, std::lock_guard, std::move;
+    typedef uint32_t u32;
+    typedef uint64_t u64;
+    using std::array, std::shared_mutex, std::shared_lock, std::scoped_lock, std::move, std::numeric_limits, std::bitset, std::sort;
 
-    //This is not a continuous map. See `BoolInputID`.
-    static unordered_map<BoolInputID, BIStatus> biStatus;
-    static mutex biStatusMutex;
+    //todo: Lock-free biStates
+    static bitset<BID_COUNT> biStates, gamepadReset;
+    static shared_mutex biStatesMutex;
 
-    //Explanation for BIEvent: see boolInput.hpp.
-    static unordered_map<BoolInputID, multimap<EventPriority, BIEvent>> biStartRegistry;
-    static mutex biStartMutex;
-    static unordered_map<BoolInputID, multimap<EventPriority, BIEvent>> biPersistRegistry;
-    static mutex biPersistMutex;
-    static unordered_map<BoolInputID, multimap<EventPriority, BIEvent>> biEndRegistry;
-    static mutex biEndMutex;
+    static array<ActionRegistryTemplate<Action>, BID_COUNT>
+        biInactiveRegistries,
+        biPressRegistries,
+        biRepeatRegistries,
+        biReleaseRegistries;
+    #define GET_REGISTRIES(type) type == ActionTypes::Inactive ? biInactiveRegistries : type == ActionTypes::Press ? biPressRegistries : type == ActionTypes::Repeat ? biRepeatRegistries : biReleaseRegistries
 
-    void init() {
-        for (auto& bi : boolInputDesc) {
-            biStatus.emplace(bi.inputCode, BIStatus::Inactive);
-            multimap<EventPriority, BIEvent> start, persist, end;
-            biStartRegistry.emplace(bi.inputCode, move(start));
-            biPersistRegistry.emplace(bi.inputCode, move(persist));
-            biEndRegistry.emplace(bi.inputCode, move(end));
-        }
+    void init() noexcept {
+        //Construct gamepad reset mask bitset.
+        gamepadReset.set();
+        for (BoolInputID i = BID_GAMEPAD_START; i <= BID_GAMEPAD_END; i++) gamepadReset.reset(i);
     }
 
-    void s_keyCB(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods) {
-        if (CherryGrove::isCGAlive) {
-            //lout << "?" << endl;
-            if (sendToImGui) imGui_keyCB(window, key, scancode, action, mods);
-            switch (action) {
-                case GLFW_PRESS: {
-                    lock_guard lock(biStatusMutex);
-                    auto p = biStatus.find(key);
-                    if (p != biStatus.end()) p->second = BIStatus::Press;
-                    //lout << "press" << endl;
-                    break;
-                }
-                case GLFW_REPEAT: break;
-                case GLFW_RELEASE: {
-                    lock_guard lock(biStatusMutex);
-                    auto p = biStatus.find(key);
-                    if (p != biStatus.end()) p->second = BIStatus::Release;
-                    //lout << "rel" << endl;
-                    break;
-                }
-            }
-        }
+    const bitset<BID_COUNT>& getKeyStates() noexcept { return biStates; }
+
+    inline static bool getState(BoolInputID bID) noexcept { return biStates.test(bID); }
+
+    inline static bool getState(i32 rawID) noexcept {
+        auto p = boolInputMap.find(rawID);
+        //Invalid SDL scancode, always not activated
+        if (p == boolInputMap.end()) return false;
+        return biStates.test(p->second);
     }
 
-    void s_mouseButtonCB(GLFWwindow* window, i32 button, i32 action, i32 mods) {
-        if (CherryGrove::isCGAlive) {
-            if (sendToImGui) imGui_mouseButtonCB(window, button, action, mods);
-            switch (action) {
-                case GLFW_PRESS: {
-                    lock_guard lock(biStatusMutex);
-                    auto p = biStatus.find(button);
-                    if (p != biStatus.end()) p->second = BIStatus::Press;
-                    break;
-                }
-                case GLFW_REPEAT: break;
-                case GLFW_RELEASE: {
-                    lock_guard lock(biStatusMutex);
-                    auto p = biStatus.find(button);
-                    if (p != biStatus.end()) p->second = BIStatus::Release;
-                    break;
-                }
-            }
-        }
+    //Doesn't lock the state array!
+    inline static void setState(BoolInputID bID, bool state) noexcept {
+        auto index = bID / 64, reminder = bID - index * 64;
+        //scoped_lock lock(biStatesMutex);
+        biStates.set(bID, state);
     }
 
-    constexpr const char* findBoolInputName(BoolInputID inputCode) {
-        auto it = std::lower_bound(boolInputDesc.begin(), boolInputDesc.end(), inputCode, [](const BISource& descriptor, BoolInputID key) {
-            return descriptor.inputCode < key;
-        });
-        if (it != boolInputDesc.end()) return it->name;
-        else return nullptr;
+    //Doesn't lock the state array!
+    inline static void setState(i32 rawID, bool state) noexcept {
+        auto p = boolInputMap.find(rawID);
+        //Invalid SDL scancode, do nothing
+        if (p == boolInputMap.end()) return;
+        //scoped_lock lock(biStatesMutex);
+        biStates.set(p->second, state);
     }
 
-    void addBoolInput(BIEType type, const InputEventInfo& info, BICallback cb, BoolInputID defaultBinding) {
-        auto& eventRegistry = type == BIEType::Start ? biStartRegistry : type == BIEType::Persist ? biPersistRegistry : biEndRegistry;
-        auto p = eventRegistry.find(defaultBinding);
-        if (biStatus.find(defaultBinding) != biStatus.end()) {
-            lock_guard eventRegistryLock(type == BIEType::Start ? biStartMutex : type == BIEType::Persist ? biPersistMutex : biEndMutex);
-            BIEvent event(info, cb, defaultBinding);
-            (p->second).emplace(info.priority, event);
-        }
-        else lerr << "[InputHandler] Passed invalid bool input ID: " << defaultBinding << endl;
-    }
-
-    bool removeBoolInput(BIEType type, BICallback cb) {
-        for (auto& [iid, map] : (type == BIEType::Start ? biStartRegistry : type == BIEType::Persist ? biPersistRegistry : biEndRegistry)) {
-            for (auto it = map.begin(); it != map.end(); it++) if (it->second.cb == cb) {
-                lock_guard eventRegistryLock(type == BIEType::Start ? biStartMutex : type == BIEType::Persist ? biPersistMutex : biEndMutex);
-                map.erase(it);
+    ActionID addBoolInput(const string& nameAndSpace, EventPriority priority, CallbackTemplate<Action, EventData> cb, ActionTypes type, BoolInputID defaultBinding) noexcept {
+        if (defaultBinding < BID_COUNT) {
+            auto& registry = (GET_REGISTRIES(type))[defaultBinding];
+            auto id = getNextId();
+            registry.operateSwap([&nameAndSpace, &priority, &cb, &defaultBinding, &id](vector<Action>& original) {
+                original.emplace_back(ActionInfo{nameAndSpace, id, priority}, cb, defaultBinding);
+                sort(original.begin(), original.end(), [](const Action& a, const Action& b) {
+                    return a.info.priority < b.info.priority;
+                });
                 return true;
-            }
+            });
+            return id;
+        }
+        else {
+            lerr << "[InputHandler] Passed invalid bool input ID for default binding: " << defaultBinding << endl;
+            return INVALID_ACTION_ID;
+        }
+    }
+
+    bool removeBoolInput(ActionID id, ActionTypes type) noexcept {
+        if (id == INVALID_ACTION_ID) return false;
+        auto& registries = GET_REGISTRIES(type);
+        //Should check `EMPTY_BID`.
+        for (BoolInputID i = 0; i < BID_COUNT; i++) {
+            bool succeed = false;
+            registries[i].operateSwap([&id, &succeed](vector<Action>& original) {
+                for (auto it = original.begin(); it != original.end(); it++) if(it->info.eventId == id) {
+                    original.erase(it);
+                    succeed = true;
+                    return true;
+                }
+                //No matches, cancel the swap
+                return false;
+            });
+            if (succeed) return true;
         }
         return false;
     }
 
-    void changeBinding() {
-
+    bool getBinding(ActionID id, ActionTypes type, BoolInputID& result) noexcept {
+        if (id == INVALID_ACTION_ID) {
+            lerr << "[InputHandler] Passed invalid action id to get binding!" << endl;
+            return false;
+        }
+        const auto& registries = GET_REGISTRIES(type);
+        for (BoolInputID i = 0; i < BID_COUNT; i++) if (registries[i].has(id) != numeric_limits<u32>::max()) {
+            result = i;
+            return true;
+        }
+        return false;
     }
 
-    void resetBinding() {
-
-    }
-
-    void s_process() {
-        //lout << "Processing Bool Input" << endl;
-        for (const auto& [id, status] : biStatus) switch (status) {
-            case BIStatus::Press: {
-                { //Change the status to `Repeat` instantly.
-                    lock_guard lock(biStatusMutex);
-                    biStatus[id] = BIStatus::Repeat;
+    bool changeBinding(ActionID id, ActionTypes type, BoolInputID newBID) noexcept {
+        if (id == INVALID_ACTION_ID) return false;
+        if (newBID < BID_COUNT) {
+            auto& registries = GET_REGISTRIES(type);
+            bool succeed = false;
+            Action temp(true);
+            //Should check `EMPTY_BID`.
+            for (BoolInputID i = 0; i < BID_COUNT; i++) {
+                //Literally `removeBoolInput` code.
+                registries[i].operateSwap([&id, &succeed, &temp](vector<Action>& original) {
+                    for (auto it = original.begin(); it != original.end(); it++) if (it->info.eventId == id) {
+                        temp = *it;
+                        original.erase(it);
+                        succeed = true;
+                        return true;
+                    }
+                    //No matches, cancel the swap
+                    return false;
+                });
+                if (succeed) {
+                    registries[newBID].operateSwap([&id, &temp](vector<Action>& original) {
+                        original.push_back(move(temp));
+                        sort(original.begin(), original.end(), [](const Action& a, const Action& b) {
+                            return a.info.priority < b.info.priority;
+                        });
+                        return true;
+                    });
+                    break;
                 }
-                auto p = biStartRegistry.find(id);
-                if (p != biStartRegistry.end()) for (const auto& [priority, event] : p->second) {
-                    //lout << "BI Press " << event.info.name << endl;
-                    EventFlags flags = 0;
-                    event.cb(p->second, priority, flags, id);
-                    if (flags & EVENTFLAGS_STOP_IMMEDIATELY) break;
-                }
-                break;
             }
-            case BIStatus::Repeat: {
-                auto p = biPersistRegistry.find(id);
-                if (p != biPersistRegistry.end()) for (const auto& [priority, event] : p->second) {
-                    //lout << "BI Repeat " << event.info.name << endl;
-                    EventFlags flags = 0;
-                    event.cb(p->second, priority, flags, id);
-                    if (flags & EVENTFLAGS_STOP_IMMEDIATELY) break;
-                }
-                break;
-            }
-            case BIStatus::Release: {
-                { //Change the status to `BIInactive` instantly.
-                    lock_guard lock(biStatusMutex);
-                    biStatus[id] = BIStatus::Inactive;
-                }
-                auto p = biEndRegistry.find(id);
-                if (p != biEndRegistry.end()) for (const auto& [priority, event] : p->second) {
-                    //lout << "BI Release " << event.info.name << endl;
-                    EventFlags flags = 0;
-                    event.cb(p->second, priority, flags, id);
-                    if (flags & EVENTFLAGS_STOP_IMMEDIATELY) break;
-                }
-                break;
-            }
-            //case BIStatus::Inactive:
-            default: break;
+            return succeed;
+        }
+        else {
+            lerr << "[InputHandler] Passed invalid bool input ID: " << newBID << endl;
+            return false;
         }
     }
-}
+
+    bool resetBinding(ActionID id, ActionTypes type) noexcept {
+        if (id == INVALID_ACTION_ID) return false;
+        auto& registries = GET_REGISTRIES(type);
+        bool succeed = false;
+        Action temp(true);
+        //this == changeBinding(..., defaultBinding)
+        //Should check `EMPTY_BID`.
+        for (BoolInputID i = 0; i < BID_COUNT; i++) {
+            registries[i].operateSwap([&id, &succeed, &temp](vector<Action>& original) {
+                for (auto it = original.begin(); it != original.end(); it++) if (it->info.eventId == id) {
+                    temp = *it;
+                    original.erase(it);
+                    succeed = true;
+                    return true;
+                }
+                //No matches, cancel the swap
+                return false;
+            });
+            if (succeed) {
+                registries[temp.defaultBinding].operateSwap([&id, &temp](vector<Action>& original) {
+                    original.push_back(move(temp));
+                    sort(original.begin(), original.end(), [](const Action& a, const Action& b) {
+                        return a.info.priority < b.info.priority;
+                    });
+                    return true;
+                });
+                break;
+            }
+        }
+        return succeed;
+    }
+
+    const ActionRegistryTemplate<Action>* getRegistry(ActionTypes type, BoolInputID bID) noexcept {
+        if (bID < BID_COUNT) {
+            const auto& registries = GET_REGISTRIES(type);
+            return &registries[bID];
+        }
+        else return nullptr;
+    }
+
+    static inline void s_process(const vector<Action>& vec, EventData data) noexcept {
+        u32 stopPriority = 0;
+        u8 currentFlags = 0;
+        for (u32 i = 0; i < vec.size(); i++) {
+            if (currentFlags & EVENTFLAGS_STOP_AFTER && stopPriority != vec[i].info.priority) break;
+            EventFlags flags = vec[i].cb(vec, vec[i].info, data, currentFlags);
+            if (flags & EVENTFLAGS_STOP_IMMEDIATELY) break;
+            if (flags & EVENTFLAGS_STOP_AFTER) stopPriority = vec[i].info.priority;
+            //fixme: Now it's designed that we can't get rid of any flags once they're set. Is it the correct design?
+            currentFlags |= flags;
+        }
+    }
+
+    void processTrigger(const SDL_Event& event, bool updateOnly) noexcept {
+        i32 rawCode = 0;
+        bool isPress = true;
+        switch (event.type) {
+            case SDL_EVENT_KEY_DOWN:
+                rawCode = event.key.scancode;
+                break;
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                rawCode = 0 - event.button.button;
+                break;
+            case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+                rawCode = 1000 + event.gbutton.button;
+                break;
+            case SDL_EVENT_KEY_UP:
+                rawCode = event.key.scancode;
+                isPress = false;
+                break;
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+                rawCode = 0 - event.button.button;
+                isPress = false;
+                break;
+            case SDL_EVENT_GAMEPAD_BUTTON_UP:
+                rawCode = 1000 + event.gbutton.button;
+                isPress = false;
+                break;
+            default:
+                lerr << "[InputHandler] BoolInput::processTrigger got unexpected event type: " << event.type << endl;
+                return;
+        }
+        auto p = boolInputMap.find(rawCode);
+        //Invalid SDL scancode, do nothing
+        if (p == boolInputMap.end()) return;
+        {
+            scoped_lock stateLock(biStatesMutex);
+            setState(p->second, isPress);
+        }
+        if (!updateOnly) {
+            auto& registries = isPress ? biPressRegistries : biReleaseRegistries;
+            auto snapshotPtr = registries[p->second].getPtr();
+            s_process(*snapshotPtr, {p->second});
+        }
+    }
+
+    void processPersist() noexcept {
+        for (BoolInputID i = 0; i < BID_COUNT; i++) {
+            //Hold them. Don't die
+            auto ptrInactive = biInactiveRegistries[i].getPtr(), ptrRepeat = biRepeatRegistries[i].getPtr();
+            EventData data(i);
+            s_process(*ptrInactive, data);
+            s_process(*ptrRepeat, data);
+        }
+    }
+
+    void update() noexcept {
+        //Use swap technique to shorten lock time.
+        shared_lock lockFetch(biStatesMutex);
+        auto _biStates = biStates;
+        lockFetch.unlock();
+        SDL_MouseButtonFlags mouseState = SDL_GetMouseState(nullptr, nullptr);
+        for (BoolInputID i = BID_MOUSE_BUTTON_START; i <= BID_MOUSE_BUTTON_END; i++) setState(i, mouseState & (1ull << (-1 - boolInputMapR[i])));
+        //-------------------------------------------------
+        i32 keyCount = 0;
+        const bool* keyState = SDL_GetKeyboardState(&keyCount);
+        for (BoolInputID i = BID_KEY_START; i <= BID_KEY_END; i++) {
+            if (boolInputMapR[i] < keyCount) setState(i, keyState[boolInputMapR[i]]);
+            else lerr << "[InputHandler] Keyboard state out of bound: " << boolInputMapR[i] << " for length " << keyCount << endl;
+        }
+        //-------------------------------------------------
+        if (InputHandler::gamepadHandle != nullptr) for (BoolInputID i = BID_GAMEPAD_START; i <= BID_GAMEPAD_END; i++) setState(i, SDL_GetGamepadButton(InputHandler::gamepadHandle, static_cast<SDL_GamepadButton>(boolInputMapR[i] - 1000)));
+        else if (InputHandler::gamepadStateResetSignal) {
+            biStates &= gamepadReset;
+            gamepadStateResetSignal = false;
+        }
+        scoped_lock lockCommit(biStatesMutex);
+        biStates = _biStates;
+    }
+} // namespace InputHandler::BoolInput

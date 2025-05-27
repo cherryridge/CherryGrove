@@ -1,11 +1,11 @@
 ﻿#include <atomic>
 
 #include "debug/Logger.hpp"
-#include "MainGame.hpp"
-#include "gui/MainWindow.hpp"
+#include "simulation/Simulation.hpp"
 #include "graphic/Renderer.hpp"
+#include "gui/Window.hpp"
+#include "gui/Gui.hpp"
 #include "sound/Sound.hpp"
-#include "gui/Guis.hpp"
 #include "pack/Pack.hpp"
 #include "input/intrinsic/Escape.hpp"
 #include "CherryGrove.hpp"
@@ -24,8 +24,7 @@ namespace CherryGrove {
 
     //Initialize libraries
         lout << "Setting up CherryGrove window & initializing input handler..." << endl;
-        MainWindow::initGlfw(2560, 1440, "CherryGrove");
-        MainWindow::loadIcon("assets/icons/CherryGrove-trs-64.png");
+        Window::initSDL(2560, 1440, "CherryGrove");
 
         lout << "Initializing bgfx & ImGui..." << endl;
         Renderer::start();
@@ -35,43 +34,43 @@ namespace CherryGrove {
         Sound::test();
 
         lout << "Initialzing GUI..." << endl;
-        Guis::init();
+        Gui::init();
 
         lout << "Initializing pack manager..." << endl;
         Pack::init();
 
     //Set up main menu
-        Guis::setVisible(Guis::wMainMenu);
-        Guis::setVisible(Guis::wCopyright);
-        Guis::setVisible(Guis::wVersion);
+        Gui::setVisible(Gui::Intrinsics::MainMenu);
+        Gui::setVisible(Gui::Intrinsics::About);
+        Gui::setVisible(Gui::Intrinsics::Version);
 
     //Set up intrinsic inputs
         //todo: Input should be able to be processed by any of the three threads:
         //Main, Renderer, Game
-        InputHandler::BoolInput::addBoolInput(InputHandler::BoolInput::BIEType::Start, { "", "escape", 10 }, IntrinsicInput::escapeCB, GLFW_KEY_ESCAPE);
+        InputHandler::BoolInput::addBoolInput(InputHandler::BoolInput::ActionTypes::Press, { "", "escape", 10 }, IntrinsicInput::escapeCB, GLFW_KEY_ESCAPE);
 
         hold();
     }
 
     //Main loop.
     //Set `isCGAlive` to `false` directly to exit the program.
-    //Check for window updates in `MainWindow::update()` instead.
+    //Check for windowHandle updates in `MainWindow::update()` instead.
     static void hold() {
         while (isCGAlive) {
-            MainWindow::update();
-            if (MainGame::gameStopSignal) {
-                MainGame::exit();
+            Window::update();
+            if (Simulation::gameStopSignal) {
+                Simulation::exit();
                 //We must immediately set it to false because we can't guarantee next time here the boolean is already set to false by the Game thread.
-                MainGame::gameStopSignal = false;
+                Simulation::gameStopSignal = false;
             }
         }
         exit();
     }
 
     static void exit() {
-        Renderer::waitShutdown();
-        if(MainGame::gameStarted) MainGame::exit();
-        MainWindow::close();
+        Renderer::shutdown();
+        if(Simulation::gameStarted) Simulation::exit();
+        Window::close();
         Pack::shutdown();
         Sound::shutdown();
         Logger::shutdown();

@@ -1,26 +1,24 @@
 ﻿#pragma once
-#include <bgfx/bgfx.h>
 #include <cstdint>
-#include <optional>
+#include <bgfx/bgfx.h>
+#include <SDL3_image/SDL_image.h>
 
 namespace TexturePool {
     typedef uint8_t u8;
     typedef uint16_t u16;
     typedef uint32_t TextureID;
-    using std::optional;
 
     struct Texture {
         bgfx::TextureHandle handle;
-        u16 width;
-        u16 height;
-        u8 bitsPerPixel;
-        unsigned char* raw;
+        SDL_Surface* data;
     };
 
-    void init(const char* samplerName);
-    void shutdown();
-    TextureID addTexture(const char* filePath, bool noVerticalFilp = false);
-    void useTexture(TextureID id, u8 textureDataIndex = 0);
-    optional<const Texture*> getTexture(TextureID id);
-    void removeTexture(TextureID id);
+    inline constexpr TextureID MISSING_TEXTURE_ID = 0;
+
+    void init(const char* samplerName) noexcept;
+    void shutdown() noexcept;
+    TextureID addTexture(const char* filePath, bool noVerticalFilp = false) noexcept;
+    void useTexture(TextureID id, u8 textureDataIndex = 0) noexcept;
+    const Texture* getTexture(TextureID id) noexcept;
+    void removeTexture(TextureID id) noexcept;
 }

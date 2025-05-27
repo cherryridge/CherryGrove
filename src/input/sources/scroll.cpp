@@ -1,51 +1,79 @@
-﻿#include <map>
-#include <mutex>
-#include <GLFW/glfw3.h>
+﻿#include <algorithm>
+#include <shared_mutex>
+#include <vector>
+#include <SDL3/SDL.h>
 
+#include "../../debug/Logger.hpp"
 #include "../../CherryGrove.hpp"
-#include "../ImGuiAdapter.hpp"
 #include "../inputBase.hpp"
 #include "scroll.hpp"
 
 namespace InputHandler::Scroll {
-    typedef int32_t i32;
-    using std::multimap, std::mutex, std::lock_guard;
+    typedef uint8_t u8;
+    typedef uint32_t u32;
+    using std::shared_mutex, std::scoped_lock, std::sort, std::vector;
 
-    static multimap<EventPriority, ScrollEvent> scrollRegistry;
-    static mutex scrollMutex;
+    static ActionRegistryTemplate<Action> registry;
+    static shared_mutex scrollMutex;
 
-    static ScrollEventInfo store;
+    static EventData store;
 
-    void init() {}
-
-    void s_scrollCB(GLFWwindow* window, double xoffset, double yoffset) {
-        if (CherryGrove::isCGAlive) {
-            if (sendToImGui) imGui_scrollCB(window, xoffset, yoffset);
-            store.xOffset = xoffset;
-            store.yOffset = yoffset;
-        }
-    }
-
-    void addScroll(const InputEventInfo& info, ScrollCallback cb) {
-        ScrollEvent event(info, cb);
-        lock_guard lock(scrollMutex);
-        scrollRegistry.emplace(info.priority, event);
-    }
-
-    bool removeScroll(ScrollCallback cb) {
-        for (auto it = scrollRegistry.begin(); it != scrollRegistry.end(); it++) if(it->second.cb == cb) {
-            lock_guard lock(scrollMutex);
-            scrollRegistry.erase(it);
+    ActionID addScroll(const string& nameAndSpace, EventPriority priority, CallbackTemplate<Action, EventData> cb) noexcept {
+        auto id = getNextId();
+        registry.operateSwap([&nameAndSpace, &priority, &cb, &id](vector<Action>& original) {
+            original.emplace_back(ActionInfo{nameAndSpace, id, priority}, cb);
+            sort(original.begin(), original.end(), [](const Action& a, const Action& b) {
+                return a.info.priority < b.info.priority;
+            });
             return true;
-        }
-        return false;
+        });
+        return id;
     }
 
-    void s_process() {
-        for (const auto& [priority, event] : scrollRegistry) {
-            EventFlags flags = 0;
-            event.cb(scrollRegistry, priority, flags, store);
+    bool removeScroll(ActionID id) noexcept {
+        if (id == INVALID_ACTION_ID) return false;
+        bool succeed = false;
+        registry.operateSwap([&id, &succeed](vector<Action>& original) {
+            for (auto it = original.begin(); it != original.end(); it++) if (it->info.eventId == id) {
+                original.erase(it);
+                succeed = true;
+                return true;
+            }
+            //No matches, cancel the swap
+            return false;
+        });
+        return succeed;
+    }
+
+    static inline void s_process(const vector<Action>& vec) noexcept {
+        u32 stopPriority = 0;
+        u8 currentFlags = 0;
+        for (u32 i = 0; i < vec.size(); i++) {
+            if (currentFlags & EVENTFLAGS_STOP_AFTER && stopPriority != vec[i].info.priority) break;
+            EventFlags flags = vec[i].cb(vec, vec[i].info, store, currentFlags);
             if (flags & EVENTFLAGS_STOP_IMMEDIATELY) break;
+            if (flags & EVENTFLAGS_STOP_AFTER) stopPriority = vec[i].info.priority;
+            //fixme: Now it's designed that we can't get rid of any flags once they're set. Is it the correct design?
+            currentFlags |= flags;
+        }
+    }
+
+    void process(const SDL_Event& event, bool updateOnly) noexcept {
+        switch (event.type) {
+            case SDL_EVENT_MOUSE_WHEEL: {
+                store.newX = event.wheel.mouse_x;
+                store.newY = event.wheel.mouse_y;
+                store.scrollX = event.wheel.x;
+                store.scrollY = event.wheel.y;
+                break;
+            }
+            default:
+                lerr << "[InputHandler] Scroll::process got unexpected event type: " << event.type << endl;
+                return;
+        }
+        if (!updateOnly) {
+            auto snapshotPtr = registry.getPtr();
+            s_process(*snapshotPtr);
         }
     }
 }

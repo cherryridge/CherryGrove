@@ -15,7 +15,8 @@ set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY FALSE)
 
 #------------MSVC------------------
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /Zc:preprocessor")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /Zc:preprocessor /utf-8")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
     cmake_policy(SET CMP0091 NEW)
     add_compile_definitions(
         WIN32_LEAN_AND_MEAN
@@ -53,17 +54,41 @@ set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<$<
 
 #------------Dep:3rdparty----------
 add_subdirectory("libs/freetype")
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "")
-set(GLFW_INSTALL OFF CACHE BOOL "")
-add_subdirectory("libs/glfw")
+set(ZLIB_ENABLE_TESTS   OFF CACHE BOOL "")
+set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "")
+set(WITH_GTEST          OFF CACHE BOOL "")
+set(ZLIB_COMPAT         ON  CACHE BOOL "")
+add_subdirectory("libs/zlib_ng")
+set(SDL_SHARED        OFF CACHE BOOL "")
+set(SDL_STATIC        ON  CACHE BOOL "")
+set(SDL_EXAMPLES      OFF CACHE BOOL "")
+set(SDL_TEST_LIBRARY  OFF CACHE BOOL "")
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+add_subdirectory("libs/sdl")
+set(SDLIMAGE_VENDORED ON CACHE BOOL "")
+set(SDLIMAGE_BACKEND_STB OFF CACHE BOOL "")
+set(SDLIMAGE_AVIF ON  CACHE BOOL "")
+set(SDLIMAGE_BMP  ON  CACHE BOOL "")
+set(SDLIMAGE_GIF  OFF CACHE BOOL "")
+set(SDLIMAGE_JPG  ON  CACHE BOOL "")
+set(SDLIMAGE_JXL  ON  CACHE BOOL "")
+set(SDLIMAGE_LBM  OFF CACHE BOOL "")
+set(SDLIMAGE_PCX  OFF CACHE BOOL "")
+set(SDLIMAGE_PNG  ON  CACHE BOOL "")
+set(SDLIMAGE_PNM  OFF CACHE BOOL "")
+set(SDLIMAGE_QOI  OFF CACHE BOOL "")
+set(SDLIMAGE_SVG  OFF CACHE BOOL "")
+set(SDLIMAGE_TGA  ON  CACHE BOOL "")
+set(SDLIMAGE_TIF  ON  CACHE BOOL "")
+set(SDLIMAGE_WEBP ON  CACHE BOOL "")
+set(SDLIMAGE_XCF  OFF CACHE BOOL "")
+set(SDLIMAGE_XPM  OFF CACHE BOOL "")
+set(SDLIMAGE_XV   OFF CACHE BOOL "")
+add_subdirectory("libs/sdl_image")
 add_subdirectory("libs/json")
 set(ENV{NLOHMANN_JSON_VERSION} "v3.12.0")
 set(nlohmann_json_VERSION "v3.12.0")
 add_subdirectory("libs/json_schema_validator")
-set(ZLIB_ENABLE_TESTS   OFF CACHE BOOL "")
-set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "")
-set(WITH_GTEST          OFF CACHE BOOL "")
-add_subdirectory("libs/zlib_ng")
 #----------------------------------
 
 #------------Dep:Internal----------
@@ -109,10 +134,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/entt/single_include"
     "libs/glm"
     "libs/json/single_include"
-    "libs/stb"
 
     "libs/freetype/include"
-    "libs/glfw/include"
+    "libs/sdl/include"
+    "libs/sdl_image/include"
     "libs/json_schema_validator/src"
     "libs/zlib_ng"
 
@@ -131,7 +156,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     CGNBT
 
     freetype
-    glfw
+    SDL3-static
     nlohmann_json_schema_validator
     zlibstatic
 

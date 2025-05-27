@@ -1,11 +1,12 @@
 ﻿#include <functional>
 #include <imgui.h>
 
-#include "Guis.hpp"
+#include "Gui.hpp"
+#include "../graphic/Renderer.hpp"
 #include "GuiUtils.hpp"
 
-namespace Guis::Utils {
-    using Guis::cache, std::function;
+namespace GuiUtils {
+    using Renderer::cache, std::function;
     using namespace ImGui;
 
     static void windowBase(const char* id, bool styled = true) noexcept {
@@ -50,9 +51,9 @@ namespace Guis::Utils {
     }
 
     void centerText(const char8_t* text) noexcept {
-        auto textSize = CalcTextSize(reinterpret_cast<const char*>(text)), winSize = GetWindowSize();
+        auto textSize = CalcTextSize(CJK(text)), winSize = GetWindowSize();
         SetCursorPosX((winSize.x - textSize.x) / 2.0f);
-        TextUnformatted(reinterpret_cast<const char*>(text));
+        TextUnformatted(CJK(text));
     }
 
     void centerText(const char* text) noexcept {
@@ -64,6 +65,6 @@ namespace Guis::Utils {
     void centerButton(const char8_t* text, ImVec2 btnSize, function<void()> clickCB) noexcept {
         auto winSizeX = GetWindowSize().x;
         SetCursorPosX((winSizeX - btnSize.x) / 2.0f);
-        if (Button(reinterpret_cast<const char*>(text), btnSize)) clickCB();
+        if (Button(CJK(text), btnSize)) clickCB();
     }
 }

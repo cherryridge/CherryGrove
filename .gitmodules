@@ -10,10 +10,6 @@
 	path = libs/entt
 	url = https://github.com/skypjack/entt
 
-[submodule "libs/stb/stb"]
-	path = libs/stb/stb
-	url = https://github.com/nothings/stb
-
 [submodule "libs/boost/uuid"]
 	path = libs/boost/uuid
 	url = https://github.com/boostorg/uuid
@@ -54,10 +50,6 @@
 	path = libs/json_schema_validator
 	url = https://github.com/pboettch/json-schema-validator
 
-[submodule "libs/glfw"]
-	path = libs/glfw
-	url = https://github.com/glfw/glfw
-
 [submodule "libs/freetype"]
 	path = libs/freetype
 	url = https://github.com/freetype/freetype
@@ -69,3 +61,15 @@
 [submodule "libs/zlib_ng"]
 	path = libs/zlib_ng
 	url = https://github.com/zlib-ng/zlib-ng
+
+[submodule "libs/sdl"]
+	path = libs/sdl
+	url = https://github.com/libsdl-org/SDL
+
+[submodule "libs/luajit"]
+	path = libs/luajit
+	url = https://github.com/LuaJIT/LuaJIT
+
+[submodule "libs/sdl_image"]
+	path = libs/sdl_image
+	url = https://github.com/cherryridge/SDL_image

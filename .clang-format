@@ -4,4 +4,26 @@ AccessModifierOffset: -4
 ColumnLimit: 0
 PointerAlignment: Left
 ReferenceAlignment: Left
-BreakBeforeBraces: Attach
+NamespaceIndentation: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+IndentPPDirectives: BeforeHash
+IndentCaseLabels: true
+CommentPragmas: '^[^ ]'
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterClass: false
+    AfterControlStatement: false
+    AfterEnum: false
+    AfterFunction: false
+    AfterNamespace: false
+    AfterStruct: false
+    AfterUnion: false
+    BeforeCatch: false
+    BeforeElse: true
+    IndentBraces: false
+    SplitEmptyFunction: false
+    SplitEmptyRecord: false
+    SplitEmptyNamespace: false

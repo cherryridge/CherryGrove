@@ -1,12 +1,8 @@
-﻿#include <GLFW/glfw3.h>
+﻿#include <atomic>
+#include <SDL3/SDL.h>
 
 #include "../debug/Logger.hpp"
 #include "../file/json/Json.hpp"
-#include "../file/FileDrop.hpp"
-#include "../graphic/Renderer.hpp"
-#include "../gui/MainWindow.hpp"
-#include "../CherryGrove.hpp"
-#include "ImGuiAdapter.hpp"
 #include "sources/boolInput.hpp"
 #include "sources/mouseMove.hpp"
 #include "sources/scroll.hpp"
@@ -15,76 +11,82 @@
 namespace InputHandler {
     typedef int32_t i32;
     typedef uint32_t u32;
+    using std::atomic;
 
-    //The non-GUI part doesn't use this callback.
-    static void charCB(GLFWwindow* window, u32 codepoint) {
-        if (CherryGrove::isCGAlive && sendToImGui) imGui_charCB(window, codepoint);
-    }
+    atomic<bool> sendToImGui(true);
+    atomic<bool> sendToSimulation(true);
 
-    //ImGui doesn't use it?
-    static void dropCB(GLFWwindow* window, i32 count, const char** paths) { if (CherryGrove::isCGAlive) FileDrop::processFile(count, paths); }
+    SDL_Gamepad* gamepadHandle = nullptr;
+    atomic<bool> gamepadStateResetSignal(false);
 
-    //The non-GUI part will be using it very soon. :)
-    static void windowFocusCB(GLFWwindow* window, i32 focused) {
-        if (CherryGrove::isCGAlive) {
-            if (sendToImGui) imGui_windowFocusCB(window, focused);
-            //Use it
+    void init() noexcept {
+        //Get gamepad device
+        i32 count = 0;
+        SDL_JoystickID* ids = SDL_GetJoysticks(&count);
+        if (ids != nullptr && count > 0) {
+            gamepadHandle = SDL_OpenGamepad(ids[0]);
+            SDL_free(ids);
         }
-    }
-
-    //Tell renderer to resize with debounce.
-    static void windowSizeCB(GLFWwindow* window, i32 width, i32 height) { Renderer::sizeUpdateSignal = true; }
-
-    static void windowRefreshCB(GLFWwindow* window) {}
-
-    static void monitorCB(GLFWmonitor* monitor, i32 event) { if (CherryGrove::isCGAlive && sendToImGui) imGui_monitorCB(monitor, event); }
-
-    static void windowCloseCB(GLFWwindow* window) { CherryGrove::isCGAlive = false; }
-
-//Process input
-    void processInputGame() {
-        BoolInput::s_process();
-        Scroll::s_process();
-    }
-
-    void processInputRenderer() {
-        MouseMove::s_process();
-    }
-
-//Initialization
-    void init() {
-    //Register real callbacks
-        using MainWindow::window;
-        glfwSetCharCallback(window, charCB);
-        //glfwSetCharModsCallback();
-        glfwSetCursorEnterCallback(window, MouseMove::s_cursorEnterCB);
-        glfwSetCursorPosCallback(window, MouseMove::s_cursorPosCB);
-        glfwSetDropCallback(window, dropCB);
-        //glfwSetErrorCallback();
-        //glfwSetFramebufferSizeCallback();
-        //glfwSetJoystickCallback();
-        glfwSetKeyCallback(window, BoolInput::s_keyCB);
-        glfwSetMonitorCallback(monitorCB);
-        glfwSetMouseButtonCallback(window, BoolInput::s_mouseButtonCB);
-        glfwSetScrollCallback(window, Scroll::s_scrollCB);
-        glfwSetWindowCloseCallback(window, windowCloseCB);
-        //glfwSetWindowContentScaleCallback();
-        glfwSetWindowFocusCallback(window, windowFocusCB);
-        //glfwSetWindowIconifyCallback();
-        //glfwSetWindowMaximizeCallback();
-        //glfwSetWindowPosCallback();
-        glfwSetWindowRefreshCallback(window, windowRefreshCB);
-        glfwSetWindowSizeCallback(window, windowSizeCB);
-    //Initialize input sources
+        //Initialize input sources
         BoolInput::init();
-        MouseMove::init();
-        Scroll::init();
-    //Get input binding options
+        //Get input binding options //todo: migrate to Settings
         auto _result = Json::getJSON("options.json");
         if (_result.has_value()) {
             const auto& result = _result.value();
             lout << "[InputHandler] Key bindings: " << result.dump(4) << endl;
         }
         else Json::saveJSON("options.json");
+        //todo: set stored bindings
+    }
+
+    void processTrigger(const SDL_Event& event) noexcept {
+        switch(event.type) {
+        //Connection events
+            case SDL_EVENT_GAMEPAD_ADDED:
+                if (gamepadHandle == nullptr) gamepadHandle = SDL_OpenGamepad(event.gdevice.which); 
+                break;
+            case SDL_EVENT_GAMEPAD_REMOVED:
+                if (gamepadHandle != nullptr && event.gdevice.which == SDL_GetGamepadID(gamepadHandle)) {
+                    SDL_CloseGamepad(gamepadHandle);
+                    gamepadHandle = nullptr;
+                    gamepadStateResetSignal = true;
+                }
+                break;
+
+        //Edge-triggered input events
+            case SDL_EVENT_KEY_DOWN:
+            case SDL_EVENT_KEY_UP:
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+            case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+            case SDL_EVENT_GAMEPAD_BUTTON_UP:
+                BoolInput::processTrigger(event);
+                break;
+            case SDL_EVENT_MOUSE_MOTION:
+                MouseMove::process(event);
+                break;
+            case SDL_EVENT_MOUSE_WHEEL:
+                Scroll::process(event);
+                break;
+            case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+                //Stick::process(event);
+                break;
+            case SDL_EVENT_FINGER_DOWN:
+            case SDL_EVENT_FINGER_UP:
+            case SDL_EVENT_FINGER_CANCELED:
+                lout << "Touch is not supported yet!" << endl;
+                break;
+            case SDL_EVENT_FINGER_MOTION:
+                lout << "Touchmove is not supported yet!" << endl;
+                break;
+        }
+    }
+
+    void processPersist() noexcept {
+        BoolInput::processPersist();
+    }
+
+    void update() noexcept {
+        BoolInput::update();
     }
 }

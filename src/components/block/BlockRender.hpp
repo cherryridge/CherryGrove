@@ -22,17 +22,16 @@ namespace Components {
         CubeFace() = default;
         CubeFace(glm::uvec2 tStart, glm::uvec2 tEnd, float uvRotation, uint32_t shaderId, uint32_t textureId) {
             int32_t dx = tEnd.x - tStart.x, dy = tEnd.y - tStart.y;
-            auto _texture = TexturePool::getTexture(textureId);
-            if (!_texture.has_value()) {
+            auto* texture = TexturePool::getTexture(textureId);
+            if (texture == nullptr) {
                 lerr << "[CubeFace] Texture not registered!" << endl;
                 return;
             }
-            auto texture = _texture.value();
-            if (tStart.x > texture->width || tEnd.x > texture->width || tStart.y > texture->height || tEnd.y > texture->height) lerr << "[CubeFace] Texture coordinates overflow in texture dimensions." << endl;
+            if (tStart.x > texture->data->w || tEnd.x > texture->data->w || tStart.y > texture->data->h || tEnd.y > texture->data->h) lerr << "[CubeFace] Texture coordinates overflow in texture dimensions." << endl;
             //todo: Cap the value instead of blowing up :)
             if (tStart.x > std::numeric_limits<int16_t>::max() || tStart.y > std::numeric_limits<int16_t>::max() || dx > std::numeric_limits<int16_t>::max() || dy > std::numeric_limits<int16_t>::max() || dx < std::numeric_limits<int16_t>::min() || dy < std::numeric_limits<int16_t>::min()) lerr << "[CubeFace] Texture coordinates overflow in short type." << endl;
-            texCoords.x = (float)tStart.x / texture->width;
-            texCoords.y = (float)tStart.y / texture->height;
+            texCoords.x = (float)tStart.x / texture->data->w;
+            texCoords.y = (float)tStart.y / texture->data->h;
             texCoords.z = (float)dx;
             texCoords.w = (float)dy;
             this->uvRotation = uvRotation;

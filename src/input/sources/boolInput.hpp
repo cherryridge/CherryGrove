@@ -1,202 +1,578 @@
 ﻿#pragma once
 #include <array>
-#include <map>
-#include <GLFW/glfw3.h>
+#include <atomic>
+#include <bitset>
+#include <functional>
+#include <limits>
+#include <memory>
+#include <vector>
+#include <unordered_map>
+#include <SDL3/SDL.h>
 
 #include "../inputBase.hpp"
 
 namespace InputHandler::BoolInput {
     typedef int32_t i32;
-    //This is a subset of `i32` consisting of GLFW mouse button codes and key codes.
-    //However, no safety check is enforced.
-    typedef i32 BoolInputID;
+    typedef uint32_t u32;
+    typedef uint64_t u64;
+    //This is a mapped id! We're not supporting weird keys.
+    typedef u8 BoolInputID;
+    using std::array, std::unordered_map, std::shared_ptr, std::make_shared, std::atomic, std::vector, std::move, std::memory_order_release, std::memory_order_acquire, std::memory_order_acq_rel, std::memory_order_relaxed, std::function, std::numeric_limits, std::bitset;
 
-    enum struct BIEType {
-        Start,
-        Persist,
-        End
-    };
-
-    enum struct BIStatus {
+    enum struct ActionTypes : u8 {
+        //Persistent state
         Inactive,
-        //Instant state, will go to `BIRepeat`
+        //Instantaneous state
         Press,
+        //Persistent state
         Repeat,
-        //Instant state, will go to `BIInactive`
-        Release
+        //Instantaneous state
+        Release,
     };
 
-    struct BISource {
-        BoolInputID inputCode;
-        const char* name;
+    struct EventData {
+        BoolInputID triggeredBID;
+    };
+
+    struct Action {
+        ActionInfo info;
+        CallbackTemplate<Action, EventData> cb;
+        BoolInputID defaultBinding;
+
+        //DONT EVER USE THIS!
+        Action(bool) noexcept {}
+
+        Action(const ActionInfo& info, CallbackTemplate<Action, EventData> cb, BoolInputID defaultBinding) noexcept : info(info), cb(cb), defaultBinding(defaultBinding) {}
     };
 
     //For events that are not binded to any bool input.
-    inline constexpr BoolInputID emptyBISource = 12914;
+    inline constexpr BoolInputID EMPTY_BID = 0;
 
-    struct BIEvent;
+    inline constexpr u8 BID_COUNT = 232;
+    inline constexpr u8 BID_MOUSE_BUTTON_START = 1;
+    inline constexpr u8 BID_MOUSE_BUTTON_END = 5;
+    inline constexpr u8 BID_KEY_START = 6;
+    inline constexpr u8 BID_KEY_END = 205;
+    inline constexpr u8 BID_GAMEPAD_START = 206;
+    inline constexpr u8 BID_GAMEPAD_END = 231;
 
-    //Reason why we put `BICallback` into `BIEvent` and thus callback functions can technically see/call other input event's callback functions:
-    //1. Internal events can see/call other event's callbacks.
-    //2. We are able to filter out `BICallback` for V8 and WASM, so pack input events can't see/call them in the future.
-    //3. If we don't do this, we will need to construct three new multimaps for callback functions to see all the callback functions binded to this key each tick, which is not a trivial task.
-    using BICallback = void(*)(const std::multimap<EventPriority, BIEvent>& events, EventPriority priority, EventFlags flags, BoolInputID triggerId);
+    void init() noexcept;
 
-    struct BIEvent {
-        InputEventInfo info;
-        BICallback cb;
-        BoolInputID defaultBinding;
+    //Technically we can just extern it, but we are so in an existential crisis that we don't trust future us won't modify it from some random places.
+    const bitset<BID_COUNT>& getKeyStates() noexcept;
 
-        BIEvent(const InputEventInfo& info, BICallback cb, BoolInputID defaultBinding) : info(info), cb(cb), defaultBinding(defaultBinding) {};
+    //There is no guarantee that any of the action's property (namespace, name, callback etc.) isn't duplicated anywhere. Implement it in UMI/api_js.
+    //Don't modify the order of the parameter as they're meant to be unified among all input sources.
+    ActionID addBoolInput(const string& nameAndSpace, EventPriority priority, CallbackTemplate<Action, EventData> cb, ActionTypes type, BoolInputID defaultBinding) noexcept;
+    //VERY SLOW O(n) algorithm!
+    bool removeBoolInput(ActionID id, ActionTypes type) noexcept;
+
+    bool getBinding(ActionID id, ActionTypes type, BoolInputID& result) noexcept;
+    bool changeBinding(ActionID id, ActionTypes type, BoolInputID newBID) noexcept;
+    bool resetBinding(ActionID id, ActionTypes type) noexcept;
+
+    const ActionRegistryTemplate<Action>* getRegistry(ActionTypes type, BoolInputID bID) noexcept;
+
+    void processTrigger(const SDL_Event& event, bool updateOnly = false) noexcept;
+    void processPersist() noexcept;
+
+    void update() noexcept;
+
+    inline const unordered_map<i32, BoolInputID> boolInputMap = {
+        //EMPTY_BID
+        {-12914, EMPTY_BID},
+        //Mouse button: 0 - x -> [1, 5]
+        {0 - SDL_BUTTON_LEFT, 1},
+        {0 - SDL_BUTTON_RIGHT, 2},
+        {0 - SDL_BUTTON_MIDDLE, 3},
+        {0 - SDL_BUTTON_X1, 4},
+        {0 - SDL_BUTTON_X2, 5},
+        //Key: x -> [6, 205]
+        {SDL_SCANCODE_A, 6},
+        {SDL_SCANCODE_B, 7},
+        {SDL_SCANCODE_C, 8},
+        {SDL_SCANCODE_D, 9},
+        {SDL_SCANCODE_E, 10},
+        {SDL_SCANCODE_F, 11},
+        {SDL_SCANCODE_G, 12},
+        {SDL_SCANCODE_H, 13},
+        {SDL_SCANCODE_I, 14},
+        {SDL_SCANCODE_J, 15},
+        {SDL_SCANCODE_K, 16},
+        {SDL_SCANCODE_L, 17},
+        {SDL_SCANCODE_M, 18},
+        {SDL_SCANCODE_N, 19},
+        {SDL_SCANCODE_O, 20},
+        {SDL_SCANCODE_P, 21},
+        {SDL_SCANCODE_Q, 22},
+        {SDL_SCANCODE_R, 23},
+        {SDL_SCANCODE_S, 24},
+        {SDL_SCANCODE_T, 25},
+        {SDL_SCANCODE_U, 26},
+        {SDL_SCANCODE_V, 27},
+        {SDL_SCANCODE_W, 28},
+        {SDL_SCANCODE_X, 29},
+        {SDL_SCANCODE_Y, 30},
+        {SDL_SCANCODE_Z, 31},
+        {SDL_SCANCODE_1, 32},
+        {SDL_SCANCODE_2, 33},
+        {SDL_SCANCODE_3, 34},
+        {SDL_SCANCODE_4, 35},
+        {SDL_SCANCODE_5, 36},
+        {SDL_SCANCODE_6, 37},
+        {SDL_SCANCODE_7, 38},
+        {SDL_SCANCODE_8, 39},
+        {SDL_SCANCODE_9, 40},
+        {SDL_SCANCODE_0, 41},
+        {SDL_SCANCODE_RETURN, 42},
+        {SDL_SCANCODE_ESCAPE, 43},
+        {SDL_SCANCODE_BACKSPACE, 44},
+        {SDL_SCANCODE_TAB, 45},
+        {SDL_SCANCODE_SPACE, 46},
+        {SDL_SCANCODE_MINUS, 47},
+        {SDL_SCANCODE_EQUALS, 48},
+        {SDL_SCANCODE_LEFTBRACKET, 49},
+        {SDL_SCANCODE_RIGHTBRACKET, 50},
+        {SDL_SCANCODE_BACKSLASH, 51},
+        {SDL_SCANCODE_NONUSHASH, 52},
+        {SDL_SCANCODE_SEMICOLON, 53},
+        {SDL_SCANCODE_APOSTROPHE, 54},
+        {SDL_SCANCODE_GRAVE, 55},
+        {SDL_SCANCODE_COMMA, 56},
+        {SDL_SCANCODE_PERIOD, 57},
+        {SDL_SCANCODE_SLASH, 58},
+        {SDL_SCANCODE_CAPSLOCK, 59},
+        {SDL_SCANCODE_F1, 60},
+        {SDL_SCANCODE_F2, 61},
+        {SDL_SCANCODE_F3, 62},
+        {SDL_SCANCODE_F4, 63},
+        {SDL_SCANCODE_F5, 64},
+        {SDL_SCANCODE_F6, 65},
+        {SDL_SCANCODE_F7, 66},
+        {SDL_SCANCODE_F8, 67},
+        {SDL_SCANCODE_F9, 68},
+        {SDL_SCANCODE_F10, 69},
+        {SDL_SCANCODE_F11, 70},
+        {SDL_SCANCODE_F12, 71},
+        {SDL_SCANCODE_PRINTSCREEN, 72},
+        {SDL_SCANCODE_SCROLLLOCK, 73},
+        {SDL_SCANCODE_PAUSE, 74},
+        {SDL_SCANCODE_INSERT, 75},
+        {SDL_SCANCODE_HOME, 76},
+        {SDL_SCANCODE_PAGEUP, 77},
+        {SDL_SCANCODE_DELETE, 78},
+        {SDL_SCANCODE_END, 79},
+        {SDL_SCANCODE_PAGEDOWN, 80},
+        {SDL_SCANCODE_RIGHT, 81},
+        {SDL_SCANCODE_LEFT, 82},
+        {SDL_SCANCODE_DOWN, 83},
+        {SDL_SCANCODE_UP, 84},
+        {SDL_SCANCODE_NUMLOCKCLEAR, 85},
+        {SDL_SCANCODE_KP_DIVIDE, 86},
+        {SDL_SCANCODE_KP_MULTIPLY, 87},
+        {SDL_SCANCODE_KP_MINUS, 88},
+        {SDL_SCANCODE_KP_PLUS, 89},
+        {SDL_SCANCODE_KP_ENTER, 90},
+        {SDL_SCANCODE_KP_1, 91},
+        {SDL_SCANCODE_KP_2, 92},
+        {SDL_SCANCODE_KP_3, 93},
+        {SDL_SCANCODE_KP_4, 94},
+        {SDL_SCANCODE_KP_5, 95},
+        {SDL_SCANCODE_KP_6, 96},
+        {SDL_SCANCODE_KP_7, 97},
+        {SDL_SCANCODE_KP_8, 98},
+        {SDL_SCANCODE_KP_9, 99},
+        {SDL_SCANCODE_KP_0, 100},
+        {SDL_SCANCODE_KP_PERIOD, 101},
+        {SDL_SCANCODE_NONUSBACKSLASH, 102},
+        {SDL_SCANCODE_APPLICATION, 103},
+        {SDL_SCANCODE_POWER, 104},
+        {SDL_SCANCODE_KP_EQUALS, 105},
+        {SDL_SCANCODE_F13, 106},
+        {SDL_SCANCODE_F14, 107},
+        {SDL_SCANCODE_F15, 108},
+        {SDL_SCANCODE_F16, 109},
+        {SDL_SCANCODE_F17, 110},
+        {SDL_SCANCODE_F18, 111},
+        {SDL_SCANCODE_F19, 112},
+        {SDL_SCANCODE_F20, 113},
+        {SDL_SCANCODE_F21, 114},
+        {SDL_SCANCODE_F22, 115},
+        {SDL_SCANCODE_F23, 116},
+        {SDL_SCANCODE_F24, 117},
+        {SDL_SCANCODE_EXECUTE, 118},
+        {SDL_SCANCODE_HELP, 119},
+        {SDL_SCANCODE_MENU, 120},
+        {SDL_SCANCODE_SELECT, 121},
+        {SDL_SCANCODE_STOP, 122},
+        {SDL_SCANCODE_AGAIN, 123},
+        {SDL_SCANCODE_UNDO, 124},
+        {SDL_SCANCODE_CUT, 125},
+        {SDL_SCANCODE_COPY, 126},
+        {SDL_SCANCODE_PASTE, 127},
+        {SDL_SCANCODE_FIND, 128},
+        {SDL_SCANCODE_MUTE, 129},
+        {SDL_SCANCODE_VOLUMEUP, 130},
+        {SDL_SCANCODE_VOLUMEDOWN, 131},
+        {SDL_SCANCODE_KP_COMMA, 132},
+        {SDL_SCANCODE_KP_EQUALSAS400, 133},
+        {SDL_SCANCODE_ALTERASE, 134},
+        {SDL_SCANCODE_SYSREQ, 135},
+        {SDL_SCANCODE_CANCEL, 136},
+        {SDL_SCANCODE_CLEAR, 137},
+        {SDL_SCANCODE_PRIOR, 138},
+        {SDL_SCANCODE_RETURN2, 139},
+        {SDL_SCANCODE_SEPARATOR, 140},
+        {SDL_SCANCODE_OUT, 141},
+        {SDL_SCANCODE_OPER, 142},
+        {SDL_SCANCODE_CLEARAGAIN, 143},
+        {SDL_SCANCODE_CRSEL, 144},
+        {SDL_SCANCODE_EXSEL, 145},
+        {SDL_SCANCODE_KP_00, 146},
+        {SDL_SCANCODE_KP_000, 147},
+        {SDL_SCANCODE_THOUSANDSSEPARATOR, 148},
+        {SDL_SCANCODE_DECIMALSEPARATOR, 149},
+        {SDL_SCANCODE_CURRENCYUNIT, 150},
+        {SDL_SCANCODE_CURRENCYSUBUNIT, 151},
+        {SDL_SCANCODE_KP_LEFTPAREN, 152},
+        {SDL_SCANCODE_KP_RIGHTPAREN, 153},
+        {SDL_SCANCODE_KP_LEFTBRACE, 154},
+        {SDL_SCANCODE_KP_RIGHTBRACE, 155},
+        {SDL_SCANCODE_KP_TAB, 156},
+        {SDL_SCANCODE_KP_BACKSPACE, 157},
+        {SDL_SCANCODE_KP_A, 158},
+        {SDL_SCANCODE_KP_B, 159},
+        {SDL_SCANCODE_KP_C, 160},
+        {SDL_SCANCODE_KP_D, 161},
+        {SDL_SCANCODE_KP_E, 162},
+        {SDL_SCANCODE_KP_F, 163},
+        {SDL_SCANCODE_LCTRL, 164},
+        {SDL_SCANCODE_LSHIFT, 165},
+        {SDL_SCANCODE_LALT, 166},
+        {SDL_SCANCODE_LGUI, 167},
+        {SDL_SCANCODE_RCTRL, 168},
+        {SDL_SCANCODE_RSHIFT, 169},
+        {SDL_SCANCODE_RALT, 170},
+        {SDL_SCANCODE_RGUI, 171},
+        {SDL_SCANCODE_MODE, 172},
+        {SDL_SCANCODE_SLEEP, 173},
+        {SDL_SCANCODE_WAKE, 174},
+        {SDL_SCANCODE_CHANNEL_INCREMENT, 175},
+        {SDL_SCANCODE_CHANNEL_DECREMENT, 176},
+        {SDL_SCANCODE_MEDIA_PLAY, 177},
+        {SDL_SCANCODE_MEDIA_PAUSE, 178},
+        {SDL_SCANCODE_MEDIA_RECORD, 179},
+        {SDL_SCANCODE_MEDIA_FAST_FORWARD, 180},
+        {SDL_SCANCODE_MEDIA_REWIND, 181},
+        {SDL_SCANCODE_MEDIA_NEXT_TRACK, 182},
+        {SDL_SCANCODE_MEDIA_PREVIOUS_TRACK, 183},
+        {SDL_SCANCODE_MEDIA_STOP, 184},
+        {SDL_SCANCODE_MEDIA_EJECT, 185},
+        {SDL_SCANCODE_MEDIA_PLAY_PAUSE, 186},
+        {SDL_SCANCODE_MEDIA_SELECT, 187},
+        {SDL_SCANCODE_AC_NEW, 188},
+        {SDL_SCANCODE_AC_OPEN, 189},
+        {SDL_SCANCODE_AC_CLOSE, 190},
+        {SDL_SCANCODE_AC_EXIT, 191},
+        {SDL_SCANCODE_AC_SAVE, 192},
+        {SDL_SCANCODE_AC_PRINT, 193},
+        {SDL_SCANCODE_AC_PROPERTIES, 194},
+        {SDL_SCANCODE_AC_SEARCH, 195},
+        {SDL_SCANCODE_AC_HOME, 196},
+        {SDL_SCANCODE_AC_BACK, 197},
+        {SDL_SCANCODE_AC_FORWARD, 198},
+        {SDL_SCANCODE_AC_STOP, 199},
+        {SDL_SCANCODE_AC_REFRESH, 200},
+        {SDL_SCANCODE_AC_BOOKMARKS, 201},
+        {SDL_SCANCODE_SOFTLEFT, 202},
+        {SDL_SCANCODE_SOFTRIGHT, 203},
+        {SDL_SCANCODE_CALL, 204},
+        {SDL_SCANCODE_ENDCALL, 205},
+        //Gamepad: 1000 + x -> [206, 231]
+        {1000 + SDL_GAMEPAD_BUTTON_SOUTH, 206},
+        {1000 + SDL_GAMEPAD_BUTTON_EAST, 207},
+        {1000 + SDL_GAMEPAD_BUTTON_WEST, 208},
+        {1000 + SDL_GAMEPAD_BUTTON_NORTH, 209},
+        {1000 + SDL_GAMEPAD_BUTTON_BACK, 210},
+        {1000 + SDL_GAMEPAD_BUTTON_GUIDE, 211},
+        {1000 + SDL_GAMEPAD_BUTTON_START, 212},
+        {1000 + SDL_GAMEPAD_BUTTON_LEFT_STICK, 213},
+        {1000 + SDL_GAMEPAD_BUTTON_RIGHT_STICK, 214},
+        {1000 + SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, 215},
+        {1000 + SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, 216},
+        {1000 + SDL_GAMEPAD_BUTTON_DPAD_UP, 217},
+        {1000 + SDL_GAMEPAD_BUTTON_DPAD_DOWN, 218},
+        {1000 + SDL_GAMEPAD_BUTTON_DPAD_LEFT, 219},
+        {1000 + SDL_GAMEPAD_BUTTON_DPAD_RIGHT, 220},
+        {1000 + SDL_GAMEPAD_BUTTON_MISC1, 221},
+        {1000 + SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1, 222},
+        {1000 + SDL_GAMEPAD_BUTTON_LEFT_PADDLE1, 223},
+        {1000 + SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2, 224},
+        {1000 + SDL_GAMEPAD_BUTTON_LEFT_PADDLE2, 225},
+        {1000 + SDL_GAMEPAD_BUTTON_TOUCHPAD, 226},
+        {1000 + SDL_GAMEPAD_BUTTON_MISC2, 227},
+        {1000 + SDL_GAMEPAD_BUTTON_MISC3, 228},
+        {1000 + SDL_GAMEPAD_BUTTON_MISC4, 229},
+        {1000 + SDL_GAMEPAD_BUTTON_MISC5, 230},
+        {1000 + SDL_GAMEPAD_BUTTON_MISC6, 231},
     };
 
-    void init();
-
-    void s_keyCB(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods);
-    void s_mouseButtonCB(GLFWwindow* window, i32 button, i32 action, i32 mods);
-
-    inline constexpr const char* findBoolInputName(BoolInputID inputCode);
-
-    void addBoolInput(BIEType type, const InputEventInfo& info, BICallback cb, BoolInputID defaultBinding = emptyBISource);
-    bool removeBoolInput(BIEType type, BICallback cb);
-
-    void changeBinding();
-    void resetBinding();
-
-    void s_process();
-
-    //Joystick buttons need to be acquired at runtime, so it's not in bool input.
-    inline constexpr std::array<BISource, 1 + 8 + 120> boolInputDesc = {
-        BISource { emptyBISource, "" },
-        //Mouse button
-        BISource{ GLFW_MOUSE_BUTTON_1, "LeftBtn" },
-        BISource{ GLFW_MOUSE_BUTTON_2, "RightBtn" },
-        BISource{ GLFW_MOUSE_BUTTON_3, "MiddleBtn" },
-        BISource{ GLFW_MOUSE_BUTTON_4, "Button4" },
-        BISource{ GLFW_MOUSE_BUTTON_5, "Button5" },
-        BISource{ GLFW_MOUSE_BUTTON_6, "Button6" },
-        BISource{ GLFW_MOUSE_BUTTON_7, "Button7" },
-        BISource{ GLFW_MOUSE_BUTTON_8, "Button8" },
-        //Keyboard
-        BISource{ GLFW_KEY_SPACE, "Space" },
-        BISource{ GLFW_KEY_APOSTROPHE, "'" },
-        BISource{ GLFW_KEY_COMMA, "," },
-        BISource{ GLFW_KEY_MINUS, "-" },
-        BISource{ GLFW_KEY_PERIOD, "." },
-        BISource{ GLFW_KEY_SLASH, "/" },
-        BISource{ GLFW_KEY_0, "0" },
-        BISource{ GLFW_KEY_1, "1" },
-        BISource{ GLFW_KEY_2, "2" },
-        BISource{ GLFW_KEY_3, "3" },
-        BISource{ GLFW_KEY_4, "4" },
-        BISource{ GLFW_KEY_5, "5" },
-        BISource{ GLFW_KEY_6, "6" },
-        BISource{ GLFW_KEY_7, "7" },
-        BISource{ GLFW_KEY_8, "8" },
-        BISource{ GLFW_KEY_9, "9" },
-        BISource{ GLFW_KEY_SEMICOLON, ";" },
-        BISource{ GLFW_KEY_EQUAL, "=" },
-        BISource{ GLFW_KEY_A, "A" },
-        BISource{ GLFW_KEY_B, "B" },
-        BISource{ GLFW_KEY_C, "C" },
-        BISource{ GLFW_KEY_D, "D" },
-        BISource{ GLFW_KEY_E, "E" },
-        BISource{ GLFW_KEY_F, "F" },
-        BISource{ GLFW_KEY_G, "G" },
-        BISource{ GLFW_KEY_H, "H" },
-        BISource{ GLFW_KEY_I, "I" },
-        BISource{ GLFW_KEY_J, "J" },
-        BISource{ GLFW_KEY_K, "K" },
-        BISource{ GLFW_KEY_L, "L" },
-        BISource{ GLFW_KEY_M, "M" },
-        BISource{ GLFW_KEY_N, "N" },
-        BISource{ GLFW_KEY_O, "O" },
-        BISource{ GLFW_KEY_P, "P" },
-        BISource{ GLFW_KEY_Q, "Q" },
-        BISource{ GLFW_KEY_R, "R" },
-        BISource{ GLFW_KEY_S, "S" },
-        BISource{ GLFW_KEY_T, "T" },
-        BISource{ GLFW_KEY_U, "U" },
-        BISource{ GLFW_KEY_V, "V" },
-        BISource{ GLFW_KEY_W, "W" },
-        BISource{ GLFW_KEY_X, "X" },
-        BISource{ GLFW_KEY_Y, "Y" },
-        BISource{ GLFW_KEY_Z, "Z" },
-        BISource{ GLFW_KEY_LEFT_BRACKET, "[" },
-        BISource{ GLFW_KEY_BACKSLASH, "\\" },
-        BISource{ GLFW_KEY_RIGHT_BRACKET, "]" },
-        BISource{ GLFW_KEY_GRAVE_ACCENT, "`" },
-        BISource{ GLFW_KEY_WORLD_1, "World1" },
-        BISource{ GLFW_KEY_WORLD_2, "World2" },
-        BISource{ GLFW_KEY_ESCAPE, "Esc" },
-        BISource{ GLFW_KEY_ENTER, "Enter" },
-        BISource{ GLFW_KEY_TAB, "Tab" },
-        BISource{ GLFW_KEY_BACKSPACE, "Backspace" },
-        BISource{ GLFW_KEY_INSERT, "Ins" },
-        BISource{ GLFW_KEY_DELETE, "Del" },
-        BISource{ GLFW_KEY_RIGHT, "→" },
-        BISource{ GLFW_KEY_LEFT, "←" },
-        BISource{ GLFW_KEY_DOWN, "↓" },
-        BISource{ GLFW_KEY_UP, "↑" },
-        BISource{ GLFW_KEY_PAGE_UP, "PgUp" },
-        BISource{ GLFW_KEY_PAGE_DOWN, "PgDn" },
-        BISource{ GLFW_KEY_HOME, "Home" },
-        BISource{ GLFW_KEY_END, "End" },
-        BISource{ GLFW_KEY_CAPS_LOCK, "CapsLk" },
-        BISource{ GLFW_KEY_SCROLL_LOCK, "ScrLk" },
-        BISource{ GLFW_KEY_NUM_LOCK, "NumLk" },
-        BISource{ GLFW_KEY_PRINT_SCREEN, "PrtSc" },
-        BISource{ GLFW_KEY_PAUSE, "Pause" },
-        BISource{ GLFW_KEY_F1, "F1" },
-        BISource{ GLFW_KEY_F2, "F2" },
-        BISource{ GLFW_KEY_F3, "F3" },
-        BISource{ GLFW_KEY_F4, "F4" },
-        BISource{ GLFW_KEY_F5, "F5" },
-        BISource{ GLFW_KEY_F6, "F6" },
-        BISource{ GLFW_KEY_F7, "F7" },
-        BISource{ GLFW_KEY_F8, "F8" },
-        BISource{ GLFW_KEY_F9, "F9" },
-        BISource{ GLFW_KEY_F10, "F10" },
-        BISource{ GLFW_KEY_F11, "F11" },
-        BISource{ GLFW_KEY_F12, "F12" },
-        BISource{ GLFW_KEY_F13, "F13" },
-        BISource{ GLFW_KEY_F14, "F14" },
-        BISource{ GLFW_KEY_F15, "F15" },
-        BISource{ GLFW_KEY_F16, "F16" },
-        BISource{ GLFW_KEY_F17, "F17" },
-        BISource{ GLFW_KEY_F18, "F18" },
-        BISource{ GLFW_KEY_F19, "F19" },
-        BISource{ GLFW_KEY_F20, "F20" },
-        BISource{ GLFW_KEY_F21, "F21" },
-        BISource{ GLFW_KEY_F22, "F22" },
-        BISource{ GLFW_KEY_F23, "F23" },
-        BISource{ GLFW_KEY_F24, "F24" },
-        BISource{ GLFW_KEY_F25, "F25" },
-        BISource{ GLFW_KEY_KP_0, "NumPd0" },
-        BISource{ GLFW_KEY_KP_1, "NumPd1" },
-        BISource{ GLFW_KEY_KP_2, "NumPd2" },
-        BISource{ GLFW_KEY_KP_3, "NumPd3" },
-        BISource{ GLFW_KEY_KP_4, "NumPd4" },
-        BISource{ GLFW_KEY_KP_5, "NumPd5" },
-        BISource{ GLFW_KEY_KP_6, "NumPd6" },
-        BISource{ GLFW_KEY_KP_7, "NumPd7" },
-        BISource{ GLFW_KEY_KP_8, "NumPd8" },
-        BISource{ GLFW_KEY_KP_9, "NumPd9" },
-        BISource{ GLFW_KEY_KP_DECIMAL, "NumPd." },
-        BISource{ GLFW_KEY_KP_DIVIDE, "NumPd/" },
-        BISource{ GLFW_KEY_KP_MULTIPLY, "NumPd*" },
-        BISource{ GLFW_KEY_KP_SUBTRACT, "NumPd-" },
-        BISource{ GLFW_KEY_KP_ADD, "NumPd+" },
-        BISource{ GLFW_KEY_KP_ENTER, "NumPdEnter" },
-        BISource{ GLFW_KEY_KP_EQUAL, "NumPd=" },
-        BISource{ GLFW_KEY_LEFT_SHIFT, "LShift" },
-        BISource{ GLFW_KEY_LEFT_CONTROL, "LCtrl" },
-        BISource{ GLFW_KEY_LEFT_ALT, "LAlt" },
-        BISource{ GLFW_KEY_LEFT_SUPER, "LSuper" },
-        BISource{ GLFW_KEY_RIGHT_SHIFT, "RShift" },
-        BISource{ GLFW_KEY_RIGHT_CONTROL, "RCtrl" },
-        BISource{ GLFW_KEY_RIGHT_ALT, "RAlt" },
-        BISource{ GLFW_KEY_RIGHT_SUPER, "RSuper" },
-        BISource{ GLFW_KEY_MENU, "Menu" },
+    inline constexpr array<i32, BID_COUNT> boolInputMapR = {
+        -12914,
+        // Mouse button: 0 - x -> [1, 5]
+        0 - SDL_BUTTON_LEFT,
+        0 - SDL_BUTTON_RIGHT,
+        0 - SDL_BUTTON_MIDDLE,
+        0 - SDL_BUTTON_X1,
+        0 - SDL_BUTTON_X2,
+        //Key: x -> [6, 205]
+        SDL_SCANCODE_A,
+        SDL_SCANCODE_B,
+        SDL_SCANCODE_C,
+        SDL_SCANCODE_D,
+        SDL_SCANCODE_E,
+        SDL_SCANCODE_F,
+        SDL_SCANCODE_G,
+        SDL_SCANCODE_H,
+        SDL_SCANCODE_I,
+        SDL_SCANCODE_J,
+        SDL_SCANCODE_K,
+        SDL_SCANCODE_L,
+        SDL_SCANCODE_M,
+        SDL_SCANCODE_N,
+        SDL_SCANCODE_O,
+        SDL_SCANCODE_P,
+        SDL_SCANCODE_Q,
+        SDL_SCANCODE_R,
+        SDL_SCANCODE_S,
+        SDL_SCANCODE_T,
+        SDL_SCANCODE_U,
+        SDL_SCANCODE_V,
+        SDL_SCANCODE_W,
+        SDL_SCANCODE_X,
+        SDL_SCANCODE_Y,
+        SDL_SCANCODE_Z,
+        SDL_SCANCODE_1,
+        SDL_SCANCODE_2,
+        SDL_SCANCODE_3,
+        SDL_SCANCODE_4,
+        SDL_SCANCODE_5,
+        SDL_SCANCODE_6,
+        SDL_SCANCODE_7,
+        SDL_SCANCODE_8,
+        SDL_SCANCODE_9,
+        SDL_SCANCODE_0,
+        SDL_SCANCODE_RETURN,
+        SDL_SCANCODE_ESCAPE,
+        SDL_SCANCODE_BACKSPACE,
+        SDL_SCANCODE_TAB,
+        SDL_SCANCODE_SPACE,
+        SDL_SCANCODE_MINUS,
+        SDL_SCANCODE_EQUALS,
+        SDL_SCANCODE_LEFTBRACKET,
+        SDL_SCANCODE_RIGHTBRACKET,
+        SDL_SCANCODE_BACKSLASH,
+        SDL_SCANCODE_NONUSHASH,
+        SDL_SCANCODE_SEMICOLON,
+        SDL_SCANCODE_APOSTROPHE,
+        SDL_SCANCODE_GRAVE,
+        SDL_SCANCODE_COMMA,
+        SDL_SCANCODE_PERIOD,
+        SDL_SCANCODE_SLASH,
+        SDL_SCANCODE_CAPSLOCK,
+        SDL_SCANCODE_F1,
+        SDL_SCANCODE_F2,
+        SDL_SCANCODE_F3,
+        SDL_SCANCODE_F4,
+        SDL_SCANCODE_F5,
+        SDL_SCANCODE_F6,
+        SDL_SCANCODE_F7,
+        SDL_SCANCODE_F8,
+        SDL_SCANCODE_F9,
+        SDL_SCANCODE_F10,
+        SDL_SCANCODE_F11,
+        SDL_SCANCODE_F12,
+        SDL_SCANCODE_PRINTSCREEN,
+        SDL_SCANCODE_SCROLLLOCK,
+        SDL_SCANCODE_PAUSE,
+        SDL_SCANCODE_INSERT,
+        SDL_SCANCODE_HOME,
+        SDL_SCANCODE_PAGEUP,
+        SDL_SCANCODE_DELETE,
+        SDL_SCANCODE_END,
+        SDL_SCANCODE_PAGEDOWN,
+        SDL_SCANCODE_RIGHT,
+        SDL_SCANCODE_LEFT,
+        SDL_SCANCODE_DOWN,
+        SDL_SCANCODE_UP,
+        SDL_SCANCODE_NUMLOCKCLEAR,
+        SDL_SCANCODE_KP_DIVIDE,
+        SDL_SCANCODE_KP_MULTIPLY,
+        SDL_SCANCODE_KP_MINUS,
+        SDL_SCANCODE_KP_PLUS,
+        SDL_SCANCODE_KP_ENTER,
+        SDL_SCANCODE_KP_1,
+        SDL_SCANCODE_KP_2,
+        SDL_SCANCODE_KP_3,
+        SDL_SCANCODE_KP_4,
+        SDL_SCANCODE_KP_5,
+        SDL_SCANCODE_KP_6,
+        SDL_SCANCODE_KP_7,
+        SDL_SCANCODE_KP_8,
+        SDL_SCANCODE_KP_9,
+        SDL_SCANCODE_KP_0,
+        SDL_SCANCODE_KP_PERIOD,
+        SDL_SCANCODE_NONUSBACKSLASH,
+        SDL_SCANCODE_APPLICATION,
+        SDL_SCANCODE_POWER,
+        SDL_SCANCODE_KP_EQUALS,
+        SDL_SCANCODE_F13,
+        SDL_SCANCODE_F14,
+        SDL_SCANCODE_F15,
+        SDL_SCANCODE_F16,
+        SDL_SCANCODE_F17,
+        SDL_SCANCODE_F18,
+        SDL_SCANCODE_F19,
+        SDL_SCANCODE_F20,
+        SDL_SCANCODE_F21,
+        SDL_SCANCODE_F22,
+        SDL_SCANCODE_F23,
+        SDL_SCANCODE_F24,
+        SDL_SCANCODE_EXECUTE,
+        SDL_SCANCODE_HELP,
+        SDL_SCANCODE_MENU,
+        SDL_SCANCODE_SELECT,
+        SDL_SCANCODE_STOP,
+        SDL_SCANCODE_AGAIN,
+        SDL_SCANCODE_UNDO,
+        SDL_SCANCODE_CUT,
+        SDL_SCANCODE_COPY,
+        SDL_SCANCODE_PASTE,
+        SDL_SCANCODE_FIND,
+        SDL_SCANCODE_MUTE,
+        SDL_SCANCODE_VOLUMEUP,
+        SDL_SCANCODE_VOLUMEDOWN,
+        SDL_SCANCODE_KP_COMMA,
+        SDL_SCANCODE_KP_EQUALSAS400,
+        SDL_SCANCODE_ALTERASE,
+        SDL_SCANCODE_SYSREQ,
+        SDL_SCANCODE_CANCEL,
+        SDL_SCANCODE_CLEAR,
+        SDL_SCANCODE_PRIOR,
+        SDL_SCANCODE_RETURN2,
+        SDL_SCANCODE_SEPARATOR,
+        SDL_SCANCODE_OUT,
+        SDL_SCANCODE_OPER,
+        SDL_SCANCODE_CLEARAGAIN,
+        SDL_SCANCODE_CRSEL,
+        SDL_SCANCODE_EXSEL,
+        SDL_SCANCODE_KP_00,
+        SDL_SCANCODE_KP_000,
+        SDL_SCANCODE_THOUSANDSSEPARATOR,
+        SDL_SCANCODE_DECIMALSEPARATOR,
+        SDL_SCANCODE_CURRENCYUNIT,
+        SDL_SCANCODE_CURRENCYSUBUNIT,
+        SDL_SCANCODE_KP_LEFTPAREN,
+        SDL_SCANCODE_KP_RIGHTPAREN,
+        SDL_SCANCODE_KP_LEFTBRACE,
+        SDL_SCANCODE_KP_RIGHTBRACE,
+        SDL_SCANCODE_KP_TAB,
+        SDL_SCANCODE_KP_BACKSPACE,
+        SDL_SCANCODE_KP_A,
+        SDL_SCANCODE_KP_B,
+        SDL_SCANCODE_KP_C,
+        SDL_SCANCODE_KP_D,
+        SDL_SCANCODE_KP_E,
+        SDL_SCANCODE_KP_F,
+        SDL_SCANCODE_LCTRL,
+        SDL_SCANCODE_LSHIFT,
+        SDL_SCANCODE_LALT,
+        SDL_SCANCODE_LGUI,
+        SDL_SCANCODE_RCTRL,
+        SDL_SCANCODE_RSHIFT,
+        SDL_SCANCODE_RALT,
+        SDL_SCANCODE_RGUI,
+        SDL_SCANCODE_MODE,
+        SDL_SCANCODE_SLEEP,
+        SDL_SCANCODE_WAKE,
+        SDL_SCANCODE_CHANNEL_INCREMENT,
+        SDL_SCANCODE_CHANNEL_DECREMENT,
+        SDL_SCANCODE_MEDIA_PLAY,
+        SDL_SCANCODE_MEDIA_PAUSE,
+        SDL_SCANCODE_MEDIA_RECORD,
+        SDL_SCANCODE_MEDIA_FAST_FORWARD,
+        SDL_SCANCODE_MEDIA_REWIND,
+        SDL_SCANCODE_MEDIA_NEXT_TRACK,
+        SDL_SCANCODE_MEDIA_PREVIOUS_TRACK,
+        SDL_SCANCODE_MEDIA_STOP,
+        SDL_SCANCODE_MEDIA_EJECT,
+        SDL_SCANCODE_MEDIA_PLAY_PAUSE,
+        SDL_SCANCODE_MEDIA_SELECT,
+        SDL_SCANCODE_AC_NEW,
+        SDL_SCANCODE_AC_OPEN,
+        SDL_SCANCODE_AC_CLOSE,
+        SDL_SCANCODE_AC_EXIT,
+        SDL_SCANCODE_AC_SAVE,
+        SDL_SCANCODE_AC_PRINT,
+        SDL_SCANCODE_AC_PROPERTIES,
+        SDL_SCANCODE_AC_SEARCH,
+        SDL_SCANCODE_AC_HOME,
+        SDL_SCANCODE_AC_BACK,
+        SDL_SCANCODE_AC_FORWARD,
+        SDL_SCANCODE_AC_STOP,
+        SDL_SCANCODE_AC_REFRESH,
+        SDL_SCANCODE_AC_BOOKMARKS,
+        SDL_SCANCODE_SOFTLEFT,
+        SDL_SCANCODE_SOFTRIGHT,
+        SDL_SCANCODE_CALL,
+        SDL_SCANCODE_ENDCALL,
+        //Gamepad: 1000 + x -> [206, 231]
+        1000 + SDL_GAMEPAD_BUTTON_SOUTH,
+        1000 + SDL_GAMEPAD_BUTTON_EAST,
+        1000 + SDL_GAMEPAD_BUTTON_WEST,
+        1000 + SDL_GAMEPAD_BUTTON_NORTH,
+        1000 + SDL_GAMEPAD_BUTTON_BACK,
+        1000 + SDL_GAMEPAD_BUTTON_GUIDE,
+        1000 + SDL_GAMEPAD_BUTTON_START,
+        1000 + SDL_GAMEPAD_BUTTON_LEFT_STICK,
+        1000 + SDL_GAMEPAD_BUTTON_RIGHT_STICK,
+        1000 + SDL_GAMEPAD_BUTTON_LEFT_SHOULDER,
+        1000 + SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER,
+        1000 + SDL_GAMEPAD_BUTTON_DPAD_UP,
+        1000 + SDL_GAMEPAD_BUTTON_DPAD_DOWN,
+        1000 + SDL_GAMEPAD_BUTTON_DPAD_LEFT,
+        1000 + SDL_GAMEPAD_BUTTON_DPAD_RIGHT,
+        1000 + SDL_GAMEPAD_BUTTON_MISC1,
+        1000 + SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1,
+        1000 + SDL_GAMEPAD_BUTTON_LEFT_PADDLE1,
+        1000 + SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2,
+        1000 + SDL_GAMEPAD_BUTTON_LEFT_PADDLE2,
+        1000 + SDL_GAMEPAD_BUTTON_TOUCHPAD,
+        1000 + SDL_GAMEPAD_BUTTON_MISC2,
+        1000 + SDL_GAMEPAD_BUTTON_MISC3,
+        1000 + SDL_GAMEPAD_BUTTON_MISC4,
+        1000 + SDL_GAMEPAD_BUTTON_MISC5,
+        1000 + SDL_GAMEPAD_BUTTON_MISC6,
     };
-}
+
+    inline constexpr const char* getMouseButtonName(u8 code) noexcept {
+        switch (code) {
+            case SDL_BUTTON_LEFT: return "LeftBtn";
+            case SDL_BUTTON_MIDDLE: return "MiddleBtn";
+            case SDL_BUTTON_RIGHT: return "RightBtn";
+            case SDL_BUTTON_X1: return "Extra1Btn";
+            case SDL_BUTTON_X2: return "Extra2Btn";
+            default: return "UnknownBtn";
+        }
+    }
+
+    //Can't be `constexpr` because SDL3 has no `constexpr`.
+    inline const char* getKeyName(SDL_Scancode code) noexcept {
+        auto utf8key = SDL_GetKeyName(code);
+        if (utf8key != "") return utf8key;
+        else return SDL_GetScancodeName(code);
+    }
+
+    //Same as above.
+    inline const char* getGamepadButtonName(SDL_GamepadButton code) noexcept { return SDL_GetGamepadStringForButton(code); }
+} // namespace InputHandler::BoolInput

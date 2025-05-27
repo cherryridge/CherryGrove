@@ -2,7 +2,7 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
-#include "../../MainGame.hpp"
+#include "../../simulation/Simulation.hpp"
 #include "../Components.hpp"
 
 namespace Components::Coordinates {
@@ -13,10 +13,10 @@ namespace Components::Coordinates {
     atomic<double> baseFlySpeed(0.2);
 
     void forwards(const entt::entity& entity, double delta) {
-        const auto* rotation = MainGame::gameRegistry.try_get<RotationComponent>(entity);
-        if (rotation && MainGame::gameRegistry.all_of<CoordinatesComponent>(entity)) {
-            lock_guard lock(entity == MainGame::playerEntity ? MainGame::playerMutex : MainGame::registryMutex);
-            MainGame::gameRegistry.patch<CoordinatesComponent>(entity, [&rotation, &delta](CoordinatesComponent& coords) {
+        const auto* rotation = Simulation::gameRegistry.try_get<RotationComponent>(entity);
+        if (rotation && Simulation::gameRegistry.all_of<CoordinatesComponent>(entity)) {
+            lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
+            Simulation::gameRegistry.patch<CoordinatesComponent>(entity, [&rotation, &delta](CoordinatesComponent& coords) {
                 coords.x += baseMovementSpeed * delta * sin(glm::radians(rotation->yaw));
                 coords.z += baseMovementSpeed * delta * cos(glm::radians(rotation->yaw));
             });
@@ -24,10 +24,10 @@ namespace Components::Coordinates {
     }
 
     void backwards(const entt::entity& entity, double delta) {
-        const auto* rotation = MainGame::gameRegistry.try_get<RotationComponent>(entity);
-        if (rotation && MainGame::gameRegistry.all_of<CoordinatesComponent>(entity)) {
-            lock_guard lock(entity == MainGame::playerEntity ? MainGame::playerMutex : MainGame::registryMutex);
-            MainGame::gameRegistry.patch<CoordinatesComponent>(entity, [&rotation, &delta](CoordinatesComponent& coords) {
+        const auto* rotation = Simulation::gameRegistry.try_get<RotationComponent>(entity);
+        if (rotation && Simulation::gameRegistry.all_of<CoordinatesComponent>(entity)) {
+            lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
+            Simulation::gameRegistry.patch<CoordinatesComponent>(entity, [&rotation, &delta](CoordinatesComponent& coords) {
                 coords.x -= baseMovementSpeed * delta * sin(glm::radians(rotation->yaw));
                 coords.z -= baseMovementSpeed * delta * cos(glm::radians(rotation->yaw));
             });
@@ -35,10 +35,10 @@ namespace Components::Coordinates {
     }
 
     void strafeLeft(const entt::entity& entity, double delta) {
-        const auto* rotation = MainGame::gameRegistry.try_get<RotationComponent>(entity);
-        if (rotation && MainGame::gameRegistry.all_of<CoordinatesComponent>(entity)) {
-            lock_guard lock(entity == MainGame::playerEntity ? MainGame::playerMutex : MainGame::registryMutex);
-            MainGame::gameRegistry.patch<CoordinatesComponent>(entity, [&rotation, &delta](CoordinatesComponent& coords) {
+        const auto* rotation = Simulation::gameRegistry.try_get<RotationComponent>(entity);
+        if (rotation && Simulation::gameRegistry.all_of<CoordinatesComponent>(entity)) {
+            lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
+            Simulation::gameRegistry.patch<CoordinatesComponent>(entity, [&rotation, &delta](CoordinatesComponent& coords) {
                 coords.x += baseMovementSpeed * delta * sin(glm::radians(rotation->yaw + 90));
                 coords.z += baseMovementSpeed * delta * cos(glm::radians(rotation->yaw + 90));
             });
@@ -46,10 +46,10 @@ namespace Components::Coordinates {
     }
 
     void strafeRight(const entt::entity& entity, double delta) {
-        const auto* rotation = MainGame::gameRegistry.try_get<RotationComponent>(entity);
-        if (rotation && MainGame::gameRegistry.all_of<CoordinatesComponent>(entity)) {
-            lock_guard lock(entity == MainGame::playerEntity ? MainGame::playerMutex : MainGame::registryMutex);
-            MainGame::gameRegistry.patch<CoordinatesComponent>(entity, [&rotation, &delta](CoordinatesComponent& coords) {
+        const auto* rotation = Simulation::gameRegistry.try_get<RotationComponent>(entity);
+        if (rotation && Simulation::gameRegistry.all_of<CoordinatesComponent>(entity)) {
+            lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
+            Simulation::gameRegistry.patch<CoordinatesComponent>(entity, [&rotation, &delta](CoordinatesComponent& coords) {
                 coords.x -= baseMovementSpeed * delta * sin(glm::radians(rotation->yaw + 90));
                 coords.z -= baseMovementSpeed * delta * cos(glm::radians(rotation->yaw + 90));
             });
@@ -57,9 +57,9 @@ namespace Components::Coordinates {
     }
 
     void fly(const entt::entity& entity, double delta) {
-        if (MainGame::gameRegistry.all_of<CoordinatesComponent>(entity)) {
-            lock_guard lock(entity == MainGame::playerEntity ? MainGame::playerMutex : MainGame::registryMutex);
-            MainGame::gameRegistry.patch<CoordinatesComponent>(entity, [&delta](CoordinatesComponent& coords) {
+        if (Simulation::gameRegistry.all_of<CoordinatesComponent>(entity)) {
+            lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
+            Simulation::gameRegistry.patch<CoordinatesComponent>(entity, [&delta](CoordinatesComponent& coords) {
                 coords.y += baseMovementSpeed * delta;
             });
         }

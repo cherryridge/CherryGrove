@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <mutex>
 
-#include "../../MainGame.hpp"
+#include "../../simulation/Simulation.hpp"
 #include "../Components.hpp"
 
 namespace Components::Rotation {
@@ -10,9 +10,9 @@ namespace Components::Rotation {
     using std::lock_guard;
 
     void setRotation(const entt::entity& entity, double yaw, double pitch) {
-        if (MainGame::gameRegistry.all_of<RotationComponent>(entity)) {
-            lock_guard lock(entity == MainGame::playerEntity ? MainGame::playerMutex : MainGame::registryMutex);
-            MainGame::gameRegistry.patch<RotationComponent>(entity, [&pitch, &yaw](RotationComponent& component) {
+        if (Simulation::gameRegistry.all_of<RotationComponent>(entity)) {
+            lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
+            Simulation::gameRegistry.patch<RotationComponent>(entity, [&pitch, &yaw](RotationComponent& component) {
                 if (yaw != infinity) component.yaw = yaw;
                 if (pitch != infinity) component.pitch = pitch;
             });
@@ -20,9 +20,9 @@ namespace Components::Rotation {
     }
 
     void deltaRotation(const entt::entity& entity, double dYaw, double dPitch) {
-        if (MainGame::gameRegistry.all_of<RotationComponent>(entity)) {
-            lock_guard lock(entity == MainGame::playerEntity ? MainGame::playerMutex : MainGame::registryMutex);
-            MainGame::gameRegistry.patch<RotationComponent>(entity, [&dYaw, &dPitch](RotationComponent& component) {
+        if (Simulation::gameRegistry.all_of<RotationComponent>(entity)) {
+            lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
+            Simulation::gameRegistry.patch<RotationComponent>(entity, [&dYaw, &dPitch](RotationComponent& component) {
                 if (dYaw != infinity) {
                     double newYaw = std::fmod(dYaw + component.yaw, 360.0);
                     if (newYaw < 0) newYaw += 360.0;
@@ -37,8 +37,8 @@ namespace Components::Rotation {
 
     void getViewMtx(float* result, const entt::entity& entity) {
         //Use `CoordinatesComponent` directly for camera position until `CameraOffsetComponent` or `EyeComponent` is implemented.
-        const auto* coords = MainGame::gameRegistry.try_get<CoordinatesComponent>(entity);
-        const auto* rotation = MainGame::gameRegistry.try_get<RotationComponent>(entity);
+        const auto* coords = Simulation::gameRegistry.try_get<CoordinatesComponent>(entity);
+        const auto* rotation = Simulation::gameRegistry.try_get<RotationComponent>(entity);
         if (coords && rotation) {
             glm::vec3
                 lookingAt(

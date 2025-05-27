@@ -1,34 +1,33 @@
 ﻿#pragma once
-#include <map>
-#include <GLFW/glfw3.h>
+#include <SDL3/SDL.h>
 
 #include "../inputBase.hpp"
 
 namespace InputHandler::Scroll {
-    struct ScrollEventInfo {
-        double xOffset;
-        double yOffset;
+    struct EventData {
+        union {
+            MousePos pos;
+            struct {
+                float newX, newY;
+            };
+        };
+        float scrollX, scrollY;
 
-        ScrollEventInfo() : xOffset(0.0), yOffset(0.0) {}
+        EventData() : newX(0.0f), newY(0.0f), scrollX(0.0f), scrollY(0.0f) {}
     };
 
-    struct ScrollEvent;
+    struct Action {
+        ActionInfo info;
+        CallbackTemplate<Action, EventData> cb;
 
-    using ScrollCallback = void(*)(const std::multimap<EventPriority, ScrollEvent>& events, EventPriority priority, EventFlags flags, const ScrollEventInfo& info);
+        //DONT EVER USE THIS!
+        //Action(bool) noexcept {}
 
-    struct ScrollEvent {
-        InputEventInfo info;
-        ScrollCallback cb;
-
-        ScrollEvent(InputEventInfo info, ScrollCallback cb) : info(info), cb(cb) {}
+        Action(const ActionInfo& info, CallbackTemplate<Action, EventData> cb) noexcept : info(info), cb(cb) {}
     };
 
-    void init();
+    ActionID addScroll(const string& nameAndSpace, EventPriority priority, CallbackTemplate<Action, EventData> cb) noexcept;
+    bool removeScroll(ActionID id) noexcept;
 
-    void s_scrollCB(GLFWwindow* window, double xoffset, double yoffset);
-
-    void addScroll(const InputEventInfo& info, ScrollCallback cb);
-    bool removeScroll(ScrollCallback cb);
-
-    void s_process();
+    void process(const SDL_Event& event, bool updateOnly = false) noexcept;
 }

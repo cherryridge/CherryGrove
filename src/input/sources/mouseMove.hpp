@@ -1,39 +1,35 @@
 ﻿#pragma once
-#include <map>
-#include <GLFW/glfw3.h>
+#include <SDL3/SDL.h>
 
 #include "../inputBase.hpp"
 
 namespace InputHandler::MouseMove {
-    typedef int32_t i32;
+    struct EventData {
+        union {
+            MousePos pos;
+            struct {
+                float newX, newY;
+            };
+        };
+        float deltaX, deltaY;
 
-    struct MMEventInfo {
-        double originX;
-        double originY;
-        double newX;
-        double newY;
-
-        MMEventInfo() : originX(0.0), originY(0.0), newX(0.0), newY(0.0) {}
+        EventData() noexcept : newX(0.0f), newY(0.0f), deltaX(0.0f), deltaY(0.0f) {}
     };
 
-    struct MMEvent;
+    struct Action {
+        ActionInfo info;
+        CallbackTemplate<Action, EventData> cb;
 
-    using MMCallback = void(*)(const std::multimap<EventPriority, MMEvent>& events, EventPriority priority, EventFlags flags, const MMEventInfo& info);
+        //DONT EVER USE THIS!
+        //Action(bool) noexcept {}
 
-    struct MMEvent {
-        InputEventInfo info;
-        MMCallback cb;
-
-        MMEvent(const InputEventInfo& info, MMCallback cb) : info(info), cb(cb) {}
+        Action(const ActionInfo& info, CallbackTemplate<Action, EventData> cb) noexcept : info(info), cb(cb) {}
     };
 
-    void init();
+    const MousePos& getMousePos() noexcept;
 
-    void s_cursorPosCB(GLFWwindow* window, double xpos, double ypos);
-    void s_cursorEnterCB(GLFWwindow* window, i32 entered);
+    ActionID addMouseMove(const string& nameAndSpace, EventPriority priority, CallbackTemplate<Action, EventData> cb) noexcept;
+    bool removeMouseMove(ActionID id) noexcept;
 
-    void addMouseMove(const InputEventInfo& info, MMCallback cb);
-    bool removeMouseMove(MMCallback cb);
-
-    void s_process();
+    void process(const SDL_Event& event, bool updateOnly = false) noexcept;
 }

@@ -3,7 +3,7 @@
 ## Disclaimer: Local libraries may be modified. Check out the links below for original code.
 
 - [ocornut/imgui](https://github.com/ocornut/imgui): `./imgui`
-  - `0a222a3e2adbda761ae8f3aeffd9254b976693e9` (`docking`)
+  - `e11ad6b77e5c7f7ed28467fec42fe2c72068b68e` (`docking`)
 - [pr0g/imgui_impl_bgfx.cpp](https://gist.github.com/pr0g/aff79b71bf9804ddb03f39ca7c0c3bbb): `./imgui/backends`
   - `acd57482616387410e42b4af036e4cfc539d8566`
 - [bkaradzic/bgfx/src/bgfx_shaders.sh](https://github.com/bkaradzic/bgfx/blob/master/src/bgfx_shader.sh): `./bgfx_shader`

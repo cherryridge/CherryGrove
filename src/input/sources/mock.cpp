@@ -1,5 +1,0 @@
-﻿
-
-namespace InputHandler::Mock {
-
-}

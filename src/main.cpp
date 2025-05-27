@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <locale>
+#include <SDL3/SDL_main.h>
 #ifdef _WIN32
     #include <windows.h>
 #else
@@ -14,16 +15,12 @@
 #include "debug/Fatal.hpp"
 #include "CherryGrove.hpp"
 
-#ifdef _WIN32
-    int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-        char** _argv = __argv;
-#else
-    int main(int argc, char* argv[]) {
-        char** _argv = argv;
-#endif
-
+#define SDL_MAIN_HANDLED
+int SDL_main(int argc, char** argv) {
     typedef int32_t i32;
     using std::filesystem::current_path, std::filesystem::canonical, std::filesystem::remove, std::filesystem::path, std::locale, std::string, std::cout, std::endl;
+
+    char** _argv = argv;
 
     //Set working directory to parent directory of the executable file
     #ifdef _WIN32
@@ -89,7 +86,7 @@
     return 0;
 
     failure:
-    //todo: Focus on the existing instance window
+    //todo: Focus on the existing instance windowHandle
     lerr << "[Instance Lock] Please don't launch CherryGrove multiple times from one executable. If you need to use multiple instances, copy the whole directory to a new place, or install again at a different location." << endl;
     return Fatal::MISC_MULTIPLE_INSTANCES;
 }
