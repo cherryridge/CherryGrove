@@ -21,20 +21,19 @@ namespace Renderer {
     typedef int32_t i32;
     typedef uint32_t u32;
     using std::thread, std::atomic, Simulation::gameRegistry, Simulation::playerEntity, bgfx::VertexBufferHandle, bgfx::VertexLayout, bgfx::IndexBufferHandle, bgfx::Init, bgfx::PlatformData, bgfx::Attrib, bgfx::AttribType, bgfx::createVertexBuffer, bgfx::createIndexBuffer, bgfx::makeRef;
+    static void renderLoop() noexcept;
 
     atomic<bool> initialized(false), sizeUpdateSignal(true);
     WindowInfoCache cache;
 
     VertexBufferHandle vertexBuffer;
     IndexBufferHandle indexBuffer;
-
-    static void renderLoop() noexcept;
     thread rendererThread;
 
     void start() noexcept { rendererThread = thread(&renderLoop); }
     void shutdown() noexcept { rendererThread.join(); }
 
-    static void initBGFX() noexcept {
+    inline static void initBGFX() noexcept {
         Init config;
         PlatformData pdata;
         auto propertyHandle = SDL_GetWindowProperties(Window::windowHandle);
@@ -81,7 +80,7 @@ namespace Renderer {
             Fatal::exit(Fatal::BGFX_INITIALIZATION_FALILED);
         }
         lout << "Using rendering backend: " << bgfx::getRendererName(bgfx::getRendererType()) << endl;
-        auto caps = bgfx::getCaps();
+        const auto* caps = bgfx::getCaps();
 
     //Initialize pools
         ShaderPool::init();
@@ -103,8 +102,6 @@ namespace Renderer {
         initBGFX();
         Gui::init();
         while (CherryGrove::isCGAlive) {
-        //Process renderer-cycle input events.
-            //InputHandler::processTrigger();
         //Prepare for rendering
             //Refresh windowHandle size
             if (sizeUpdateSignal) {
@@ -114,7 +111,9 @@ namespace Renderer {
                 sizeUpdateSignal = false;
             }
             //Temp debug code
-            bgfx::setDebug(BGFX_DEBUG_STATS | BGFX_DEBUG_PROFILER | BGFX_DEBUG_TEXT);
+            #if DEBUG
+                bgfx::setDebug(BGFX_DEBUG_STATS | BGFX_DEBUG_PROFILER | BGFX_DEBUG_TEXT);
+            #endif
         //Render GUI
             bgfx::setViewClear(guiViewId, BGFX_CLEAR_NONE, 0x00000000);
             bgfx::setViewRect(guiViewId, 0, 0, cache.width, cache.height);

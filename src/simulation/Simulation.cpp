@@ -1,7 +1,7 @@
-﻿#include <thread>
-#include <mutex>
-#include <atomic>
+﻿#include <atomic>
 #include <chrono>
+#include <mutex>
+#include <thread>
 #include <entt/entt.hpp>
 
 #include "../debug/Logger.hpp"
@@ -17,12 +17,11 @@
 namespace Simulation {
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::atomic, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds;
+    using std::atomic, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::addBoolInput, InputHandler::MouseMove::addMouseMove, InputHandler::BoolInput::ActionTypes;
     using namespace std::chrono_literals;
     using namespace std::this_thread;
-
-    static void gameLoop();
-    static void tick();
+    static void gameLoop() noexcept;
+    static void tick() noexcept;
 
     atomic<bool> gameStarted(false);
     atomic<bool> gameStopSignal(false);
@@ -36,28 +35,28 @@ namespace Simulation {
     registry gameRegistry;
     entt::entity playerEntity;
     mutex registryMutex, playerMutex;
+    InputHandler::ActionID forward, backward, left, right, up, down, moveCamera;
 
     void start() {
         gameStarted = true;
 
-        Gui::setVisible(Gui::wMainMenu, false);
-        Gui::setVisible(Gui::wCopyright, false);
-        Gui::setVisible(Gui::wVersion, false);
+        Gui::setVisible(Gui::Intrinsics::MainMenu, false);
+        Gui::setVisible(Gui::Intrinsics::Copyright, false);
+        Gui::setVisible(Gui::Intrinsics::Version, false);
 
         Window::runOnMainThread([]() {
-            using namespace InputHandler;
-            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "forward", 10 }, IntrinsicInput::forward, GLFW_KEY_W);
-            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "backward", 10 }, IntrinsicInput::backward, GLFW_KEY_S);
-            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "left", 10 }, IntrinsicInput::left, GLFW_KEY_A);
-            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "right", 10 }, IntrinsicInput::right, GLFW_KEY_D);
-            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "up", 10 }, IntrinsicInput::up, GLFW_KEY_SPACE);
-            BoolInput::addBoolInput(BoolInput::ActionTypes::Repeat, { "", "down", 10 }, IntrinsicInput::down, GLFW_KEY_LEFT_SHIFT);
-            MouseMove::addMouseMove({ "", "moveCamera", 10 }, IntrinsicInput::changeRotationCB);
-            glfwSetInputMode(Window::windowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            forward = addBoolInput(":forward", 10, IntrinsicInput::forward, ActionTypes::Repeat, 28);
+            backward = addBoolInput(":backward", 10, IntrinsicInput::backward, ActionTypes::Repeat, 24);
+            left = addBoolInput(":left", 10, IntrinsicInput::left, ActionTypes::Repeat, 6);
+            right = addBoolInput(":right", 10, IntrinsicInput::right, ActionTypes::Repeat, 9);
+            up = addBoolInput(":up", 10, IntrinsicInput::up, ActionTypes::Repeat, 46);
+            down = addBoolInput(":down", 10, IntrinsicInput::down, ActionTypes::Repeat, 165);
+            moveCamera = addMouseMove(":moveCamera", 10, IntrinsicInput::changeRotationCB);
+            //glfwSetInputMode(Window::windowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         });
 
         //Temporary code to show debug menu
-        Gui::setVisible(Gui::wDebugMenu);
+        Gui::setVisible(Gui::Intrinsics::DebugMenu);
         gameThread = thread(&gameLoop);
 
         //Temporary code to spawn player entity
@@ -100,24 +99,24 @@ namespace Simulation {
         //Clear input callbacks (todo: will be changed to use clear())
         Window::runOnMainThread([]() {
             using namespace InputHandler;
-            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::forward);
-            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::backward);
-            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::left);
-            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::right);
-            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::up);
-            BoolInput::removeBoolInput(BoolInput::ActionTypes::Repeat, IntrinsicInput::down);
-            MouseMove::removeMouseMove(IntrinsicInput::changeRotationCB);
-            glfwSetInputMode(Window::windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            BoolInput::removeBoolInput(forward, ActionTypes::Repeat);
+            BoolInput::removeBoolInput(backward, ActionTypes::Repeat);
+            BoolInput::removeBoolInput(left, ActionTypes::Repeat);
+            BoolInput::removeBoolInput(right, ActionTypes::Repeat);
+            BoolInput::removeBoolInput(up, ActionTypes::Repeat);
+            BoolInput::removeBoolInput(down, ActionTypes::Repeat);
+            MouseMove::removeMouseMove(moveCamera);
+            //glfwSetInputMode(Window::windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         });
 
         //Go back to main menu
-        Gui::setVisible(Gui::wDebugMenu, false);
-        Gui::setVisible(Gui::wMainMenu);
-        Gui::setVisible(Gui::wCopyright);
-        Gui::setVisible(Gui::wVersion);
+        Gui::setVisible(Gui::Intrinsics::DebugMenu, false);
+        Gui::setVisible(Gui::Intrinsics::MainMenu);
+        Gui::setVisible(Gui::Intrinsics::Copyright);
+        Gui::setVisible(Gui::Intrinsics::Version);
     }
 
-    static void gameLoop() {
+    static void gameLoop() noexcept {
         lout << "Game" << flush;
         lout << "Hello from game loop!" << endl;
         while (gameStarted) {
@@ -130,9 +129,9 @@ namespace Simulation {
         lout << "Game loop terminated!" << endl;
     }
 
-    static void tick() {
+    static void tick() noexcept {
     //Process player input
-        InputHandler::processInputGame();
+        InputHandler::processPersist();
     //Update world
         unique_lock lock(registryMutex);
         //Simulates tick

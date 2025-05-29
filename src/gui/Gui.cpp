@@ -25,10 +25,10 @@ namespace Gui {
     typedef uint32_t u32;
     using std::unordered_map, std::unordered_set, Sound::EventID, Renderer::WindowInfoCache;
 
-    ImGuiContext* context;
+    static ImGuiContext* context;
+    static unordered_set<Intrinsics> visibleGuis;
+    static unordered_map<Intrinsics, void (*)()> guiRegistry;
     EventID click;
-    unordered_set<Intrinsics> visibleGuis;
-    unordered_map<Intrinsics, void (*)()> guiRegistry;
 
     void init() noexcept {
         i32 width, height;
@@ -41,8 +41,8 @@ namespace Gui {
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
         // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-        io.DisplaySize.x = width;
-        io.DisplaySize.y = height;
+        io.DisplaySize.x = static_cast<float>(width);
+        io.DisplaySize.y = static_cast<float>(height);
         io.ConfigViewportsNoAutoMerge = true;
         io.ConfigViewportsNoTaskBarIcon = true;
         float scale = SDL_GetWindowDisplayScale(Window::windowHandle);
@@ -59,10 +59,8 @@ namespace Gui {
         ImGuiStyle& style = ImGui::GetStyle();
         style.WindowRounding = 0.0f;
         style.WindowTitleAlign = ImVec2(0.5f, 0.0f);
-        ImGui_ImplSDL3_InitForOther(Window::windowHandle);
         ImGui_Implbgfx_Init(Renderer::guiViewId);
-        //fixme: wtf is this?
-        //InputHandler::sendToImGui = true;
+        ImGui_ImplSDL3_InitForOther(Window::windowHandle);
         click = Sound::addEvent(Sound::addSound("assets/sounds/click1.ogg"), 2.0f, 1.0f, 0.0f, true);
         //Register them manually!
         guiRegistry.emplace(Intrinsics::MainMenu, &MainMenu::render);
@@ -84,7 +82,7 @@ namespace Gui {
         unordered_set<Intrinsics> visibleGuisBuffer = visibleGuis;
         for (const auto& gui : visibleGuisBuffer) {
             if (guiRegistry.find(gui) != guiRegistry.end()) guiRegistry[gui]();
-            else lerr << "[GUI] Did you forget to emplace the GUI: " << gui << "?" << endl;
+            else lerr << "[GUI] Did you forget to emplace the GUI: " << static_cast<u8>(gui) << "?" << endl;
         }
         ImGui::Render();
         ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());

@@ -5,6 +5,7 @@
 #include <bgfx/bgfx.h>
 #include <SDL3_image/SDL_image.h>
 
+#include "../debug/Fatal.hpp"
 #include "../debug/Logger.hpp"
 #include "TexturePool.hpp"
 
@@ -12,15 +13,15 @@
 //as well as dynamically managing texture size, allowing registering 32x32 or bigger texture.
 namespace TexturePool {
     typedef int16_t i16;
-    using std::atomic, std::unordered_map, bgfx::UniformHandle, bgfx::createUniform, bgfx::destroy, std::optional, std::move, std::numeric_limits, std::memory_order_relaxed;
-    TextureID addTexture(const char* filePath, bool noVerticalFilp) noexcept;
+    using std::atomic, std::unordered_map, bgfx::UniformHandle, bgfx::createTexture2D, bgfx::createUniform, bgfx::setTexture, bgfx::makeRef, bgfx::UniformType, bgfx::TextureFormat, bgfx::destroy, std::optional, std::move, std::numeric_limits, std::memory_order_relaxed;
+    TextureID addTexture(const char* filePath) noexcept;
 
     unordered_map<TextureID, Texture> registry;
     atomic<TextureID> nextId(0);
     UniformHandle sampler;
 
     void init(const char* samplerName) noexcept {
-        sampler = createUniform(samplerName, bgfx::UniformType::Sampler);
+        sampler = createUniform(samplerName, UniformType::Sampler);
         addTexture("assets/textures/missing.png");
     }
 
@@ -32,37 +33,45 @@ namespace TexturePool {
         destroy(sampler);
     }
 
-    TextureID addTexture(const char* filePath, bool noVerticalFilp) noexcept {
+    TextureID addTexture(const char* filePath) noexcept {
         Texture texture{};
         auto* imgData = IMG_Load(filePath);
+        if (imgData == nullptr) {
+            lerr << "[TexturePool] Failed to add texture from file " << filePath << ", SDL error: " << SDL_GetError() << endl;
+            if (nextId.load(memory_order_relaxed) == 0) Fatal::exit(Fatal::TEXTUREPOOL_MISSING_MISSING_PNG);
+            return MISSING_TEXTURE_ID;
+        }
         if (SDL_MUSTLOCK(imgData) && SDL_LockSurface(imgData) < 0) {
-            lerr << "[TexturePool] Texture from file " << filePath << " is not lockable!" << endl;
+            lerr << "[TexturePool] Texture from file " << filePath << " is not lockable, SDL error: " << SDL_GetError() << endl;
+            if (nextId.load(memory_order_relaxed) == 0) Fatal::exit(Fatal::TEXTUREPOOL_MISSING_MISSING_PNG);
             return MISSING_TEXTURE_ID;
         }
         if (imgData->h > numeric_limits<i16>::max()) {
-            lerr << "Texture height overflow (highest " << numeric_limits<i16>::max() << "): " << filePath << endl;
+            lerr << "[TexturePool] Texture height overflow (highest " << numeric_limits<i16>::max() << "): " << filePath << endl;
             return 0;
         }
         if (imgData->w > numeric_limits<i16>::max()) {
-            lerr << "Texture width overflow (highest " << numeric_limits<i16>::max() << "): " << filePath << endl;
+            lerr << "[TexturePool] Texture width overflow (highest " << numeric_limits<i16>::max() << "): " << filePath << endl;
             return 0;
         }
-        auto* formattedData = SDL_ConvertSurface(imgData, SDL_PIXELFORMAT_RGBA8888);
+        auto* formattedData = SDL_ConvertSurface(imgData, SDL_PIXELFORMAT_ABGR8888);
         if (formattedData == nullptr) {
-            lerr << "[TexturePool] Texture from file " << filePath << " is not convertable to RGBA8 format!" << endl;
+            lerr << "[TexturePool] Failed to convert texture from file " << filePath << " to RGBA8 format!" << endl;
+            if (nextId.load(memory_order_relaxed) == 0) Fatal::exit(Fatal::TEXTUREPOOL_MISSING_MISSING_PNG);
             return MISSING_TEXTURE_ID;
         }
         SDL_DestroySurface(imgData);
         //todo: Build texture atlas for only 16x16 textures (consider dynamic-sized atlas?)
-        texture.handle = bgfx::createTexture2D(
-            imgData->w,
-            imgData->h,
+        texture.handle = createTexture2D(
+            formattedData->w,
+            formattedData->h,
             false, 1,
-            bgfx::TextureFormat::RGBA8,
+            TextureFormat::RGBA8,
             //Temporary: Disable pixel interpolation
             BGFX_SAMPLER_MIN_POINT | BGFX_SAMPLER_MAG_POINT,
-            bgfx::makeRef(imgData->pixels, imgData->w * imgData->h * 4)
+            makeRef(formattedData->pixels, formattedData->w * formattedData->h * 4)
         );
+        texture.data = move(formattedData);
         registry.emplace(nextId, move(texture));
         auto id = nextId.fetch_add(1, memory_order_relaxed);
         return id;
@@ -71,8 +80,8 @@ namespace TexturePool {
     void useTexture(TextureID id, u8 textureDataIndex) noexcept {
         auto p = registry.find(id);
         //Fallback to a missing texture. See `init()`.
-        if (p == registry.end()) bgfx::setTexture(textureDataIndex, sampler, registry[0].handle);
-        else bgfx::setTexture(textureDataIndex, sampler, p->second.handle);
+        if (p == registry.end()) setTexture(textureDataIndex, sampler, registry[0].handle);
+        else setTexture(textureDataIndex, sampler, p->second.handle);
     }
 
     const Texture* getTexture(TextureID id) noexcept {

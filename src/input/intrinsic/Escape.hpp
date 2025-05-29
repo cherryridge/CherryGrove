@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "../inputBase.hpp"
 #include "../sources/boolInput.hpp"
+#include "../inputBase.hpp"
 
 namespace IntrinsicInput {
     using namespace InputHandler;
-    void escapeCB(const std::multimap<EventPriority, BoolInput::Action>& events, EventPriority priority, EventFlags flags, BoolInput::BoolInputID triggerId);
+    EventFlags escapeCB(const vector<BoolInput::Action>& events, const ActionInfo& info, const BoolInput::EventData& data, EventFlags flags) noexcept;
 }

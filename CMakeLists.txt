@@ -15,8 +15,10 @@ set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY FALSE)
 
 #------------MSVC------------------
 if(MSVC)
+    add_link_options(/INCREMENTAL)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /Zc:preprocessor /utf-8")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
+    #Some C deps use `/source-charset:utf-8` and some use `/utf-8`, so we're not going to bother with it.
+    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
     cmake_policy(SET CMP0091 NEW)
     add_compile_definitions(
         WIN32_LEAN_AND_MEAN
@@ -54,24 +56,29 @@ set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<$<
 
 #------------Dep:3rdparty----------
 add_subdirectory("libs/freetype")
+
 set(ZLIB_ENABLE_TESTS   OFF CACHE BOOL "")
 set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "")
 set(WITH_GTEST          OFF CACHE BOOL "")
 set(ZLIB_COMPAT         ON  CACHE BOOL "")
 add_subdirectory("libs/zlib_ng")
+
 set(SDL_SHARED        OFF CACHE BOOL "")
 set(SDL_STATIC        ON  CACHE BOOL "")
 set(SDL_EXAMPLES      OFF CACHE BOOL "")
 set(SDL_TEST_LIBRARY  OFF CACHE BOOL "")
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 add_subdirectory("libs/sdl")
-set(SDLIMAGE_VENDORED ON CACHE BOOL "")
-set(SDLIMAGE_BACKEND_STB OFF CACHE BOOL "")
+
+set(SDL_DISABLE_INSTALL  ON CACHE BOOL "")
+set(SDLIMAGE_BACKEND_STB ON CACHE BOOL "")
+set(SDLIMAGE_STRICT      ON CACHE BOOL "")
+set(SDLIMAGE_VENDORED    ON CACHE BOOL "")
 set(SDLIMAGE_AVIF ON  CACHE BOOL "")
 set(SDLIMAGE_BMP  ON  CACHE BOOL "")
 set(SDLIMAGE_GIF  OFF CACHE BOOL "")
 set(SDLIMAGE_JPG  ON  CACHE BOOL "")
-set(SDLIMAGE_JXL  ON  CACHE BOOL "")
+set(SDLIMAGE_JXL  OFF CACHE BOOL "")
 set(SDLIMAGE_LBM  OFF CACHE BOOL "")
 set(SDLIMAGE_PCX  OFF CACHE BOOL "")
 set(SDLIMAGE_PNG  ON  CACHE BOOL "")
@@ -85,7 +92,9 @@ set(SDLIMAGE_XCF  OFF CACHE BOOL "")
 set(SDLIMAGE_XPM  OFF CACHE BOOL "")
 set(SDLIMAGE_XV   OFF CACHE BOOL "")
 add_subdirectory("libs/sdl_image")
+
 add_subdirectory("libs/json")
+
 set(ENV{NLOHMANN_JSON_VERSION} "v3.12.0")
 set(nlohmann_json_VERSION "v3.12.0")
 add_subdirectory("libs/json_schema_validator")
@@ -100,13 +109,13 @@ add_subdirectory("libs/cgnbt")
 if(UNIX AND NOT APPLE)
     find_package(ALSA REQUIRED)
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(JACK REQUIRED jack)
     find_package(Threads REQUIRED)
+    pkg_check_modules(JACK REQUIRED jack)
 elseif(APPLE)
-    find_library(COREAUDIO_LIBRARY CoreAudio)
     find_library(AUDIO_TOOLBOX_LIBRARY AudioToolbox)
-    find_library(METAL_LIBRARY Metal)
+    find_library(COREAUDIO_LIBRARY CoreAudio)
     find_library(FOUNDATION_LIBRARY Foundation)
+    find_library(METAL_LIBRARY Metal)
     find_library(QUARTZCORE_LIBRARY QuartzCore)
 endif()
 #----------------------------------
@@ -142,6 +151,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/zlib_ng"
 
     "libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/include"
+    #"libs/luajit/$<IF:$<CONFIG:Debug>,debug,release>/include"
     "libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/include"
     "libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/include"
 
@@ -157,6 +167,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
     freetype
     SDL3-static
+    SDL3_image-static
     nlohmann_json_schema_validator
     zlibstatic
 

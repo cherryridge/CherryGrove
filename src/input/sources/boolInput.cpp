@@ -249,12 +249,20 @@ namespace InputHandler::BoolInput {
     }
 
     void processPersist() noexcept {
+        shared_lock lockFetch(biStatesMutex);
+        auto _biStates = biStates;
+        lockFetch.unlock();
         for (BoolInputID i = 0; i < BID_COUNT; i++) {
-            //Hold them. Don't die
-            auto ptrInactive = biInactiveRegistries[i].getPtr(), ptrRepeat = biRepeatRegistries[i].getPtr();
             EventData data(i);
-            s_process(*ptrInactive, data);
-            s_process(*ptrRepeat, data);
+            if (_biStates[i]) {
+                //Hold it. Don't die
+                auto ptrRepeat = biRepeatRegistries[i].getPtr();
+                s_process(*ptrRepeat, data);
+            }
+            else {
+                auto ptrInactive = biInactiveRegistries[i].getPtr();
+                s_process(*ptrInactive, data);
+            }
         }
     }
 

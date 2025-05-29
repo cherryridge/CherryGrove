@@ -56,20 +56,18 @@
 
 [submodule "libs/cgnbt"]
 	path = libs/cgnbt
-	url = https://github.com/CherryRidge/CGNBT
-
-[submodule "libs/zlib_ng"]
-	path = libs/zlib_ng
-	url = https://github.com/zlib-ng/zlib-ng
+	url = https://github.com/cherryridge/cgnbt
 
 [submodule "libs/sdl"]
 	path = libs/sdl
 	url = https://github.com/libsdl-org/SDL
 
-[submodule "libs/luajit"]
-	path = libs/luajit
-	url = https://github.com/LuaJIT/LuaJIT
-
 [submodule "libs/sdl_image"]
 	path = libs/sdl_image
-	url = https://github.com/cherryridge/SDL_image
+	url = https://github.com/libsdl-org/SDL_image
+[submodule "libs/zlib_ng"]
+	path = libs/zlib_ng
+	url = https://github.com/zlib-ng/zlib-ng
+[submodule "libs/lz4"]
+	path = libs/lz4
+	url = https://github.com/lz4/lz4

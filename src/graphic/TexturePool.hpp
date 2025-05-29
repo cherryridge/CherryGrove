@@ -17,7 +17,7 @@ namespace TexturePool {
 
     void init(const char* samplerName) noexcept;
     void shutdown() noexcept;
-    TextureID addTexture(const char* filePath, bool noVerticalFilp = false) noexcept;
+    TextureID addTexture(const char* filePath) noexcept;
     void useTexture(TextureID id, u8 textureDataIndex = 0) noexcept;
     const Texture* getTexture(TextureID id) noexcept;
     void removeTexture(TextureID id) noexcept;

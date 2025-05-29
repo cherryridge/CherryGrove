@@ -1,79 +1,64 @@
 ﻿#pragma once
-#include <unordered_map>
 #include <array>
 #include <cstdint>
 #include <limits>
 #include <glm/glm.hpp>
+#include <unordered_map>
 
 #include "../../debug/Logger.hpp"
 #include "../../graphic/TexturePool.hpp"
 
 namespace Components {
+    typedef uint16_t u16;
+    typedef uint32_t u32;
+    using std::array, std::unordered_map, std::numeric_limits, glm::uvec2, glm::vec3, glm::vec4;
+
     struct CubeFace {
-        //{U, V, deltaU, deltaV}
-        //glm::i16vec4 texCoords;
         //{U1, V1, U2, V2}
         //U2 >= U1 && V2 >= V1
-        glm::vec4 texCoords;
+        vec4 texCoords;
         float uvRotation;
-        uint32_t shaderId;
-        uint32_t textureId;
+        u32 shaderId;
+        u32 textureId;
 
-        CubeFace() = default;
-        CubeFace(glm::uvec2 tStart, glm::uvec2 tEnd, float uvRotation, uint32_t shaderId, uint32_t textureId) {
-            int32_t dx = tEnd.x - tStart.x, dy = tEnd.y - tStart.y;
-            auto* texture = TexturePool::getTexture(textureId);
+        CubeFace() noexcept = default;
+        CubeFace(const uvec2& rectStartCoords, const uvec2& rectEndCoords, float uvRotation, u32 shaderId, u32 textureId) noexcept : uvRotation(uvRotation), shaderId(shaderId), textureId(textureId) {
+            const auto* texture = TexturePool::getTexture(textureId);
             if (texture == nullptr) {
                 lerr << "[CubeFace] Texture not registered!" << endl;
                 return;
             }
-            if (tStart.x > texture->data->w || tEnd.x > texture->data->w || tStart.y > texture->data->h || tEnd.y > texture->data->h) lerr << "[CubeFace] Texture coordinates overflow in texture dimensions." << endl;
-            //todo: Cap the value instead of blowing up :)
-            if (tStart.x > std::numeric_limits<int16_t>::max() || tStart.y > std::numeric_limits<int16_t>::max() || dx > std::numeric_limits<int16_t>::max() || dy > std::numeric_limits<int16_t>::max() || dx < std::numeric_limits<int16_t>::min() || dy < std::numeric_limits<int16_t>::min()) lerr << "[CubeFace] Texture coordinates overflow in short type." << endl;
-            texCoords.x = (float)tStart.x / texture->data->w;
-            texCoords.y = (float)tStart.y / texture->data->h;
-            texCoords.z = (float)dx;
-            texCoords.w = (float)dy;
-            this->uvRotation = uvRotation;
-            this->shaderId = shaderId;
-            this->textureId = textureId;
+            if (rectStartCoords.x < rectEndCoords.x || rectStartCoords.y < rectEndCoords.y) lerr << "[CubeFace] Texture coordinates malformed." << endl;
+            texCoords.x = (float)rectStartCoords.x / texture->data->w;
+            texCoords.y = (float)rectStartCoords.y / texture->data->h;
+            texCoords.z = (float)rectEndCoords.x / texture->data->w;
+            texCoords.w = (float)rectEndCoords.y / texture->data->h;
         }
     };
 
     struct SubCube {
         //All coordinates are relative to block coordinates (corner with least coordinates).
-        glm::vec3 origin;
-        glm::vec3 size;
+        vec3 origin;
+        vec3 size;
         //Selection box origin
-        glm::vec3 sOrigin;
+        vec3 sOrigin;
         //Selection box size, if no selection box should be displayed, set to (0.0f).
-        glm::vec3 sSize;
-        glm::vec3 pivot;
+        vec3 sSize;
+        vec3 pivot;
         //(rotationX, rotationY, rotationZ), if no rotation, set to (0.0f).
-        glm::vec3 rotation;
+        vec3 rotation;
         //(up, down, north, east, south, west)
-        std::array<CubeFace, 6> faces;
-        
+        array<CubeFace, 6> faces;
 
-        SubCube() = default;
-        SubCube(glm::vec3 origin, glm::vec3 size, glm::vec3 sOrigin, glm::vec3 sSize, glm::vec3 pivot, glm::vec3 rotation, CubeFace faceUp, CubeFace faceDown, CubeFace faceNorth, CubeFace faceEast, CubeFace faceSouth, CubeFace faceWest) {
-            this->origin = origin;
-            this->size = size;
-            this->sOrigin = sOrigin;
-            this->sSize = sSize;
-            this->pivot = pivot;
-            this->rotation = rotation;
-            this->faces = std::array<CubeFace, 6>{ faceUp, faceDown, faceNorth, faceEast, faceSouth, faceWest };
-        }
+        SubCube() noexcept = default;
+        SubCube(vec3 origin, vec3 size, vec3 sOrigin, vec3 sSize, vec3 pivot, vec3 rotation, CubeFace faceUp, CubeFace faceDown, CubeFace faceNorth, CubeFace faceEast, CubeFace faceSouth, CubeFace faceWest) noexcept : origin(origin), size(size), sOrigin(sOrigin), sSize(sSize), pivot(pivot), rotation(rotation), faces({faceUp, faceDown, faceNorth, faceEast, faceSouth, faceWest}) {}
     };
 
     struct BlockRenderComponent {
-        std::unordered_map<uint32_t, SubCube> subcubes;
+        unordered_map<u32, SubCube> subcubes;
 
-        BlockRenderComponent() = default;
+        BlockRenderComponent() noexcept = default;
         //Single cube convention
-        BlockRenderComponent(SubCube sc) {
-            subcubes.emplace(0u, sc);
-        }
+        BlockRenderComponent(SubCube sc) noexcept : subcubes({{0u, sc}}) {}
     };
 }

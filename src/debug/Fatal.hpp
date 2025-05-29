@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <cstdint>
 
+#include "Logger.hpp"
+
 namespace Fatal {
     typedef int32_t i32;
 
@@ -18,6 +20,8 @@ namespace Fatal {
     inline constexpr i32 BGFX_OPEN_SHADER_FILE_FAILED                = 1004;
     inline constexpr i32 BGFX_READ_SHADER_FILE_FAILED                = 1005;
     inline constexpr i32 BGFX_GET_SHADER_FAILED                      = 1006;
+    //:)
+    inline constexpr i32 TEXTUREPOOL_MISSING_MISSING_PNG             = 1007;
 
     //SoLoud/Sound System: 2001-3000
     inline constexpr i32 SOLOUD_INITIALIZATION_FALILED               = 2001;

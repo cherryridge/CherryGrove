@@ -9,6 +9,7 @@
 #include "pack/Pack.hpp"
 #include "input/intrinsic/Escape.hpp"
 #include "CherryGrove.hpp"
+#include <zlib.h>
 
 namespace CherryGrove {
     using std::atomic;
@@ -21,8 +22,10 @@ namespace CherryGrove {
     void launch() {
         isCGAlive = true;
         lout << "Main" << flush;
+    //Read settings
+        //todo
 
-    //Initialize libraries
+    //Initialize systems
         lout << "Setting up CherryGrove window & initializing input handler..." << endl;
         Window::initSDL(2560, 1440, "CherryGrove");
 
@@ -32,9 +35,6 @@ namespace CherryGrove {
         lout << "Initializing SoLoud..." << endl;
         Sound::init();
         Sound::test();
-
-        lout << "Initialzing GUI..." << endl;
-        Gui::init();
 
         lout << "Initializing pack manager..." << endl;
         Pack::init();
@@ -47,7 +47,7 @@ namespace CherryGrove {
     //Set up intrinsic inputs
         //todo: Input should be able to be processed by any of the three threads:
         //Main, Renderer, Game
-        InputHandler::BoolInput::addBoolInput(InputHandler::BoolInput::ActionTypes::Press, { "", "escape", 10 }, IntrinsicInput::escapeCB, GLFW_KEY_ESCAPE);
+        InputHandler::BoolInput::addBoolInput(":escape", 10, IntrinsicInput::escapeCB, InputHandler::BoolInput::ActionTypes::Press, 43);
 
         hold();
     }

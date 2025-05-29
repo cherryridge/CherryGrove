@@ -6,6 +6,7 @@ Thumbs.db
 # Build system generated files/folders
 .vscode/
 .vs/
+.VSCodeCounter/
 *.suo
 *.user
 *.VC.db
@@ -22,6 +23,7 @@ build/
 !*/build/
 out/
 !*/out/
+cmake-build-*/
 
 # Local-only folders
 others/

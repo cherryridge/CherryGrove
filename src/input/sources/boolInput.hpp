@@ -63,7 +63,7 @@ namespace InputHandler::BoolInput {
 
     //There is no guarantee that any of the action's property (namespace, name, callback etc.) isn't duplicated anywhere. Implement it in UMI/api_js.
     //Don't modify the order of the parameter as they're meant to be unified among all input sources.
-    ActionID addBoolInput(const string& nameAndSpace, EventPriority priority, CallbackTemplate<Action, EventData> cb, ActionTypes type, BoolInputID defaultBinding) noexcept;
+    ActionID addBoolInput(const string& nameAndSpace, EventPriority priority, CallbackTemplate<Action, EventData> cb, ActionTypes type, BoolInputID defaultBinding = EMPTY_BID) noexcept;
     //VERY SLOW O(n) algorithm!
     bool removeBoolInput(ActionID id, ActionTypes type) noexcept;
 
