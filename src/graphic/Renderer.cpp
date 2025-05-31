@@ -1,5 +1,5 @@
-﻿#include <thread>
-#include <atomic>
+﻿#include <atomic>
+#include <thread>
 #include <bx/math.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
@@ -30,7 +30,9 @@ namespace Renderer {
     IndexBufferHandle indexBuffer;
     thread rendererThread;
 
-    void start() noexcept { rendererThread = thread(&renderLoop); }
+    void init() noexcept {
+        rendererThread = thread(renderLoop);
+    }
     void shutdown() noexcept { rendererThread.join(); }
 
     inline static void initBGFX() noexcept {
@@ -101,6 +103,7 @@ namespace Renderer {
         lout << "Initializing..." << endl;
         initBGFX();
         Gui::init();
+        CherryGrove::subsystemLatch.count_down();
         while (CherryGrove::isCGAlive) {
         //Prepare for rendering
             //Refresh windowHandle size

@@ -4,19 +4,18 @@
 #include <SDL3/SDL.h>
 
 #include "../../debug/Logger.hpp"
-#include "../../CherryGrove.hpp"
 #include "../inputBase.hpp"
 #include "scroll.hpp"
 
 namespace InputHandler::Scroll {
     typedef uint8_t u8;
     typedef uint32_t u32;
-    using std::shared_mutex, std::scoped_lock, std::sort, std::vector;
-
-    static ActionRegistryTemplate<Action> registry;
-    static shared_mutex scrollMutex;
+    using std::shared_mutex, std::sort, std::vector;
 
     static EventData store;
+    static shared_mutex storeMutex;
+
+    static ActionRegistryTemplate<Action> registry;
 
     ActionID addScroll(const string& nameAndSpace, EventPriority priority, CallbackTemplate<Action, EventData> cb) noexcept {
         auto id = getNextId();

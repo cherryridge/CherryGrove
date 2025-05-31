@@ -13,6 +13,9 @@ namespace InputHandler {
 
     void init() noexcept;
 
+    bool getCursorDisabled() noexcept;
+    void setCursorDisabled(bool disabled = true) noexcept;
+
     void processTrigger(const SDL_Event& event) noexcept;
     void processPersist() noexcept;
     void update() noexcept;

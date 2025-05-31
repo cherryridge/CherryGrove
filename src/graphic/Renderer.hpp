@@ -5,13 +5,13 @@
 namespace Renderer {
     typedef uint8_t u8;
     typedef int32_t i32;
-    using std::atomic, std::array;
+    using std::atomic, std::array, std::mutex;
 
     extern atomic<bool> initialized;
     extern atomic<bool> sizeUpdateSignal;
     
-    //Must be called after `MainWindow::initInputHandler`.
-    void start() noexcept;
+    //Must be called after `Window::init`.
+    void init() noexcept;
     void shutdown() noexcept;
 
     inline constexpr u8 guiViewId        = 1u;

@@ -11,6 +11,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY FALSE)
 set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY FALSE)
+set(CMAKE_SUPPRESS_REGENERATION ON CACHE BOOL "" FORCE)
 #----------------------------------
 
 #------------MSVC------------------
@@ -49,9 +50,11 @@ set(BGFX_BGFX_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,rele
 set(BGFX_BX_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bx$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 set(BGFX_BIMG_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bimg$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 
+set(LUAJIT_LIB "${CMAKE_SOURCE_DIR}/libs/luajit/$<IF:$<CONFIG:Debug>,debug,release>/$<IF:$<PLATFORM_ID:Windows>,lua51.lib,libluajit.a>")
+
 set(SOLOUD_LIB "${CMAKE_SOURCE_DIR}/libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>soloud_static_x64$<$<CONFIG:Debug>:_d>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 
-set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>v8_monolith$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
+set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<IF:$<PLATFORM_ID:Windows>,v8_monolith.lib,libv8_monolith.a>")
 #----------------------------------
 
 #------------Dep:3rdparty----------
@@ -151,7 +154,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/zlib_ng"
 
     "libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/include"
-    #"libs/luajit/$<IF:$<CONFIG:Debug>,debug,release>/include"
+    "libs/luajit/$<IF:$<CONFIG:Debug>,debug,release>/include"
     "libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/include"
     "libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/include"
 
@@ -174,6 +177,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${BGFX_BGFX_LIB}
     ${BGFX_BX_LIB}
     ${BGFX_BIMG_LIB}
+    ${LUAJIT_LIB}
     ${SOLOUD_LIB}
     ${V8_LIB}
 )

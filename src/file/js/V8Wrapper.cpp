@@ -4,14 +4,14 @@
 #ifdef DEBUG
     #define V8_ENABLE_CHECKS 1
 #endif
-#include <v8/v8.h>
-#include <v8/libplatform/libplatform.h>
-#include <v8/v8-context.h>
-#include <v8/v8-initialization.h>
-#include <v8/v8-isolate.h>
-#include <v8/v8-local-handle.h>
-#include <v8/v8-primitive.h>
-#include <v8/v8-script.h>
+#include <v8.h>
+#include <libplatform/libplatform.h>
+#include <v8-context.h>
+#include <v8-initialization.h>
+#include <v8-isolate.h>
+#include <v8-local-handle.h>
+#include <v8-primitive.h>
+#include <v8-script.h>
 
 #include "../../debug/Logger.hpp"
 #include "V8Wrapper.hpp"

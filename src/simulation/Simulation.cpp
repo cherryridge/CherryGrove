@@ -52,7 +52,7 @@ namespace Simulation {
             up = addBoolInput(":up", 10, IntrinsicInput::up, ActionTypes::Repeat, 46);
             down = addBoolInput(":down", 10, IntrinsicInput::down, ActionTypes::Repeat, 165);
             moveCamera = addMouseMove(":moveCamera", 10, IntrinsicInput::changeRotationCB);
-            //glfwSetInputMode(Window::windowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            SDL_SetWindowRelativeMouseMode(Window::windowHandle, true);
         });
 
         //Temporary code to show debug menu
@@ -106,7 +106,7 @@ namespace Simulation {
             BoolInput::removeBoolInput(up, ActionTypes::Repeat);
             BoolInput::removeBoolInput(down, ActionTypes::Repeat);
             MouseMove::removeMouseMove(moveCamera);
-            //glfwSetInputMode(Window::windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            SDL_SetWindowRelativeMouseMode(Window::windowHandle, false);
         });
 
         //Go back to main menu

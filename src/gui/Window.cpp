@@ -23,7 +23,7 @@ namespace Window {
 //Main thread runner
     static queue<function<void()>> taskQueue;
 
-    void initSDL(u32 width, u32 height, const char* title) noexcept {
+    void init(u32 width, u32 height, const char* title) noexcept {
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
             lerr << "[Window] Failed to set up SDL!" << endl;
             Fatal::exit(Fatal::SDL_INITIALIZATION_FALILED);
@@ -39,14 +39,17 @@ namespace Window {
         else lerr << "[Window] Load window icon data failed!" << endl;
         SDL_DestroySurface(icon);
         InputHandler::init();
+        CherryGrove::subsystemLatch.count_down();
     }
 
     void update() noexcept {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(windowHandle))) CherryGrove::isCGAlive = false;
-            ImGui_ImplSDL3_ProcessEvent(&event);
-            InputHandler::processTrigger(event);
+            else if(CherryGrove::isCGAlive) {
+                ImGui_ImplSDL3_ProcessEvent(&event);
+                InputHandler::processTrigger(event);
+            }
         }
         auto size = taskQueue.size();
         for (i32 i = 0; i < size; i++) {

@@ -8,7 +8,7 @@ namespace Window {
 
     extern SDL_Window* windowHandle;
 
-    void initSDL(u32 width, u32 height, const char* title) noexcept;
+    void init(u32 width, u32 height, const char* title) noexcept;
     void update() noexcept;
     void close() noexcept;
 

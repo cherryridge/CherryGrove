@@ -3,7 +3,7 @@
 Thumbs.db
 [Dd]esktop.ini
 
-# Build system generated files/folders
+# Build system/IDE generated files/folders
 .vscode/
 .vs/
 .VSCodeCounter/
@@ -17,19 +17,14 @@ Thumbs.db
 .netrwhist
 .vimcache
 .cache
-compile_commands.json
-
+/compile_commands.json
 build/
 !*/build/
 out/
 !*/out/
 cmake-build-*/
 
-# Local-only folders
-others/
-!*/others/
-
-# Test-purpose folders
+# Test-purpose files/folders
 saves/
 !*/saves/
 packs/

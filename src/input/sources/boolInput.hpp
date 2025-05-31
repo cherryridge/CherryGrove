@@ -569,7 +569,7 @@ namespace InputHandler::BoolInput {
     //Can't be `constexpr` because SDL3 has no `constexpr`.
     inline const char* getKeyName(SDL_Scancode code) noexcept {
         auto utf8key = SDL_GetKeyName(code);
-        if (utf8key != "") return utf8key;
+        if (string(utf8key) != "") return utf8key;
         else return SDL_GetScancodeName(code);
     }
 

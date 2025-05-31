@@ -46,6 +46,7 @@ namespace Sound {
         lout << "SoLoud is running on " << soLoudInstance->getBackendString() << " with " << soLoudInstance->getBackendChannels() << " channels." << endl;
         lout << "Creating audio thread..." << endl;
         audioThread = thread(&audioLoop);
+        CherryGrove::subsystemLatch.count_down();
     }
 
     void test() {

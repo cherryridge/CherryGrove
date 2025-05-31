@@ -11,10 +11,10 @@
 namespace InputHandler {
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::atomic;
+    using std::atomic, std::memory_order_acquire, std::memory_order_release;
 
-    atomic<bool> sendToImGui(true);
-    atomic<bool> sendToSimulation(true);
+    atomic<bool> sendToImGui(true), sendToSimulation(true), cursorDisabled(true);
+
 
     SDL_Gamepad* gamepadHandle = nullptr;
     atomic<bool> gamepadStateResetSignal(false);
@@ -37,6 +37,18 @@ namespace InputHandler {
         }
         else Json::saveJSON("options.json");
         //todo: set stored bindings
+    }
+
+    bool getCursorDisabled() noexcept { return cursorDisabled.load(memory_order_acquire); }
+
+    void setCursorDisabled(bool disabled) noexcept {
+        auto currentDisabled = cursorDisabled.load(memory_order_acquire);
+        if (currentDisabled && !disabled) {
+            cursorDisabled.store(false, memory_order_release);
+        }
+        else if (!currentDisabled && disabled) {
+            cursorDisabled.store(true, memory_order_release);
+        }
     }
 
     void processTrigger(const SDL_Event& event) noexcept {

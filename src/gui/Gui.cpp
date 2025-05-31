@@ -63,10 +63,10 @@ namespace Gui {
         ImGui_ImplSDL3_InitForOther(Window::windowHandle);
         click = Sound::addEvent(Sound::addSound("assets/sounds/click1.ogg"), 2.0f, 1.0f, 0.0f, true);
         //Register them manually!
-        guiRegistry.emplace(Intrinsics::MainMenu, &MainMenu::render);
-        guiRegistry.emplace(Intrinsics::Copyright, &Copyright::render);
-        guiRegistry.emplace(Intrinsics::Version, &Version::render);
-        guiRegistry.emplace(Intrinsics::DebugMenu, &DebugMenu::render);
+        guiRegistry.emplace(Intrinsics::MainMenu, MainMenu::render);
+        guiRegistry.emplace(Intrinsics::Copyright, Copyright::render);
+        guiRegistry.emplace(Intrinsics::Version, Version::render);
+        guiRegistry.emplace(Intrinsics::DebugMenu, DebugMenu::render);
     }
 
     void shutdown() noexcept {

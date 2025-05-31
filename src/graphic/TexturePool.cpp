@@ -37,12 +37,12 @@ namespace TexturePool {
         Texture texture{};
         auto* imgData = IMG_Load(filePath);
         if (imgData == nullptr) {
-            lerr << "[TexturePool] Failed to add texture from file " << filePath << ", SDL error: " << SDL_GetError() << endl;
+            lerr << "[TexturePool] Failed to add texture from file " << filePath << ": " << SDL_GetError() << endl;
             if (nextId.load(memory_order_relaxed) == 0) Fatal::exit(Fatal::TEXTUREPOOL_MISSING_MISSING_PNG);
             return MISSING_TEXTURE_ID;
         }
         if (SDL_MUSTLOCK(imgData) && SDL_LockSurface(imgData) < 0) {
-            lerr << "[TexturePool] Texture from file " << filePath << " is not lockable, SDL error: " << SDL_GetError() << endl;
+            lerr << "[TexturePool] Texture from file " << filePath << " is not lockable: " << SDL_GetError() << endl;
             if (nextId.load(memory_order_relaxed) == 0) Fatal::exit(Fatal::TEXTUREPOOL_MISSING_MISSING_PNG);
             return MISSING_TEXTURE_ID;
         }

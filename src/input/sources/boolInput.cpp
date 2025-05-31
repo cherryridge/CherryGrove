@@ -6,7 +6,6 @@
 #include <SDL3/SDL.h>
 
 #include "../../debug/Logger.hpp"
-#include "../../CherryGrove.hpp"
 #include "../InputHandler.hpp"
 #include "../inputBase.hpp"
 #include "boolInput.hpp"
@@ -37,29 +36,10 @@ namespace InputHandler::BoolInput {
 
     const bitset<BID_COUNT>& getKeyStates() noexcept { return biStates; }
 
-    inline static bool getState(BoolInputID bID) noexcept { return biStates.test(bID); }
-
-    inline static bool getState(i32 rawID) noexcept {
-        auto p = boolInputMap.find(rawID);
-        //Invalid SDL scancode, always not activated
-        if (p == boolInputMap.end()) return false;
-        return biStates.test(p->second);
-    }
-
     //Doesn't lock the state array!
     inline static void setState(BoolInputID bID, bool state) noexcept {
-        auto index = bID / 64, reminder = bID - index * 64;
         //scoped_lock lock(biStatesMutex);
         biStates.set(bID, state);
-    }
-
-    //Doesn't lock the state array!
-    inline static void setState(i32 rawID, bool state) noexcept {
-        auto p = boolInputMap.find(rawID);
-        //Invalid SDL scancode, do nothing
-        if (p == boolInputMap.end()) return;
-        //scoped_lock lock(biStatesMutex);
-        biStates.set(p->second, state);
     }
 
     ActionID addBoolInput(const string& nameAndSpace, EventPriority priority, CallbackTemplate<Action, EventData> cb, ActionTypes type, BoolInputID defaultBinding) noexcept {
@@ -134,7 +114,7 @@ namespace InputHandler::BoolInput {
                     return false;
                 });
                 if (succeed) {
-                    registries[newBID].operateSwap([&id, &temp](vector<Action>& original) {
+                    registries[newBID].operateSwap([&temp](vector<Action>& original) {
                         original.push_back(move(temp));
                         sort(original.begin(), original.end(), [](const Action& a, const Action& b) {
                             return a.info.priority < b.info.priority;
@@ -171,7 +151,7 @@ namespace InputHandler::BoolInput {
                 return false;
             });
             if (succeed) {
-                registries[temp.defaultBinding].operateSwap([&id, &temp](vector<Action>& original) {
+                registries[temp.defaultBinding].operateSwap([&temp](vector<Action>& original) {
                     original.push_back(move(temp));
                     sort(original.begin(), original.end(), [](const Action& a, const Action& b) {
                         return a.info.priority < b.info.priority;

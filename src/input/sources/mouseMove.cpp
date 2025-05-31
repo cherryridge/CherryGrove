@@ -4,7 +4,6 @@
 #include <SDL3/SDL.h>
 
 #include "../../debug/Logger.hpp"
-#include "../../CherryGrove.hpp"
 #include "../inputBase.hpp"
 #include "mouseMove.hpp"
 
@@ -14,7 +13,7 @@ namespace InputHandler::MouseMove {
     using std::shared_mutex, std::scoped_lock, std::sort, std::vector;
 
     static EventData store;
-    static shared_mutex cacheMutex;
+    static shared_mutex storeMutex;
 
     static ActionRegistryTemplate<Action> registry;
 
@@ -63,7 +62,7 @@ namespace InputHandler::MouseMove {
     void process(const SDL_Event& event, bool updateOnly) noexcept {
         switch (event.type) {
             case SDL_EVENT_MOUSE_MOTION: {
-                scoped_lock lock(cacheMutex);
+                scoped_lock lock(storeMutex);
                 store.newX = event.motion.x;
                 store.newY = event.motion.y;
                 store.deltaX = event.motion.xrel;
