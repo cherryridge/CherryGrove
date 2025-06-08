@@ -58,6 +58,26 @@ set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<IF
 #----------------------------------
 
 #------------Dep:3rdparty----------
+set(PHYSFS_ARCHIVE_ZIP         ON  CACHE BOOL "")
+set(PHYSFS_ARCHIVE_7Z          ON  CACHE BOOL "")
+set(PHYSFS_ARCHIVE_GRP         OFF CACHE BOOL "")
+set(PHYSFS_ARCHIVE_WAD         OFF CACHE BOOL "")
+set(PHYSFS_ARCHIVE_CSM         OFF CACHE BOOL "")
+set(PHYSFS_ARCHIVE_HOG         OFF CACHE BOOL "")
+set(PHYSFS_ARCHIVE_MVL         OFF CACHE BOOL "")
+set(PHYSFS_ARCHIVE_QPAK        OFF CACHE BOOL "")
+set(PHYSFS_ARCHIVE_SL          OFF CACHE BOOL "")
+set(PHYSFS_ARCHIVE_ISO9660     OFF CACHE BOOL "")
+set(PHYSFS_ARCHIVE_VDF         OFF CACHE BOOL "")
+set(PHYSFS_ARCHIVE_LECARCHIVES OFF CACHE BOOL "")
+set(PHYSFS_BUILD_STATIC        ON  CACHE BOOL "")
+set(PHYSFS_BUILD_SHARED        OFF CACHE BOOL "")
+set(PHYSFS_BUILD_TEST          OFF CACHE BOOL "")
+set(PHYSFS_DISABLE_INSTALL     ON  CACHE BOOL "")
+set(PHYSFS_BUILD_DOCS          OFF CACHE BOOL "")
+add_subdirectory("libs/physfs")
+
+set(FT_DISABLE_ZLIB OFF CACHE BOOL "")
 add_subdirectory("libs/freetype")
 
 set(ZLIB_ENABLE_TESTS   OFF CACHE BOOL "")
@@ -136,17 +156,25 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "BX_CONFIG_DEBUG=$<IF:$<CONFI
 target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/boost/assert/include"
     "libs/boost/config/include"
+    "libs/boost/container_hash/include"
+    "libs/boost/core/include"
+    "libs/boost/describe/include"
     "libs/boost/detail/include"
     "libs/boost/exception/include"
+    "libs/boost/mp11/include"
     "libs/boost/pfr/include"
+    "libs/boost/predef/include"
+    "libs/boost/static_assert/include"
     "libs/boost/throw_exception/include"
     "libs/boost/type_traits/include"
+    "libs/boost/unordered/include"
     "libs/boost/utility/include"
     "libs/boost/uuid/include"
     "libs/entt/single_include"
     "libs/glm"
     "libs/json/single_include"
 
+    "libs/physfs/src"
     "libs/freetype/include"
     "libs/sdl/include"
     "libs/sdl_image/include"
@@ -168,6 +196,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE
     CGNBT
 
+    physfs-static
     freetype
     SDL3-static
     SDL3_image-static

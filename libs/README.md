@@ -1,6 +1,8 @@
-# Local libraries
+# Local Libraries
 
-## Disclaimer: Local libraries may be modified. Check out the links below for original code.
+### Disclaimer: Local libraries may be modified. Check out the links below for original code.
+
+### All of the local libraries need to be updated periodically.
 
 - [ocornut/imgui](https://github.com/ocornut/imgui): `./imgui`
   - `e11ad6b77e5c7f7ed28467fec42fe2c72068b68e` (`docking`)

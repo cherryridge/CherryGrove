@@ -1,19 +1,3 @@
-[submodule "libs/json"]
-	path = libs/json
-	url = https://github.com/nlohmann/json
-
-[submodule "libs/glm"]
-	path = libs/glm
-	url = https://github.com/g-truc/glm
-
-[submodule "libs/entt"]
-	path = libs/entt
-	url = https://github.com/skypjack/entt
-
-[submodule "libs/boost/uuid"]
-	path = libs/boost/uuid
-	url = https://github.com/boostorg/uuid
-
 [submodule "libs/boost/assert"]
 	path = libs/boost/assert
 	url = https://github.com/boostorg/assert
@@ -21,6 +5,18 @@
 [submodule "libs/boost/config"]
 	path = libs/boost/config
 	url = https://github.com/boostorg/config
+
+[submodule "libs/boost/container_hash"]
+	path = libs/boost/container_hash
+	url = https://github.com/boostorg/container_hash
+
+[submodule "libs/boost/core"]
+	path = libs/boost/core
+	url = https://github.com/boostorg/core
+
+[submodule "libs/boost/describe"]
+	path = libs/boost/describe
+	url = https://github.com/boostorg/describe
 
 [submodule "libs/boost/detail"]
 	path = libs/boost/detail
@@ -30,9 +26,21 @@
 	path = libs/boost/exception
 	url = https://github.com/boostorg/exception
 
+[submodule "libs/boost/mp11"]
+	path = libs/boost/mp11
+	url = https://github.com/boostorg/mp11
+
 [submodule "libs/boost/pfr"]
 	path = libs/boost/pfr
 	url = https://github.com/boostorg/pfr
+
+[submodule "libs/boost/predef"]
+	path = libs/boost/predef
+	url = https://github.com/boostorg/predef
+
+[submodule "libs/boost/static_assert"]
+	path = libs/boost/static_assert
+	url = https://github.com/boostorg/static_assert
 
 [submodule "libs/boost/throw_exception"]
 	path = libs/boost/throw_exception
@@ -42,21 +50,45 @@
 	path = libs/boost/type_traits
 	url = https://github.com/boostorg/type_traits
 
+[submodule "libs/boost/unordered"]
+	path = libs/boost/unordered
+	url = https://github.com/boostorg/unordered
+
 [submodule "libs/boost/utility"]
 	path = libs/boost/utility
 	url = https://github.com/boostorg/utility
 
-[submodule "libs/json_schema_validator"]
-	path = libs/json_schema_validator
-	url = https://github.com/pboettch/json-schema-validator
+[submodule "libs/boost/uuid"]
+	path = libs/boost/uuid
+	url = https://github.com/boostorg/uuid
+
+[submodule "libs/cgnbt"]
+	path = libs/cgnbt
+	url = https://github.com/cherryridge/cgnbt
+
+[submodule "libs/entt"]
+	path = libs/entt
+	url = https://github.com/skypjack/entt
 
 [submodule "libs/freetype"]
 	path = libs/freetype
 	url = https://github.com/freetype/freetype
 
-[submodule "libs/cgnbt"]
-	path = libs/cgnbt
-	url = https://github.com/cherryridge/cgnbt
+[submodule "libs/glm"]
+	path = libs/glm
+	url = https://github.com/g-truc/glm
+
+[submodule "libs/json"]
+	path = libs/json
+	url = https://github.com/nlohmann/json
+
+[submodule "libs/json_schema_validator"]
+	path = libs/json_schema_validator
+	url = https://github.com/pboettch/json-schema-validator
+
+[submodule "libs/physfs"]
+	path = libs/physfs
+	url = https://github.com/icculus/physfs
 
 [submodule "libs/sdl"]
 	path = libs/sdl
