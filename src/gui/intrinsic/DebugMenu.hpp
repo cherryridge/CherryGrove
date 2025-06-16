@@ -8,7 +8,7 @@ namespace Gui::DebugMenu {
     void render() {
         tlWindow("DebugMenu");
         if (Simulation::gameStarted) {
-            auto& coords = Simulation::gameRegistry.get<Components::CoordinatesComponent>(Simulation::playerEntity);
+            auto& coords = Simulation::gameRegistry.get<Components::CoordinatesComp>(Simulation::playerEntity);
             std::string coordsStr = "(";
             coordsStr += std::to_string(coords.x);
             coordsStr += ", ";
@@ -17,7 +17,7 @@ namespace Gui::DebugMenu {
             coordsStr += std::to_string(coords.z);
             coordsStr += ")";
             TextUnformatted(coordsStr.c_str());
-            auto& rotation = Simulation::gameRegistry.get<Components::RotationComponent>(Simulation::playerEntity);
+            auto& rotation = Simulation::gameRegistry.get<Components::RotationComp>(Simulation::playerEntity);
             std::string rotationStr = "Yaw: ";
             rotationStr += std::to_string(rotation.yaw);
             rotationStr += " Pitch: ";

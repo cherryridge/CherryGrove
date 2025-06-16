@@ -48,7 +48,7 @@ namespace Json {
             const auto default_patch = validator.validate(result);
             patchedResult = result.patch(default_patch);
         }
-        catch (exception& e) {
+        catch (const exception& e) {
             lerr << "[JSON] Error while validating and patching " << filePath << ": " << e.what() << endl;
             return nullopt;
         }

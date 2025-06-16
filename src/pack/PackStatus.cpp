@@ -1,9 +1,9 @@
 ﻿#include <string>
 #include <filesystem>
 #include <fstream>
-#include <unordered_map>
 #include <exception>
 #include <vector>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/uuid.hpp>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
@@ -17,11 +17,11 @@
 namespace PackStatus {
     typedef uint16_t u16;
     typedef uint32_t u32;
-    using std::vector, std::unordered_map, std::string, std::ofstream, Json::getJSON, Json::deduceFormatVersion, boost::uuids::string_generator, std::exception;
+    using std::vector, boost::unordered_flat_map, std::string, std::ofstream, Json::getJSON, Json::deduceFormatVersion, boost::uuids::string_generator, std::exception;
     using namespace std::filesystem;
     using namespace nlohmann;
 
-    unordered_map<Pack::PackIdentifier, u16> statusCache;
+    unordered_flat_map<Pack::PackIdentifier, u16> statusCache;
 
     void refreshStatus(const char* rootDir) {
         //`packs` folder is gone.
@@ -45,7 +45,7 @@ namespace PackStatus {
         validator.set_root_schema(schemaJSON);
         try { const auto default_patch = validator.validate(status); }
         //We currently empty `config.json` directly if any error happened during validation.
-        catch (exception e) {
+        catch (const exception& e) {
             lerr << "[PackStatus] config.json is invalid, emptying it: " << e.what() << endl;
             Json::saveJSON(temp);
             return;

@@ -62,9 +62,9 @@ namespace Simulation {
         //Temporary code to spawn player entity
         using namespace Components;
         playerEntity = gameRegistry.create();
-        gameRegistry.emplace<CameraComponent>(playerEntity, 60.0f);
-        gameRegistry.emplace<CoordinatesComponent>(playerEntity, -0.2, -0.5, 1.0, 0u);
-        gameRegistry.emplace<RotationComponent>(playerEntity, 90.0, 0.0);
+        gameRegistry.emplace<CameraComp>(playerEntity, 60.0f);
+        gameRegistry.emplace<CoordinatesComp>(playerEntity, -0.2, -0.5, 1.0, 0u);
+        gameRegistry.emplace<RotationComp>(playerEntity, 90.0, 0.0);
 
         //Test code to spawn a block
         TexturePool::TextureID
@@ -82,8 +82,8 @@ namespace Simulation {
         CubeFace ny(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugny);
         CubeFace nz(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugnz);
         SubCube sc(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), py, ny, nz, px, pz, nx);
-        gameRegistry.emplace<BlockCoordinatesComponent>(block, 2, 0, 0, 0u);
-        gameRegistry.emplace<BlockRenderComponent>(block, sc);
+        gameRegistry.emplace<BlockCoordinatesComp>(block, 2, 0, 0, 0u);
+        gameRegistry.emplace<BlockRenderComp>(block, sc);
     }
 
     void exit() {

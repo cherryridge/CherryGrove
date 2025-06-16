@@ -1,30 +1,66 @@
 ﻿#pragma once
 #include <limits>
+#include <mutex>
 #include <bx/math.h>
 #include <entt/entt.hpp>
+#include <glm/glm.hpp>
 
-namespace Components {
-    struct RotationComponent {
-        //Range: [0.0, 360.0).
-        //0.0 is facing south (+Z), 90.0 is facing east (+X).
-        double yaw;
-        //-90.0 is up (+Y in WP), 90.0 is down (-Y in WP).
-        //Range: (-90.0, 90.0).
-        double pitch;
-    };
+#include "entity.hpp"
+#include "../../simulation/Simulation.hpp"
 
-    namespace Rotation {
-        //In world space.
-        //Will be configurable soon.
-        inline constexpr bx::Vec3 up = { 0.0f, 1.0f, 0.0f };
-        //Infinity is dummy value for not changing the field.
-        inline constexpr double infinity = std::numeric_limits<double>::infinity();
+namespace Components::Rotation {
+    using std::lock_guard;
+    using namespace Components;
 
-        void setRotation(const entt::entity& entity, double yaw = infinity, double pitch = infinity);
+    //In world space.
+    //Will be configurable soon.
+    inline constexpr bx::Vec3 up = { 0.0f, 1.0f, 0.0f };
+    //Infinity is dummy value for not changing the field.
+    inline constexpr double infinity = std::numeric_limits<double>::infinity();
 
-        void deltaRotation(const entt::entity& entity, double dYaw = infinity, double dPitch = infinity);
+    inline void setRotation(const entt::entity& entity, double yaw, double pitch) noexcept {
+        if (Simulation::gameRegistry.all_of<RotationComp>(entity)) {
+            lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
+            Simulation::gameRegistry.patch<RotationComp>(entity, [&pitch, &yaw](RotationComp& component) {
+                if (yaw != infinity) component.yaw = yaw;
+                if (pitch != infinity) component.pitch = pitch;
+            });
+        }
+    }
 
-        //Entity must have a `CoordinatesComponent` by now.
-        void getViewMtx(float* result, const entt::entity& entity);
+    inline void deltaRotation(const entt::entity& entity, double dYaw, double dPitch) noexcept {
+        if (Simulation::gameRegistry.all_of<RotationComp>(entity)) {
+            lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
+            Simulation::gameRegistry.patch<RotationComp>(entity, [&dYaw, &dPitch](RotationComp& component) {
+                if (dYaw != infinity) {
+                    double newYaw = std::fmod(dYaw + component.yaw, 360.0);
+                    if (newYaw < 0) newYaw += 360.0;
+                    component.yaw = newYaw;
+                }
+                if (dPitch != infinity) component.pitch += dPitch;
+                if (component.pitch < -89.9999) component.pitch = -89.9999;
+                if (component.pitch > 89.9999) component.pitch = 89.9999;
+            });
+        }
+    }
+
+    //Entity must have a `CoordinatesComp` by now.
+    inline void getViewMtx(float* result, const entt::entity& entity) noexcept {
+        //Use `CoordinatesComp` directly for camera position until `CameraOffsetComp` or `EyeComp` is implemented.
+        const auto* coords = Simulation::gameRegistry.try_get<CoordinatesComp>(entity);
+        const auto* rotation = Simulation::gameRegistry.try_get<RotationComp>(entity);
+        if (coords && rotation) {
+            glm::vec3
+                lookingAt(
+                    //The looking direction.
+                    sin(glm::radians(rotation->yaw)) * cos(glm::radians(rotation->pitch)),
+                    sin(glm::radians(rotation->pitch)),
+                    cos(glm::radians(rotation->yaw)) * cos(glm::radians(rotation->pitch))),
+                pos(coords->x, coords->y, coords->z);
+            //The normalized looking at coordinates.
+            lookingAt = pos + glm::normalize(lookingAt);
+            //Using two math libraries to do work is so dumb.
+            bx::mtxLookAt(result, reinterpret_cast<bx::Vec3&>(pos), reinterpret_cast<bx::Vec3&>(lookingAt), up, bx::Handedness::Right);
+        }
     }
 }

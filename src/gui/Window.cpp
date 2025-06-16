@@ -39,7 +39,7 @@ namespace Window {
         else lerr << "[Window] Load window icon data failed!" << endl;
         SDL_DestroySurface(icon);
         InputHandler::init();
-        CherryGrove::subsystemLatch.count_down();
+        CherryGrove::subsystemSetupLatch.count_down();
     }
 
     void update() noexcept {

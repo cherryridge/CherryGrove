@@ -96,14 +96,14 @@ namespace Renderer {
     }
 
     static void renderLoop() noexcept {
-        using Components::BlockRenderComponent, Components::BlockCoordinatesComponent;
+        using Components::BlockRenderComp, Components::BlockCoordinatesComp;
         using namespace Components;
         lout << "Renderer" << flush;
         lout << "Hello from renderer thread!" << endl;
         lout << "Initializing..." << endl;
         initBGFX();
         Gui::init();
-        CherryGrove::subsystemLatch.count_down();
+        CherryGrove::subsystemSetupLatch.count_down();
         while (CherryGrove::isCGAlive) {
         //Prepare for rendering
             //Refresh windowHandle size
@@ -134,8 +134,8 @@ namespace Renderer {
                 //Wait for the lock
                 //unique_lock lock(Simulation::registryMutex);
                 //Get all renderable blocks
-                auto group = gameRegistry.group<const BlockCoordinatesComponent, const BlockRenderComponent>();
-                group.each([](entt::entity entity, const BlockCoordinatesComponent& coords, const BlockRenderComponent& renderData) {
+                auto group = gameRegistry.group<const BlockCoordinatesComp, const BlockRenderComp>();
+                group.each([](entt::entity entity, const BlockCoordinatesComp& coords, const BlockRenderComp& renderData) {
                     float worldSpaceTranslate[16]{};
                     bx::mtxTranslate(worldSpaceTranslate, (float)coords.x, (float)coords.y, (float)coords.z);
                     for (const auto& [cubeIndex, cube] : renderData.subcubes) {

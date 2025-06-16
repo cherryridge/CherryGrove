@@ -6,7 +6,7 @@ namespace CherryGrove {
     using std::atomic, std::latch;
 
     extern atomic<bool> isCGAlive;
-    extern latch subsystemLatch;
+    extern latch subsystemSetupLatch;
 
     void launch();
 }

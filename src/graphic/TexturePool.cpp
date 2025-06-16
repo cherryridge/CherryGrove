@@ -1,8 +1,8 @@
 ﻿#include <atomic>
 #include <limits>
 #include <optional>
-#include <unordered_map>
 #include <bgfx/bgfx.h>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <SDL3_image/SDL_image.h>
 
 #include "../debug/Fatal.hpp"
@@ -13,10 +13,10 @@
 //as well as dynamically managing texture size, allowing registering 32x32 or bigger texture.
 namespace TexturePool {
     typedef int16_t i16;
-    using std::atomic, std::unordered_map, bgfx::UniformHandle, bgfx::createTexture2D, bgfx::createUniform, bgfx::setTexture, bgfx::makeRef, bgfx::UniformType, bgfx::TextureFormat, bgfx::destroy, std::optional, std::move, std::numeric_limits, std::memory_order_relaxed;
+    using std::atomic, boost::unordered::unordered_flat_map, bgfx::UniformHandle, bgfx::createTexture2D, bgfx::createUniform, bgfx::setTexture, bgfx::makeRef, bgfx::UniformType, bgfx::TextureFormat, bgfx::destroy, std::optional, std::move, std::numeric_limits, std::memory_order_relaxed;
     TextureID addTexture(const char* filePath) noexcept;
 
-    unordered_map<TextureID, Texture> registry;
+    unordered_flat_map<TextureID, Texture> registry;
     atomic<TextureID> nextId(0);
     UniformHandle sampler;
 
@@ -41,7 +41,7 @@ namespace TexturePool {
             if (nextId.load(memory_order_relaxed) == 0) Fatal::exit(Fatal::TEXTUREPOOL_MISSING_MISSING_PNG);
             return MISSING_TEXTURE_ID;
         }
-        if (SDL_MUSTLOCK(imgData) && SDL_LockSurface(imgData) < 0) {
+        if (SDL_MUSTLOCK(imgData) && !SDL_LockSurface(imgData)) {
             lerr << "[TexturePool] Texture from file " << filePath << " is not lockable: " << SDL_GetError() << endl;
             if (nextId.load(memory_order_relaxed) == 0) Fatal::exit(Fatal::TEXTUREPOOL_MISSING_MISSING_PNG);
             return MISSING_TEXTURE_ID;
@@ -84,10 +84,12 @@ namespace TexturePool {
         else setTexture(textureDataIndex, sampler, p->second.handle);
     }
 
-    const Texture* getTexture(TextureID id) noexcept {
+    bool getTextureInfo(TextureID id, TextureInfo& result) noexcept {
         auto p = registry.find(id);
-        if (p == registry.end()) return nullptr;
-        return &(p->second);
+        if (p == registry.end()) return false;
+        result.width = p->second.data->w;
+        result.height = p->second.data->h;
+        return true;
     }
 
     void removeTexture(TextureID id) noexcept {

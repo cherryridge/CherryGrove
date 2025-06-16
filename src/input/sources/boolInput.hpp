@@ -6,7 +6,7 @@
 #include <limits>
 #include <memory>
 #include <vector>
-#include <unordered_map>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <SDL3/SDL.h>
 
 #include "../inputBase.hpp"
@@ -17,7 +17,7 @@ namespace InputHandler::BoolInput {
     typedef uint64_t u64;
     //This is a mapped id! We're not supporting weird keys.
     typedef u8 BoolInputID;
-    using std::array, std::unordered_map, std::shared_ptr, std::make_shared, std::atomic, std::vector, std::move, std::memory_order_release, std::memory_order_acquire, std::memory_order_acq_rel, std::memory_order_relaxed, std::function, std::numeric_limits, std::bitset;
+    using std::array, boost::unordered_flat_map, std::shared_ptr, std::make_shared, std::atomic, std::vector, std::move, std::memory_order_release, std::memory_order_acquire, std::memory_order_acq_rel, std::memory_order_relaxed, std::function, std::numeric_limits, std::bitset;
 
     enum struct ActionTypes : u8 {
         //Persistent state
@@ -78,7 +78,7 @@ namespace InputHandler::BoolInput {
 
     void update() noexcept;
 
-    inline const unordered_map<i32, BoolInputID> boolInputMap = {
+    inline const unordered_flat_map<i32, BoolInputID> boolInputMap = {
         //EMPTY_BID
         {-12914, EMPTY_BID},
         //Mouse button: 0 - x -> [1, 5]

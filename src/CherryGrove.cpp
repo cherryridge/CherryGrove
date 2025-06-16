@@ -15,7 +15,7 @@ namespace CherryGrove {
     using std::atomic, std::latch, std::memory_order_relaxed;
 
     atomic<bool> isCGAlive(false);
-    latch subsystemLatch(3);
+    latch subsystemSetupLatch(3);
 
     static void hold();
     static void exit();
@@ -41,7 +41,7 @@ namespace CherryGrove {
         Pack::init();
 
     //Make sure everything is set up
-        subsystemLatch.wait();
+        subsystemSetupLatch.wait();
 
     //Set up main menu
         Gui::setVisible(Gui::Intrinsics::MainMenu);
@@ -62,7 +62,6 @@ namespace CherryGrove {
             Window::update();
             if (Simulation::gameStopSignal) {
                 Simulation::exit();
-                //We must immediately set it to false because we can't guarantee next time here the boolean is already set to false by the Game thread.
                 Simulation::gameStopSignal = false;
             }
         }

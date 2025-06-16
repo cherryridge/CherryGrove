@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <limits>
 #include <glm/glm.hpp>
-#include <unordered_map>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #include "../../debug/Logger.hpp"
 #include "../../graphic/TexturePool.hpp"
@@ -11,7 +11,16 @@
 namespace Components {
     typedef uint16_t u16;
     typedef uint32_t u32;
-    using std::array, std::unordered_map, std::numeric_limits, glm::uvec2, glm::vec3, glm::vec4;
+    typedef int64_t i64;
+    typedef uint64_t u64;
+    using std::array, boost::unordered::unordered_flat_map, std::numeric_limits, glm::uvec2, glm::vec3, glm::vec4, TexturePool::getTextureInfo, TexturePool::TextureInfo;
+
+    struct BlockCoordinatesComp {
+        i64 x;
+        i64 y;
+        i64 z;
+        u64 dimensionId;
+    };
 
     struct CubeFace {
         //{U1, V1, U2, V2}
@@ -23,16 +32,16 @@ namespace Components {
 
         CubeFace() noexcept = default;
         CubeFace(const uvec2& rectStartCoords, const uvec2& rectEndCoords, float uvRotation, u32 shaderId, u32 textureId) noexcept : uvRotation(uvRotation), shaderId(shaderId), textureId(textureId) {
-            const auto* texture = TexturePool::getTexture(textureId);
-            if (texture == nullptr) {
+            TextureInfo info;
+            if (!getTextureInfo(textureId, info)) {
                 lerr << "[CubeFace] Texture not registered!" << endl;
                 return;
             }
             if (rectStartCoords.x < rectEndCoords.x || rectStartCoords.y < rectEndCoords.y) lerr << "[CubeFace] Texture coordinates malformed." << endl;
-            texCoords.x = (float)rectStartCoords.x / texture->data->w;
-            texCoords.y = (float)rectStartCoords.y / texture->data->h;
-            texCoords.z = (float)rectEndCoords.x / texture->data->w;
-            texCoords.w = (float)rectEndCoords.y / texture->data->h;
+            texCoords.x = static_cast<float>(rectStartCoords.x) / info.width;
+            texCoords.y = static_cast<float>(rectStartCoords.y) / info.height;
+            texCoords.z = static_cast<float>(rectEndCoords.x) / info.width;
+            texCoords.w = static_cast<float>(rectEndCoords.y) / info.height;
         }
     };
 
@@ -54,11 +63,11 @@ namespace Components {
         SubCube(vec3 origin, vec3 size, vec3 sOrigin, vec3 sSize, vec3 pivot, vec3 rotation, CubeFace faceUp, CubeFace faceDown, CubeFace faceNorth, CubeFace faceEast, CubeFace faceSouth, CubeFace faceWest) noexcept : origin(origin), size(size), sOrigin(sOrigin), sSize(sSize), pivot(pivot), rotation(rotation), faces({faceUp, faceDown, faceNorth, faceEast, faceSouth, faceWest}) {}
     };
 
-    struct BlockRenderComponent {
-        unordered_map<u32, SubCube> subcubes;
+    struct BlockRenderComp {
+        unordered_flat_map<u32, SubCube> subcubes;
 
-        BlockRenderComponent() noexcept = default;
+        BlockRenderComp() noexcept = default;
         //Single cube convention
-        BlockRenderComponent(SubCube sc) noexcept : subcubes({{0u, sc}}) {}
+        BlockRenderComp(SubCube sc) noexcept : subcubes({{0u, sc}}) {}
     };
 }

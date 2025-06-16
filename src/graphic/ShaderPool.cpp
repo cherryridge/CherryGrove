@@ -1,9 +1,9 @@
-﻿#include <unordered_map>
+﻿#include <fstream>
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <filesystem>
 #include <bgfx/bgfx.h>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #include "../debug/Logger.hpp"
 #include "../debug/Fatal.hpp"
@@ -13,11 +13,10 @@ namespace ShaderPool {
     typedef uint32_t u32;
     typedef uint16_t u16;
     typedef u16 ShaderID;
-
-    using std::unordered_map, std::string, std::ifstream, std::filesystem::file_size, std::filesystem::exists, bgfx::RendererType, bgfx::ShaderHandle, bgfx::ProgramHandle, bgfx::destroy;
+    using std::string, std::ifstream, std::filesystem::file_size, std::filesystem::exists, bgfx::RendererType, bgfx::ShaderHandle, bgfx::ProgramHandle, bgfx::destroy, boost::unordered::unordered_flat_map;
 
     static ShaderID nextId;
-    static unordered_map<ShaderID, ProgramHandle> registry;
+    static unordered_flat_map<ShaderID, ProgramHandle> registry;
     static ShaderHandle loadShader(const char* fileName);
 
     void init() {

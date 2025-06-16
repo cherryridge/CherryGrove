@@ -4,8 +4,8 @@
 #include <tuple>
 #include <memory>
 #include <functional>
-#include <unordered_map>
 #include <nlohmann/json.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/uuid.hpp>
 
 #include "../Pack.hpp"
@@ -55,7 +55,7 @@ struct SchemaReturn<SchemaType::Manifest> { using type = ManifestJSON; };
 
 //Processor registry types.
 template <typename T>
-using ProcessorMap = std::unordered_map<uint32_t, std::function<T(const nlohmann::json& input)>>;
+using ProcessorMap = boost::unordered_flat_map<uint32_t, std::function<T(const nlohmann::json& input)>>;
 
 template <typename T>
 using ProcessorPtr = std::unique_ptr<ProcessorMap<T>>;

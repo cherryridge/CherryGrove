@@ -1,10 +1,11 @@
-﻿#pragma execution_character_set(push, "utf-8")
-#include <unordered_set>
-#include <unordered_map>
+﻿//Temporary
+#pragma execution_character_set(push, "utf-8")
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
 #define IMGUI_ENABLE_FREETYPE
 #include <imgui.h>
-#include <backends/imgui_impl_sdl3.h>
 #include <backends/imgui_impl_bgfx.h>
+#include <backends/imgui_impl_sdl3.h>
 #include <SDL3/SDL.h>
 
 #include "../CherryGrove.hpp"
@@ -23,11 +24,11 @@
 namespace Gui {
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::unordered_map, std::unordered_set, Sound::EventID, Renderer::WindowInfoCache;
+    using boost::unordered_flat_set, boost::unordered_flat_map, Sound::EventID, Renderer::WindowInfoCache;
 
     static ImGuiContext* context;
-    static unordered_set<Intrinsics> visibleGuis;
-    static unordered_map<Intrinsics, void (*)()> guiRegistry;
+    static unordered_flat_set<Intrinsics> visibleGuis;
+    static unordered_flat_map<Intrinsics, void (*)()> guiRegistry;
     EventID click;
 
     void init() noexcept {
@@ -79,10 +80,10 @@ namespace Gui {
         ImGui_Implbgfx_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
-        unordered_set<Intrinsics> visibleGuisBuffer = visibleGuis;
+        unordered_flat_set<Intrinsics> visibleGuisBuffer = visibleGuis;
         for (const auto& gui : visibleGuisBuffer) {
             if (guiRegistry.find(gui) != guiRegistry.end()) guiRegistry[gui]();
-            else lerr << "[GUI] Did you forget to emplace the GUI: " << static_cast<u8>(gui) << "?" << endl;
+            else lerr << "[GUI] Did you forget to emplace the GUI: " << static_cast<i32>(gui) << "?" << endl;
         }
         ImGui::Render();
         ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
