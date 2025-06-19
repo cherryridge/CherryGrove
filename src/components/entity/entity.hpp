@@ -1,39 +1,33 @@
 ﻿#pragma once
 #include <cstdint>
+#include <glm/glm.hpp>
 
 namespace Components {
     typedef uint32_t u32;
     typedef uint64_t u64;
+    using glm::vec3;
 
     struct AccelerationComp {
-        double d2x;
-        double d2y;
-        double d2z;
+        float d2x, d2y, d2z;
     };
 
     struct CameraComp {
-        float fov;
-        float nearPlane;
-        float farPlane;
+        float fov, nearPlane {0.1f}, farPlane {100.0f};
 
-        CameraComp() = default;
-        CameraComp(float fov) {
-            this->fov = fov;
-            farPlane = 100.0f;
-            nearPlane = 0.1f;
-        }
+        CameraComp(float fov = 60.0f) noexcept : fov(fov) {}
     };
 
     struct CoordinatesComp {
-        double x;
-        double y;
-        double z;
+        double x, y, z;
         u64 dimensionId;
+
+        explicit operator vec3() const noexcept {
+            return vec3(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+        }
     };
 
     struct HealthComp {
-        u32 maxHealth;
-        u32 health;
+        u32 maxHealth, health;
     };
 
     struct RotationComp {
@@ -46,8 +40,12 @@ namespace Components {
     };
 
     struct VelocityComp {
-        double dx;
-        double dy;
-        double dz;
+        //block per tick.
+        //Double?: I don't think anything will ever go that fast. Orbital strike cannons' TNTs sent to a reasonable distance are still below the acceptable threshold.
+        float dx, dy, dz;
+
+        explicit operator vec3() const noexcept {
+            return vec3(dx, dy, dz);
+        }
     };
 }

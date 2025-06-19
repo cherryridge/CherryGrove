@@ -23,7 +23,7 @@ namespace Gui {
         Count
     };
 
-    extern Sound::EventID click;
+    extern Sound::SoundHandle click;
 
     //Must be called after `Sound::init`.
     void init() noexcept;

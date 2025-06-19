@@ -1,6 +1,4 @@
 ﻿#pragma once
-#include <ctime>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <mutex>
@@ -12,16 +10,13 @@
 using std::endl, std::flush;
 
 namespace Logger {
-    using std::cout, std::cerr, std::ostream, std::enable_if, std::is_function, std::stringstream, std::this_thread::get_id, std::lock_guard, std::mutex, std::string, std::thread, std::lock_guard, boost::unordered::unordered_flat_map, std::streambuf, std::ofstream, std::filesystem::exists, std::filesystem::is_regular_file, std::filesystem::is_directory, std::filesystem::create_directory, std::to_string;
+    using std::cout, std::cerr, std::ostream, std::enable_if, std::is_function, std::stringstream, std::this_thread::get_id, std::lock_guard, std::mutex, std::string, std::thread, std::ofstream, std::to_string, boost::unordered_flat_map;
 
-    inline bool toFile = false;
-    inline static mutex loggerMutex;
-    inline static unordered_flat_map<thread::id, string, std::hash<thread::id>> threadNames;
-    inline static streambuf* coutBuffer;
-    inline static streambuf* cerrBuffer;
-    inline static ofstream logFile;
+    extern bool toFile;
+    extern mutex loggerMutex;
+    extern unordered_flat_map<thread::id, string, std::hash<thread::id>> threadNames;
 
-    inline static thread_local stringstream threadBufferOdi;
+    extern thread_local stringstream threadBufferOdi;
     struct LoggerCout {
         LoggerCout& operator<<(ostream& (*manip)(ostream&)) {
             if (manip == static_cast<ostream& (*)(ostream&)>(endl)) {
@@ -74,9 +69,9 @@ namespace Logger {
         }
 
     };
-    inline LoggerCout lout;
+    extern LoggerCout lout;
 
-    inline static thread_local stringstream threadBufferErr;
+    extern thread_local stringstream threadBufferErr;
     struct LoggerCerr {
         LoggerCerr& operator<<(ostream& (*manip)(ostream&)) {
             if (manip == static_cast<ostream & (*)(ostream&)>(endl)) {
@@ -130,52 +125,10 @@ namespace Logger {
         }
 
     };
-    inline LoggerCerr lerr;
+    extern LoggerCerr lerr;
 
-    inline void shutdown() noexcept {
-        lout << "Terminating logger! (cout will be reverted to console)" << endl;
-        cout.rdbuf(coutBuffer);
-        logFile.close();
-    }
-    
-    inline void setToFile(bool _toFile) noexcept {
-        if (toFile != _toFile) {
-            if (_toFile) {
-                coutBuffer = cout.rdbuf();
-                cerrBuffer = cerr.rdbuf();
-                time_t timestamp;
-                time(&timestamp);
-                if (!exists("logs") || !is_directory("logs")) {
-                    if (!create_directory("logs")) {
-                        lerr << "[Logger] Failed to create /logs directory!" << endl;
-                        //Refuse to redirect logs to prevent data loss.
-                        return;
-                    }
-                }
-                string logFileName = "logs/CherryGrove-";
-                logFileName += to_string(timestamp);
-                logFileName += ".log";
-                logFile = ofstream(logFileName);
-                if (!logFile.is_open()) {
-                    lerr << "[Logger] Failed to open log file: " << logFileName << "\n";
-                    //Refuse to redirect logs to prevent data loss.
-                    return;
-                }
-                else {
-                    lout << "Writing log to " << logFileName << "!" << endl;
-                    cout.rdbuf(logFile.rdbuf());
-                    cerr.rdbuf(logFile.rdbuf());
-                }
-            }
-            else {
-                lout << "Writing log to console!" << endl;
-                cout.rdbuf(coutBuffer);
-                cerr.rdbuf(cerrBuffer);
-            }
-            toFile = _toFile;
-        }
-        else lout << "Logger output not changed." << endl;
-    }
+    void shutdown() noexcept;
+    void setToFile(bool _toFile) noexcept;
 }
 
 //Auto use magic variables

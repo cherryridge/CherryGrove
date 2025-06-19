@@ -49,15 +49,16 @@ namespace Pack {
         }
     };
 
+    inline u64 hash_value(const PackIdentifier& input) noexcept {
+        return std::hash<boost::uuids::uuid>{}(input.uuid_f) ^ (std::hash<uint32_t>{}(input.packVersion) << 1);
+    }
+
     struct PackDesc {
         //`0`: nameSpace, `1`: name, `2`: description, `[2, size()-1]`: authors
         vector<string> metadata;
         uuid uuid_f;
-        u32 packVersion;
-        u32 minEngineVersion;
-        u16 statusFlags;
-        u16 configFlags;
-        u32 featureFlags;
+        u32 packVersion, minEngineVersion, featureFlags;
+        u16 statusFlags, configFlags;
         vector<PackIdentifier> dependencies;
     };
 
@@ -66,12 +67,3 @@ namespace Pack {
 
     void refreshPacks(const char* rootDir = "packs");
 };
-
-namespace std {
-    template<>
-    struct hash<Pack::PackIdentifier> {
-        uint64_t operator()(const Pack::PackIdentifier& input) const {
-            return hash<boost::uuids::uuid>{}(input.uuid_f) ^ (hash<uint32_t>{}(input.packVersion) << 1);
-        }
-    };
-}

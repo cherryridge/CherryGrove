@@ -9,7 +9,7 @@
 #include "../../simulation/Simulation.hpp"
 
 namespace Components::Rotation {
-    using std::lock_guard;
+    using std::lock_guard, std::fmod, glm::vec3, glm::radians, glm::normalize;
     using namespace Components;
 
     //In world space.
@@ -33,7 +33,7 @@ namespace Components::Rotation {
             lock_guard lock(entity == Simulation::playerEntity ? Simulation::playerMutex : Simulation::registryMutex);
             Simulation::gameRegistry.patch<RotationComp>(entity, [&dYaw, &dPitch](RotationComp& component) {
                 if (dYaw != infinity) {
-                    double newYaw = std::fmod(dYaw + component.yaw, 360.0);
+                    double newYaw = fmod(dYaw + component.yaw, 360.0);
                     if (newYaw < 0) newYaw += 360.0;
                     component.yaw = newYaw;
                 }
@@ -50,15 +50,15 @@ namespace Components::Rotation {
         const auto* coords = Simulation::gameRegistry.try_get<CoordinatesComp>(entity);
         const auto* rotation = Simulation::gameRegistry.try_get<RotationComp>(entity);
         if (coords && rotation) {
-            glm::vec3
+            vec3
                 lookingAt(
                     //The looking direction.
-                    sin(glm::radians(rotation->yaw)) * cos(glm::radians(rotation->pitch)),
-                    sin(glm::radians(rotation->pitch)),
-                    cos(glm::radians(rotation->yaw)) * cos(glm::radians(rotation->pitch))),
+                    sin(radians(rotation->yaw)) * cos(radians(rotation->pitch)),
+                    sin(radians(rotation->pitch)),
+                    cos(radians(rotation->yaw)) * cos(radians(rotation->pitch))),
                 pos(coords->x, coords->y, coords->z);
             //The normalized looking at coordinates.
-            lookingAt = pos + glm::normalize(lookingAt);
+            lookingAt = pos + normalize(lookingAt);
             //Using two math libraries to do work is so dumb.
             bx::mtxLookAt(result, reinterpret_cast<bx::Vec3&>(pos), reinterpret_cast<bx::Vec3&>(lookingAt), up, bx::Handedness::Right);
         }

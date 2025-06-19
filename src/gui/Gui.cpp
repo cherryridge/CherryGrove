@@ -24,12 +24,12 @@
 namespace Gui {
     typedef int32_t i32;
     typedef uint32_t u32;
-    using boost::unordered_flat_set, boost::unordered_flat_map, Sound::EventID, Renderer::WindowInfoCache;
+    using boost::unordered_flat_set, boost::unordered_flat_map, Sound::SoundHandle, Renderer::WindowInfoCache;
 
     static ImGuiContext* context;
     static unordered_flat_set<Intrinsics> visibleGuis;
     static unordered_flat_map<Intrinsics, void (*)()> guiRegistry;
-    EventID click;
+    SoundHandle click{0};
 
     void init() noexcept {
         i32 width, height;
@@ -62,7 +62,7 @@ namespace Gui {
         style.WindowTitleAlign = ImVec2(0.5f, 0.0f);
         ImGui_Implbgfx_Init(Renderer::guiViewId);
         ImGui_ImplSDL3_InitForOther(Window::windowHandle);
-        click = Sound::addEvent(Sound::addSound("assets/sounds/click1.ogg"), 2.0f, 1.0f, 0.0f, true);
+        click = Sound::addSound("assets/sounds/click1.ogg", false, true, 2.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
         //Register them manually!
         guiRegistry.emplace(Intrinsics::MainMenu, MainMenu::render);
         guiRegistry.emplace(Intrinsics::Copyright, Copyright::render);

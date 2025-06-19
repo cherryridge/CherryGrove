@@ -32,7 +32,10 @@ namespace CherryGrove {
 
         lout << "Initializing SoLoud..." << endl;
         Sound::init();
-        Sound::test();
+
+        //Debug: Play a.ogg
+        auto handle = Sound::addSound("test/a.ogg", true, true, 1.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
+        Sound::play(handle, {0.0, 0.0, 0.0});
 
         lout << "Initializing bgfx & ImGui..." << endl;
         Renderer::init();

@@ -25,17 +25,17 @@ namespace Gui::MainMenu {
             PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 30.0f));
             ImVec2 btnSize(240.0f, 80.0f);
             centerButton(u8"存档（调试）", btnSize, []() {
-                Sound::play(click);
+                Sound::play(click, Sound::DUMMY_COORD_2D);
                 Simulation::start();
             });
             centerButton(u8"内容包", btnSize, []() {
-                Sound::play(click);
+                Sound::play(click, Sound::DUMMY_COORD_2D);
             });
             centerButton(u8"设置", btnSize, []() {
-                Sound::play(click);
+                Sound::play(click, Sound::DUMMY_COORD_2D);
             });
             centerButton(u8"退出", btnSize, []() {
-                Sound::play(click);
+                Sound::play(click, Sound::DUMMY_COORD_2D);
                 CherryGrove::isCGAlive = false;
             });
             PopStyleVar();
