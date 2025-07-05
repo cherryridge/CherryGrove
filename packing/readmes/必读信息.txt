@@ -9,7 +9,7 @@ test（可能不存在）：存放开发版 CherryGrove 的测试用途文件，
 
 文件介绍：
 CherryGrove.exe：CherryGrove 软件。
-LICENSE：随附的一份 GPL-3.0-or-later 许可证原文。
+许可证.txt：随附的一份 GPL-3.0-or-later 许可证原文。s
 options.cgb：CherryGrove 保存的软件设置，使用 CGNBT 二进制格式存储，请不要使用记事本等编辑器编辑。
 uninstall.exe：卸载 CherryGrove 需要的程序。双击打开以卸载本软件。
 

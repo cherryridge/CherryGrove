@@ -10,6 +10,7 @@
 // examples/README.txt and documentation at the top of imgui.cpp.
 // https://github.com/ocornut/imgui
 
+#pragma once
 void ImGui_Implbgfx_Init(int view);
 void ImGui_Implbgfx_Shutdown();
 void ImGui_Implbgfx_NewFrame();

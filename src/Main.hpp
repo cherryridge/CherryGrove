@@ -2,7 +2,7 @@
 #include <atomic>
 #include <latch>
 
-namespace CherryGrove {
+namespace Main {
     using std::atomic, std::latch;
 
     extern atomic<bool> isCGAlive;

@@ -70,7 +70,7 @@ VIProductVersion "${VERSION}.0"
 
 Section "MainSection" SEC01
     SetOutPath "$INSTDIR"
-    File "..\..\LICENSE"
+    File /oname=许可证.txt "..\..\LICENSE"                                                            #DIF
     File "..\readmes\必读信息.txt"                                                                     #DIF
     File "..\..\out\windows-x64-release\CherryGrove.exe"
     SetOutPath "$INSTDIR\assets"

@@ -8,7 +8,7 @@
 #include "../debug/Logger.hpp"
 #include "../debug/Fatal.hpp"
 #include "../components/Components.hpp"
-#include "../CherryGrove.hpp"
+#include "../Main.hpp"
 #include "ShaderPool.hpp"
 #include "TexturePool.hpp"
 #include "../input/InputHandler.hpp"
@@ -103,8 +103,8 @@ namespace Renderer {
         lout << "Initializing..." << endl;
         initBGFX();
         Gui::init();
-        CherryGrove::subsystemSetupLatch.count_down();
-        while (CherryGrove::isCGAlive) {
+        Main::subsystemSetupLatch.count_down();
+        while (Main::isCGAlive) {
         //Prepare for rendering
             //Refresh windowHandle size
             if (sizeUpdateSignal) {

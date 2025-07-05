@@ -90,6 +90,10 @@
 	path = libs/physfs
 	url = https://github.com/icculus/physfs
 
+[submodule "libs/rocksdb"]
+	path = libs/rocksdb
+	url = https://github.com/facebook/rocksdb
+
 [submodule "libs/sdl"]
 	path = libs/sdl
 	url = https://github.com/libsdl-org/SDL

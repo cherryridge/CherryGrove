@@ -1,11 +1,11 @@
 ﻿#pragma once
 #include <imgui.h>
 
-#include "../CherryGrove.hpp"
-#include "../../sound/Sound.hpp"
 #include "../../simulation/Simulation.hpp"
-#include "../GuiUtils.hpp"
+#include "../../sound/Sound.hpp"
 #include "../Gui.hpp"
+#include "../GuiUtils.hpp"
+#include "../Main.hpp"
 
 namespace Gui::MainMenu {
     using namespace ImGui;
@@ -36,7 +36,7 @@ namespace Gui::MainMenu {
             });
             centerButton(u8"退出", btnSize, []() {
                 Sound::play(click, Sound::DUMMY_COORD_2D);
-                CherryGrove::isCGAlive = false;
+                Main::isCGAlive = false;
             });
             PopStyleVar();
         }

@@ -2,7 +2,6 @@
 #include <vector>
 #include <soloud/soloud.h>
 
-#include <iostream>
 #include "PitchShiftFilter.hpp"
 
 namespace Sound {

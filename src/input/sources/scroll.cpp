@@ -1,4 +1,5 @@
 ﻿#include <algorithm>
+#include <mutex>
 #include <shared_mutex>
 #include <vector>
 #include <SDL3/SDL.h>
@@ -10,7 +11,7 @@
 namespace InputHandler::Scroll {
     typedef uint8_t u8;
     typedef uint32_t u32;
-    using std::shared_mutex, std::sort, std::vector;
+    using std::shared_mutex, std::sort, std::vector, std::scoped_lock;
 
     static EventData store;
     static shared_mutex storeMutex;
@@ -60,6 +61,7 @@ namespace InputHandler::Scroll {
     void process(const SDL_Event& event, bool updateOnly) noexcept {
         switch (event.type) {
             case SDL_EVENT_MOUSE_WHEEL: {
+                scoped_lock lock(storeMutex);
                 store.newX = event.wheel.mouse_x;
                 store.newY = event.wheel.mouse_y;
                 store.scrollX = event.wheel.x;

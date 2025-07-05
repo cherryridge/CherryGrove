@@ -8,7 +8,7 @@
 #include <backends/imgui_impl_sdl3.h>
 #include <SDL3/SDL.h>
 
-#include "../CherryGrove.hpp"
+#include "../Main.hpp"
 #include "../debug/Logger.hpp"
 #include "../graphic/Renderer.hpp"
 #include "../input/InputHandler.hpp"
@@ -55,7 +55,7 @@ namespace Gui {
         // todo: manage texture manually
         io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", scaledFontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
         io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 1.4f * scaledFontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-        io.Fonts->Build();
+        //io.Fonts->Build();
         ImGui::StyleColorsDark();
         ImGuiStyle& style = ImGui::GetStyle();
         style.WindowRounding = 0.0f;

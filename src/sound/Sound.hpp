@@ -180,7 +180,7 @@ namespace Sound {
         PlayHandle& result;
         atomic<bool>& finished;
 
-        Play(SoundHandle soundHandle, const CoordinatesComp& position, const VelocityComp& velocity, float iniProgress, float pitch, float playSpeed, PlayHandle& result, atomic<bool>& finished, u32 playCount) noexcept : soundHandle(soundHandle), position(position), velocity(velocity), iniProgress(iniProgress), pitch(pitch), playSpeed(playSpeed), result(result), finished(finished), playCount(playCount) {}
+        Play(SoundHandle soundHandle, const CoordinatesComp& position, const VelocityComp& velocity, float iniProgress, float pitch, float playSpeed, PlayHandle& result, atomic<bool>& finished, u32 playCount) noexcept : soundHandle(soundHandle), position(position), velocity(velocity), iniProgress(iniProgress), pitch(pitch), playSpeed(playSpeed), playCount(playCount), result(result), finished(finished) {}
         Play(const Play&) noexcept = default;
         ~Play() = default;
     };

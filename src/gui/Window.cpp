@@ -10,7 +10,7 @@
 #include "../input/InputHandler.hpp"
 #include "../debug/Logger.hpp"
 #include "../debug/Fatal.hpp"
-#include "../CherryGrove.hpp"
+#include "../Main.hpp"
 #include "Window.hpp"
 
 namespace Window {
@@ -39,14 +39,14 @@ namespace Window {
         else lerr << "[Window] Load window icon data failed!" << endl;
         SDL_DestroySurface(icon);
         InputHandler::init();
-        CherryGrove::subsystemSetupLatch.count_down();
+        Main::subsystemSetupLatch.count_down();
     }
 
     void update() noexcept {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(windowHandle))) CherryGrove::isCGAlive = false;
-            else if(CherryGrove::isCGAlive) if(ImGui_ImplSDL3_ProcessEvent(&event)) InputHandler::processTrigger(event);
+            if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(windowHandle))) Main::isCGAlive = false;
+            else if(Main::isCGAlive) if(ImGui_ImplSDL3_ProcessEvent(&event)) InputHandler::processTrigger(event);
         }
         auto size = taskQueue.size();
         for (i32 i = 0; i < size; i++) {

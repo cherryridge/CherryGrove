@@ -16,6 +16,6 @@ namespace Sound {
 		PitchShiftFilter* parent {nullptr};
 
 		PitchShiftFilterInstance(PitchShiftFilter* parent) noexcept;
-		virtual void filterChannel(float* buffer, u32 sampleCount, float sampleRate, double playTime, u32 currentChannel, u32 channelCount) noexcept;
+		void filterChannel(float* buffer, u32 sampleCount, float sampleRate, double playTime, u32 currentChannel, u32 channelCount) noexcept override;
 	};
 }

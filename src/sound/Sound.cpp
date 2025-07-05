@@ -1,8 +1,6 @@
 ﻿#include <atomic>
 #include <chrono>
-#include <filesystem>
 #include <memory>
-#include <shared_mutex>
 #include <thread>
 #include <vector>
 #include <glm/glm.hpp>
@@ -12,11 +10,11 @@
 
 #include "../debug/Logger.hpp"
 #include "../debug/Fatal.hpp"
-#include "../CherryGrove.hpp"
+#include "../Main.hpp"
 #include "Sound.hpp"
 
 namespace Sound {
-    using std::atomic, std::atomic_ref, std::memory_order_relaxed, std::memory_order_acquire, std::memory_order_release, std::filesystem::exists, std::thread, std::shared_mutex, std::unique_ptr, std::make_unique, std::scoped_lock, std::shared_lock, std::move, std::vector, std::filesystem::is_regular_file, SoLoud::SO_NO_ERROR, SoLoud::Soloud, Components::CoordinatesComp, Components::RotationComp, Components::VelocityComp, glm::vec3, glm::radians, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds;
+    using std::atomic, std::atomic_ref, std::memory_order_acquire, std::memory_order_release, std::thread, std::unique_ptr, std::make_unique, std::vector, SoLoud::SO_NO_ERROR, SoLoud::Soloud, Components::CoordinatesComp, Components::RotationComp, Components::VelocityComp, glm::vec3, glm::radians, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds;
     static void audioLoop() noexcept;
 
     u64 performance_LoopUs{0};
@@ -36,7 +34,7 @@ namespace Sound {
         lout << "[Sound] Backend: " << soLoudInstance->getBackendString() << ", channels: " << soLoudInstance->getBackendChannels() << ", bufsize: " << soLoudInstance->getBackendBufferSize() << endl;
         lout << "Creating audio thread..." << endl;
         audioThread = thread(&audioLoop);
-        CherryGrove::subsystemSetupLatch.count_down();
+        Main::subsystemSetupLatch.count_down();
     }
 
     void shutdown() noexcept {
@@ -133,7 +131,7 @@ namespace Sound {
         lout << "Audio" << flush;
         lout << "Hello from audio thread!" << endl;
         u32 gcCursor = 0;
-        while (CherryGrove::isCGAlive) {
+        while (Main::isCGAlive) {
             auto startTime = steady_clock::now();
             bool shouldUpdate3D = false;
         //Process commands.
