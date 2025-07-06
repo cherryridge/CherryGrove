@@ -1,6 +1,7 @@
 ﻿#pragma once
-#include <atomic>
 #include <array>
+#include <atomic>
+#include <mutex>
 
 namespace Renderer {
     typedef uint8_t u8;

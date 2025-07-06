@@ -46,7 +46,7 @@ namespace Window {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(windowHandle))) Main::isCGAlive = false;
-            else if(Main::isCGAlive) if(ImGui_ImplSDL3_ProcessEvent(&event)) InputHandler::processTrigger(event);
+            else if(Main::isCGAlive && ImGui_ImplSDL3_ProcessEvent(&event)) InputHandler::processTrigger(event);
         }
         auto size = taskQueue.size();
         for (i32 i = 0; i < size; i++) {

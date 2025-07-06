@@ -17,20 +17,20 @@
 
 typedef int32_t i32;
 namespace Main{
-    static i32 launch(i32 argc, char** argv);
+    static i32 launch(i32 argc, char** argv) noexcept;
 }
 #define SDL_MAIN_HANDLED
-i32 SDL_main(i32 argc, char** argv) { return Main::launch(argc, argv); }
+int SDL_main(i32 argc, char** argv) { return Main::launch(argc, argv); }
 
 namespace Main {
     using std::atomic, std::latch, std::memory_order_relaxed, std::filesystem::current_path, std::filesystem::canonical, std::filesystem::path, std::locale, std::string, std::cout, std::endl;
-    static void hold();
-    static void exit();
+    static void hold() noexcept;
+    static void exit() noexcept;
 
     atomic<bool> isCGAlive(false);
     latch subsystemSetupLatch(3);
 
-    static i32 launch(i32 argc, char** argv) {
+    static i32 launch(i32 argc, char** argv) noexcept {
     //Execute path
         //Set working directory to parent directory of the executable file
         //todo: Use Physfs
@@ -101,7 +101,7 @@ namespace Main {
     //Main loop.
     //Set `isCGAlive` to `false` directly to exit the program.
     //Check for windowHandle updates in `Window::update()` instead.
-    static void hold() {
+    static void hold() noexcept {
         while (isCGAlive) {
             Window::update();
             if (Simulation::gameStopSignal) {
@@ -112,7 +112,7 @@ namespace Main {
         exit();
     }
 
-    static void exit() {
+    static void exit() noexcept {
         Renderer::shutdown();
         if(Simulation::gameStarted) Simulation::exit();
         Window::close();

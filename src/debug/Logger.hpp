@@ -1,135 +1,78 @@
 ﻿#pragma once
-#include <fstream>
+#include <atomic>
 #include <iostream>
-#include <mutex>
+#include <ostream>
 #include <sstream>
+#include <string>
 #include <thread>
-#include <boost/unordered/unordered_flat_map.hpp>
+#include <type_traits>
 
 //Auto use magic variables
 using std::endl, std::flush;
 
 namespace Logger {
-    using std::cout, std::cerr, std::ostream, std::enable_if, std::is_function, std::stringstream, std::this_thread::get_id, std::lock_guard, std::mutex, std::string, std::thread, std::ofstream, std::to_string, boost::unordered_flat_map;
+    using std::atomic_flag, std::ostream, std::enable_if, std::is_function, std::ostringstream, std::memory_order_acquire, std::memory_order_release, std::string, std::this_thread::get_id;
+    using Manip = ostream& (*)(ostream&);
 
-    extern bool toFile;
-    extern mutex loggerMutex;
-    extern unordered_flat_map<thread::id, string, std::hash<thread::id>> threadNames;
-
-    extern thread_local stringstream threadBufferOdi;
-    struct LoggerCout {
-        LoggerCout& operator<<(ostream& (*manip)(ostream&)) {
-            if (manip == static_cast<ostream& (*)(ostream&)>(endl)) {
-                //Use l* << <Content> << endl to output thread-safe content.
-                //l* << endl will result in nothing.
-                if (!threadBufferOdi.str().empty()) {
-                    lock_guard<mutex> lock(loggerMutex);
-                    cout << threadBufferOdi.str() << endl << flush;
-                    threadBufferOdi.str("");
-                    threadBufferOdi.clear();
-                }
-            }
-            else if (manip == static_cast<ostream& (*)(ostream&)>(flush)) {
-                //Use l* << <Name> << flush to set a customized name for this thread.
-                if (!threadBufferOdi.str().empty()) {
-                    lock_guard<mutex> lock(loggerMutex);
-                    string tBstr = threadBufferOdi.str(), name = tBstr.substr(tBstr.find_first_of(' ') + 1);
-                    auto p = threadNames.find(get_id());
-                    if (p == threadNames.end()) threadNames.emplace(get_id(), name);
-                    else p->second = name;
-                    threadBufferOdi.str("");
-                    threadBufferOdi.clear();
-                }
-                //Use l* << flush to delete the customized thread name.
-                else {
-                    auto p = threadNames.find(get_id());
-                    if (p != threadNames.end()) threadNames.erase(p);
-                }
-            }
-            else {
-                if (threadBufferOdi.str().empty()) {
-                    auto p = threadNames.find(get_id());
-                    if (p == threadNames.end()) threadBufferOdi << "[" << get_id() << "] ";
-                    else threadBufferOdi << "[" << p->second << "] ";
-                }
-                threadBufferOdi << manip;
-            }
-            return *this;
-        }
-
-        template <typename T>
-        typename enable_if<!is_function<T>::value, LoggerCout&>::type operator<<(const T& value) {
-            if (threadBufferOdi.str().empty()) {
-                auto p = threadNames.find(get_id());
-                if (p == threadNames.end()) threadBufferOdi << "[" << get_id() << "] ";
-                else threadBufferOdi << "[" << p->second << "] ";
-            }
-            threadBufferOdi << value;
-            return *this;
-        }
-
-    };
-    extern LoggerCout lout;
-
-    extern thread_local stringstream threadBufferErr;
-    struct LoggerCerr {
-        LoggerCerr& operator<<(ostream& (*manip)(ostream&)) {
-            if (manip == static_cast<ostream & (*)(ostream&)>(endl)) {
-                //Use l* << <Content> << endl to output thread-safe content.
-                //l* << endl will result in nothing.
-                if (!threadBufferErr.str().empty()) {
-                    lock_guard<mutex> guard(loggerMutex);
-                    //No need to flush because `cerr` will automatically empty the buffer to the screen.
-                    cerr << threadBufferErr.str() << endl;
-                    threadBufferErr.str("");
-                    threadBufferErr.clear();
-                }
-            }
-            else if (manip == static_cast<ostream & (*)(ostream&)>(flush)) {
-                //Use l* << <Name> << flush to set a customized name for this thread.
-                if (!threadBufferErr.str().empty()) {
-                    lock_guard<mutex> guard(loggerMutex);
-                    string tBstr = threadBufferErr.str(), name = tBstr.substr(tBstr.find_first_of(' ') + 1);
-                    auto p = threadNames.find(get_id());
-                    if (p == threadNames.end()) threadNames.emplace(get_id(), name);
-                    else p->second = name;
-                    threadBufferErr.str("");
-                    threadBufferErr.clear();
-                }
-                //Use l* << flush to delete the customized thread name.
-                else {
-                    auto p = threadNames.find(get_id());
-                    if (p != threadNames.end()) threadNames.erase(p);
-                }
-            }
-            else {
-                if (threadBufferErr.str().empty()) {
-                    auto p = threadNames.find(get_id());
-                    if (p == threadNames.end()) threadBufferErr << "[" << get_id() << "] ";
-                    else threadBufferErr << "[" << p->second << "] ";
-                }
-                threadBufferErr << manip;
-            }
-            return *this;
-        }
-
-        template <typename T>
-        typename enable_if<!is_function<T>::value, LoggerCerr&>::type operator<<(const T& value) {
-            if (threadBufferErr.str().empty()) {
-                auto p = threadNames.find(get_id());
-                if (p == threadNames.end()) threadBufferErr << "[" << get_id() << "][Error] ";
-                else threadBufferErr << "[" << p->second << "][Error] ";
-            }
-            threadBufferErr << value;
-            return *this;
-        }
-
-    };
-    extern LoggerCerr lerr;
-
-    void shutdown() noexcept;
     void setToFile(bool _toFile) noexcept;
+    void shutdown() noexcept;
+
+    struct Logger {
+        explicit Logger(ostream& output, const string& title = string(), bool immediateFlush = false) noexcept : output(output), immediateFlush(immediateFlush) {
+            if (title != "") this->title = "[" + title + "] ";
+        }
+
+        Logger& operator<<(Manip manip) noexcept {
+            if (manip == static_cast<Manip>(endl) && !buffer.str().empty()) {
+                while (flag.test_and_set(memory_order_acquire)) {}
+                if (threadName != "") output << threadName;
+                else output << "[" << get_id() << "]";
+                if (title != "") output << title;
+                else output << " ";
+                output << buffer.str() << "\n";
+                flushBuffer();
+                if (immediateFlush) output.flush();
+                flag.clear(memory_order_release);
+            }
+            else if (manip == static_cast<Manip>(flush)) {
+                //Use instance << flush to delete the customized thread name.
+                if (buffer.str().empty()) threadName = "";
+                else {
+                    threadName = "[" + buffer.str() + "]";
+                    flushBuffer();
+                }
+            }
+            //Don't react to other manipulation functions.
+            //else
+            return *this;
+        }
+
+        template<typename T>
+        typename enable_if<!is_function<T>::value, Logger&>::type operator<<(const T& value) noexcept {
+            buffer << value;
+            return *this;
+        }
+
+    private:
+        ostream& output;
+        atomic_flag flag{};
+        string title{};
+        bool immediateFlush;
+        //We have to use `static` on buffer because C++ only allow thread_local entries with static or external linkage.
+        //And this implies we need to flush the buffer every time we finish the
+        static thread_local ostringstream buffer;
+        static thread_local string threadName;
+
+        void flushBuffer() noexcept {
+            buffer.str({});
+            buffer.clear();
+        }
+    };
+
+    inline thread_local ostringstream Logger::buffer;
+    inline thread_local string Logger::threadName;
+
+    extern Logger lout, lerr;
 }
 
-//Auto use magic variables
 using Logger::lout, Logger::lerr;

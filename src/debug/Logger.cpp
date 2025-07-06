@@ -5,25 +5,19 @@
 #include <mutex>
 #include <sstream>
 #include <string>
-#include <thread>
-#include <boost/unordered/unordered_flat_map.hpp>
 
 #include "Logger.hpp"
 
 namespace Logger {
     typedef uint32_t u32;
-    using std::cout, std::cerr, std::ostream, std::enable_if, std::is_function, std::stringstream, std::this_thread::get_id, std::lock_guard, std::mutex, std::string, std::thread, std::lock_guard, boost::unordered::unordered_flat_map, std::streambuf, std::ofstream, std::filesystem::exists, std::filesystem::is_regular_file, std::filesystem::is_directory, std::filesystem::create_directory, std::to_string;
+    using std::cout, std::cerr, std::ostream, std::stringstream, std::mutex, std::string, std::streambuf, std::ofstream, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::to_string;
 
     bool toFile = false;
     mutex loggerMutex;
     streambuf* coutBuffer;
     streambuf* cerrBuffer;
     ofstream logFile;
-    thread_local stringstream threadBufferOdi;
-    LoggerCout lout;
-    thread_local stringstream threadBufferErr;
-    LoggerCerr lerr;
-    unordered_flat_map<thread::id, string, std::hash<thread::id>> threadNames;
+    Logger lout(cout), lerr(cerr, "Error", true);
 
     void setToFile(bool _toFile) noexcept {
         if (toFile != _toFile) {

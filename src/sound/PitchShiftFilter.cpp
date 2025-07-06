@@ -15,7 +15,6 @@ namespace Sound {
 
     PitchShiftFilterInstance::PitchShiftFilterInstance(PitchShiftFilter* parent) noexcept : parent(parent) {}
 
-    constexpr u32 FFT_WINDOW = 2048, FFT_HOP_SIZE = FFT_WINDOW / 4;
     constexpr double PI = 3.141592653589793;
     constexpr float WINDOW_RANGE_MS = 20.0f, SEARCH_RANGE_MS = 10.0f, OVERLAP_FRAC = 0.5f;
 

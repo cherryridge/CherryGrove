@@ -17,7 +17,7 @@ namespace Sound {
     using std::atomic, std::atomic_ref, std::memory_order_acquire, std::memory_order_release, std::thread, std::unique_ptr, std::make_unique, std::vector, SoLoud::SO_NO_ERROR, SoLoud::Soloud, Components::CoordinatesComp, Components::RotationComp, Components::VelocityComp, glm::vec3, glm::radians, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds;
     static void audioLoop() noexcept;
 
-    u64 performance_LoopUs{0};
+    u64 performance_LoopUs = 0;
     unique_ptr<Soloud> soLoudInstance;
     SlotTable<SoundHandle, SoundSource> soundRegistry;
     SlotTable<PlayHandle, PlayInfo> playRegistry;

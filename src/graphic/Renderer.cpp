@@ -1,21 +1,21 @@
 ﻿#include <atomic>
 #include <thread>
-#include <bx/math.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
+#include <bx/math.h>
 #include <SDL3/SDL.h>
 
+#include "../components/Components.hpp"
 #include "../debug/Logger.hpp"
 #include "../debug/Fatal.hpp"
-#include "../components/Components.hpp"
-#include "../Main.hpp"
-#include "ShaderPool.hpp"
-#include "TexturePool.hpp"
-#include "../input/InputHandler.hpp"
 #include "../gui/Gui.hpp"
 #include "../gui/Window.hpp"
+#include "../input/InputHandler.hpp"
+#include "../Main.hpp"
 #include "../simulation/Simulation.hpp"
 #include "Renderer.hpp"
+#include "ShaderPool.hpp"
+#include "TexturePool.hpp"
 
 namespace Renderer {
     typedef int32_t i32;
@@ -30,9 +30,8 @@ namespace Renderer {
     IndexBufferHandle indexBuffer;
     thread rendererThread;
 
-    void init() noexcept {
-        rendererThread = thread(renderLoop);
-    }
+    void init() noexcept { rendererThread = thread(&renderLoop); }
+
     void shutdown() noexcept { rendererThread.join(); }
 
     inline static void initBGFX() noexcept {

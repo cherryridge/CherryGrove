@@ -1,11 +1,16 @@
 ﻿//Temporary
 #pragma execution_character_set(push, "utf-8")
+
+#include <functional>
+
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
+
 #define IMGUI_ENABLE_FREETYPE
 #include <imgui.h>
 #include <backends/imgui_impl_bgfx.h>
 #include <backends/imgui_impl_sdl3.h>
+
 #include <SDL3/SDL.h>
 
 #include "../Main.hpp"
@@ -24,12 +29,12 @@
 namespace Gui {
     typedef int32_t i32;
     typedef uint32_t u32;
-    using boost::unordered_flat_set, boost::unordered_flat_map, Sound::SoundHandle, Renderer::WindowInfoCache;
+    using std::function, boost::unordered_flat_set, boost::unordered_flat_map, Sound::SoundHandle, Renderer::WindowInfoCache;
 
     static ImGuiContext* context;
     static unordered_flat_set<Intrinsics> visibleGuis;
-    static unordered_flat_map<Intrinsics, void (*)()> guiRegistry;
-    SoundHandle click{0};
+    static unordered_flat_map<Intrinsics, function<void()>> guiRegistry;
+    SoundHandle click = 0;
 
     void init() noexcept {
         i32 width, height;
@@ -40,8 +45,8 @@ namespace Gui {
         io.IniFilename = nullptr;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-        // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.DisplaySize.x = static_cast<float>(width);
         io.DisplaySize.y = static_cast<float>(height);
         io.ConfigViewportsNoAutoMerge = true;

@@ -9,5 +9,5 @@ namespace Save {
     extern std::map<time_t, WorldInfo> worldList;
     extern std::mutex worldListMutex;
 
-    void refreshWorldList(const char* rootDir = "saves");
+    void refreshWorldList(const char* rootDir = "saves") noexcept;
 }

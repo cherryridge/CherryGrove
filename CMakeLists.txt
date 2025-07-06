@@ -77,6 +77,25 @@ set(PHYSFS_DISABLE_INSTALL     ON  CACHE BOOL "")
 set(PHYSFS_BUILD_DOCS          OFF CACHE BOOL "")
 add_subdirectory("libs/physfs")
 
+set(WITH_LZ4                    ON  CACHE BOOL "")
+set(WITH_ZSTD                   ON  CACHE BOOL "")
+set(WITH_WINDOWS_UTF8_FILENAMES ON  CACHE BOOL "")
+set(ROCKSDB_BUILD_SHARED        OFF CACHE BOOL "")
+set(WITH_MD_LIBRARY             OFF CACHE BOOL "")
+set(WITH_TESTS                  OFF CACHE BOOL "")
+set(WITH_BENCHMARK_TOOLS        OFF CACHE BOOL "")
+set(WITH_TOOLS                  OFF CACHE BOOL "")
+set(WITH_CORE_TOOLS             OFF CACHE BOOL "")
+set(WITH_ALL_TESTS              OFF CACHE BOOL "")
+set(WITH_BENCHMARK_TOOLS        OFF CACHE BOOL "")
+#What the fuck does this option exist?
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(WITH_RUNTIME_DEBUG ON  CACHE BOOL "")
+else()
+    set(WITH_RUNTIME_DEBUG OFF CACHE BOOL "")
+endif()
+add_subdirectory("libs/rocksdb")
+
 set(FT_DISABLE_ZLIB OFF CACHE BOOL "")
 add_subdirectory("libs/freetype")
 
@@ -116,6 +135,7 @@ set(SDLIMAGE_XPM  OFF CACHE BOOL "")
 set(SDLIMAGE_XV   OFF CACHE BOOL "")
 add_subdirectory("libs/sdl_image")
 
+#For json_schema_validator.
 add_subdirectory("libs/json")
 
 set(ENV{NLOHMANN_JSON_VERSION} "v3.12.0")
@@ -175,6 +195,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/json/single_include"
 
     "libs/physfs/src"
+    "lib/rocksdb/include"
     "libs/freetype/include"
     "libs/sdl/include"
     "libs/sdl_image/include"

@@ -40,12 +40,7 @@ namespace Sound {
         bool operator==(const Handle& other) noexcept { return handle == other.handle; }
         explicit operator u64() noexcept { return handle; }
 
-        friend Logger::LoggerCout& operator<<(Logger::LoggerCout& os, const Handle& data) noexcept {
-            os << data.handle << " (idx " << data.index << ", gen " << data.generation << ")";
-            return os;
-        }
-
-        friend Logger::LoggerCerr& operator<<(Logger::LoggerCerr& os, const Handle& data) noexcept {
+        friend Logger::Logger& operator<<(Logger::Logger& os, const Handle& data) noexcept {
             os << data.handle << " (idx " << data.index << ", gen " << data.generation << ")";
             return os;
         }

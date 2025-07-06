@@ -15,7 +15,7 @@ namespace Save {
     map<time_t, WorldInfo> worldList;
     mutex worldListMutex;
 
-    void refreshWorldList(const char* rootDir) {
+    void refreshWorldList(const char* rootDir) noexcept {
         if (!exists(rootDir) || !is_directory(rootDir)) {
             create_directory(rootDir);
             return;
