@@ -14,17 +14,13 @@ set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY FALSE)
 set(CMAKE_SUPPRESS_REGENERATION ON CACHE BOOL "" FORCE)
 #----------------------------------
 
-#------------MSVC------------------
+#----------Before Tweaks-----------
 if(MSVC)
     add_link_options(/INCREMENTAL)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /Zc:preprocessor /utf-8")
     #Some C deps use `/source-charset:utf-8` and some use `/utf-8`, so we're not going to bother with it.
     #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
     cmake_policy(SET CMP0091 NEW)
-    add_compile_definitions(
-        WIN32_LEAN_AND_MEAN
-        NOMINMAX
-    )
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     foreach(flag_var
         CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
@@ -33,6 +29,16 @@ if(MSVC)
             string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
         endif()
     endforeach()
+endif()
+if(WIN32)
+    set(CMAKE_SYSTEM_VERSION 10.0)
+    add_compile_definitions(
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+        _WIN32_WINNT=0x0A00
+        WINVER=0x0A00
+        NTDDI_VERSION=0x0A000000
+    )
 endif()
 #----------------------------------
 
@@ -77,18 +83,52 @@ set(PHYSFS_DISABLE_INSTALL     ON  CACHE BOOL "")
 set(PHYSFS_BUILD_DOCS          OFF CACHE BOOL "")
 add_subdirectory("libs/physfs")
 
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+set(LZ4_BUILD_CLI     OFF CACHE BOOL "")
+add_subdirectory("libs/lz4/build/cmake")
+
+set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "")
+set(BUILD_TESTING       OFF CACHE BOOL "")
+set(ZSTD_BUILD_STATIC   ON  CACHE BOOL "")
+set(ZSTD_BUILD_SHARED   OFF CACHE BOOL "")
+if(MSVC)
+    set(ZSTD_USE_STATIC_RUNTIME ON CACHE BOOL "")
+endif()
+add_subdirectory("libs/zstd/build/cmake")
+
 set(WITH_LZ4                    ON  CACHE BOOL "")
 set(WITH_ZSTD                   ON  CACHE BOOL "")
 set(WITH_WINDOWS_UTF8_FILENAMES ON  CACHE BOOL "")
 set(ROCKSDB_BUILD_SHARED        OFF CACHE BOOL "")
 set(WITH_MD_LIBRARY             OFF CACHE BOOL "")
+set(WITH_GFLAGS                 OFF CACHE BOOL "")
 set(WITH_TESTS                  OFF CACHE BOOL "")
 set(WITH_BENCHMARK_TOOLS        OFF CACHE BOOL "")
 set(WITH_TOOLS                  OFF CACHE BOOL "")
 set(WITH_CORE_TOOLS             OFF CACHE BOOL "")
 set(WITH_ALL_TESTS              OFF CACHE BOOL "")
 set(WITH_BENCHMARK_TOOLS        OFF CACHE BOOL "")
-#What the fuck does this option exist?
+#OK. They just DONT CARE about whether the main project needs lz4 or other compression library.
+#THEY JUST LINK THEIRS PRIVATELY. ALWAYS.
+#I GIVE UP.
+if(MSVC)
+    set(ROCKSDB_SKIP_THIRDPARTY OFF CACHE BOOL "")
+endif()
+set(ENV{LZ4_HOME} ${CMAKE_SOURCE_DIR}/libs/lz4)
+set(ENV{LZ4_INCLUDE} $ENV{LZ4_HOME}/lib)
+set(ENV{LZ4_LIB_DEBUG} ${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/lz4.lib)
+set(ENV{LZ4_LIB_RELEASE} ${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/lz4.lib)
+set(ENV{ZSTD_HOME} ${CMAKE_SOURCE_DIR}/libs/zstd)
+set(ENV{ZSTD_INCLUDE} $ENV{ZSTD_HOME}/lib)
+set(ENV{ZSTD_LIB_DEBUG} ${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib)
+set(ENV{ZSTD_LIB_RELEASE} ${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib)
+#Why the fuck does this exist on non-Linux builds?
+if(UNIX AND NOT APPLE)
+    set(WITH_LIBURING ON  CACHE BOOL "")
+else()
+    set(WITH_LIBURING OFF CACHE BOOL "")
+endif()
+#Why the fuck does this option even exist?
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(WITH_RUNTIME_DEBUG ON  CACHE BOOL "")
 else()
@@ -98,12 +138,6 @@ add_subdirectory("libs/rocksdb")
 
 set(FT_DISABLE_ZLIB OFF CACHE BOOL "")
 add_subdirectory("libs/freetype")
-
-set(ZLIB_ENABLE_TESTS   OFF CACHE BOOL "")
-set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "")
-set(WITH_GTEST          OFF CACHE BOOL "")
-set(ZLIB_COMPAT         ON  CACHE BOOL "")
-add_subdirectory("libs/zlib_ng")
 
 set(SDL_SHARED        OFF CACHE BOOL "")
 set(SDL_STATIC        ON  CACHE BOOL "")
@@ -144,7 +178,6 @@ add_subdirectory("libs/json_schema_validator")
 #----------------------------------
 
 #------------Dep:Internal----------
-set(CGNBT_HAS_ZLIBNG ON CACHE BOOL "")
 add_subdirectory("libs/cgnbt")
 #----------------------------------
 
@@ -174,6 +207,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "BX_CONFIG_DEBUG=$<IF:$<CONFI
 
 #------------Inclusions------------
 target_include_directories(${PROJECT_NAME} PRIVATE
+    "libs/imgui"
+
     "libs/boost/assert/include"
     "libs/boost/config/include"
     "libs/boost/container_hash/include"
@@ -195,12 +230,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/json/single_include"
 
     "libs/physfs/src"
-    "lib/rocksdb/include"
+    "libs/zstd/lib"
+    "libs/rocksdb/include"
     "libs/freetype/include"
     "libs/sdl/include"
     "libs/sdl_image/include"
     "libs/json_schema_validator/src"
-    "libs/zlib_ng"
 
     "libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/include"
     "libs/luajit/$<IF:$<CONFIG:Debug>,debug,release>/include"
@@ -208,21 +243,18 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/include"
 
     "libs/cgnbt/include"
-
-    "libs/imgui"
 )
 #----------------------------------
 
 #------------Link------------------
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    CGNBT
-
     physfs-static
+    libzstd_static
+    rocksdb
     freetype
     SDL3-static
     SDL3_image-static
     nlohmann_json_schema_validator
-    zlibstatic
 
     ${BGFX_BGFX_LIB}
     ${BGFX_BX_LIB}
@@ -230,13 +262,32 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${LUAJIT_LIB}
     ${SOLOUD_LIB}
     ${V8_LIB}
+
+    CGNBT
 )
+#----------------------------------
+
+#-----------After Tweaks-----------
+if(MSVC)
+    #util\auto_tune_compressor.cc(98): error C2220: the following warning is treated as an error
+    target_compile_options(rocksdb PRIVATE /wd4702)
+endif()
+if(WIN32)
+    target_compile_options(rocksdb PRIVATE /U_WIN32_WINNT /UWINVER /UNTDDI_VERSION)
+    target_compile_definitions(rocksdb PRIVATE
+        _WIN32_WINNT=0x0A00
+        WINVER=0x0A00
+        NTDDI_VERSION=0x0A000000
+    )
+endif()
 #----------------------------------
 
 #------------Link:System-----------
 if(WIN32)
     target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
+    #V8
     target_link_libraries(${PROJECT_NAME} PRIVATE dbghelp)
+    #Packing
     target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows")
     target_sources(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows/CherryGrove.rc")
 elseif(UNIX AND NOT APPLE)

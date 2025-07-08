@@ -86,6 +86,10 @@
 	path = libs/json_schema_validator
 	url = https://github.com/pboettch/json-schema-validator
 
+[submodule "libs/lz4"]
+	path = libs/lz4
+	url = https://github.com/lz4/lz4
+
 [submodule "libs/physfs"]
 	path = libs/physfs
 	url = https://github.com/icculus/physfs
@@ -102,6 +106,6 @@
 	path = libs/sdl_image
 	url = https://github.com/libsdl-org/SDL_image
 
-[submodule "libs/zlib_ng"]
-	path = libs/zlib_ng
-	url = https://github.com/zlib-ng/zlib-ng
+[submodule "libs/zstd"]
+	path = libs/zstd
+	url = https://github.com/facebook/zstd
