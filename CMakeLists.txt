@@ -178,6 +178,7 @@ add_subdirectory("libs/json_schema_validator")
 #----------------------------------
 
 #------------Dep:Internal----------
+set(CGNBT_HAS_ZSTD ON CACHE BOOL "")
 add_subdirectory("libs/cgnbt")
 #----------------------------------
 
