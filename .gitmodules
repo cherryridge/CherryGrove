@@ -1,3 +1,7 @@
+[submodule "libs/bgfx/source"]
+	path = libs/bgfx/source
+	url = https://github.com/bkaradzic/bgfx
+
 [submodule "libs/boost/assert"]
 	path = libs/boost/assert
 	url = https://github.com/boostorg/assert
@@ -86,6 +90,10 @@
 	path = libs/json_schema_validator
 	url = https://github.com/pboettch/json-schema-validator
 
+[submodule "libs/luajit/source"]
+	path = libs/luajit/source
+	url = https://github.com/LuaJIT/LuaJIT
+
 [submodule "libs/lz4"]
 	path = libs/lz4
 	url = https://github.com/lz4/lz4
@@ -105,6 +113,10 @@
 [submodule "libs/sdl_image"]
 	path = libs/sdl_image
 	url = https://github.com/libsdl-org/SDL_image
+
+[submodule "libs/soloud/source"]
+	path = libs/soloud/source
+	url = https://github.com/jarikomppa/soloud
 
 [submodule "libs/zstd"]
 	path = libs/zstd

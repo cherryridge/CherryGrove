@@ -178,7 +178,10 @@ add_subdirectory("libs/json_schema_validator")
 #----------------------------------
 
 #------------Dep:Internal----------
-set(CGNBT_HAS_ZSTD ON CACHE BOOL "")
+set(CGNBT_HAS_ZSTD   ON CACHE BOOL "")
+set(CGNBT_HAS_PHYSFS ON CACHE BOOL "")
+set(CGNBT_PHYSFS_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/physfs" CACHE STRING "")
+set(CGNBT_ZSTD_DIRECTORY   "${CMAKE_SOURCE_DIR}/libs/zstd"   CACHE STRING "")
 add_subdirectory("libs/cgnbt")
 #----------------------------------
 
