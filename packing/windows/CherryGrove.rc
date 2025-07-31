@@ -66,11 +66,11 @@ BEGIN
     BEGIN
         BLOCK "080404b0"
         BEGIN
-            VALUE "CompanyName", "LJM12914"
+            VALUE "CompanyName", "CherryRidge"
             VALUE "FileDescription", "CherryGrove"
             VALUE "FileVersion", "0.0.1.0"
             VALUE "InternalName", "CherryGrove.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2025 LJM12914"
+            VALUE "LegalCopyright", "Copyright (c) 2025 CherryGrove Contributors."
             VALUE "OriginalFilename", "CherryGrove.exe"
             VALUE "ProductName", "CherryGrove"
             VALUE "ProductVersion", "0.0.1.0"
