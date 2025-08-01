@@ -24,4 +24,4 @@ Currently, the repository and organization is maintained solely by [LJM12914](ht
 
 ## License and Terms
 
-See https://docs.cherrygrove.dev/cg/legal#terms-of-use.
+See https://docs.cherrygrove.dev/legal#terms-of-use.
