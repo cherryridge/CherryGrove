@@ -4,7 +4,7 @@ English | [中文](README.chs.md)
 
 <h1 align="center">CherryGrove</h1>
 
-🌸⛰️ A highly customizable scripting-based block game framework made for the next generation.
+🌸🌳 A highly customizable scripting-based block game framework made for the next generation.
 
 ## Goals
 
