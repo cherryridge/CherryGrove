@@ -32,6 +32,7 @@ if(MSVC)
 endif()
 if(WIN32)
     set(CMAKE_SYSTEM_VERSION 10.0)
+    #RocksDB
     add_compile_definitions(
         WIN32_LEAN_AND_MEAN
         NOMINMAX
@@ -61,6 +62,8 @@ set(LUAJIT_LIB "${CMAKE_SOURCE_DIR}/libs/luajit/$<IF:$<CONFIG:Debug>,debug,relea
 set(SOLOUD_LIB "${CMAKE_SOURCE_DIR}/libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>soloud_static_x64$<$<CONFIG:Debug>:_d>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 
 set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<IF:$<PLATFORM_ID:Windows>,v8_monolith.lib,libv8_monolith.a>")
+
+set(WASMTIME_LIB "${CMAKE_SOURCE_DIR}/libs/wasmtime/$<IF:$<CONFIG:Debug>,debug,release>/$<IF:$<PLATFORM_ID:Windows>,wasmtime.lib,libwasmtime.a>")
 #----------------------------------
 
 #------------Dep:3rdparty----------
@@ -178,8 +181,10 @@ add_subdirectory("libs/json_schema_validator")
 #----------------------------------
 
 #------------Dep:Internal----------
-set(CGNBT_HAS_ZSTD   ON CACHE BOOL "")
+set(CGNBT_HAS_BOOST  ON CACHE BOOL "")
 set(CGNBT_HAS_PHYSFS ON CACHE BOOL "")
+set(CGNBT_HAS_ZSTD   ON CACHE BOOL "")
+set(CGNBT_BOOST_DIRECTORY  "${CMAKE_SOURCE_DIR}/libs/boost"  CACHE STRING "")
 set(CGNBT_PHYSFS_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/physfs" CACHE STRING "")
 set(CGNBT_ZSTD_DIRECTORY   "${CMAKE_SOURCE_DIR}/libs/zstd"   CACHE STRING "")
 add_subdirectory("libs/cgnbt")
@@ -245,6 +250,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/luajit/$<IF:$<CONFIG:Debug>,debug,release>/include"
     "libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/include"
     "libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/include"
+    "libs/wasmtime/$<IF:$<CONFIG:Debug>,debug,release>/include"
 
     "libs/cgnbt/include"
 )
@@ -266,6 +272,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${LUAJIT_LIB}
     ${SOLOUD_LIB}
     ${V8_LIB}
+    ${WASMTIME_LIB}
 
     CGNBT
 )
@@ -277,11 +284,17 @@ if(MSVC)
     target_compile_options(rocksdb PRIVATE /wd4702)
 endif()
 if(WIN32)
+    #RocksDB
     target_compile_options(rocksdb PRIVATE /U_WIN32_WINNT /UWINVER /UNTDDI_VERSION)
     target_compile_definitions(rocksdb PRIVATE
         _WIN32_WINNT=0x0A00
         WINVER=0x0A00
         NTDDI_VERSION=0x0A000000
+    )
+    #Wasmtime
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        WASM_API_EXTERN=
+        WASI_API_EXTERN=
     )
 endif()
 #----------------------------------
@@ -291,6 +304,16 @@ if(WIN32)
     target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
     #V8
     target_link_libraries(${PROJECT_NAME} PRIVATE dbghelp)
+    #Wasmtime
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ws2_32
+        advapi32
+        userenv
+        ntdll
+        shell32
+        ole32
+        bcrypt
+    )
     #Packing
     target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows")
     target_sources(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows/CherryGrove.rc")
