@@ -1,3 +1,7 @@
+[submodule "assets/schemas"]
+	path = assets/schemas
+	url = https://github.com/cherryridge/umi_json
+
 [submodule "libs/bgfx/source"]
 	path = libs/bgfx/source
 	url = https://github.com/bkaradzic/bgfx
