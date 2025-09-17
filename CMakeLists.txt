@@ -22,6 +22,8 @@ if(MSVC)
     #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
     cmake_policy(SET CMP0091 NEW)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
     foreach(flag_var
         CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
         CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
@@ -32,7 +34,7 @@ if(MSVC)
 endif()
 if(WIN32)
     set(CMAKE_SYSTEM_VERSION 10.0)
-    #RocksDB
+    #RocksDB on Windows
     add_compile_definitions(
         WIN32_LEAN_AND_MEAN
         NOMINMAX
@@ -84,6 +86,9 @@ set(PHYSFS_BUILD_SHARED        OFF CACHE BOOL "")
 set(PHYSFS_BUILD_TEST          OFF CACHE BOOL "")
 set(PHYSFS_DISABLE_INSTALL     ON  CACHE BOOL "")
 set(PHYSFS_BUILD_DOCS          OFF CACHE BOOL "")
+if(UNIX)
+    set(PHYSFS_TARGETNAME_DIST "physfs-dist-please-do-not-collide-with-anything-ok" CACHE STRING "")
+endif()
 add_subdirectory("libs/physfs")
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
@@ -187,6 +192,7 @@ set(CGNBT_HAS_ZSTD   ON CACHE BOOL "")
 set(CGNBT_BOOST_DIRECTORY  "${CMAKE_SOURCE_DIR}/libs/boost"  CACHE STRING "")
 set(CGNBT_PHYSFS_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/physfs" CACHE STRING "")
 set(CGNBT_ZSTD_DIRECTORY   "${CMAKE_SOURCE_DIR}/libs/zstd"   CACHE STRING "")
+set(CGNBT_BUILD_TESTS OFF CACHE BOOL "")
 add_subdirectory("libs/cgnbt")
 #----------------------------------
 
@@ -284,14 +290,14 @@ if(MSVC)
     target_compile_options(rocksdb PRIVATE /wd4702)
 endif()
 if(WIN32)
-    #RocksDB
+    #RocksDB on Windows
     target_compile_options(rocksdb PRIVATE /U_WIN32_WINNT /UWINVER /UNTDDI_VERSION)
     target_compile_definitions(rocksdb PRIVATE
         _WIN32_WINNT=0x0A00
         WINVER=0x0A00
         NTDDI_VERSION=0x0A000000
     )
-    #Wasmtime
+    #Wasmtime on static lib build
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         WASM_API_EXTERN=
         WASI_API_EXTERN=
