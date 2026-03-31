@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "block/block.hpp" // IWYU pragma: export
-
 #include "entity/entity.hpp" // IWYU pragma: export
 #include "entity/Acceleration.hpp" // IWYU pragma: export
 #include "entity/Camera.hpp" // IWYU pragma: export

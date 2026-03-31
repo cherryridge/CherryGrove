@@ -2,43 +2,38 @@
 #pragma execution_character_set(push, "utf-8")
 
 #include <functional>
-
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
-
-#define IMGUI_ENABLE_FREETYPE
 #include <imgui.h>
 #include <backends/imgui_impl_bgfx.h>
 #include <backends/imgui_impl_sdl3.h>
-
 #include <SDL3/SDL.h>
 
 #include "../Main.hpp"
 #include "../debug/Logger.hpp"
-#include "../graphic/Renderer.hpp"
-#include "../input/InputHandler.hpp"
+#include "../graphics/Renderer.hpp"
+#include "../settings/Settings.hpp"
 #include "../sound/Sound.hpp"
-#include "../simulation/Simulation.hpp"
 #include "intrinsic/Copyright.hpp"
 #include "intrinsic/DebugMenu.hpp"
 #include "intrinsic/MainMenu.hpp"
 #include "intrinsic/Version.hpp"
-#include "Window.hpp"
 #include "Gui.hpp"
 
 namespace Gui {
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::function, boost::unordered_flat_set, boost::unordered_flat_map, Sound::SoundHandle, Renderer::WindowInfoCache;
+    using std::function, boost::unordered_flat_set, boost::unordered_flat_map, Sound::SoundHandle;
 
     static ImGuiContext* context;
     static unordered_flat_set<Intrinsics> visibleGuis;
     static unordered_flat_map<Intrinsics, function<void()>> guiRegistry;
-    SoundHandle click = 0;
+    SoundHandle click{};
 
     void init() noexcept {
         i32 width, height;
-        SDL_GetWindowSize(Window::windowHandle, &width, &height);
+        SDL_GetWindowSize(Main::windowHandle, &width, &height);
+        IMGUI_CHECKVERSION();
         context = ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.LogFilename = nullptr;
@@ -51,7 +46,8 @@ namespace Gui {
         io.DisplaySize.y = static_cast<float>(height);
         io.ConfigViewportsNoAutoMerge = true;
         io.ConfigViewportsNoTaskBarIcon = true;
-        float scale = SDL_GetWindowDisplayScale(Window::windowHandle);
+        float scale = SDL_GetWindowDisplayScale(Main::windowHandle);
+        //todo: Rework fonts!!!
         io.FontGlobalScale = scale;
         float scaledFontSize = 24.0f * scale;
         io.Fonts->Flags |= ImFontAtlasFlags_::ImFontAtlasFlags_NoPowerOfTwoHeight;
@@ -65,8 +61,10 @@ namespace Gui {
         ImGuiStyle& style = ImGui::GetStyle();
         style.WindowRounding = 0.0f;
         style.WindowTitleAlign = ImVec2(0.5f, 0.0f);
-        ImGui_Implbgfx_Init(Renderer::guiViewId);
-        ImGui_ImplSDL3_InitForOther(Window::windowHandle);
+        //Gemini recommends not to use `msaaSamples` whatsoever, so we're just vibing it with `1`.
+        //todo: Populate `bUsingVSync` from Settings.
+        ImGui_Implbgfx_Init(Renderer::guiViewId, 1, Settings::getData().graphics.vsync);
+        ImGui_ImplSDL3_InitForOther(Main::windowHandle);
         click = Sound::addSound("assets/sounds/click1.ogg", false, true, 2.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
         //Register them manually!
         guiRegistry.emplace(Intrinsics::MainMenu, MainMenu::render);

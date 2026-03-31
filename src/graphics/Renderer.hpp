@@ -1,0 +1,82 @@
+﻿#pragma once
+#include <array>
+#include <atomic>
+#include <SDL3/SDL.h>
+
+#include "../util/concurrentQueue.hpp"
+
+namespace Renderer {
+    typedef uint8_t u8;
+    typedef int32_t i32;
+    using std::atomic, std::array, Util::SPSCQueue;
+
+    extern atomic<bool> initialized;
+    extern SPSCQueue<SDL_Event> inputMQ_Main_Renderer;
+    
+    //Must be called after `Window::init`.
+    void init() noexcept;
+    void shutdown() noexcept;
+
+    inline constexpr u8 guiViewId  = 1u, gameViewId = 0u;
+
+    struct WindowInfoCache {
+        i32 width, height;
+        float aspectRatio;
+    };
+
+    extern WindowInfoCache cache;
+
+    struct Vertex {
+        float x, y, z;
+        //Texture coordinates are normalized from `i16` during conversion.
+        float u, v;
+    };
+
+    //Debug only.
+    struct d_ColoredVertex {
+        float x, y, z, r, g, b, a;
+    };
+
+    struct NormalVertex {
+        float x, y, z;
+        //Texture coordinates are normalized from `i16` during conversion.
+        float u, v;
+        float nx, ny, nz;
+    };
+
+    //(up, down, north, east, south, west)
+    inline constexpr array<Vertex, 24> blockVerticesTemplate = {
+        //Up
+        Vertex{ 0.0f, 1.0f, 0.0f, 0.0f, 0.0f },
+        Vertex{ 1.0f, 1.0f, 0.0f, 1.0f, 0.0f },
+        Vertex{ 0.0f, 1.0f, 1.0f, 0.0f, 1.0f },
+        Vertex{ 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+        //Down
+        Vertex{ 0.0f, 0.0f, 1.0f, 0.0f, 0.0f },
+        Vertex{ 1.0f, 0.0f, 1.0f, 1.0f, 0.0f },
+        Vertex{ 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+        Vertex{ 1.0f, 0.0f, 0.0f, 1.0f, 1.0f },
+        //North (-Z)
+        Vertex{ 1.0f, 1.0f, 0.0f, 0.0f, 0.0f },
+        Vertex{ 0.0f, 1.0f, 0.0f, 1.0f, 0.0f },
+        Vertex{ 1.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+        Vertex{ 0.0f, 0.0f, 0.0f, 1.0f, 1.0f },
+        //East (+X)
+        Vertex{ 1.0f, 1.0f, 1.0f, 0.0f, 0.0f },
+        Vertex{ 1.0f, 1.0f, 0.0f, 1.0f, 0.0f },
+        Vertex{ 1.0f, 0.0f, 1.0f, 0.0f, 1.0f },
+        Vertex{ 1.0f, 0.0f, 0.0f, 1.0f, 1.0f },
+        //South (+Z)
+        Vertex{ 0.0f, 1.0f, 1.0f, 0.0f, 0.0f },
+        Vertex{ 1.0f, 1.0f, 1.0f, 1.0f, 0.0f },
+        Vertex{ 0.0f, 0.0f, 1.0f, 0.0f, 1.0f },
+        Vertex{ 1.0f, 0.0f, 1.0f, 1.0f, 1.0f },
+        //West (-X)
+        Vertex{ 0.0f, 1.0f, 0.0f, 0.0f, 0.0f },
+        Vertex{ 0.0f, 1.0f, 1.0f, 1.0f, 0.0f },
+        Vertex{ 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+        Vertex{ 0.0f, 0.0f, 1.0f, 1.0f, 1.0f },
+    };
+
+    inline constexpr array<int16_t, 6> blockIndicesTemplate = { 0, 2, 1, 1, 2, 3 };
+}

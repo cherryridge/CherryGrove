@@ -51,7 +51,6 @@ function Download-Library {
 }
 
 Download-Library -name 'bgfx'
-Download-Library -name 'luajit'
 Download-Library -name 'soloud'
 Download-Library -name 'v8'
 Download-Library -name 'wasmtime'

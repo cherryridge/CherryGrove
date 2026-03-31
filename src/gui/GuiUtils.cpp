@@ -1,8 +1,7 @@
 ﻿#include <functional>
 #include <imgui.h>
 
-#include "Gui.hpp"
-#include "../graphic/Renderer.hpp"
+#include "../graphics/Renderer.hpp"
 #include "GuiUtils.hpp"
 
 namespace GuiUtils {
@@ -10,7 +9,7 @@ namespace GuiUtils {
     using namespace ImGui;
 
     static void windowBase(const char* id, bool styled = true) noexcept {
-        if(styled) {
+        if (styled) {
             PushStyleColor(ImGuiCol_WindowBg, transparent);
             PushStyleColor(ImGuiCol_Border, transparent);
         }
@@ -46,7 +45,7 @@ namespace GuiUtils {
     void endWindow(bool styled) noexcept {
         auto drawList = GetWindowDrawList();
         drawList->PopClipRect();
-        if(styled) PopStyleColor(2);
+        if (styled) PopStyleColor(2);
         End();
     }
 

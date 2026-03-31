@@ -6,18 +6,19 @@
 
 #include "../debug/Logger.hpp"
 #include "../input/InputHandler.hpp"
-#include "../input/intrinsic/ChangeRotation.hpp"
-#include "../input/intrinsic/Movement.hpp"
+#include "../intrinsics/actions/ChangeRotation.hpp"
+#include "../intrinsics/actions/Movement.hpp"
 #include "../components/Components.hpp"
-#include "../graphic/TexturePool.hpp"
+#include "../graphics/TexturePool.hpp"
 #include "../gui/Gui.hpp"
-#include "../gui/Window.hpp"
+#include "../Main.hpp"
 #include "Simulation.hpp"
 
 namespace Simulation {
+    typedef uint8_t u8;
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::atomic, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::addBoolInput, InputHandler::MouseMove::addMouseMove, InputHandler::BoolInput::ActionTypes;
+    using std::atomic, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::addBoolInput, InputHandler::MouseMove::addMouseMove, InputHandler::BoolInput::BIEventType;
     using namespace std::chrono_literals;
     using namespace std::this_thread;
     static void gameLoop() noexcept;
@@ -44,15 +45,15 @@ namespace Simulation {
         Gui::setVisible(Gui::Intrinsics::Copyright, false);
         Gui::setVisible(Gui::Intrinsics::Version, false);
 
-        Window::runOnMainThread([]() {
-            forward = addBoolInput(":forward", 10, IntrinsicInput::forward, ActionTypes::Repeat, 28);
-            backward = addBoolInput(":backward", 10, IntrinsicInput::backward, ActionTypes::Repeat, 24);
-            left = addBoolInput(":left", 10, IntrinsicInput::left, ActionTypes::Repeat, 6);
-            right = addBoolInput(":right", 10, IntrinsicInput::right, ActionTypes::Repeat, 9);
-            up = addBoolInput(":up", 10, IntrinsicInput::up, ActionTypes::Repeat, 46);
-            down = addBoolInput(":down", 10, IntrinsicInput::down, ActionTypes::Repeat, 165);
+        Main::runOnMainThreadMQ.enqueue([]() {
+            forward = addBoolInput(":forward", 10, IntrinsicInput::forward, BIEventType::Repeat, 28);
+            backward = addBoolInput(":backward", 10, IntrinsicInput::backward, BIEventType::Repeat, 24);
+            left = addBoolInput(":left", 10, IntrinsicInput::left, BIEventType::Repeat, 6);
+            right = addBoolInput(":right", 10, IntrinsicInput::right, BIEventType::Repeat, 9);
+            up = addBoolInput(":up", 10, IntrinsicInput::up, BIEventType::Repeat, 46);
+            down = addBoolInput(":down", 10, IntrinsicInput::down, BIEventType::Repeat, 165);
             moveCamera = addMouseMove(":moveCamera", 10, IntrinsicInput::changeRotationCB);
-            SDL_SetWindowRelativeMouseMode(Window::windowHandle, true);
+            //SDL_SetWindowRelativeMouseMode(Main::windowHandle, true);
         });
 
         //Temporary code to show debug menu
@@ -66,7 +67,7 @@ namespace Simulation {
         gameRegistry.emplace<CoordinatesComp>(playerEntity, -0.2, -0.5, 1.0, 0u);
         gameRegistry.emplace<RotationComp>(playerEntity, 90.0, 0.0);
 
-        //Test code to spawn a block
+        //Temporary code to spawn a block
         TexturePool::TextureID
             debugpx = TexturePool::addTexture("assets/textures/debug+x.png"),
             debugnx = TexturePool::addTexture("assets/textures/debug-x.png"),
@@ -96,17 +97,17 @@ namespace Simulation {
         gameThread.join();
         gameRegistry.clear();
 
-        //Clear input callbacks (todo: will be changed to use clear())
-        Window::runOnMainThread([]() {
+        //Clear input callbacks
+        Main::runOnMainThreadMQ.enqueue([]() {
             using namespace InputHandler;
-            BoolInput::removeBoolInput(forward, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(backward, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(left, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(right, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(up, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(down, ActionTypes::Repeat);
+            BoolInput::removeBoolInput(forward, BIEventType::Repeat);
+            BoolInput::removeBoolInput(backward, BIEventType::Repeat);
+            BoolInput::removeBoolInput(left, BIEventType::Repeat);
+            BoolInput::removeBoolInput(right, BIEventType::Repeat);
+            BoolInput::removeBoolInput(up, BIEventType::Repeat);
+            BoolInput::removeBoolInput(down, BIEventType::Repeat);
             MouseMove::removeMouseMove(moveCamera);
-            SDL_SetWindowRelativeMouseMode(Window::windowHandle, false);
+            SDL_SetWindowRelativeMouseMode(Main::windowHandle, false);
         });
 
         //Go back to main menu

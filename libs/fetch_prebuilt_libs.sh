@@ -79,7 +79,6 @@ download_library() {
 }
 
 download_library bgfx
-download_library luajit
 download_library soloud
 download_library v8
 download_library wasmtime

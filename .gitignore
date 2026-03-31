@@ -10,6 +10,7 @@ Thumbs.db
 *.suo
 *.user
 *.VC.db
+cpp.hint
 .idea/
 *.iws
 *.iml

@@ -1,12 +1,14 @@
 ﻿#pragma once
 #include <atomic>
-#include <latch>
+#include <functional>
+#include <SDL3/SDL.h>
+
+#include "util/concurrentQueue.hpp"
 
 namespace Main {
-    using std::atomic, std::latch;
+    using std::atomic, std::function, Util::MPSCQueue;
 
-    extern atomic<bool> isCGAlive;
-    extern latch subsystemSetupLatch;
-
-    void launch();
+    extern atomic<bool> isCGAlive, multiThreadEra;
+    extern SDL_Window* windowHandle;
+    extern MPSCQueue<function<void()>> runOnMainThreadMQ;
 }

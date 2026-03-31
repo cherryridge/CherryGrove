@@ -1,66 +1,78 @@
-﻿#include <ctime>
+﻿#include <atomic>
+#include <ctime>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <iostream>
-#include <mutex>
-#include <sstream>
 #include <string>
 
+#include "../util/os/platform.hpp"
 #include "Logger.hpp"
 
 namespace Logger {
-    typedef uint32_t u32;
-    using std::cout, std::cerr, std::ostream, std::stringstream, std::mutex, std::string, std::streambuf, std::ofstream, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::to_string;
+    using std::atomic_flag, std::cout, std::cerr, std::ios, std::string, std::ofstream, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::format;
 
-    bool toFile = false;
-    mutex loggerMutex;
-    streambuf* coutBuffer;
-    streambuf* cerrBuffer;
-    ofstream logFile;
-    Logger lout(cout), lerr(cerr, "Error", true);
+    static ofstream logFile;
+    static atomic_flag logFileFlag{}, coutFlag{}, cerrFlag{};
+    Logger lout(&cout, &coutFlag), lerr(&cerr, &cerrFlag, "(Error)", true);
 
-    void setToFile(bool _toFile) noexcept {
-        if (toFile != _toFile) {
-            if (_toFile) {
-                coutBuffer = cout.rdbuf();
-                cerrBuffer = cerr.rdbuf();
+    void init(LoggingMode mode) noexcept {
+        switch(mode) {
+            //The two logger object use stdout by default. Nothing to do here.
+            case LoggingMode::Stdout: break;
+            case LoggingMode::Separate:
+            #if CG_PLATFORM_WINDOWS
+            {
+                AllocConsole();
+                SetConsoleOutputCP(CP_UTF8);
+                SetConsoleCP(CP_UTF8);
+                FILE* fDummy = nullptr;
+                freopen_s(&fDummy, "CONIN$", "r", stdin);
+                freopen_s(&fDummy, "CONOUT$", "w", stdout);
+                freopen_s(&fDummy, "CONOUT$", "w", stderr);
+                ios::sync_with_stdio();
+                cout.clear();
+                cerr.clear();
+                break;
+            }
+            #elif CG_PLATFORM_LINUX
+                //todo: 
+                break;
+            #elif CG_PLATFORM_MACOS
+                //todo: 
+                break;
+            #elif CG_PLATFORM_ANDROID
+            #elif CG_PLATFORM_IOS
+                cout << "We can't spawn console on mobile, falling back to file output." << endl;
+                [[fallthrough]];
+            #endif
+            case LoggingMode::File: {
+                if ((!exists("logs") || !is_directory("logs")) && !create_directory("logs")) {
+                    cerr << "(Error)[Logger] Failed to create /logs directory!" << endl;
+                    //Refuse to redirect logs to prevent data loss.
+                    return;
+                }
                 time_t timestamp;
                 time(&timestamp);
-                if (!exists("logs") || !is_directory("logs")) {
-                    if (!create_directory("logs")) {
-                        lerr << "[Logger] Failed to create /logs directory!" << endl;
-                        //Refuse to redirect logs to prevent data loss.
-                        return;
-                    }
-                }
-                string logFileName = "logs/CherryGrove-";
-                logFileName += to_string(timestamp);
-                logFileName += ".log";
+                string logFileName = format("logs/CherryGrove-{}.log", timestamp);
                 logFile = ofstream(logFileName);
                 if (!logFile.is_open()) {
-                    lerr << "[Logger] Failed to open log file: " << logFileName << "\n";
+                    cerr << "(Error)[Logger] Failed to open log file: " << logFileName << "\n";
                     //Refuse to redirect logs to prevent data loss.
                     return;
                 }
                 else {
-                    lout << "Writing log to " << logFileName << "!" << endl;
-                    cout.rdbuf(logFile.rdbuf());
-                    cerr.rdbuf(logFile.rdbuf());
+                    cout << "Writing log to " << logFileName << "!" << endl;
+                    lout.redirect(&logFile, &logFileFlag);
+                    lerr.redirect(&logFile, &logFileFlag);
                 }
+                break;
             }
-            else {
-                lout << "Writing log to console!" << endl;
-                cout.rdbuf(coutBuffer);
-                cerr.rdbuf(cerrBuffer);
-            }
-            toFile = _toFile;
         }
-        else lout << "Logger output not changed." << endl;
     }
 
     void shutdown() noexcept {
-        lout << "Terminating logger! (cout will be reverted to console)" << endl;
-        cout.rdbuf(coutBuffer);
-        logFile.close();
+        lout << "Terminating logger!" << endl;
+        if (logFile.is_open()) logFile.close();
     }
-} // namespace Logger
+}

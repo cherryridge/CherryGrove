@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <mutex>
+#include <bgfx/bgfx.h>
 #include <bx/math.h>
 #include <entt/entt.hpp>
 

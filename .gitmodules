@@ -74,6 +74,10 @@
 	path = libs/cgnbt
 	url = https://github.com/cherryridge/cgnbt
 
+[submodule "libs/cli11"]
+	path = libs/cli11
+	url = https://github.com/CLIUtils/CLI11
+
 [submodule "libs/entt"]
 	path = libs/entt
 	url = https://github.com/skypjack/entt
@@ -82,21 +86,21 @@
 	path = libs/freetype
 	url = https://github.com/freetype/freetype
 
+[submodule "libs/function2"]
+	path = libs/function2
+	url = https://github.com/Naios/function2
+
+[submodule "libs/glaze"]
+	path = libs/glaze
+	url = https://github.com/stephenberry/glaze
+
 [submodule "libs/glm"]
 	path = libs/glm
 	url = https://github.com/g-truc/glm
 
-[submodule "libs/json"]
-	path = libs/json
-	url = https://github.com/nlohmann/json
-
-[submodule "libs/json_schema_validator"]
-	path = libs/json_schema_validator
-	url = https://github.com/pboettch/json-schema-validator
-
-[submodule "libs/luajit/source"]
-	path = libs/luajit/source
-	url = https://github.com/LuaJIT/LuaJIT
+[submodule "libs/luau"]
+	path = libs/luau
+	url = https://github.com/luau-lang/luau
 
 [submodule "libs/lz4"]
 	path = libs/lz4
@@ -125,3 +129,7 @@
 [submodule "libs/zstd"]
 	path = libs/zstd
 	url = https://github.com/facebook/zstd
+
+[submodule "packing/windows/translations/chs"]
+	path = packing/windows/translations/chs
+	url = https://github.com/kira-96/Inno-Setup-Chinese-Simplified-Translation
