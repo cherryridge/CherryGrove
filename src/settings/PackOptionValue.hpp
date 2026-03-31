@@ -2,9 +2,9 @@
 #include <string>
 #include <boost/uuid/uuid.hpp>
 #include <glaze/glaze.hpp>
-#include <utility>
 
 #include "../pack/PackOptionDef.hpp"
+#include "../util/json/helper.hpp"
 
 namespace Settings {
     typedef int64_t i64;
@@ -106,8 +106,7 @@ namespace glz {
 
     struct PackOptionValue_glz {
         string identifier, type;
-        //Yep, because `Enum` and `String` both use `string` as their value type, we have to parse manually.
-        raw_json value;
+        generic value;
     };
 
     template <>
@@ -120,33 +119,32 @@ namespace glz {
             result.identifier = move(temp.identifier);
 
             result.destroyUnion();
-            const string& type = temp.type;
-            const string& raw = temp.value.str;
-            const auto rawIt = raw.data();
-            const auto rawEnd = rawIt + raw.size();
-
-            if (type == "boolean") {
-                parse<JSON>::op<Options>(result.boolValue, ctx, rawIt, rawEnd);
+            if (temp.type == "boolean") {
                 result.type = Boolean;
+                GLAZE_CONSTRAINT_ASSERT(temp.value.is_boolean(), "Value for boolean option must be a boolean.")
+                result.boolValue = temp.value.get<bool>();
             }
-            else if (type == "integer") {
-                parse<JSON>::op<Options>(result.intValue, ctx, rawIt, rawEnd);
+            else if (temp.type == "integer") {
                 result.type = Integer;
+                GLAZE_CONSTRAINT_ASSERT(temp.value.is_number(), "Value for integer option must be a number.")
+                result.intValue = temp.value.as<i64>();
             }
-            else if (type == "float") {
-                parse<JSON>::op<Options>(result.floatValue, ctx, rawIt, rawEnd);
+            else if (temp.type == "float") {
                 result.type = Float;
+                GLAZE_CONSTRAINT_ASSERT(temp.value.is_number(), "Value for float option must be a number.")
+                result.floatValue = temp.value.as<double>();
             }
-            else if (type == "string") {
-                new (&result.stringValue) string();
-                parse<JSON>::op<Options>(result.stringValue, ctx, rawIt, rawEnd);
+            else if (temp.type == "string") {
                 result.type = String;
+                GLAZE_CONSTRAINT_ASSERT(temp.value.is_string(), "Value for string option must be a string.")
+                new (&result.stringValue) string(temp.value.get<string>());
             }
-            else if (type == "enum") {
-                new (&result.enumValue) string();
-                parse<JSON>::op<Options>(result.enumValue, ctx, rawIt, rawEnd);
+            else if (temp.type == "enum") {
                 result.type = Enum;
+                GLAZE_CONSTRAINT_ASSERT(temp.value.is_string(), "Value for enum option must be a string.")
+                new (&result.enumValue) string(temp.value.get<string>());
             }
+            else GLAZE_CONSTRAINT_ASSERT(false, "Invalid option type.")
         }
     };
 
@@ -161,23 +159,23 @@ namespace glz {
             switch (input.type) {
                 case Boolean:
                     temp.type = "boolean";
-                    write<Options>(input.boolValue, temp.value.str, ctx);
+                    temp.value = input.boolValue;
                     break;
                 case Integer:
                     temp.type = "integer";
-                    write<Options>(input.intValue, temp.value.str, ctx);
+                    temp.value = input.intValue;
                     break;
                 case Float:
                     temp.type = "float";
-                    write<Options>(input.floatValue, temp.value.str, ctx);
+                    temp.value = input.floatValue;
                     break;
                 case String:
                     temp.type = "string";
-                    write<Options>(input.stringValue, temp.value.str, ctx);
+                    temp.value = input.stringValue;
                     break;
                 case Enum:
                     temp.type = "enum";
-                    write<Options>(input.enumValue, temp.value.str, ctx);
+                    temp.value = input.enumValue;
                     break;
                 case Count:
                     break;

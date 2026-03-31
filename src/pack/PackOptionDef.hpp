@@ -192,10 +192,12 @@ namespace glz {
             }
             else if (temp.type == "string") {
                 result.type = String;
+                GLAZE_CONSTRAINT_ASSERT(temp.defaultValue.is_string(), "Default value for string option must be a string.")
                 new (&result.defaultString) string(temp.defaultValue.get<string>());
             }
             else if (temp.type == "enum") {
                 result.type = Enum;
+                GLAZE_CONSTRAINT_ASSERT(temp.defaultValue.is_string(), "Default value for enum option must be a string.")
                 new (&result.defaultEnum) string(temp.defaultValue.get<string>());
                 new (&result.enumValues) vector<string>(move(temp.enumValues));
                 bool foundDefault = false;
@@ -205,6 +207,7 @@ namespace glz {
                 }
                 GLAZE_CONSTRAINT_ASSERT(foundDefault, "Default enum value must be one of the values in the enum.")
             }
+            else GLAZE_CONSTRAINT_ASSERT(false, "Invalid option type.")
         }
     };
 
