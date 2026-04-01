@@ -4,15 +4,15 @@
 #include <entt/entt.hpp>
 
 namespace Simulation {
-    extern std::atomic<bool> gameStarted;
+    using std::atomic;
+
+    extern atomic<bool> gameStarted;
     //Signals the Main thread to call `exit`.
-    extern std::atomic<bool> gameStopSignal;
-    extern std::atomic<bool> gamePaused;
+    extern atomic<bool> gameStopSignal, gamePaused;
     extern entt::registry gameRegistry;
     extern entt::entity playerEntity;
     extern std::mutex registryMutex, playerMutex;
 
-    void start();
-    //Joins the Game thread. Must NOT be called in game thread.
-    void exit();
+    void start() noexcept;
+    void exit() noexcept;
 }

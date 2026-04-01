@@ -1,11 +1,10 @@
-﻿#include <array>
-#include <atomic>
+﻿#include <atomic>
+#include <chrono>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <SDL3/SDL.h>
-#include <chrono>
 
 #include "../debug/Logger.hpp"
-#include "../Main.hpp"
+#include "../settings/Settings.hpp"
 #include "../util/concurrentQueue.hpp"
 #include "Action.hpp"
 #include "SDL3/SDL_events.h"
@@ -20,7 +19,7 @@
 
 namespace InputHandler {
     typedef int16_t i16;
-    using std::array, std::atomic, std::memory_order_acquire, std::memory_order_release, boost::unordered_flat_map, Util::SPSCQueue;
+    using std::atomic, std::chrono::milliseconds, std::memory_order_acquire, std::memory_order_release, boost::unordered_flat_map, Util::SPSCQueue;
 
     atomic<bool> sendToImGui{true}, sendToSimulation{true};
 
@@ -28,13 +27,10 @@ namespace InputHandler {
 
     //threaded: Main Thread
     void init() noexcept {
-        //todo: query settings for arguments.
-        std::chrono::milliseconds comboMinTTL(100), repeatTapGap(100);
-        array<i16, 8> deadzones{7800, 32767, 7800, 32767, 7800, 32767, 7800, 32767};
-        //todo: query settings for arguments.
         Gamepad::init();
-        BoolInput::updateArguments(repeatTapGap, comboMinTTL);
-        Stick::updateArguments(deadzones);
+        const auto& settings = Settings::getSettings();
+        BoolInput::updateArguments(milliseconds(settings.input.repeatTapGap), milliseconds(settings.input.comboMinTTL));
+        Stick::updateArguments(settings.input.deadzones);
         //todo: query settings for bindings.
     }
 
@@ -101,7 +97,7 @@ namespace InputHandler {
     [[nodiscard]] bool processTrigger() noexcept {
         SDL_Event event;
         u64 i = 0;
-        for (; i < MAXIMUM_EVENTS_PER_FRAME; i++) {
+        for (; i < MAXIMUM_INPUT_EVENTS_PER_FRAME; i++) {
             if (!eventQueue.dequeue(event)) break;
             switch(event.type) {
             //Device events
@@ -165,9 +161,9 @@ namespace InputHandler {
                     break;
             }
         }
-        if (i == MAXIMUM_EVENTS_PER_FRAME) {
+        if (i == MAXIMUM_INPUT_EVENTS_PER_FRAME) {
         #if CG_DEBUG
-            lout << "[InputHandler] Maximum events per frame reached: " << MAXIMUM_EVENTS_PER_FRAME << endl;
+            lout << "[InputHandler] Maximum events per frame reached: " << MAXIMUM_INPUT_EVENTS_PER_FRAME << endl;
         #endif
             return false;
         }

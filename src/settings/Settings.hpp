@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <string>
 
-#include "../debug/Fatal.hpp"
 #include "../debug/Logger.hpp"
 #include "../umi/frontend/json/JSON.hpp"
 #include "v1.hpp"
@@ -27,26 +26,22 @@ namespace Settings {
     namespace detail {
         inline constexpr const char* SETTINGS_FILENAME = "settings.json";
 
-        inline bool initialized{false};
         inline Latest<Settings> data;
     }
 
-    [[nodiscard]] inline bool isInitialized() noexcept { return detail::initialized; }
-    [[nodiscard]] inline const Latest<Settings>& getData() noexcept { return detail::data; }
+    [[nodiscard]] inline const Latest<Settings>& getSettings() noexcept { return detail::data; }
 
-    //Note: Pre-logger function (maybe called before logger is initialized)
-    [[nodiscard]] inline bool loadSettings(bool initial = false) noexcept {
-        if (!UmiJSON::readJSONFromFile<Settings>(detail::SETTINGS_FILENAME, detail::data, false)) {
-            LOGGER_DYNAMIC_ERR("Failed to parse Settings file.");
-            if (initial) Fatal::exit(Fatal::SETTINGS_FAILED_TO_LOAD);
-            return false;
-        }
-        detail::initialized = true;
-        return true;
+    //Note: Maybe pre-logger function.
+    [[nodiscard]] inline bool loadSettings() noexcept {
+        return UmiJSON::readJSONFromFile<Settings, false>(detail::SETTINGS_FILENAME, detail::data);
     }
 
-    [[nodiscard]] inline bool saveSettings(const Latest<Settings>& newData) noexcept {
-        //todo:
+    //This is usually called automatically by various Setting modification functions so you rarely need to call this manually.
+    [[nodiscard]] inline bool saveSettings() noexcept {
+        if (!UmiJSON::writeJSONToFile<Settings>(detail::data, detail::SETTINGS_FILENAME, Util::OS::ExistBehavior::Overwrite)) {
+            lerr << "Failed to write Settings file." << endl;
+            return false;
+        }
         return true;
     }
 }

@@ -2,19 +2,21 @@
 #include <array>
 #include <vector>
 
+#include "../pack/KnownPack.hpp"
+#include "../pack/PackOptionValue.hpp"
+#include "../util/json/formatVersion.hpp"
 #include "base.hpp"
-#include "PackOptionValue.hpp"
 
 namespace Settings {
     typedef int16_t i16;
     typedef int64_t i64;
     typedef uint32_t u32;
     typedef uint64_t u64;
-    using std::array, std::vector;
+    using std::array, std::vector, Pack::KnownPack, Pack::PackOptionValue;
 
     struct Settings_v1 {
 
-    u32 formatVersion{1};
+    u32 formatVersion{INVALID_FORMAT_VERSION};
 
     struct Packs {
         vector<KnownPack> knownPacks;
@@ -57,6 +59,9 @@ namespace Settings {
 
     struct Debug {
         Logger::LoggingMode logging{Logger::LoggingMode::File};
+        //I don't know if this is a good idea but let's just try and see.
+        u32 maximumMainThreadFunctionsPerFrame{128};
+        u32 maximumMainThreadLoopTimeUs{1000};
     } debug;
 
     struct Misc {

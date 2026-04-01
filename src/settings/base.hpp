@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <string>
-#include <boost/uuid/uuid.hpp>
 #include <glaze/glaze.hpp>
 
 #include "../input/boolInput/KeyCombo.hpp"
@@ -8,13 +7,7 @@
 namespace Settings {
     typedef uint8_t u8;
     typedef uint32_t u32;
-    using std::string, boost::uuids::uuid, InputHandler::BoolInput::KeyCombo;
-
-    struct KnownPack {
-        uuid id;
-        u32 version;
-        bool disabled;
-    };
+    using std::string, InputHandler::BoolInput::KeyCombo;
 
     enum struct WindowMode : u8 { Windowed, Fullscreen };
 

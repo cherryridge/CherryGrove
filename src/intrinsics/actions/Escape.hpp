@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include <atomic>
 
+#include "../../globalState.hpp"
 #include "../../input/Action.hpp"
 #include "../../input/boolInput/BIAction.hpp"
-#include "../../Main.hpp"
 #include "../../simulation/Simulation.hpp"
 #include "../../util/SlotTable.hpp"
 

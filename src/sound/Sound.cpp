@@ -11,7 +11,6 @@
 
 #include "../debug/Logger.hpp"
 #include "../debug/Fatal.hpp"
-#include "../Main.hpp"
 #include "../util/concurrentQueue.hpp"
 #include "../util/os/platform.hpp"
 #include "commands.hpp"

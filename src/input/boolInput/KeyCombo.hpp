@@ -5,6 +5,7 @@
 #include <glaze/glaze.hpp>
 
 #include "../../debug/Logger.hpp"
+#include "../../util/macros.hpp"
 #include "biid.hpp"
 
 namespace InputHandler::BoolInput {
@@ -171,17 +172,9 @@ namespace InputHandler::BoolInput {
     };
 }
 
-[[nodiscard]] inline size_t hash_value(const InputHandler::BoolInput::KeyCombo& input) noexcept {
-    //Watermark :)
-    return (input.lower ^ 3'25'20'9'12'21ull) ^ std::rotl(input.middle, 21) ^ std::rotl(input.higher, 38); 
-}
-
-namespace std {
-    template <>
-    struct hash<InputHandler::BoolInput::KeyCombo> {
-        [[nodiscard]] size_t operator()(const InputHandler::BoolInput::KeyCombo& input) const noexcept { return hash_value(input); }
-    };
-}
+IMPL_HASH_FOR(InputHandler::BoolInput, KeyCombo, 0,
+    seed = (input.lower ^ 3'25'20'9'12'21ull) ^ std::rotl(input.middle, 21) ^ std::rotl(input.higher, 38);
+)
 
 template <>
 struct glz::meta<InputHandler::BoolInput::KeyCombo> {

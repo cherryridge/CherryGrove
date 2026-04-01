@@ -6,9 +6,9 @@
 #include "../pack/PackOptionDef.hpp"
 #include "../util/json/helper.hpp"
 
-namespace Settings {
+namespace Pack {
     typedef int64_t i64;
-    using std::string, Pack::PackOptionType;
+    using std::string;
 
     struct PackOptionValue {
         using enum PackOptionType;
@@ -101,7 +101,7 @@ namespace Settings {
 
 namespace glz {
     typedef int64_t i64;
-    using std::string, std::move, Settings::PackOptionValue;
+    using std::string, std::move, Pack::PackOptionValue;
     using enum Pack::PackOptionType;
 
     struct PackOptionValue_glz {

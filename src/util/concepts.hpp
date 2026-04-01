@@ -7,7 +7,7 @@
 #include <utility>
 
 namespace Util {
-    using std::string, std::string_view, std::filesystem::path, std::decay_t, std::constructible_from, std::convertible_to, std::is_unsigned_v, std::is_signed_v, std::is_floating_point_v, std::derived_from, std::same_as, std::remove_cvref_t, std::make_index_sequence, std::index_sequence, std::is_aggregate_v;
+    using std::move, std::string, std::string_view, std::filesystem::path, std::decay_t, std::constructible_from, std::convertible_to, std::is_unsigned_v, std::is_signed_v, std::is_floating_point_v, std::derived_from, std::same_as, std::remove_cvref_t, std::make_index_sequence, std::index_sequence, std::is_aggregate_v;
 
     template <typename T>
     concept SInt = is_signed_v<T>;

@@ -8,7 +8,7 @@ namespace Components {
     typedef uint64_t u64;
     using std::array, std::vector;
 
-    //Chunk size: 2^5 = 32
+    //Chunk size: 2^5 = 32, which will probably not change during the whole lifecycle of the game software itself, but we have to be extra aware, so we don't hardcode it anywhere else.
     inline constexpr u8 CHUNK_SIZE_MAGNITUDE = 5;
 
     struct ChunkMesh {

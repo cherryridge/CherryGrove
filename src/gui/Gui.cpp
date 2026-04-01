@@ -1,7 +1,4 @@
-﻿//Temporary
-#pragma execution_character_set(push, "utf-8")
-
-#include <functional>
+﻿#include <functional>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
 #include <imgui.h>
@@ -9,15 +6,14 @@
 #include <backends/imgui_impl_sdl3.h>
 #include <SDL3/SDL.h>
 
-#include "../Main.hpp"
 #include "../debug/Logger.hpp"
 #include "../graphics/Renderer.hpp"
+#include "../intrinsics/guis/Copyright.hpp"
+#include "../intrinsics/guis/DebugMenu.hpp"
+#include "../intrinsics/guis/MainMenu.hpp"
+#include "../intrinsics/guis/Version.hpp"
 #include "../settings/Settings.hpp"
 #include "../sound/Sound.hpp"
-#include "intrinsic/Copyright.hpp"
-#include "intrinsic/DebugMenu.hpp"
-#include "intrinsic/MainMenu.hpp"
-#include "intrinsic/Version.hpp"
 #include "Gui.hpp"
 
 namespace Gui {
@@ -40,30 +36,24 @@ namespace Gui {
         io.IniFilename = nullptr;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-        //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.DisplaySize.x = static_cast<float>(width);
         io.DisplaySize.y = static_cast<float>(height);
         io.ConfigViewportsNoAutoMerge = true;
         io.ConfigViewportsNoTaskBarIcon = true;
         float scale = SDL_GetWindowDisplayScale(Main::windowHandle);
-        //todo: Rework fonts!!!
-        io.FontGlobalScale = scale;
-        float scaledFontSize = 24.0f * scale;
         io.Fonts->Flags |= ImFontAtlasFlags_::ImFontAtlasFlags_NoPowerOfTwoHeight;
         io.Fonts->Clear();
-        io.FontGlobalScale = 1.0f;
-        // todo: manage texture manually
-        io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", scaledFontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-        io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 1.4f * scaledFontSize, nullptr, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
-        //io.Fonts->Build();
+        io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 16.0f * scale);
+        io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 24.0f * scale);
+        io.Fonts->
         ImGui::StyleColorsDark();
         ImGuiStyle& style = ImGui::GetStyle();
         style.WindowRounding = 0.0f;
         style.WindowTitleAlign = ImVec2(0.5f, 0.0f);
         //Gemini recommends not to use `msaaSamples` whatsoever, so we're just vibing it with `1`.
-        //todo: Populate `bUsingVSync` from Settings.
-        ImGui_Implbgfx_Init(Renderer::guiViewId, 1, Settings::getData().graphics.vsync);
+        ImGui_Implbgfx_Init(Renderer::guiViewId, 1, Settings::getSettings().graphics.vsync);
         ImGui_ImplSDL3_InitForOther(Main::windowHandle);
         click = Sound::addSound("assets/sounds/click1.ogg", false, true, 2.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
         //Register them manually!

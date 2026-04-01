@@ -39,15 +39,15 @@ namespace Util::OS {
         if (ec) return false;
         const auto permissions = st.permissions();
         return (
-            ((permissions & perms::owner_write)  != perms::none )
-         || ((permissions & perms::group_write)  != perms::none )
-         || ((permissions & perms::others_write) != perms::none )
+            ((permissions & perms::owner_write)  != perms::none)
+         || ((permissions & perms::group_write)  != perms::none)
+         || ((permissions & perms::others_write) != perms::none)
         );
     }
 
-    template <FilePath PathType>
-    [[nodiscard]] inline bool readFile(PathType&& path_, vector<u8>& result, bool physfs) noexcept {
-        if (physfs) {
+    template <bool physfs, FilePath PathType>
+    [[nodiscard]] inline bool readFile(PathType&& path_, vector<u8>& result) noexcept {
+        if constexpr (physfs) {
             if (!PHYSFS_isInit()) return false;
 
             PHYSFS_File* file;
@@ -92,43 +92,17 @@ namespace Util::OS {
         Fail, Overwrite, Append
     };
 
+    //note: It's decided that Physfs will only be used for reading, not writing. So there is no `physfs` template parameter for `writeFile`.
     template <FilePath PathType>
-    [[nodiscard]] inline bool writeFile(PathType&& path_, const span<const u8> data, bool physfs, ExistBehavior existBehavior = ExistBehavior::Fail) noexcept {
-        if (physfs) {
-            if (!PHYSFS_isInit()) return false;
-
-            string pathStr;
-            static_assert(!Equal<PathType, path>, "Path type is not supported for PhysFS. You've probably made a mistake.");
-            if constexpr (Equal<PathType, string>) pathStr = path_;
-            else if constexpr (Equal<PathType, string_view>) pathStr = string(path_);
-            //const char*
-            else pathStr = string(path_);
-
-            if (existBehavior == ExistBehavior::Fail && PHYSFS_exists(pathStr.c_str())) return false;
-
-            //This cannot be const because `PHYSFS_close` takes a non-const pointer.
-            PHYSFS_File* file = existBehavior == ExistBehavior::Append ? PHYSFS_openAppend(pathStr.c_str()) : PHYSFS_openWrite(pathStr.c_str());
-            if (file == nullptr) return false;
-
-            const PHYSFS_sint64 bytesWritten = PHYSFS_writeBytes(file, data.data(), static_cast<PHYSFS_uint64>(data.size()));
-            PHYSFS_close(file);
-
-            if (bytesWritten < static_cast<PHYSFS_sint64>(data.size())) return false;
-            return true;
-        }
-        else {
-            if (existBehavior == ExistBehavior::Fail && exists(path_)) return false;
-
-            ofstream file(path_, std::ios::binary | (existBehavior == ExistBehavior::Append ? std::ios::app : std::ios::trunc));
-            if (!file.is_open()) return false;
-
-            if (!file.write(reinterpret_cast<const char*>(data.data()), static_cast<streamsize>(data.size()))) {
-                file.close();
-                return false;
-            }
-
+    [[nodiscard]] inline bool writeFile(PathType&& path_, const span<const u8> data, ExistBehavior existBehavior = ExistBehavior::Fail) noexcept {
+        if (existBehavior == ExistBehavior::Fail && exists(path_)) return false;
+        ofstream file(path_, std::ios::binary | (existBehavior == ExistBehavior::Append ? std::ios::app : std::ios::trunc));
+        if (!file.is_open()) return false;
+        if (!file.write(reinterpret_cast<const char*>(data.data()), static_cast<streamsize>(data.size()))) {
             file.close();
-            return true;
+            return false;
         }
+        file.close();
+        return true;
     }
 }

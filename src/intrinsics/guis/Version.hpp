@@ -1,14 +1,16 @@
 ﻿#pragma once
 #include <imgui.h>
 
-#include "../GuiUtils.hpp"
+#include "../../gui/GuiUtils.hpp"
+#include "../../meta.hpp"
 
 namespace Gui::Version {
     using namespace ImGui;
     using namespace GuiUtils;
-    inline void render() {
+
+    inline void render() noexcept {
         brWindow("Version");
-        TextUnformatted("0.0.1");
+        TextUnformatted(CG_SEMATIC_VERSION);
         endWindow();
     }
 }

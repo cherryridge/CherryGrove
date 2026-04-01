@@ -1,18 +1,21 @@
 ﻿#pragma once
+#include <array>
 #include <atomic>
 #include <memory>
 #include <vector>
 #include <SDL3/SDL.h>
 
 #include "../util/concurrentQueue.hpp"
+#include "InputHandler.hpp"
 
 namespace InputHandler {
     typedef uint64_t u64;
-    using std::atomic, std::shared_ptr, std::vector, Util::SPSCQueue;
+    using std::array, std::atomic, std::shared_ptr, std::vector, Util::SPSCQueue;
 
     struct FramedSDLEvents {
         u64 frame;
-        vector<SDL_Event> events;
+        //note: This is changed from a vector so we have a heap allocation free event pipeline.
+        array<SDL_Event, MAXIMUM_INPUT_EVENTS_PER_FRAME> events;
     };
 
     struct FramedImGuiFlags {

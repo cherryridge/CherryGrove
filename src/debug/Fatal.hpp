@@ -1,12 +1,10 @@
 ﻿#pragma once
-#include <atomic>
 
 #include "Logger.hpp"
-#include "../Main.hpp"
 
 namespace Fatal {
     typedef int32_t i32;
-    using std::memory_order_acquire, std::cerr, std::abort;
+    using std::abort, Logger::LOGGER_DYNAMIC_ERR;
     #define DEF inline constexpr i32
 
     //0 is reserved.
@@ -49,16 +47,14 @@ namespace Fatal {
     DEF BOOT_UNSUPPORTED_PLATFORM             = 7002;
     DEF BOOT_INVALID_WORKING_DIR              = 7003;
 
-    //It shouldn't be here: 8001-9000
-    DEF ISBH_CANNOT_CREATE_CONFIG_JSON        = 8001;
-    DEF ISBH_WHY_SCHEMA_INVALID_IDK           = 8002;
+    //Settings: 8001-9000
+    DEF SETTINGS_FAILED_TO_LOAD               = 8001;
+    DEF SETTINGS_FAILED_TO_SAVE               = 8002;
 
-    //Settings: 9001-10000
-    DEF SETTINGS_FAILED_TO_LOAD               = 9001;
+    //It shouldn't be here (i.e. there is 100% a bug): 9001-10000
 
     [[noreturn]] inline void exit(i32 code) noexcept {
-        if (Main::multiThreadEra.load(memory_order_acquire)) lerr << "[Fatal] Exit code: " << code << endl;
-        else cerr << "[Fatal] Exit code: " << code << endl;
+        LOGGER_DYNAMIC_ERR("[Fatal] Exit code: ", code);
         abort();
     }
 }

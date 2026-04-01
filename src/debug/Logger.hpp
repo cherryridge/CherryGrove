@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <glaze/glaze.hpp>
 
-#include "../Main.hpp"
+#include "../globalState.hpp"
 #include "../util/concepts.hpp"
 #include "../util/os/thread.hpp"
 
@@ -68,7 +68,7 @@ namespace Logger {
 
         template <typename... Ts> requires (!is_function_v<Ts>, ...)
         Logger& print(Ts&&... values) noexcept {
-            *this << (forward<Ts>(values), ...);
+            ((*this << forward<Ts>(values)), ...);
             *this << endl;
             return *this;
         }
@@ -108,25 +108,26 @@ namespace Logger {
     extern Logger lout, lerr;
 
     template <typename... Ts>
-    inline constexpr void LOGGER_DYNAMIC_OUT(Ts&&... ts) noexcept {
+    inline void LOGGER_DYNAMIC_OUT(Ts&&... ts) noexcept {
         if (Main::multiThreadEra.load(memory_order_acquire)) {
-            lout << (forward<Ts>(ts), ...);
+            ((lout << forward<Ts>(ts)), ...);
             lout << endl;
         }
         else {
-            cout << (forward<Ts>(ts), ...);
+            ((cout << forward<Ts>(ts)), ...);
             cout << endl;
         }
     }
 
     template <typename... Ts>
-    inline constexpr void LOGGER_DYNAMIC_ERR(Ts&&... ts) noexcept {
+    inline void LOGGER_DYNAMIC_ERR(Ts&&... ts) noexcept {
         if (Main::multiThreadEra.load(memory_order_acquire)) {
-            lerr << (forward<Ts>(ts), ...);
+            ((lerr << forward<Ts>(ts)), ...);
             lerr << endl;
         }
         else {
-            cerr << "(Error)" << (forward<Ts>(ts), ...);
+            cerr << "(Error)";
+            ((cerr << forward<Ts>(ts)), ...);
             cerr << endl;
         }
     }

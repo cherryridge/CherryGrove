@@ -42,12 +42,12 @@ namespace Boot {
         {
             const u32 pid = Util::OS::getProcessId();
             const span<const u8> pidBytes(reinterpret_cast<const u8*>(&pid), sizeof(pid));
-            static_cast<void>(Util::OS::writeFile(lockFilePath, pidBytes, false));
+            static_cast<void>(Util::OS::writeFile(lockFilePath, pidBytes));
         }
             return;
         invoke: {
             vector<u8> fileData;
-            if (Util::OS::readFile(lockFilePath, fileData, false) && fileData.size() >= sizeof(u32)) {
+            if (Util::OS::readFile<false>(lockFilePath, fileData) && fileData.size() >= sizeof(u32)) {
                 u32 pid;
                 memcpy(&pid, fileData.data(), sizeof(u32));
             #if CG_PLATFORM_WINDOWS

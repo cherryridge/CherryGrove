@@ -7,11 +7,10 @@
 #include "../../debug/Logger.hpp"
 #include "../concepts.hpp"
 #include "../os/filesystem.hpp"
-#include "glaze/json/write.hpp"
 
 namespace Util::Json {
     typedef uint8_t u8;
-    using std::span, std::string, std::vector, glz::opts, glz::read, glz::write_json, glz::format_error, Util::FilePath, Util::OS::ExistBehavior;
+    using std::span, std::string, std::vector, glz::opts, glz::read, glz::write, glz::format_error, Util::FilePath, Util::OS::ExistBehavior;
 
     namespace detail {
         struct ReadOptions : opts {
@@ -53,14 +52,6 @@ namespace Util::Json {
         else return true;
     }
 
-    template <typename T, FilePath PathType>
-    [[nodiscard]] inline bool readJSON(T& result, PathType&& path_, bool physfs) noexcept {
-        vector<u8> buffer;
-        if (!Util::OS::readFile(path_, buffer, physfs)) return false;
-        if (!readJSON(result, buffer)) return false;
-        return true;
-    }
-
     namespace detail {
         struct WriteOptions : opts {
             //This option does what you think it does.
@@ -82,12 +73,5 @@ namespace Util::Json {
             return false;
         }
         return true;
-    }
-
-    template <typename T, FilePath PathType>
-    [[nodiscard]] inline bool writeJSON(T&& data, PathType&& path_, ExistBehavior existBehavior = ExistBehavior::Fail) noexcept {
-        vector<u8> buffer;
-        if (!writeJSON(data, buffer)) return false;
-        return Util::OS::writeFile(path_, span<const u8>(reinterpret_cast<const u8*>(buffer.data()), buffer.size()), false, existBehavior);
     }
 }

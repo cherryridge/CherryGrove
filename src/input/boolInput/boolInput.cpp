@@ -278,7 +278,7 @@ namespace InputHandler::BoolInput {
             #endif
                 return;
         }
-        const InputHandler::BoolInputKind triggeredKind = down ? InputHandler::BoolInputKind::KeyDown : InputHandler::BoolInputKind::KeyUp;
+        const BoolInputKind triggeredKind = down ? BoolInputKind::Down : BoolInputKind::Up;
 
         if (down) state[biid].onPhysicalPress(Simulation::now());
         else state[biid].onPhysicalRelease(Simulation::now());
@@ -338,7 +338,7 @@ namespace InputHandler::BoolInput {
             #endif
                 //We used an even smarter trick: make every combo only added through the lowest key in the combo. This way we don't need to worry about duplicating actions and every actions in one combo is still sorted, because they are originated from the same BIIDtoBindings list, which is sorted.
                 //Also, the first key check comes before because it's more likely to fail and is more performant.
-                if (record->combo.firstKey() == biid && currentCombo >= record->combo && actionInfo->actionwiseInfo.allowedKinds.get(InputHandler::BoolInputKind::KeyPersist)) comboGroups2[record->combo].push_back(record->actionHandle);
+                if (record->combo.firstKey() == biid && currentCombo >= record->combo && actionInfo->actionwiseInfo.allowedKinds.get(BoolInputKind::Persist)) comboGroups2[record->combo].push_back(record->actionHandle);
             }
         }
 
@@ -346,7 +346,7 @@ namespace InputHandler::BoolInput {
             .triggeredCombo = combo,
             .repeatedTriggerCount = 1,
             .lastActiveId = INVALID_BIID,
-            .triggeredKind = InputHandler::BoolInputKind::KeyPersist
+            .triggeredKind = BoolInputKind::Persist
         });
     }
 

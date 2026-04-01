@@ -13,8 +13,8 @@ namespace InputHandler::BoolInput {
     //Virtual layer: "Sticky" state with TTL compensation for chord/combo tolerance.
     //
     //Design rationale (from architecture discussion):
-    //  - On KeyDown: physical=DOWN, virtual=DOWN, timestamps updated (re-press extends virtual).
-    //  - On KeyUp: physical=UP immediately; virtual stays DOWN until minTTL expires.
+    //  - On Down: physical=DOWN, virtual=DOWN, timestamps updated (re-press extends virtual).
+    //  - On Up: physical=UP immediately; virtual stays DOWN until minTTL expires.
     //  - On Update tick: expire virtual states whose TTL has passed.
     //  - Double-tap: compare current press time with previous press time in physical layer.
     struct KeyState {

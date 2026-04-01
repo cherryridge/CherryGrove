@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <type_traits>
 
+#include "concepts.hpp"
+
 namespace Util {
     typedef uint8_t u8;
     typedef uint16_t u16;
@@ -26,6 +28,13 @@ namespace Util {
         Size<count> bits{0};
 
     public:
+        explicit BitField() noexcept = default;
+
+        template <typename... Flags> requires (sizeof...(Flags) > 0) && (Equal<Flags, EnumType> && ...)
+        [[nodiscard]] explicit BitField(Flags&&... flags) noexcept {
+            (set(flags), ...);
+        }
+
         [[nodiscard]] bool get(EnumType flag) const noexcept { return (bits & (static_cast<Size<count>>(1) << static_cast<underlying_type_t<EnumType>>(flag))) != 0; }
 
         void set(EnumType flag) noexcept { bits |= (static_cast<Size<count>>(1) << static_cast<underlying_type_t<EnumType>>(flag)); }

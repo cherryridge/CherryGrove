@@ -93,13 +93,19 @@ namespace Util::Json {
         template <u32 minFV, u32 currentFV, u32 latestFV, typename List, auto upgraders>
         struct ChainProcessor {
             static bool process(u32 formatVersion, const span<const u8> data, LastType<List>& result) noexcept {
-                if (formatVersion == currentFV) {
-                    tuple_element_t<currentFV - minFV, typename List::types> parsedStruct;
-                    if (!readJSON(parsedStruct, data)) return false;
-                    result = upgradeToLatest<currentFV>(parsedStruct);
-                    return true;
+                //This is mandatory for stopping the compiler from instantiating `tuple_element_t<-1, ...>` from the final case's `else` branch, which we cannot prevent because `formatVersion` is only known at runtime.
+                //Real control flow will never reach this branch because we will stop at the `formatVersion == currentFV == latestFV` case, but the compiler doesn't know that.
+                //To explain further, basically what we're doing here is to "convert" `formatVersion` from a runtime value to a compile-time value (`currentFV`) by guessing one by one until we get it, then we perform the parsing and upgrading. This way the compiler will generate a cascade of `if (formatVersion == X) { ... } else if (formatVersion == Y) { ... } ...` for us automatically and prevent the hell of switches full of `[[fallthrough]]` or manually chained if-else.
+                if constexpr (currentFV > latestFV) return false;
+                else {
+                    if (formatVersion == currentFV) {
+                        tuple_element_t<currentFV - minFV, typename List::types> parsedStruct;
+                        if (!readJSON(parsedStruct, data)) return false;
+                        result = upgradeToLatest<currentFV>(parsedStruct);
+                        return true;
+                    }
+                    else return ChainProcessor<minFV, currentFV + 1, latestFV, List, upgraders>::process(formatVersion, data, result);
                 }
-                else return ChainProcessor<minFV, currentFV + 1, latestFV, List, upgraders>::process(formatVersion, data, result);
             }
 
         private:
@@ -155,8 +161,11 @@ namespace Util::Json {
     template <> struct Util::Json::KindMeta<Util::Json::JSONKind::kind_> {                      \
         static constexpr auto kind = Util::Json::JSONKind::kind_;                               \
         using LatestType = Util::Json::LastType<List>;                                          \
-        static bool process(const std::span<const u8> data, LatestType& result) noexcept {      \
+        static bool read(const std::span<const u8> data, LatestType& result) noexcept {         \
             return Util::Json::detail::process<minFV, latestFV, List, upgraders>(data, result); \
+        }                                                                                       \
+        static bool write(const LatestType& input, vector<u8>& result) noexcept {               \
+            return writeJSON(input, result);                                                    \
         }                                                                                       \
     };
 

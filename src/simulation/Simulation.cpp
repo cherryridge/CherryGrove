@@ -5,32 +5,31 @@
 #include <entt/entt.hpp>
 
 #include "../debug/Logger.hpp"
+
 #include "../input/InputHandler.hpp"
+#include "../input/boolInput/boolInput.hpp"
+#include "../input/mouseMove/mouseMove.hpp"
+
 #include "../intrinsics/actions/ChangeRotation.hpp"
 #include "../intrinsics/actions/Movement.hpp"
-#include "../components/Components.hpp"
-#include "../graphics/TexturePool.hpp"
+
 #include "../gui/Gui.hpp"
-#include "../Main.hpp"
+#include "../main/hold.hpp"
 #include "Simulation.hpp"
 
 namespace Simulation {
     typedef uint8_t u8;
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::atomic, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::addBoolInput, InputHandler::MouseMove::addMouseMove, InputHandler::BoolInput::BIEventType;
+    using std::atomic, std::memory_order_release, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::BoolInputKind, InputHandler::MouseMove::SubKind, Util::BitField;
     using namespace std::chrono_literals;
     using namespace std::this_thread;
     static void gameLoop() noexcept;
     static void tick() noexcept;
 
-    atomic<bool> gameStarted(false);
-    atomic<bool> gameStopSignal(false);
-    atomic<bool> gamePaused(false);
+    atomic<bool> gameStarted{false}, gameStopSignal{false}, gamePaused{false};
 
-    atomic<float> currentTPS(0.0f);
-    atomic<float> currentMSPT(0.0f);
-    atomic<float> maxTPS(20.0f);
+    atomic<float> currentTPS{0.0f}, currentMSPT{0.0f}, maxTPS{20.0f};
 
     thread gameThread;
     registry gameRegistry;
@@ -38,27 +37,27 @@ namespace Simulation {
     mutex registryMutex, playerMutex;
     InputHandler::ActionID forward, backward, left, right, up, down, moveCamera;
 
-    void start() {
-        gameStarted = true;
+    void start() noexcept {
+        gameStarted.store(true, memory_order_release);
 
         Gui::setVisible(Gui::Intrinsics::MainMenu, false);
         Gui::setVisible(Gui::Intrinsics::Copyright, false);
         Gui::setVisible(Gui::Intrinsics::Version, false);
 
-        Main::runOnMainThreadMQ.enqueue([]() {
-            forward = addBoolInput(":forward", 10, IntrinsicInput::forward, BIEventType::Repeat, 28);
-            backward = addBoolInput(":backward", 10, IntrinsicInput::backward, BIEventType::Repeat, 24);
-            left = addBoolInput(":left", 10, IntrinsicInput::left, BIEventType::Repeat, 6);
-            right = addBoolInput(":right", 10, IntrinsicInput::right, BIEventType::Repeat, 9);
-            up = addBoolInput(":up", 10, IntrinsicInput::up, BIEventType::Repeat, 46);
-            down = addBoolInput(":down", 10, IntrinsicInput::down, BIEventType::Repeat, 165);
-            moveCamera = addMouseMove(":moveCamera", 10, IntrinsicInput::changeRotationCB);
-            //SDL_SetWindowRelativeMouseMode(Main::windowHandle, true);
+        Main::runOnMainThread.enqueue([]() {
+            forward = InputHandler::BoolInput::add(IntrinsicInput::forward, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            backward = InputHandler::BoolInput::add(IntrinsicInput::backward, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            left = InputHandler::BoolInput::add(IntrinsicInput::left, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            right = InputHandler::BoolInput::add(IntrinsicInput::right, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            up = InputHandler::BoolInput::add(IntrinsicInput::up, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            down = InputHandler::BoolInput::add(IntrinsicInput::down, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            moveCamera = InputHandler::MouseMove::add(IntrinsicInput::changeRotationCB, 10, {BitField<SubKind, SubKind::Count>(SubKind::Persist)});
+            InputHandler::setPointerLocked(true);
         });
 
         //Temporary code to show debug menu
         Gui::setVisible(Gui::Intrinsics::DebugMenu);
-        gameThread = thread(&gameLoop);
+        gameThread = thread(gameLoop);
 
         //Temporary code to spawn player entity
         using namespace Components;
@@ -66,30 +65,11 @@ namespace Simulation {
         gameRegistry.emplace<CameraComp>(playerEntity, 60.0f);
         gameRegistry.emplace<CoordinatesComp>(playerEntity, -0.2, -0.5, 1.0, 0u);
         gameRegistry.emplace<RotationComp>(playerEntity, 90.0, 0.0);
-
-        //Temporary code to spawn a block
-        TexturePool::TextureID
-            debugpx = TexturePool::addTexture("assets/textures/debug+x.png"),
-            debugnx = TexturePool::addTexture("assets/textures/debug-x.png"),
-            debugpy = TexturePool::addTexture("assets/textures/debug+y.png"),
-            debugny = TexturePool::addTexture("assets/textures/debug-y.png"),
-            debugpz = TexturePool::addTexture("assets/textures/debug+z.png"),
-            debugnz = TexturePool::addTexture("assets/textures/debug-z.png");
-        auto block = gameRegistry.create();
-        CubeFace px(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugpx);
-        CubeFace py(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugpy);
-        CubeFace pz(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugpz);
-        CubeFace nx(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugnx);
-        CubeFace ny(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugny);
-        CubeFace nz(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugnz);
-        SubCube sc(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), py, ny, nz, px, pz, nx);
-        gameRegistry.emplace<BlockCoordinatesComp>(block, 2, 0, 0, 0u);
-        gameRegistry.emplace<BlockRenderComp>(block, sc);
     }
 
-    void exit() {
+    void exit() noexcept {
         //Reset flags
-        gameStarted = false;
+        gameStarted.store(false, memory_order_release);
         gamePaused = false;
         gameStopSignal = false;
 
@@ -98,16 +78,16 @@ namespace Simulation {
         gameRegistry.clear();
 
         //Clear input callbacks
-        Main::runOnMainThreadMQ.enqueue([]() {
-            using namespace InputHandler;
-            BoolInput::removeBoolInput(forward, BIEventType::Repeat);
-            BoolInput::removeBoolInput(backward, BIEventType::Repeat);
-            BoolInput::removeBoolInput(left, BIEventType::Repeat);
-            BoolInput::removeBoolInput(right, BIEventType::Repeat);
-            BoolInput::removeBoolInput(up, BIEventType::Repeat);
-            BoolInput::removeBoolInput(down, BIEventType::Repeat);
-            MouseMove::removeMouseMove(moveCamera);
-            SDL_SetWindowRelativeMouseMode(Main::windowHandle, false);
+        Main::runOnMainThread.enqueue([]() {
+            //fixme: Implement the `canDelete` mechanism properly.
+            static_cast<void>(InputHandler::BoolInput::remove(forward));
+            static_cast<void>(InputHandler::BoolInput::remove(backward));
+            static_cast<void>(InputHandler::BoolInput::remove(left));
+            static_cast<void>(InputHandler::BoolInput::remove(right));
+            static_cast<void>(InputHandler::BoolInput::remove(up));
+            static_cast<void>(InputHandler::BoolInput::remove(down));
+            static_cast<void>(InputHandler::MouseMove::remove(moveCamera));
+            InputHandler::setPointerLocked(false);
         });
 
         //Go back to main menu

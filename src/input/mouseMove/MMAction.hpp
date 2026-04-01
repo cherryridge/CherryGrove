@@ -16,7 +16,7 @@ namespace InputHandler::MouseMove {
     struct ActionwiseInfo_MM {
         BitField<SubKind, SubKind::Count> allowedKinds;
     };
-    
+
     struct EventwiseInfo_MM {
         float currentX, currentY, deltaX, deltaY;
         //Persist actions will be fired with `deltaX` and `deltaY` equal to `0.0f`.

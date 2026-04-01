@@ -12,7 +12,7 @@ namespace InputHandler {
     //todo: Eliminate these.
     extern atomic<bool> sendToImGui, sendToSimulation;
 
-    inline constexpr u64 MAXIMUM_EVENTS_PER_FRAME = 256;
+    inline constexpr u64 MAXIMUM_INPUT_EVENTS_PER_FRAME = 64;
 
     namespace internal {
         //This function is now single-threaded. There is really no point for it to be atomic provided that separate input kinds cannot add inputs concurrently within itself, and coordinating mods to add *different kinds* of inputs concurrently will probably bring more overhead.
