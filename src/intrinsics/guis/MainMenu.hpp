@@ -13,14 +13,14 @@ namespace Gui::MainMenu {
     inline void render() noexcept {
         centerWindow("MainMenu");
         {
-            //todo: Rework fonts!!!
-            PushFont(GetIO().Fonts->Fonts[1], );
+            PushFont(GetIO().Fonts->Fonts[0], 28.0f);
             PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 80.0f));
             centerText("CherryGrove");
             PopStyleVar();
             PopFont();
         }
         {
+            PushFont(GetIO().Fonts->Fonts[0], 18.0f);
             PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 30.0f));
             ImVec2 btnSize(240.0f, 80.0f);
             centerButton(u8"存档（调试）", btnSize, []() {
@@ -38,6 +38,7 @@ namespace Gui::MainMenu {
                 Main::isCGAlive = false;
             });
             PopStyleVar();
+            PopFont();
         }
         endWindow();
     }

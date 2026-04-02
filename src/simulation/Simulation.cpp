@@ -5,29 +5,23 @@
 #include <entt/entt.hpp>
 
 #include "../debug/Logger.hpp"
-
+#include "../gui/Gui.hpp"
 #include "../input/InputHandler.hpp"
 #include "../input/boolInput/boolInput.hpp"
 #include "../input/mouseMove/mouseMove.hpp"
-
 #include "../intrinsics/actions/ChangeRotation.hpp"
 #include "../intrinsics/actions/Movement.hpp"
-
-#include "../gui/Gui.hpp"
 #include "../main/hold.hpp"
 #include "Simulation.hpp"
 
 namespace Simulation {
-    typedef uint8_t u8;
-    typedef int32_t i32;
-    typedef uint32_t u32;
-    using std::atomic, std::memory_order_release, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::BoolInputKind, InputHandler::MouseMove::SubKind, Util::BitField;
+    using std::atomic, std::memory_order_acquire, std::memory_order_release, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::BoolInputKind, InputHandler::MouseMove::SubKind, Util::BitField;
     using namespace std::chrono_literals;
     using namespace std::this_thread;
     static void gameLoop() noexcept;
     static void tick() noexcept;
 
-    atomic<bool> gameStarted{false}, gameStopSignal{false}, gamePaused{false};
+    atomic<bool> gameStarted{false}, gamePaused{false};
 
     atomic<float> currentTPS{0.0f}, currentMSPT{0.0f}, maxTPS{20.0f};
 
@@ -37,12 +31,14 @@ namespace Simulation {
     mutex registryMutex, playerMutex;
     InputHandler::ActionID forward, backward, left, right, up, down, moveCamera;
 
+    //threaded: Main thread
     void start() noexcept {
         gameStarted.store(true, memory_order_release);
+        gamePaused.store(false, memory_order_release);
 
-        Gui::setVisible(Gui::Intrinsics::MainMenu, false);
-        Gui::setVisible(Gui::Intrinsics::Copyright, false);
-        Gui::setVisible(Gui::Intrinsics::Version, false);
+        Gui::setVisibility(Gui::Intrinsics::MainMenu, false);
+        Gui::setVisibility(Gui::Intrinsics::Copyright, false);
+        Gui::setVisibility(Gui::Intrinsics::Version, false);
 
         Main::runOnMainThread.enqueue([]() {
             forward = InputHandler::BoolInput::add(IntrinsicInput::forward, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
@@ -56,7 +52,7 @@ namespace Simulation {
         });
 
         //Temporary code to show debug menu
-        Gui::setVisible(Gui::Intrinsics::DebugMenu);
+        Gui::setVisibility(Gui::Intrinsics::DebugMenu, true);
         gameThread = thread(gameLoop);
 
         //Temporary code to spawn player entity
@@ -67,11 +63,11 @@ namespace Simulation {
         gameRegistry.emplace<RotationComp>(playerEntity, 90.0, 0.0);
     }
 
+    //threaded: Main thread
     void exit() noexcept {
         //Reset flags
         gameStarted.store(false, memory_order_release);
-        gamePaused = false;
-        gameStopSignal = false;
+        gamePaused.store(false, memory_order_release);
 
         //Clear resources
         gameThread.join();
@@ -91,18 +87,18 @@ namespace Simulation {
         });
 
         //Go back to main menu
-        Gui::setVisible(Gui::Intrinsics::DebugMenu, false);
-        Gui::setVisible(Gui::Intrinsics::MainMenu);
-        Gui::setVisible(Gui::Intrinsics::Copyright);
-        Gui::setVisible(Gui::Intrinsics::Version);
+        Gui::setVisibility(Gui::Intrinsics::DebugMenu, false);
+        Gui::setVisibility(Gui::Intrinsics::MainMenu, true);
+        Gui::setVisibility(Gui::Intrinsics::Copyright, true);
+        Gui::setVisibility(Gui::Intrinsics::Version, true);
     }
 
     static void gameLoop() noexcept {
         lout << "Game" << flush;
         lout << "Hello from game loop!" << endl;
-        while (gameStarted) {
+        while (gameStarted.load(memory_order_acquire)) {
             auto startTime = steady_clock::now();
-            if (!gamePaused) tick();
+            if (!gamePaused.load(memory_order_acquire)) tick();
             auto endTime = steady_clock::now();
             auto elapsedTime = duration_cast<microseconds>(endTime - startTime);
             if (elapsedTime < 20000us) sleep_for(20000us - elapsedTime);
@@ -112,6 +108,7 @@ namespace Simulation {
 
     static void tick() noexcept {
     //Process player input
+        InputHandler::processTrigger();
         InputHandler::processPersist();
     //Update world
         unique_lock lock(registryMutex);

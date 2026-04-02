@@ -9,11 +9,11 @@
 #include "../components/Components.hpp"
 #include "../debug/Fatal.hpp"
 #include "../debug/Logger.hpp"
+#include "../globalState.hpp"
 #include "../gui/Gui.hpp"
-#include "../input/eventPipeline.hpp"
-#include "../Main.hpp"
+#include "../input/inputPipeline.hpp"
 #include "../simulation/Simulation.hpp"
-#include "../util/platform.hpp"
+#include "../util/os/platform.hpp"
 #include "Renderer.hpp"
 #include "ShaderPool.hpp"
 #include "TexturePool.hpp"
@@ -25,7 +25,7 @@ namespace Renderer {
     using std::thread, std::atomic, std::this_thread::yield, std::memory_order_acquire, std::memory_order_release, Simulation::gameRegistry, Simulation::playerEntity, bgfx::VertexBufferHandle, bgfx::VertexLayout, bgfx::IndexBufferHandle, bgfx::Init, bgfx::PlatformData, bgfx::Attrib, bgfx::AttribType, bgfx::createVertexBuffer, bgfx::createIndexBuffer, bgfx::makeRef;
     static void renderLoop() noexcept;
 
-    atomic<bool> initialized {false};//, sizeUpdateSignal {true};
+    atomic<bool> initialized {false};
     WindowInfoCache cache;
 
     static VertexBufferHandle vertexBuffer;
@@ -114,9 +114,9 @@ namespace Renderer {
             //    bgfx::reset(cache.width, cache.height);
             //    sizeUpdateSignal = false;
             //}
-            #if DEBUG
-                bgfx::setDebug(BGFX_DEBUG_STATS | BGFX_DEBUG_PROFILER | BGFX_DEBUG_TEXT);
-            #endif
+        #if DEBUG
+            bgfx::setDebug(BGFX_DEBUG_STATS | BGFX_DEBUG_PROFILER | BGFX_DEBUG_TEXT);
+        #endif
         //Render GUI
             bgfx::setViewClear(guiViewId, BGFX_CLEAR_NONE, 0x00000000);
             bgfx::setViewRect(guiViewId, 0, 0, cache.width, cache.height);
@@ -163,13 +163,13 @@ namespace Renderer {
         //Process input events
             const u64 nextFrame = InputHandler::nextFrame_M.load(memory_order_acquire);
             while(true) {
-                const auto* ptr = InputHandler::eventQueue_M2R.peek();
+                const auto* ptr = InputHandler::inputQueue_M2R.peek();
                 //We need to keep up with main thread
                 if (ptr && ptr->frame < nextFrame) {
                     InputHandler::FramedSDLEvents framedEvents;
                     //Discard the success flag because we already peeked.
                     //Don't use `ptr` directly.
-                    static_cast<void>(InputHandler::eventQueue_M2R.dequeue(framedEvents));
+                    static_cast<void>(InputHandler::inputQueue_M2R.dequeue(framedEvents));
                     if (Simulation::gameStarted.load(memory_order_acquire)) {
                         auto& io = ImGui::GetIO();
                         InputHandler::flagQueue_R2S.enqueue({framedEvents.frame, io.WantCaptureMouse, io.WantCaptureKeyboard, io.WantTextInput, io.WantSetMousePos});

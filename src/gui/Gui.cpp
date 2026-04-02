@@ -1,9 +1,9 @@
-﻿#include <functional>
+﻿#include <backends/imgui_impl_bgfx.h>
+#include <backends/imgui_impl_sdl3.h>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
+#include <function2/function2.hpp>
 #include <imgui.h>
-#include <backends/imgui_impl_bgfx.h>
-#include <backends/imgui_impl_sdl3.h>
 #include <SDL3/SDL.h>
 
 #include "../debug/Logger.hpp"
@@ -13,17 +13,18 @@
 #include "../intrinsics/guis/MainMenu.hpp"
 #include "../intrinsics/guis/Version.hpp"
 #include "../settings/Settings.hpp"
+#include "../globalState.hpp"
 #include "../sound/Sound.hpp"
 #include "Gui.hpp"
 
 namespace Gui {
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::function, boost::unordered_flat_set, boost::unordered_flat_map, Sound::SoundHandle;
+    using fu2::function_view, boost::unordered_flat_set, boost::unordered_flat_map, Sound::SoundHandle;
 
     static ImGuiContext* context;
     static unordered_flat_set<Intrinsics> visibleGuis;
-    static unordered_flat_map<Intrinsics, function<void()>> guiRegistry;
+    static unordered_flat_map<Intrinsics, function_view<void()>> guiRegistry;
     SoundHandle click{};
 
     void init() noexcept {
@@ -42,14 +43,13 @@ namespace Gui {
         io.DisplaySize.y = static_cast<float>(height);
         io.ConfigViewportsNoAutoMerge = true;
         io.ConfigViewportsNoTaskBarIcon = true;
-        float scale = SDL_GetWindowDisplayScale(Main::windowHandle);
         io.Fonts->Flags |= ImFontAtlasFlags_::ImFontAtlasFlags_NoPowerOfTwoHeight;
         io.Fonts->Clear();
-        io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 16.0f * scale);
-        io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 24.0f * scale);
-        io.Fonts->
+        io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 18.0f);
         ImGui::StyleColorsDark();
         ImGuiStyle& style = ImGui::GetStyle();
+        style.FontSizeBase = 18.0f;
+        style.FontScaleDpi = SDL_GetWindowDisplayScale(Main::windowHandle);
         style.WindowRounding = 0.0f;
         style.WindowTitleAlign = ImVec2(0.5f, 0.0f);
         //Gemini recommends not to use `msaaSamples` whatsoever, so we're just vibing it with `1`.
@@ -82,7 +82,7 @@ namespace Gui {
         ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
     }
 
-    void setVisible(Intrinsics gui, bool visible) {
+    void setVisibility(Intrinsics gui, bool visible) noexcept {
         if (visible && visibleGuis.find(gui) == visibleGuis.end()) visibleGuis.insert(gui);
         else if (!visible && visibleGuis.find(gui) != visibleGuis.end()) visibleGuis.erase(gui);
     }

@@ -6,11 +6,12 @@
 namespace Simulation {
     using std::atomic;
 
-    extern atomic<bool> gameStarted;
-    //Signals the Main thread to call `exit`.
-    extern atomic<bool> gameStopSignal, gamePaused;
+    extern atomic<bool> gameStarted, gamePaused;
+
     extern entt::registry gameRegistry;
+
     extern entt::entity playerEntity;
+
     extern std::mutex registryMutex, playerMutex;
 
     void start() noexcept;

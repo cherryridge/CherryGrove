@@ -49,6 +49,6 @@ namespace InputHandler {
     void submitEvent(const SDL_Event& event) noexcept;
 
     //threaded: Simulation thread
-    [[nodiscard]] bool processTrigger() noexcept;
+    void processTrigger() noexcept;
     void processPersist() noexcept;
 }

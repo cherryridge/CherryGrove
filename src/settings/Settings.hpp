@@ -39,7 +39,7 @@ namespace Settings {
     //This is usually called automatically by various Setting modification functions so you rarely need to call this manually.
     [[nodiscard]] inline bool saveSettings() noexcept {
         if (!UmiJSON::writeJSONToFile<Settings>(detail::data, detail::SETTINGS_FILENAME, Util::OS::ExistBehavior::Overwrite)) {
-            lerr << "Failed to write Settings file." << endl;
+            lerr << "[Settings] Failed to write Settings file." << endl;
             return false;
         }
         return true;

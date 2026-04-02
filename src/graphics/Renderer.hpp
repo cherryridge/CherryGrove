@@ -3,15 +3,12 @@
 #include <atomic>
 #include <SDL3/SDL.h>
 
-#include "../util/concurrentQueue.hpp"
-
 namespace Renderer {
     typedef uint8_t u8;
     typedef int32_t i32;
-    using std::atomic, std::array, Util::SPSCQueue;
+    using std::atomic, std::array;
 
     extern atomic<bool> initialized;
-    extern SPSCQueue<SDL_Event> inputMQ_Main_Renderer;
     
     //Must be called after `Window::init`.
     void init() noexcept;

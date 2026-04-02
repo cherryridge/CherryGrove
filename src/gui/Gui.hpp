@@ -1,11 +1,10 @@
 ﻿#pragma once
 #include <cstdint>
 
-#include "../sound/Sound.hpp"
+#include "../sound/types.hpp"
 
 namespace Gui {
     typedef uint8_t u8;
-    typedef int32_t i32;
 
     enum struct Intrinsics : u8 {
         MainMenu,
@@ -29,6 +28,6 @@ namespace Gui {
     void init() noexcept;
     void shutdown() noexcept;
 
-    void setVisible(Intrinsics gui, bool visible = true);
+    void setVisibility(Intrinsics gui, bool visible) noexcept;
     void render() noexcept;
 }

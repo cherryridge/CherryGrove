@@ -92,9 +92,9 @@ namespace Main {
         Pack::init();
 
     //Set up main menu
-        Gui::setVisible(Gui::Intrinsics::MainMenu);
-        Gui::setVisible(Gui::Intrinsics::Copyright);
-        Gui::setVisible(Gui::Intrinsics::Version);
+        Gui::setVisibility(Gui::Intrinsics::MainMenu, true);
+        Gui::setVisibility(Gui::Intrinsics::Copyright, true);
+        Gui::setVisibility(Gui::Intrinsics::Version, true);
 
     //Set up intrinsic inputs
         static_cast<void>(InputHandler::BoolInput::add(IntrinsicInput::escapeCB, 10, {

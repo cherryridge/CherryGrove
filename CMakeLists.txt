@@ -43,6 +43,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "App
         $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-unused-but-set-variable>
         $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-missing-braces>
         $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-macro-redefined>
+        $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-deprecated-declarations>
     )
 endif()
 

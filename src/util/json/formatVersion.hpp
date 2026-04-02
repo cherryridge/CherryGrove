@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "../../debug/Logger.hpp"
 #include "../functionTraits.hpp"
 #include "JSONKind.hpp"
 #include "rw.hpp"
@@ -149,7 +150,18 @@ namespace Util::Json {
             );
 
             const u32 formatVersion = probeFormatVersion(data);
-            if (formatVersion < minFV || formatVersion > latestFV) return false;
+            if (formatVersion == INVALID_FORMAT_VERSION) {
+                lerr << "[Util::Json] Format version probe failed or format version is `0`." << endl;
+                return false;
+            }
+            else if (formatVersion < minFV) {
+                lerr << "[Util::Json] Format version " << formatVersion << " is less than minimum supported version: " << minFV << "." << endl;
+                return false;
+            }
+            else if (formatVersion > latestFV) {
+                lerr << "[Util::Json] Format version " << formatVersion << " is greater than latest supported version: " << latestFV << "." << endl;
+                return false;
+            }
             return ChainProcessor<minFV, minFV, latestFV, List, upgraders>::process(formatVersion, data, result);
         }
     }

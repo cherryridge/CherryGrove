@@ -94,7 +94,7 @@ namespace InputHandler {
 
     //threaded: Simulation thread
     //Router for different event types.
-    [[nodiscard]] bool processTrigger() noexcept {
+    void processTrigger() noexcept {
         SDL_Event event;
         u64 i = 0;
         for (; i < MAXIMUM_INPUT_EVENTS_PER_FRAME; i++) {
@@ -161,15 +161,12 @@ namespace InputHandler {
                     break;
             }
         }
-        if (i == MAXIMUM_INPUT_EVENTS_PER_FRAME) {
-        #if CG_DEBUG
-            lout << "[InputHandler] Maximum events per frame reached: " << MAXIMUM_INPUT_EVENTS_PER_FRAME << endl;
-        #endif
-            return false;
-        }
-        return true;
+    #if CG_DEBUG
+        if (i == MAXIMUM_INPUT_EVENTS_PER_FRAME) lout << "[InputHandler] Maximum events per frame reached: " << MAXIMUM_INPUT_EVENTS_PER_FRAME << endl;
+    #endif
     }
 
+    //threaded: Simulation thread
     void processPersist() noexcept {
         BoolInput::processPersist();
         MouseMove::processPersist();
