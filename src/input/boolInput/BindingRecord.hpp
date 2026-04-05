@@ -14,9 +14,5 @@ namespace InputHandler::BoolInput {
         KeyCombo combo;
     };
 
-    struct BindingHandle {
-        GenerationalHandle value;
-
-        bool operator==(const BindingHandle& other) const noexcept { return value == other.value; }
-    };
+    MAKE_DISTINCT_HANDLE(BindingHandle)
 }

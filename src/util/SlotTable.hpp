@@ -42,12 +42,19 @@ namespace Util {
         }
     };
 
+    #define MAKE_DISTINCT_HANDLE(type)                                                                   \
+    struct type {                                                                                        \
+        Util::GenerationalHandle value;                                                                  \
+        [[nodiscard]] bool operator==(const type& other) const noexcept { return value == other.value; } \
+    };
+
     template <typename EntryType, typename HandleType = GenerationalHandle> requires EqualStrict<HandleType, GenerationalHandle> || DistinctHandleOf<HandleType, GenerationalHandle>
     struct SlotTable {
         struct Entry {
             EntryType data;
-            //0 is reserved for tombstone.
-            //Odd is occupied, even is free, because we're using copy assignment operator on emplace and do not destruct EntryType on destroy.
+            //0 is reserved for tombstone. Odd is occupied, even is free.
+            //We're using copy assignment operator to actually destroy things on emplace instead of destroying them on destroy though. This has nothing to do with generation counting.
+            //The default value of `1` makes every slot start as occupied, which is a good default. But you can safely ignore it, since we will assign a value to generation on every path.
             u32 generation{1};
         };
 
@@ -113,7 +120,7 @@ namespace Util {
             return storage[index].generation == generation;
         }
 
-        //Returns invalid handle if slot is invalid or free.
+        //Returns canonical invalid handle (generation 0) if slot is invalid or free, regardless of the current generation.
         [[nodiscard]] HandleType getCurrentHandle(u32 index) const noexcept {
             if (index >= storage.size() || (storage[index].generation & 1) == 0) return wrapHandle(GenerationalHandle{0, index});
             return wrapHandle(GenerationalHandle{storage[index].generation, index});

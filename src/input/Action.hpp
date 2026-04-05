@@ -11,11 +11,7 @@ namespace InputHandler {
     typedef uint64_t u64;
     using std::function, std::vector, Util::SlotTable, Util::GenerationalHandle;
 
-    struct ActionHandle {
-        GenerationalHandle value;
-
-        bool operator==(const ActionHandle& other) const noexcept { return value == other.value; }
-    };
+    MAKE_DISTINCT_HANDLE(ActionHandle)
 
     template <typename ActionwiseInfo, typename EventwiseInfo>
     struct Action;

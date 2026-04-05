@@ -2,24 +2,14 @@
 #include <bgfx/bgfx.h>
 
 #include "../../util/SlotTable.hpp"
+#include "TextureAtlas.hpp"
+#include "TextureInfo.hpp"
+#include "types.hpp"
 
 namespace TexturePool::detail {
+    typedef uint32_t u32;
     using Util::SlotTable, Util::GenerationalHandle;
 
-    struct TextureAtlas {
-        bgfx::TextureHandle handle;
-        vector<>
-    };
-
-    struct TextureHandle {
-        GenerationalHandle value;
-
-        bool operator==(const TextureHandle& other) const noexcept { return value == other.value; }
-    };
-
-    namespace detail {
-        inline SlotTable<TextureAtlas, TextureHandle> registry;
-
-        
-    }
+    inline SlotTable<TextureAtlas, TextureAtlasHandle> atlasRegistry;
+    inline SlotTable<TextureInfo, TextureHandle> textureRegistry;
 }
