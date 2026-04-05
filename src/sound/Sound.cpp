@@ -142,7 +142,7 @@ namespace Sound {
         const auto code = soLoudInstance->init(SoLoud::Soloud::CLIP_ROUNDOFF, preferredBackend);
         if (code != SO_NO_ERROR) {
             lerr << "[Sound] SoLoud initialization failed: " << soLoudInstance->getErrorString(code) << endl;
-            Fatal::exit(Fatal::SOLOUD_INITIALIZATION_FALILED);
+            Fatal::exit(Fatal::SOLOUD_INITIALIZATION_FAILED);
         }
         lout << "[Sound] Backend: " << soLoudInstance->getBackendString() << ", channels: " << soLoudInstance->getBackendChannels() << ", bufsize: " << soLoudInstance->getBackendBufferSize() << endl;
     }

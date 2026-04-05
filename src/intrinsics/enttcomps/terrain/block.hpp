@@ -37,7 +37,11 @@ namespace EnttComps::Terrain {
                 lerr << "[CubeFace] Texture not registered!" << endl;
                 return;
             }
-            if (rectStartCoords.x < rectEndCoords.x || rectStartCoords.y < rectEndCoords.y) lerr << "[CubeFace] Texture coordinates malformed." << endl;
+            if (info.width <= 0 || info.height <= 0) {
+                lerr << "[CubeFace] Texture dimensions are invalid." << endl;
+                return;
+            }
+            if (rectStartCoords.x > rectEndCoords.x || rectStartCoords.y > rectEndCoords.y) lerr << "[CubeFace] Texture coordinates malformed." << endl;
             texCoords.x = static_cast<float>(rectStartCoords.x) / info.width;
             texCoords.y = static_cast<float>(rectStartCoords.y) / info.height;
             texCoords.z = static_cast<float>(rectEndCoords.x) / info.width;

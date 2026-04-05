@@ -56,7 +56,7 @@ namespace Main {
         lout << "Setting up CherryGrove window & initializing input handler..." << endl;
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
             lerr << "[Main] Failed to set up SDL!" << endl;
-            Fatal::exit(Fatal::SDL_INITIALIZATION_FALILED);
+            Fatal::exit(Fatal::SDL_INITIALIZATION_FAILED);
         }
         windowHandle = SDL_CreateWindow(settings.misc.windowTitleBase.c_str(), settings.graphics.windowWidth, settings.graphics.windowHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_HIGH_PIXEL_DENSITY);
         if (windowHandle == nullptr) {

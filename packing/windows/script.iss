@@ -6,7 +6,9 @@ AppPublisher=CherryGrove Contributors
 AppCopyright=Copyright (c) 2026 CherryGrove Contributors
 DefaultDirName={userappdata}\CherryGrove
 DefaultGroupName=CherryGrove
-OutputBaseFilename=CherryGrove_setup_win64
+AllowNoIcons=yes
+DisableProgramGroupPage=no
+OutputBaseFilename=CherryGrove_setup_windows_{#Arch}
 OutputDir=.
 SetupIconFile=..\..\assets\icons\CherryGrove-trs.ico
 UninstallDisplayIcon={app}\CherryGrove.exe
@@ -22,9 +24,11 @@ ShowLanguageDialog=auto
 LanguageDetectionMethod=uilanguage
 UsePreviousTasks=no
 WizardStyle=modern
-WizardSizePercent=150,150
-WizardResizable=no
 CreateUninstallRegKey=no
+
+[LangOptions]
+DialogFontSize=10
+WelcomeFontSize=16
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl";
@@ -58,7 +62,7 @@ chinesesimplified.SystemIntegration=系统集成：
 chinesesimplified.WriteRegistryText=写入 Windows 注册表（如果之前已经安装过，系统设置“应用和功能”列表中之前的安装信息将被覆盖。）
 
 [Files]
-Source: "..\..\out\windows-x64-release\CherryGrove.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\out\windows-{#Arch}-release\CherryGrove.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\LICENSE"; DestDir: "{app}"; DestName: "{cm:LicenseFileName}.txt"; Flags: ignoreversion
 
 ;Readme files
@@ -67,7 +71,6 @@ Source: "..\readmes\必读信息.txt"; DestDir: "{app}"; DestName: "必读信息
 ;end
 
 Source: "..\..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\..\out\windows-x64-release\shaders\*"; DestDir: "{app}\shaders"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\..\test\*"; DestDir: "{app}\test"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Dirs]
@@ -105,36 +108,22 @@ Type: files; Name: "{group}\CherryGrove.lnk"
 Type: files; Name: "{autodesktop}\CherryGrove.lnk"
 
 [Code]
-const
-    SWP_NOSIZE     = $0001;
-    SWP_NOMOVE     = $0002;
-    SWP_NOACTIVATE = $0010;
-    HWND_TOPMOST   = -1;
-    HWND_NOTOPMOST = -2;
-
-function SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags: Integer): Boolean;
-    external 'SetWindowPos@user32.dll stdcall';
-
-procedure BumpWizardToFront;
-begin
-    SetWindowPos(WizardForm.Handle, HWND_TOPMOST,    0,0,0,0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
-    SetWindowPos(WizardForm.Handle, HWND_NOTOPMOST,  0,0,0,0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE);
-  BringToFrontAndRestore;
-end;
-procedure InitializeWizard();
-begin
-    BringToFrontAndRestore;
-    WizardForm.BringToFront;
-end;
-procedure CurPageChanged(CurPageID :Integer);
-begin
-    BringToFrontAndRestore;
-end;
 function InitializeSetup(): Boolean;
+var
+  buttonLabels: TArrayOfString;
 begin
+    SetArrayLength(buttonLabels, 0);
     if ActiveLanguage = 'chinesesimplified' then
     begin
-        MsgBox('CherryGrove 是源代码可用软件，供个人完全免费使用，并拥有独立完整的知识产权。' + #13#10 + #13#10 + '如果你付费获得该安装包，请立即差评并举报店铺。' + #13#10 + #13#10 + '如果你在某些平台看到【未明确说明本软件名称的】借用本软件的【商业性推广】，请在评论区等大胆留言质疑。' + #13#10 + #13#10 + '让我们一起坚决抵制这些自由开放软件精神和生态的破坏者。' + #13#10 + #13#10 + '本告示不构成任何条款或法律文本。请在此处查阅完整使用条款：https://docs.cherrygrove.dev/legal#terms-of-use。', mbError, MB_OK);
+        BringToFrontAndRestore;
+        TaskDialogMsgBox(
+            '重要告示',
+            'CherryGrove 是源代码可用软件，供个人完全免费使用，并拥有独立完整的知识产权。' + #13#10 + #13#10 + '如果你付费获得该安装包，请立即差评并举报店铺。' + #13#10 + #13#10 + '如果你在某些平台看到【未明确说明本软件名称的】借用本软件的【商业性推广】，请在评论区等大胆留言质疑。' + #13#10 + #13#10 + '让我们一起坚决抵制这些自由开放软件精神和生态的破坏者。' + #13#10 + #13#10 + '本告示不构成任何条款或法律文本。请在此处查阅完整使用条款：https://docs.cherrygrove.dev/legal#terms-of-use。',
+            mbError,
+            MB_OK,
+            buttonLabels,
+            0
+        );
     end;
     Result := True;
 end;

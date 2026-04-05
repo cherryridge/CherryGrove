@@ -7,8 +7,10 @@ namespace Util::Json {
     enum struct JSONKind : u8 {
         Settings,
         Manifest,
-        Block,
-        Geometry,
+        BlockDefinition,
+        TextureDefinition,
+        BlockGeometry,
+        EntityDefinition,
         Count
     };
 }

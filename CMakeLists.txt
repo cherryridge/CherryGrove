@@ -86,8 +86,8 @@ function(gperf_generate IN OUT)
     if(NOT OUT)
         message(FATAL_ERROR "gperf_generate: missing OUT")
     endif()
-    set(IN_ ${CMAKE_CURRENT_SOURCE_DIR}/${IN})
-    set(OUT_ ${CMAKE_CURRENT_BINARY_DIR}/${OUT})
+    set(IN_ ${CMAKE_SOURCE_DIR}/${IN})
+    set(OUT_ ${CMAKE_BINARY_DIR}/${OUT})
     add_custom_command(
         OUTPUT ${OUT_}
         COMMAND ${GPERF_EXECUTABLE} --language=C++ --readonly-tables --output-file=${OUT_} ${IN_}
@@ -236,7 +236,7 @@ set(SDLIMAGE_LBM  OFF CACHE BOOL "")
 set(SDLIMAGE_PCX  OFF CACHE BOOL "")
 set(SDLIMAGE_PNG  ON  CACHE BOOL "")
 set(SDLIMAGE_PNM  OFF CACHE BOOL "")
-set(SDLIMAGE_QOI  OFF CACHE BOOL "")
+set(SDLIMAGE_QOI  ON  CACHE BOOL "")
 set(SDLIMAGE_SVG  OFF CACHE BOOL "")
 set(SDLIMAGE_TGA  ON  CACHE BOOL "")
 set(SDLIMAGE_TIF  ON  CACHE BOOL "")
@@ -318,6 +318,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/wasmtime/$<IF:$<CONFIG:Debug>,debug,release>/include"
 
     "libs/cgnbt/include"
+    "${CMAKE_BINARY_DIR}/shaders"
 )
 #----------------------------------
 
@@ -401,93 +402,65 @@ elseif(APPLE)
 endif()
 #----------------------------------
 
-#------------Debug:CopyFile--------
+#-------Copy Debug Env Files-------
 if(EXISTS "${CMAKE_SOURCE_DIR}/assets")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets" "${CMAKE_BINARY_DIR}/assets")
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/packs")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/packs" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/packs")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/packs" "${CMAKE_BINARY_DIR}/packs")
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/saves")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/saves" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/saves")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/saves" "${CMAKE_BINARY_DIR}/saves")
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/test")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/test" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/test")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/test" "${CMAKE_BINARY_DIR}/test")
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/settings.json")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/settings.json" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/settings.json")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/settings.json" "${CMAKE_BINARY_DIR}/settings.json")
 endif()
 #----------------------------------
 
-#------------Debug:Shader----------
-file(GLOB VERT_SHADER_SOURCES CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/shader/*.vert")
-foreach(SHADER_PATH IN LISTS VERT_SHADER_SOURCES)
-    get_filename_component(SHADER_NAME "${SHADER_PATH}" NAME)
-    if(WIN32)
-        add_custom_command(
-            TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/dx11"
-            COMMAND $<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/shaderc> -f "${SHADER_PATH}" -o "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/dx11/${SHADER_NAME}.bin" --type v -p s_5_0 --platform windows -O 3
-            COMMENT "$<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/shaderc> -f ${SHADER_PATH} -o $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/dx11/${SHADER_NAME}.bin --type v -p s_5_0 --platform windows -O 3"
-            COMMAND_EXPAND_LISTS
-            VERBATIM
-        )
-    endif()
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/glsl"
-        COMMAND $<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/shaderc> -f "${SHADER_PATH}" -o "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/glsl/${SHADER_NAME}.bin" --type v -p 440 -O 3
-        COMMAND_EXPAND_LISTS
-        VERBATIM
-    )
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/spirv"
-        COMMAND $<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/shaderc> -f "${SHADER_PATH}" -o "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/spirv/${SHADER_NAME}.bin" --type v -p spirv16-13 --platform linux -O 3
-        COMMAND_EXPAND_LISTS
-        VERBATIM
-    )
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/metal"
-        COMMAND $<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/shaderc> -f "${SHADER_PATH}" -o "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/metal/${SHADER_NAME}.bin" --type v -p metal31-14 --platform osx -O 3
-        COMMAND_EXPAND_LISTS
-        VERBATIM
-    )
-endforeach()
+#----------Compile Shader----------
+file(GLOB VERTEX_SHADERS CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/shader/*.vert")
+file(GLOB FRAGMENT_SHADERS CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/shader/*.frag")
+set(SHADERC_EXECUTABLE "$<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/bin/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/bin/shaderc>")
 
-file(GLOB FRAG_SHADER_SOURCES CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/shader/*.frag")
-foreach(SHADER_PATH IN LISTS FRAG_SHADER_SOURCES)
-    get_filename_component(SHADER_NAME "${SHADER_PATH}" NAME)
-    if(WIN32)
-        add_custom_command(
-            TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/dx11"
-            COMMAND $<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/shaderc> -f "${SHADER_PATH}" -o "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/dx11/${SHADER_NAME}.bin" --type f -p s_5_0 --platform windows -O 3
-            COMMAND_EXPAND_LISTS
-            VERBATIM
+function(make_shader_compilation_commands result)
+    set(commands)
+    foreach(SHADER_PATH IN LISTS VERTEX_SHADERS)
+        get_filename_component(SHADER_NAME_EXT "${SHADER_PATH}" NAME)
+        get_filename_component(SHADER_NAME "${SHADER_PATH}" NAME_WE)
+        list(APPEND commands
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --bin2c "${SHADER_NAME}_vert_dx11" --type vertex -p s_5_0 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --bin2c "${SHADER_NAME}_vert_dx12" --type vertex -p s_6_9 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_opengl.h" --bin2c "${SHADER_NAME}_vert_opengl" --type vertex -p 440
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_vulkan.h" --bin2c "${SHADER_NAME}_vert_vulkan" --type vertex -p spirv16-13
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_metal.h" --bin2c "${SHADER_NAME}_vert_metal" --type vertex -p metal31-14 --platform osx
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_opengles.h" --bin2c "${SHADER_NAME}_vert_opengles" --type vertex -p 320_es
         )
-    endif()
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/glsl"
-        COMMAND $<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/shaderc> -f "${SHADER_PATH}" -o "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/glsl/${SHADER_NAME}.bin" --type f -p 440 -O 3
-        COMMAND_EXPAND_LISTS
-        VERBATIM
-    )
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/spirv"
-        COMMAND $<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/shaderc> -f "${SHADER_PATH}" -o "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/spirv/${SHADER_NAME}.bin" --type f -p spirv16-13 --platform linux -O 3
-        COMMAND_EXPAND_LISTS
-        VERBATIM
-    )
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/metal"
-        COMMAND $<IF:$<CONFIG:Debug>,${CMAKE_SOURCE_DIR}/libs/bgfx/debug/shaderc,${CMAKE_SOURCE_DIR}/libs/bgfx/release/shaderc> -f "${SHADER_PATH}" -o "$<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/metal/${SHADER_NAME}.bin" --type f -p metal31-14 --platform osx -O 3
-        COMMAND_EXPAND_LISTS
-        VERBATIM
-    )
-endforeach()
+    endforeach()
+    foreach(SHADER_PATH IN LISTS FRAGMENT_SHADERS)
+        get_filename_component(SHADER_NAME_EXT "${SHADER_PATH}" NAME)
+        get_filename_component(SHADER_NAME "${SHADER_PATH}" NAME_WE)
+        list(APPEND commands
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --bin2c "${SHADER_NAME}_frag_dx11" --type fragment -p s_5_0 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --bin2c "${SHADER_NAME}_frag_dx12" --type fragment -p s_6_9 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_opengl.h" --bin2c "${SHADER_NAME}_frag_opengl" --type fragment -p 440
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_vulkan.h" --bin2c "${SHADER_NAME}_frag_vulkan" --type fragment -p spirv16-13
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_metal.h" --bin2c "${SHADER_NAME}_frag_metal" --type fragment -p metal31-14 --platform osx
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_opengles.h" --bin2c "${SHADER_NAME}_frag_opengles" --type fragment -p 320_es
+        )
+    endforeach()
+    set(${result} "${commands}" PARENT_SCOPE)
+endfunction()
+
+make_shader_compilation_commands(SHADER_COMPILATION_COMMANDS)
+
+add_custom_target(compile_shaders
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/shaders"
+    ${SHADER_COMPILATION_COMMANDS}
+    VERBATIM
+    COMMAND_EXPAND_LISTS
+)
+add_dependencies(${PROJECT_NAME} compile_shaders)
 #----------------------------------

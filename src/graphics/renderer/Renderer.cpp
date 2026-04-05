@@ -22,7 +22,7 @@ namespace Renderer {
     typedef int32_t i32;
     typedef uint32_t u32;
     typedef uint64_t u64;
-    using std::thread, std::atomic, std::this_thread::yield, std::memory_order_acquire, std::memory_order_release, Simulation::gameRegistry, Simulation::playerEntity, bgfx::VertexBufferHandle, bgfx::VertexLayout, bgfx::IndexBufferHandle, bgfx::Init, bgfx::PlatformData, bgfx::Attrib, bgfx::AttribType, bgfx::createVertexBuffer, bgfx::createIndexBuffer, bgfx::makeRef;
+    using std::thread, std::atomic, std::this_thread::yield, std::memory_order_acquire, std::memory_order_release,  Simulation::playerEntity, bgfx::VertexBufferHandle, bgfx::VertexLayout, bgfx::IndexBufferHandle, bgfx::Init, bgfx::PlatformData, bgfx::Attrib, bgfx::AttribType, bgfx::createVertexBuffer, bgfx::createIndexBuffer, bgfx::makeRef;
     static void renderLoop() noexcept;
 
     atomic<bool> initialized {false};
@@ -66,11 +66,9 @@ namespace Renderer {
         #elif CG_PLATFORM_IOS
             Fatal::exit(Fatal::MISC_UNSUPPORTED_PLATFORM);
         #endif
-        //Let bgfx auto select rendering backend.
+        //Let bgfx select the rendering backend automatically.
         config.type = bgfx::RendererType::Count;
-        //Control for switching backend temporaily for debug.
-        //config.type = bgfx::RendererType::Vulkan;
-        //Let bgfx auto select adapter.
+        //Let bgfx select the adapter automatically.
         config.vendorId = BGFX_PCI_ID_NONE;
         i32 width, height;
         SDL_GetWindowSize(Main::windowHandle, &width, &height);
@@ -80,7 +78,7 @@ namespace Renderer {
         config.platformData = pdata;
         if (!bgfx::init(config)) {
             lerr << "[Renderer] Failed to initialize bgfx!" << endl;
-            Fatal::exit(Fatal::BGFX_INITIALIZATION_FALILED);
+            Fatal::exit(Fatal::BGFX_INITIALIZATION_FAILED);
         }
         lout << "Using rendering backend: " << bgfx::getRendererName(bgfx::getRendererType()) << endl;
 
@@ -131,31 +129,9 @@ namespace Renderer {
                 Rotation::getViewMtx(view, playerEntity);
                 Camera::getProjMtx(proj, playerEntity, cache.aspectRatio);
                 bgfx::setViewTransform(gameViewId, view, proj);
-            //Render opaque parts/blocks
-                //Get all renderable blocks
-                auto group = gameRegistry.group<const BlockCoordinatesComp, const BlockRenderComp>();
-                group.each([](entt::entity entity, const BlockCoordinatesComp& coords, const BlockRenderComp& renderData) {
-                    float worldSpaceTranslate[16]{};
-                    bx::mtxTranslate(worldSpaceTranslate, (float)coords.x, (float)coords.y, (float)coords.z);
-                    for (const auto& [cubeIndex, cube] : renderData.subcubes) {
-                        float subcubeTransform[16]{};
-                        //Subcube translate
-                        bx::mtxTranslate(subcubeTransform, cube.origin.x, cube.origin.y, cube.origin.z);
-                        //todo: Subcube rotation
-                        //bx::mtxRotateXYZ(transform, );
-                        for (i32 i = 0; i < 6; i++) if (cube.faces[i].shaderId) {
-                            float transform[16]{};
-                            bx::mtxMul(transform, worldSpaceTranslate, subcubeTransform);
-                            bgfx::setTransform(transform);
-                            bgfx::setVertexBuffer(0, vertexBuffer, i * 4, 4);
-                            bgfx::setIndexBuffer(indexBuffer);
-                            TexturePool::useTexture(cube.faces[i].textureId);
-                            bgfx::submit(gameViewId, ShaderPool::getShader(cube.faces[i].shaderId));
-                        }
-                    }
-                });
-            //Render translucent blocks
-                //todo
+            //Render blocks from chunk meshes
+                //todo:
+            //Render entities
             }
             else bgfx::touch(gameViewId);
         //end
