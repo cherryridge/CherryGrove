@@ -3,7 +3,7 @@
 #include <SDL3/SDL.h>
 
 #include "../pack/Pack.hpp"
-#include "../graphics/Renderer.hpp"
+#include "../graphics/renderer/Renderer.hpp"
 #include "../simulation/Simulation.hpp"
 #include "../sound/Sound.hpp"
 #include "../globalState.hpp"

@@ -21,7 +21,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR (CMAKE_CXX_COMPILER_ID STREQUAL "Cla
     target_compile_options(ScopedFlags INTERFACE
         $<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>
         $<$<COMPILE_LANGUAGE:CXX>:/Zc:preprocessor>
-        $<$<COMPILE_LANGUAGE:CXX>:/utf-8>
+        $<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>
     )
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
@@ -348,8 +348,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 #--------------Tweaks--------------
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
-    #util/auto_tune_compressor.cc(98): error C2220: the following warning is treated as an error
+    #util/auto_tune_compressor.cc(98)
     target_compile_options(rocksdb PRIVATE /wd4702)
+    #rocksdb/include/rocksdb/advanced_options.h(632)
+    target_compile_options(rocksdb PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>)
 endif()
 
 if(WIN32)

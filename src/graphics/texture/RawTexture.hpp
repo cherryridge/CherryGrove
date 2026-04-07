@@ -13,24 +13,24 @@ namespace TexturePool::detail {
     using std::string, std::vector;
 
     //RGBA32 is guaranteed in this struct.
-    struct LoneTexture {
+    struct RawTexture {
         u32 width, height;
         vector<u8> pixels;
     };
 
-    [[nodiscard]] inline bool loadTexture(const vector<u8>& mem, LoneTexture& result, const string& path_ = string{}) noexcept {
+    [[nodiscard]] inline bool getRawTexture(const vector<u8>& mem, RawTexture& result, const string& debug_texture_path = string{}) noexcept {
         SDL_IOStream* stream = SDL_IOFromConstMem(mem.data(), mem.size());
         if (stream == nullptr) {
-            lerr << "[TexturePool] Failed to create SDL stream for texture " << path_ << ": " << SDL_GetError() << endl;
+            lerr << "[TexturePool] Failed to create SDL stream for texture " << debug_texture_path << ": " << SDL_GetError() << endl;
             return false;
         }
         SDL_Surface* surface = IMG_Load_IO(stream, true);
         if (surface == nullptr) {
-            lerr << "[TexturePool] Failed to decode texture " << path_ << ": " << SDL_GetError() << endl;
+            lerr << "[TexturePool] Failed to decode texture " << debug_texture_path << ": " << SDL_GetError() << endl;
             return false;
         }
         if (SDL_MUSTLOCK(surface) && !SDL_LockSurface(surface)) {
-            lerr << "[TexturePool] Texture " << path_ << " needs to be locked but failed to do so: " << SDL_GetError() << endl;
+            lerr << "[TexturePool] Texture " << debug_texture_path << " needs to be locked but failed to do so: " << SDL_GetError() << endl;
             SDL_DestroySurface(surface);
             return false;
         }
@@ -46,13 +46,13 @@ namespace TexturePool::detail {
         else {
             SDL_Surface* formatted = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
             if (formatted == nullptr) {
-                lerr << "[TexturePool] Failed to convert texture " << path_ << " to RGBA8 format: " << SDL_GetError() << endl;
+                lerr << "[TexturePool] Failed to convert texture " << debug_texture_path << " to RGBA8 format: " << SDL_GetError() << endl;
                 if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface);
                 SDL_DestroySurface(surface);
                 return false;
             }
             if (SDL_MUSTLOCK(formatted) && !SDL_LockSurface(formatted)) {
-                lerr << "[TexturePool] Converted texture " << path_ << " needs to be locked but failed to do so: " << SDL_GetError() << endl;
+                lerr << "[TexturePool] Converted texture " << debug_texture_path << " needs to be locked but failed to do so: " << SDL_GetError() << endl;
                 SDL_DestroySurface(surface);
                 SDL_DestroySurface(formatted);
                 return false;

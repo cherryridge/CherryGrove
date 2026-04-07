@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <cstdint>
+#include <bgfx/bgfx.h>
 
 #include "types.hpp"
 
@@ -15,8 +16,8 @@ namespace TexturePool::detail {
         // |
         // v
         // V axis (height)
-        float u0, v0, u1, v1;
-        TextureAtlasHandle storageHandle;
+        UVRect uvRect;
+        bgfx::TextureHandle bgfxTextureHandle = BGFX_INVALID_HANDLE;
 
         void use() const noexcept;
     };

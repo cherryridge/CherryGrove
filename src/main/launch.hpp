@@ -9,7 +9,7 @@
 #include "../boot/SessionLock.hpp"
 #include "../debug/Fatal.hpp"
 #include "../globalState.hpp"
-#include "../graphics/Renderer.hpp"
+#include "../graphics/renderer/Renderer.hpp"
 #include "../gui/Gui.hpp"
 #include "../intrinsics/actions/Escape.hpp"
 #include "../input/boolInput/boolInput.hpp"
