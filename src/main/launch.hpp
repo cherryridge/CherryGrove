@@ -50,7 +50,7 @@ namespace Main {
 
     //Mark the starting of CherryGrove
         lout << "Launching CherryGrove..." << endl;
-        isCGAlive.store(true, memory_order_relaxed);
+        GlobalState::isCGAlive.store(true, memory_order_relaxed);
 
     //Create Window
         lout << "Setting up CherryGrove window & initializing input handler..." << endl;
@@ -58,14 +58,14 @@ namespace Main {
             lerr << "[Main] Failed to set up SDL!" << endl;
             Fatal::exit(Fatal::SDL_INITIALIZATION_FAILED);
         }
-        windowHandle = SDL_CreateWindow(settings.misc.windowTitleBase.c_str(), settings.graphics.windowWidth, settings.graphics.windowHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_HIGH_PIXEL_DENSITY);
-        if (windowHandle == nullptr) {
+        GlobalState::windowHandle = SDL_CreateWindow(settings.misc.windowTitleBase.c_str(), settings.graphics.windowWidth, settings.graphics.windowHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+        if (GlobalState::windowHandle == nullptr) {
             lerr << "[Main] Failed to create SDL window: " << SDL_GetError() << endl;
             SDL_Quit();
             Fatal::exit(Fatal::SDL_CREATE_WINDOW_FAILED);
         }
-        const auto icon = IMG_Load("assets/icons/CherryGrove-trs-64.png");
-        if (icon) SDL_SetWindowIcon(windowHandle, icon);
+        auto* icon = IMG_Load("assets/icons/CherryGrove-trs-64.png");
+        if (icon != nullptr) SDL_SetWindowIcon(GlobalState::windowHandle, icon);
         else lerr << "[Main] Load window icon data failed!" << endl;
         SDL_DestroySurface(icon);
 
@@ -73,7 +73,7 @@ namespace Main {
         InputHandler::init();
 
     //Enter the multi-thread era as we are going to spawn the first thread.
-        multiThreadEra.store(true, memory_order_relaxed);
+        GlobalState::multiThreadEra.store(true, memory_order_relaxed);
 
         lout << "Initializing SoLoud..." << endl;
         //This is synchronized, we will wait inside.

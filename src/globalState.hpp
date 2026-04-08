@@ -2,7 +2,7 @@
 #include <atomic>
 #include <SDL3/SDL.h>
 
-namespace Main {
+namespace GlobalState {
     using std::atomic;
 
     //This is the most global of global states. It is used to determine whether the program should exit or not.

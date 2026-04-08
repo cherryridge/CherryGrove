@@ -18,8 +18,8 @@ namespace TexturePool::detail {
         vector<u8> pixels;
     };
 
-    [[nodiscard]] inline bool getRawTexture(const vector<u8>& mem, RawTexture& result, const string& debug_texture_path = string{}) noexcept {
-        SDL_IOStream* stream = SDL_IOFromConstMem(mem.data(), mem.size());
+    [[nodiscard]] inline bool getRawTexture(const vector<u8>& fileData, RawTexture& result, const string& debug_texture_path = string{}) noexcept {
+        SDL_IOStream* stream = SDL_IOFromConstMem(fileData.data(), fileData.size());
         if (stream == nullptr) {
             lerr << "[TexturePool] Failed to create SDL stream for texture " << debug_texture_path << ": " << SDL_GetError() << endl;
             return false;

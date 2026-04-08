@@ -1,10 +1,10 @@
 ﻿#pragma once
+#include <cstdlib>
 
 #include "Logger.hpp"
 
 namespace Fatal {
     typedef int32_t i32;
-    using std::abort, Logger::LOGGER_DYNAMIC_ERR;
     #define DEF inline constexpr i32
 
     //0 is reserved.
@@ -47,9 +47,12 @@ namespace Fatal {
     DEF SETTINGS_FAILED_TO_SAVE               = 8002;
 
     //It shouldn't be here (i.e. there is 100% a bug): 9001-10000
+    DEF TEXTUREPOOL_TEXTURE_NOT_IN_ATLAS     = 9001;
 
     [[noreturn]] inline void exit(i32 code) noexcept {
-        LOGGER_DYNAMIC_ERR("[Fatal] Exit code: ", code);
-        abort();
+        Logger::LOGGER_DYNAMIC_ERR("[Fatal] Exit code: ", code);
+        std::exit(code);
     }
+
+    #undef DEF
 }

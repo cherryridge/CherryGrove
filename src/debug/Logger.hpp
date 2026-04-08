@@ -109,7 +109,7 @@ namespace Logger {
 
     template <typename... Ts>
     inline void LOGGER_DYNAMIC_OUT(Ts&&... ts) noexcept {
-        if (Main::multiThreadEra.load(memory_order_acquire)) {
+        if (GlobalState::multiThreadEra.load(memory_order_acquire)) {
             ((lout << forward<Ts>(ts)), ...);
             lout << endl;
         }
@@ -121,7 +121,7 @@ namespace Logger {
 
     template <typename... Ts>
     inline void LOGGER_DYNAMIC_ERR(Ts&&... ts) noexcept {
-        if (Main::multiThreadEra.load(memory_order_acquire)) {
+        if (GlobalState::multiThreadEra.load(memory_order_acquire)) {
             ((lerr << forward<Ts>(ts)), ...);
             lerr << endl;
         }

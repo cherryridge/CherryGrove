@@ -6,17 +6,17 @@
 #include <bx/math.h>
 #include <SDL3/SDL.h>
 
-#include "../components/Components.hpp"
-#include "../debug/Fatal.hpp"
-#include "../debug/Logger.hpp"
-#include "../globalState.hpp"
-#include "../gui/Gui.hpp"
-#include "../input/inputPipeline.hpp"
-#include "../simulation/Simulation.hpp"
-#include "../util/os/platform.hpp"
+#include "../../components/Components.hpp"
+#include "../../debug/Fatal.hpp"
+#include "../../debug/Logger.hpp"
+#include "../../globalState.hpp"
+#include "../../gui/Gui.hpp"
+#include "../../input/inputPipeline.hpp"
+#include "../../simulation/Simulation.hpp"
+#include "../../util/os/platform.hpp"
+#include "../shader/ShaderPool.hpp"
+#include "../texture/TexturePool.hpp"
 #include "Renderer.hpp"
-#include "ShaderPool.hpp"
-#include "TexturePool.hpp"
 
 namespace Renderer {
     typedef int32_t i32;
@@ -42,7 +42,7 @@ namespace Renderer {
     static void bgfx_SP_TP_init() noexcept {
         Init config;
         PlatformData pdata;
-        auto propertyHandle = SDL_GetWindowProperties(Main::windowHandle);
+        auto propertyHandle = SDL_GetWindowProperties(GlobalState::windowHandle);
         #if CG_PLATFORM_WINDOWS
             pdata.ndt = nullptr;
             pdata.nwh = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
@@ -71,7 +71,7 @@ namespace Renderer {
         //Let bgfx select the adapter automatically.
         config.vendorId = BGFX_PCI_ID_NONE;
         i32 width, height;
-        SDL_GetWindowSize(Main::windowHandle, &width, &height);
+        SDL_GetWindowSize(GlobalState::windowHandle, &width, &height);
         config.resolution.width = width;
         config.resolution.height = height;
         config.resolution.reset = BGFX_RESET_VSYNC;
@@ -84,7 +84,7 @@ namespace Renderer {
 
     //Initialize pools
         ShaderPool::init();
-        TexturePool::init("s_texture");
+        TexturePool::init();
 
     //Initialize vertex layout
         VertexLayout layout;
@@ -100,21 +100,21 @@ namespace Renderer {
         bgfx_SP_TP_init();
         Gui::init();
         initialized.store(true, memory_order_release);
-        SDL_GetWindowSize(Main::windowHandle, &cache.width, &cache.height);
-        cache.aspectRatio = SDL_GetWindowDisplayScale(Main::windowHandle);
+        SDL_GetWindowSize(GlobalState::windowHandle, &cache.width, &cache.height);
+        cache.aspectRatio = SDL_GetWindowDisplayScale(GlobalState::windowHandle);
         bgfx::reset(cache.width, cache.height, BGFX_RESET_VSYNC);
-        while (Main::isCGAlive) {
+        while (GlobalState::isCGAlive) {
         //Prepare for rendering
             //Refresh windowHandle size
             //if (sizeUpdateSignal) {
-            //    SDL_GetWindowSize(Window::windowHandle, &cache.width, &cache.height);
-            //    cache.aspectRatio = SDL_GetWindowDisplayScale(Window::windowHandle);
+            //    SDL_GetWindowSize(GlobalState::windowHandle, &cache.width, &cache.height);
+            //    cache.aspectRatio = SDL_GetWindowDisplayScale(GlobalState::windowHandle);
             //    bgfx::reset(cache.width, cache.height);
             //    sizeUpdateSignal = false;
             //}
-        #if DEBUG
-            bgfx::setDebug(BGFX_DEBUG_STATS | BGFX_DEBUG_PROFILER | BGFX_DEBUG_TEXT);
-        #endif
+    #if DEBUG
+        bgfx::setDebug(BGFX_DEBUG_STATS | BGFX_DEBUG_PROFILER | BGFX_DEBUG_TEXT);
+    #endif
         //Render GUI
             bgfx::setViewClear(guiViewId, BGFX_CLEAR_NONE, 0x00000000);
             bgfx::setViewRect(guiViewId, 0, 0, cache.width, cache.height);

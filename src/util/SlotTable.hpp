@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <compare>
+#include <memory>
 #include <vector>
 #include <ostream>
 
@@ -10,7 +11,7 @@ namespace Util {
     typedef uint8_t u8;
     typedef uint32_t u32;
     typedef uint64_t u64;
-    using std::vector, std::forward, std::ostream, std::strong_ordering;
+    using std::vector, std::forward, std::ostream, std::strong_ordering, std::construct_at, std::destroy_at;
 
     struct GenerationalHandle {
     private:
@@ -94,14 +95,15 @@ namespace Util {
         [[nodiscard]] HandleType emplace(Args&&... args) noexcept {
             if (freeList.empty()) {
                 const u32 index = static_cast<u32>(storage.size());
-                storage.emplace_back(EntryType(forward<Args>(args)...), 1);
+                storage.push_back(Entry{EntryType(forward<Args>(args)...), 1});
                 return wrapHandle(GenerationalHandle{1, index});
             }
             else {
                 const u32 index = freeList.back();
                 freeList.pop_back();
                 auto& slot = storage[index];
-                slot.data = EntryType(forward<Args>(args)...);
+                destroy_at(&slot.data);
+                construct_at(&slot.data, forward<Args>(args)...);
                 slot.generation++;
                 return wrapHandle(GenerationalHandle{slot.generation, index});
             }
