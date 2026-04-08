@@ -69,11 +69,7 @@ namespace InputHandler::BoolInput {
         if (!InputHandler::getLocation(id, location, InputKind::BoolInput)) return false;
         if (!actionInfos.destroy(location.actionHandle)) return false;
         InputHandler::internal::unregisterId(id);
-        for (u32 i = 0; i < bindings.storage.size(); i++) {
-            const auto& slot = bindings.storage[i];
-            if ((slot.generation & 1) == 0) continue;
-            if (slot.data.actionHandle == location.actionHandle) _removeBinding(bindings.getCurrentHandle(i));
-        }
+        for (auto it = bindings.begin(); it != bindings.end(); ++it) if (it->actionHandle == location.actionHandle) _removeBinding(it.handle());
         return true;
     }
 
@@ -152,13 +148,9 @@ namespace InputHandler::BoolInput {
     [[nodiscard]] bool getBindings(ActionHandle handle, vector<KeyCombo>& result) noexcept {
         //note: This variable cannot be replaced by `result.empty()` because we want to allow the caller to reuse the `result` vector across multiple calls to avoid unnecessary allocations and they might not clear it between calls.
         bool found = false;
-        for (u32 i = 0; i < bindings.storage.size(); i++) {
-            const auto& slot = bindings.storage[i];
-            if ((slot.generation & 1) == 0) continue;
-            if (slot.data.actionHandle == handle) {
-                if (!found) found = true;
-                result.push_back(slot.data.combo);
-            }
+        for (const auto& binding : bindings) if (binding.actionHandle == handle) {
+            if (!found) found = true;
+            result.push_back(binding.combo);
         }
         return found;
     }
@@ -198,13 +190,9 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] bool removeBindings(ActionHandle handle) noexcept {
         bool found = false;
-        for (u32 i = 0; i < bindings.storage.size(); i++) {
-            const auto& slot = bindings.storage[i];
-            if ((slot.generation & 1) == 0) continue;
-            if (slot.data.actionHandle == handle) {
-                if (!found) found = true;
-                _removeBinding(bindings.getCurrentHandle(i));
-            }
+        for (auto it = bindings.begin(); it != bindings.end(); ++it) if (it->actionHandle == handle) {
+            if (!found) found = true;
+            _removeBinding(it.handle());
         }
         return found;
     }

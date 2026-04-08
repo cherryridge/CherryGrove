@@ -20,38 +20,38 @@ namespace TexturePool {
     using std::string, std::vector, std::max, Util::FilePath, Util::OS::readFile;
 
     inline void init() noexcept {
-        detail::initUniforms();
-        detail::readFromIntrinsicFiles();
+        internal::initUniforms();
+        internal::readFromIntrinsicFiles();
     }
 
     inline void shutdown() noexcept {
-        detail::destroyUniforms();
+        internal::destroyUniforms();
     }
 
     [[nodiscard]] inline bool addTexture(const vector<u8>& fileData, TextureHandle& result, bool linear, const string& debug_texture_path = string{}) noexcept {
-        detail::RawTexture rawTexture;
+        internal::RawTexture rawTexture;
         //`getRawTexture` handles logging of errors.
-        if (!detail::getRawTexture(fileData, rawTexture, debug_texture_path)) return false;
+        if (!internal::getRawTexture(fileData, rawTexture, debug_texture_path)) return false;
         const u32 maximumDimension = max(rawTexture.width, rawTexture.height);
 
         if (maximumDimension > 64) {
             lout << "[TexturePool] Texture " << debug_texture_path << " is large (" << rawTexture.width << "x" << rawTexture.height << "). Using single texture atlas." << endl;
         }
 
-        const TextureHandle tempHandle = detail::textureRegistry.emplace();
-        detail::TextureInfo& textureInfo = *detail::textureRegistry.get(tempHandle);
+        const TextureHandle tempHandle = internal::textureRegistry.emplace();
+        internal::TextureInfo& textureInfo = *internal::textureRegistry.get(tempHandle);
         bool addedToAtlas = false;
-        for (auto& atlasEntry : detail::atlasRegistry) if (atlasEntry.put(rawTexture, tempHandle, textureInfo.uvRect, textureInfo.bgfxTextureHandle)) {
+        for (auto& atlasEntry : internal::atlasRegistry) if (atlasEntry.put(rawTexture, tempHandle, textureInfo.uvRect, textureInfo.bgfxTextureHandle)) {
             addedToAtlas = true;
             break;
         }
 
         if (!addedToAtlas) {
-            TextureAtlasHandle atlasHandle;
-            if (maximumDimension <= 16) atlasHandle = detail::atlasRegistry.emplace(4, linear);
-            else if (maximumDimension <= 32) atlasHandle = detail::atlasRegistry.emplace(5, linear);
-            else atlasHandle = detail::atlasRegistry.emplace(6, linear);
-            auto& atlas = *detail::atlasRegistry.get(atlasHandle);
+            internal::TextureAtlasHandle atlasHandle;
+            if (maximumDimension <= 16) atlasHandle = internal::atlasRegistry.emplace(4, linear);
+            else if (maximumDimension <= 32) atlasHandle = internal::atlasRegistry.emplace(5, linear);
+            else atlasHandle = internal::atlasRegistry.emplace(6, linear);
+            auto& atlas = *internal::atlasRegistry.get(atlasHandle);
             if (!atlas.put(rawTexture, tempHandle, textureInfo.uvRect, textureInfo.bgfxTextureHandle)) {
                 lerr << "[TexturePool] Failed to add texture " << debug_texture_path << "." << endl;
                 return false;
@@ -78,7 +78,7 @@ namespace TexturePool {
     }
 
     inline void useTexture(TextureHandle handle) noexcept {
-        const auto* texture = detail::textureRegistry.get(handle);
+        const auto* texture = internal::textureRegistry.get(handle);
         if (texture == nullptr) {
             lerr << "[TexturePool] Invalid texture handle " << handle << "." << endl;
             return;
@@ -87,13 +87,13 @@ namespace TexturePool {
     }
 
     [[nodiscard]] inline bool removeTexture(TextureHandle handle) noexcept {
-        const auto* textureInfo = detail::textureRegistry.get(handle);
+        const auto* textureInfo = internal::textureRegistry.get(handle);
         if (textureInfo == nullptr) {
             lerr << "[TexturePool] Invalid texture handle " << handle << "." << endl;
             return false;
         }
-        for (auto& atlasEntry : detail::atlasRegistry) if (atlasEntry.remove(handle)) {
-            static_cast<void>(detail::textureRegistry.destroy(handle));
+        for (auto& atlasEntry : internal::atlasRegistry) if (atlasEntry.remove(handle)) {
+            static_cast<void>(internal::textureRegistry.destroy(handle));
             return true;
         }
         lerr << "[TexturePool] Texture handle " << handle << " is found in the registry but not in any atlas. This should never happen!!" << endl;

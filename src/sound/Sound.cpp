@@ -11,6 +11,7 @@
 
 #include "../debug/Logger.hpp"
 #include "../debug/Fatal.hpp"
+#include "../globalState.hpp"
 #include "../util/concurrentQueue.hpp"
 #include "../util/os/platform.hpp"
 #include "commands.hpp"
@@ -153,7 +154,7 @@ namespace Sound {
         initSoLoud();
         initialized.store(true, memory_order_release);
         u32 gcCursor = 0;
-        while (Main::isCGAlive) {
+        while (GlobalState::isCGAlive) {
             auto startTime = steady_clock::now();
             bool shouldUpdate3D = false;
         //Process commands.

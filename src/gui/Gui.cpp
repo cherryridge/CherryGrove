@@ -7,7 +7,7 @@
 #include <SDL3/SDL.h>
 
 #include "../debug/Logger.hpp"
-#include "../graphics/Renderer.hpp"
+#include "../graphics/renderer/Renderer.hpp"
 #include "../intrinsics/guis/Copyright.hpp"
 #include "../intrinsics/guis/DebugMenu.hpp"
 #include "../intrinsics/guis/MainMenu.hpp"
@@ -29,7 +29,7 @@ namespace Gui {
 
     void init() noexcept {
         i32 width, height;
-        SDL_GetWindowSize(Main::windowHandle, &width, &height);
+        SDL_GetWindowSize(GlobalState::windowHandle, &width, &height);
         IMGUI_CHECKVERSION();
         context = ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
@@ -49,12 +49,12 @@ namespace Gui {
         ImGui::StyleColorsDark();
         ImGuiStyle& style = ImGui::GetStyle();
         style.FontSizeBase = 18.0f;
-        style.FontScaleDpi = SDL_GetWindowDisplayScale(Main::windowHandle);
+        style.FontScaleDpi = SDL_GetWindowDisplayScale(GlobalState::windowHandle);
         style.WindowRounding = 0.0f;
         style.WindowTitleAlign = ImVec2(0.5f, 0.0f);
         //Gemini recommends not to use `msaaSamples` whatsoever, so we're just vibing it with `1`.
         ImGui_Implbgfx_Init(Renderer::guiViewId, 1, Settings::getSettings().graphics.vsync);
-        ImGui_ImplSDL3_InitForOther(Main::windowHandle);
+        ImGui_ImplSDL3_InitForOther(GlobalState::windowHandle);
         click = Sound::addSound("assets/sounds/click1.ogg", false, true, 2.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
         //Register them manually!
         guiRegistry.emplace(Intrinsics::MainMenu, MainMenu::render);

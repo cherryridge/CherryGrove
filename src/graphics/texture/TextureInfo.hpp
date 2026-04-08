@@ -5,7 +5,7 @@
 #include "types.hpp"
 #include "uniforms.hpp"
 
-namespace TexturePool::detail {
+namespace TexturePool::internal {
     typedef uint32_t u32;
 
     struct TextureInfo {

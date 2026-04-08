@@ -43,7 +43,7 @@ namespace InputHandler {
     void setCanDelete(bool canDelete) noexcept;
 
     [[nodiscard]] bool getPointerLocked() noexcept;
-    void setPointerLocked(bool disabled) noexcept;
+    void setPointerLocked(bool locked) noexcept;
 
     //threaded: Main thread
     void submitEvent(const SDL_Event& event) noexcept;

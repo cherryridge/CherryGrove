@@ -14,8 +14,8 @@ namespace InputHandler {
 
     struct FramedSDLEvents {
         u64 frame;
-        //Why not? `SDL_Event` is already 8-byte aligned.
-        u64 size{0};
+        //Why not use `u64`? `SDL_Event` is already 8-byte aligned.
+        u64 actualSize{0};
         //note: This is changed from a vector so we have a heap allocation free event pipeline.
         array<SDL_Event, MAXIMUM_INPUT_EVENTS_PER_FRAME> events;
     };
@@ -25,8 +25,8 @@ namespace InputHandler {
         bool wantCaptureMouse{false}, wantCaptureKeyboard{false}, wantTextInput{false}, wantSetMousePos{false};
     };
 
-    inline atomic<shared_ptr<const FramedSDLEvents>> current{shared_ptr<const FramedSDLEvents>(new FramedSDLEvents{0, {}})};
-    inline FramedSDLEvents buffer_M{0, {}};
+    //inline atomic<shared_ptr<const FramedSDLEvents>> current{shared_ptr<const FramedSDLEvents>(new FramedSDLEvents{0, {}})};
+    //inline FramedSDLEvents buffer_M{0, {}};
     inline SPSCQueue<FramedImGuiFlags> flagQueue_R2S;
     inline SPSCQueue<FramedSDLEvents> inputQueue_M2R, inputQueue_M2S;
 

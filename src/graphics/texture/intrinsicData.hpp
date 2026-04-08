@@ -5,9 +5,9 @@
 #include "../../util/os/filesystem.hpp"
 #include "RawTexture.hpp"
 
-namespace TexturePool::detail {
+namespace TexturePool::internal {
     typedef uint8_t u8;
-    using std::vector, TexturePool::detail::RawTexture;
+    using std::vector;
 
     inline RawTexture rawTexture_missing_png, rawTexture_toobig_png;
 

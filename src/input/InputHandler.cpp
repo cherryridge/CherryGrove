@@ -78,9 +78,9 @@ namespace InputHandler {
 
     [[nodiscard]] bool getPointerLocked() noexcept { return pointerLocked.load(memory_order_acquire); }
 
-    void setPointerLocked(bool disabled) noexcept {
-        pointerLocked.store(disabled, memory_order_release);
-        SDL_SetWindowRelativeMouseMode(Main::windowHandle, disabled);
+    void setPointerLocked(bool locked) noexcept {
+        pointerLocked.store(locked, memory_order_release);
+        SDL_SetWindowRelativeMouseMode(GlobalState::windowHandle, locked);
     }
 
 //#endregion

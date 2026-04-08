@@ -49,14 +49,24 @@ namespace Util {
         }
     };
 
-    #define MAKE_DISTINCT_HANDLE(type)                                                                       \
-    struct type {                                                                                            \
-        Util::GenerationalHandle value;                                                                      \
-        bool operator==(const type& other) const noexcept { return value == other.value; }                   \
-        std::strong_ordering operator<=>(const type& other) const noexcept { return value <=> other.value; } \
+    #define MAKE_DISTINCT_HANDLE(type)                                                                                     \
+    struct type {                                                                                                          \
+        Util::GenerationalHandle value;                                                                                    \
+        bool operator==(const type& other) const noexcept { return value == other.value; }                                 \
+        std::strong_ordering operator<=>(const Util::GenerationalHandle& other) const noexcept { return value <=> other; } \
+        std::strong_ordering operator<=>(const type& other) const noexcept { return value <=> other.value; }               \
+        friend Logger::Logger& operator<<(Logger::Logger& os, const type& data) noexcept {                                 \
+            os << #type << " (idx " << data.value.getIndex() << ", gen " << data.value.getGeneration() << ")";             \
+            return os;                                                                                                     \
+        }                                                                                                                  \
+        friend std::ostream& operator<<(std::ostream& os, const type& data) noexcept {                                     \
+            os << #type << " (idx " << data.value.getIndex() << ", gen " << data.value.getGeneration() << ")";             \
+            return os;                                                                                                     \
+        }                                                                                                                  \
     };
 
-    template <typename EntryType, typename HandleType = GenerationalHandle> requires EqualStrict<HandleType, GenerationalHandle> || DistinctHandleOf<HandleType, GenerationalHandle>
+    //Use SlotTable with `HandleType` as plain `GenerationalHandle` is deprecated and should be replaced by distinct handles for better type safety.
+    template <typename EntryType, typename HandleType> requires Equal<HandleType, GenerationalHandle> || DistinctHandleOf<HandleType, GenerationalHandle>
     struct SlotTable {
     private:
         struct Entry {
@@ -179,6 +189,8 @@ namespace Util {
                 );
             }
 
+            [[nodiscard]] HandleType handle() const noexcept { return table->getCurrentHandle(static_cast<u32>(index)); }
+
             Iterator& operator++() noexcept {
                 index = table->nextOccupiedIndex(index + 1);
                 return *this;
@@ -215,6 +227,8 @@ namespace Util {
                     table->wrapHandle(GenerationalHandle{table->storage[index].generation, static_cast<u32>(index)})
                 );
             }
+
+            [[nodiscard]] HandleType handle() const noexcept { return table->getCurrentHandle(static_cast<u32>(index)); }
 
             ConstIterator& operator++() noexcept {
                 index = table->nextOccupiedIndex(index + 1);

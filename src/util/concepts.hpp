@@ -88,9 +88,9 @@ namespace Util {
     constexpr size_t memberCount = MemberCount::findMemberCount<T, 0, maxSearchRange>();
 
     template <typename T, typename U>
-    concept DistinctHandleOf = requires(T t) {
+    concept DistinctHandleOf = requires(remove_cvref_t<T> t) {
         { move(t.value) } -> EqualStrict<U&&>;
-    } && HasNMembers<T, 1>;
+    } && HasNMembers<remove_cvref_t<T>, 1>;
 
     //Usage:
     //template <FilePath T>

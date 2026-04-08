@@ -1,12 +1,15 @@
 ﻿#pragma once
+#include <atomic>
 #include <imgui.h>
 
 #include "../../simulation/Simulation.hpp"
 #include "../../sound/Sound.hpp"
+#include "../../globalState.hpp"
 #include "../../gui/Gui.hpp"
 #include "../../gui/GuiUtils.hpp"
 
 namespace Gui::MainMenu {
+    using std::memory_order_release;
     using namespace ImGui;
     using namespace GuiUtils;
 
@@ -35,7 +38,7 @@ namespace Gui::MainMenu {
             });
             centerButton(u8"退出", btnSize, []() {
                 static_cast<void>(Sound::play(Gui::click, Sound::DUMMY_COORD_2D));
-                Main::isCGAlive = false;
+                GlobalState::isCGAlive.store(false, memory_order_release);
             });
             PopStyleVar();
             PopFont();

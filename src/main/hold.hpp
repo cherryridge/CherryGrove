@@ -27,16 +27,16 @@ namespace Main {
         FramedSDLEvents frame{nextFrame_M.load(memory_order_relaxed), {}};
         function_view<void()> task;
 
-        while (isCGAlive.load(memory_order_acquire)) {
+        while (GlobalState::isCGAlive.load(memory_order_acquire)) {
             loopStartTime = high_resolution_clock::now();
 
         //Populate new input frame
-            for (frame.size = 0; frame.size < MAXIMUM_INPUT_EVENTS_PER_FRAME; frame.size++) if (SDL_PollEvent(&event)) {
-                if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(windowHandle))) {
-                    isCGAlive.store(false, memory_order_release);
+            for (frame.actualSize = 0; frame.actualSize < MAXIMUM_INPUT_EVENTS_PER_FRAME; frame.actualSize++) if (SDL_PollEvent(&event)) {
+                if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(GlobalState::windowHandle))) {
+                    GlobalState::isCGAlive.store(false, memory_order_release);
                     goto stop;
                 }
-                frame.events[frame.size] = event;
+                frame.events[frame.actualSize] = event;
             }
             inputQueue_M2R.enqueue(frame);
             if (Simulation::gameStarted.load(memory_order_acquire)) inputQueue_M2S.enqueue(frame);

@@ -4,7 +4,7 @@
 #include "../../debug/Fatal.hpp"
 #include "../../debug/Logger.hpp"
 
-namespace TexturePool::detail {
+namespace TexturePool::internal {
     inline bgfx::UniformHandle samplerUniform = BGFX_INVALID_HANDLE;
     inline bgfx::UniformHandle uvRectUniform = BGFX_INVALID_HANDLE;
 

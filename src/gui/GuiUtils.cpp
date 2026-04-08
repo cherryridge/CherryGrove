@@ -1,7 +1,7 @@
 ﻿#include <functional>
 #include <imgui.h>
 
-#include "../graphics/Renderer.hpp"
+#include "../graphics/renderer/Renderer.hpp"
 #include "GuiUtils.hpp"
 
 namespace GuiUtils {

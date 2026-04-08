@@ -4,8 +4,8 @@
 #include "TextureAtlas.hpp"
 #include "types.hpp"
 
-namespace TexturePool::detail {
-    using Util::SlotTable, TexturePool::detail::TextureAtlas, TexturePool::TextureAtlasHandle;
+namespace TexturePool::internal {
+    using Util::SlotTable;
 
     inline SlotTable<TextureAtlas, TextureAtlasHandle> atlasRegistry;
 }

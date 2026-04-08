@@ -4,8 +4,8 @@
 #include "TextureInfo.hpp"
 #include "types.hpp"
 
-namespace TexturePool::detail {
-    using Util::SlotTable, TexturePool::detail::TextureInfo, TexturePool::TextureHandle;
+namespace TexturePool::internal {
+    using Util::SlotTable;
 
     inline SlotTable<TextureInfo, TextureHandle> textureRegistry;
 }
