@@ -5,7 +5,7 @@
 #include <imgui.h>
 
 #include "../../components/Components.hpp"
-#include "../../gui/GuiUtils.hpp"
+#include "../../graphics/gui/GuiUtils.hpp"
 #include "../../simulation/Simulation.hpp"
 
 namespace Gui::DebugMenu {

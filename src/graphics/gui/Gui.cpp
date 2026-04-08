@@ -6,15 +6,15 @@
 #include <imgui.h>
 #include <SDL3/SDL.h>
 
-#include "../debug/Logger.hpp"
-#include "../graphics/renderer/Renderer.hpp"
-#include "../intrinsics/guis/Copyright.hpp"
-#include "../intrinsics/guis/DebugMenu.hpp"
-#include "../intrinsics/guis/MainMenu.hpp"
-#include "../intrinsics/guis/Version.hpp"
-#include "../settings/Settings.hpp"
-#include "../globalState.hpp"
-#include "../sound/Sound.hpp"
+#include "../../debug/Logger.hpp"
+#include "../../intrinsics/guis/Copyright.hpp"
+#include "../../intrinsics/guis/DebugMenu.hpp"
+#include "../../intrinsics/guis/MainMenu.hpp"
+#include "../../intrinsics/guis/Version.hpp"
+#include "../../settings/Settings.hpp"
+#include "../../globalState.hpp"
+#include "../../sound/Sound.hpp"
+#include "../renderer/Renderer.hpp"
 #include "Gui.hpp"
 
 namespace Gui {
@@ -37,7 +37,7 @@ namespace Gui {
         io.IniFilename = nullptr;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.DisplaySize.x = static_cast<float>(width);
         io.DisplaySize.y = static_cast<float>(height);

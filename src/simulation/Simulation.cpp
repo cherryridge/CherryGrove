@@ -5,7 +5,7 @@
 #include <entt/entt.hpp>
 
 #include "../debug/Logger.hpp"
-#include "../gui/Gui.hpp"
+#include "../graphics/gui/Gui.hpp"
 #include "../input/InputHandler.hpp"
 #include "../input/boolInput/boolInput.hpp"
 #include "../input/mouseMove/mouseMove.hpp"
@@ -40,7 +40,7 @@ namespace Simulation {
         Gui::setVisibility(Gui::Intrinsics::Copyright, false);
         Gui::setVisibility(Gui::Intrinsics::Version, false);
 
-        Main::runOnMainThread.enqueue([]() {
+        Main::runOnMainThread.enqueue([]() noexcept {
             forward = InputHandler::BoolInput::add(IntrinsicInput::forward, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
             backward = InputHandler::BoolInput::add(IntrinsicInput::backward, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
             left = InputHandler::BoolInput::add(IntrinsicInput::left, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
@@ -74,7 +74,7 @@ namespace Simulation {
         gameRegistry.clear();
 
         //Clear input callbacks
-        Main::runOnMainThread.enqueue([]() {
+        Main::runOnMainThread.enqueue([]() noexcept {
             //fixme: Implement the `canDelete` mechanism properly.
             static_cast<void>(InputHandler::BoolInput::remove(forward));
             static_cast<void>(InputHandler::BoolInput::remove(backward));

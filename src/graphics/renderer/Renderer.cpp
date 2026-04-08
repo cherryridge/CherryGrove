@@ -1,4 +1,5 @@
-﻿#include <atomic>
+﻿#include <array>
+#include <atomic>
 #include <thread>
 #include <backends/imgui_impl_sdl3.h>
 #include <bgfx/bgfx.h>
@@ -10,10 +11,10 @@
 #include "../../debug/Fatal.hpp"
 #include "../../debug/Logger.hpp"
 #include "../../globalState.hpp"
-#include "../../gui/Gui.hpp"
 #include "../../input/inputPipeline.hpp"
 #include "../../simulation/Simulation.hpp"
 #include "../../util/os/platform.hpp"
+#include "../gui/Gui.hpp"
 #include "../shader/ShaderPool.hpp"
 #include "../texture/TexturePool.hpp"
 #include "Renderer.hpp"
@@ -22,7 +23,7 @@ namespace Renderer {
     typedef int32_t i32;
     typedef uint32_t u32;
     typedef uint64_t u64;
-    using std::thread, std::atomic, std::this_thread::yield, std::memory_order_acquire, std::memory_order_release,  Simulation::playerEntity, bgfx::VertexBufferHandle, bgfx::VertexLayout, bgfx::IndexBufferHandle, bgfx::Init, bgfx::PlatformData, bgfx::Attrib, bgfx::AttribType, bgfx::createVertexBuffer, bgfx::createIndexBuffer, bgfx::makeRef;
+    using std::array, std::thread, std::atomic, std::this_thread::yield, std::memory_order_acquire, std::memory_order_release,  Simulation::playerEntity, bgfx::VertexBufferHandle, bgfx::VertexLayout, bgfx::IndexBufferHandle, bgfx::Init, bgfx::PlatformData, bgfx::Attrib, bgfx::AttribType, bgfx::createVertexBuffer, bgfx::createIndexBuffer, bgfx::makeRef;
     static void renderLoop() noexcept;
 
     atomic<bool> initialized {false};
@@ -125,13 +126,15 @@ namespace Renderer {
             bgfx::setViewRect(gameViewId, 0, 0, cache.width, cache.height);
             if (Simulation::gameStarted.load(memory_order_acquire)) {
             //Prepare render environment
-                float view[16]{}, proj[16]{};
-                Rotation::getViewMtx(view, playerEntity);
-                Camera::getProjMtx(proj, playerEntity, cache.aspectRatio);
-                bgfx::setViewTransform(gameViewId, view, proj);
+                array<float, 16> view{}, proj{};
+                Rotation::getViewMtx(view.data(), playerEntity);
+                Camera::getProjMtx(proj.data(), playerEntity, cache.aspectRatio);
+                bgfx::setViewTransform(gameViewId, view.data(), proj.data());
             //Render blocks from chunk meshes
                 //todo:
             //Render entities
+
+                bgfx::submit()
             }
             else bgfx::touch(gameViewId);
         //end

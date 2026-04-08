@@ -129,3 +129,7 @@
 [submodule "packing/windows/translations/chs"]
 	path = packing/windows/translations/chs
 	url = https://github.com/kira-96/Inno-Setup-Chinese-Simplified-Translation
+
+[submodule "src/graphics/backend"]
+	path = src/graphics/backend
+	url = https://github.com/cherryridge/imgui_impl_bgfx

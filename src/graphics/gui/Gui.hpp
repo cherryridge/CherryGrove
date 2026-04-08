@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <cstdint>
 
-#include "../sound/types.hpp"
+#include "../../sound/types.hpp"
 
 namespace Gui {
     typedef uint8_t u8;

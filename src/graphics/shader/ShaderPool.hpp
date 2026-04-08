@@ -1,46 +1,48 @@
 ﻿#pragma once
 #include <bgfx/bgfx.h>
-#include <boost/unordered/unordered_flat_map.hpp>
 
 #include "../../debug/Fatal.hpp"
 #include "../../debug/Logger.hpp"
+#include "../../util/SlotTable.hpp"
 #include "ShaderDef.hpp"
 
 namespace ShaderPool {
-    typedef u8 u8;
-    typedef uint16_t ShaderID;
-    using bgfx::RendererType, bgfx::ShaderHandle, bgfx::ProgramHandle, bgfx::destroy, boost::unordered_flat_map;
+    typedef uint8_t u8;
+    using Util::SlotTable;
+
+    MAKE_DISTINCT_HANDLE(ShaderPoolHandle);
 
     namespace detail {
-        inline ShaderID nextId;
-        inline unordered_flat_map<ShaderID, ProgramHandle> registry;
+        inline SlotTable<bgfx::ProgramHandle, ShaderPoolHandle> registry2;
 
         //This is a critical function so we always panic if it fails.
-        inline ShaderHandle loadShader(const ShaderDef& shaderDef) noexcept {
+        [[nodiscard]] inline bgfx::ShaderHandle loadShader(const ShaderDef& shaderDef) noexcept {
             const u8* data = nullptr;
             size_t size = 0;
             switch (bgfx::getRendererType()) {
-                case RendererType::Direct3D11:
+                using enum bgfx::RendererType::Enum;
+
+                case Direct3D11:
                     data = shaderDef.dx11;
                     size = shaderDef.dx11_size;
                     break;
-                case RendererType::Direct3D12:
+                case Direct3D12:
                     data = shaderDef.dx12;
                     size = shaderDef.dx12_size;
                     break;
-                case RendererType::Metal:
+                case Metal:
                     data = shaderDef.metal;
                     size = shaderDef.metal_size;
                     break;
-                case RendererType::OpenGL:
+                case OpenGL:
                     data = shaderDef.opengl;
                     size = shaderDef.opengl_size;
                     break;
-                case RendererType::OpenGLES:
+                case OpenGLES:
                     data = shaderDef.opengles;
                     size = shaderDef.opengles_size;
                     break;
-                case RendererType::Vulkan:
+                case Vulkan:
                     data = shaderDef.vulkan;
                     size = shaderDef.vulkan_size;
                     break;
@@ -64,7 +66,7 @@ namespace ShaderPool {
             return handle;
         }
 
-        inline ProgramHandle loadShaderSet(const ShaderSetDef& shaderSetDef) noexcept {
+        [[nodiscard]] inline bgfx::ProgramHandle loadShaderSet(const ShaderSetDef& shaderSetDef) noexcept {
             const auto vsh = loadShader(shaderSetDef.vs), fsh = loadShader(shaderSetDef.fs);
             const auto handle = bgfx::createProgram(vsh, fsh, true);
             if (!bgfx::isValid(handle)) {
@@ -75,38 +77,31 @@ namespace ShaderPool {
         }
     }
 
-    inline void init() noexcept {
-        //Shader ID `0` is for **NOT RENDERING THE OBJECT**!
-        detail::nextId = 1;
-    }
+    inline void init() noexcept {}
 
     inline void shutdown() noexcept {
-        for (const auto& shader : detail::registry) destroy(shader.second);
-        detail::registry.clear();
+        for (const auto& programHandle : detail::registry2) bgfx::destroy(programHandle);
     }
 
-    [[nodiscard]] inline ShaderID addShader(const ShaderSetDef& shaderSetDef) noexcept {
-        const auto handle = detail::loadShaderSet(shaderSetDef);
-        const auto id = detail::nextId;
-        detail::nextId++;
-        detail::registry.emplace(id, handle);
-        return id;
+    [[nodiscard]] inline ShaderPoolHandle addShader(const ShaderSetDef& shaderSetDef) noexcept {
+        const auto programHandle = detail::loadShaderSet(shaderSetDef);
+        return detail::registry2.emplace(programHandle);
     }
 
-    [[nodiscard]] inline const ProgramHandle& getShader(ShaderID shaderId) noexcept {
-        const auto p = detail::registry.find(shaderId);
-        if (p == detail::registry.end()) {
-            lerr << "[ShaderPool] Failed to get shader " << shaderId << "!" << endl;
+    [[nodiscard]] inline bgfx::ProgramHandle getShader(ShaderPoolHandle handle) noexcept {
+        const auto* p = detail::registry2.get(handle);
+        if (p == nullptr) {
+            lerr << "[ShaderPool] Failed to get shader " << handle << "!" << endl;
             Fatal::exit(Fatal::BGFX_GET_SHADER_FAILED);
         }
-        return p->second;
+        return *p;
     }
 
-    [[nodiscard]] inline bool removeShader(ShaderID id) noexcept {
-        const auto p = detail::registry.find(id);
-        if (p == detail::registry.end()) return false;
-        destroy(p->second);
-        detail::registry.erase(p);
+    [[nodiscard]] inline bool removeShader(ShaderPoolHandle handle) noexcept {
+        const auto* p = detail::registry2.get(handle);
+        if (p == nullptr) return false;
+        bgfx::destroy(*p);
+        static_cast<void>(detail::registry2.destroy(handle));
         return true;
     }
 }
