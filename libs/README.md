@@ -11,7 +11,7 @@ See https://docs.cherrygrove.dev/cg/releasing/building#grab-prebuilt-depedencies
 ### [ocornut/imgui](https://github.com/ocornut/imgui)
 
 - Local Path: `libs/imgui`
-- Current Commit: `dac07199cfd761113d966eb8ad739254e10df2fe`
+- Current Commit: `bbcc83e999c5e08852a83c0c1c4af2ada515f9eb`
 - In Branch: `docking`
-- Current Version: 1.92.7
-- Reason: `imconfig.h` needs to be modified.
+- Current Version: 1.92.8 WIP (+)
+- Reason for Being Local: `imconfig.h` needs to be modified.
