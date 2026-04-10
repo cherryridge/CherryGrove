@@ -37,4 +37,6 @@
     #else
         #error "Unknown Apple platform"
     #endif
+#else
+    #error "Unknown platform"
 #endif

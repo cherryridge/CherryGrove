@@ -9,8 +9,8 @@
 #include "../boot/SessionLock.hpp"
 #include "../debug/Fatal.hpp"
 #include "../globalState.hpp"
+#include "../graphics/gui/Gui.hpp"
 #include "../graphics/renderer/Renderer.hpp"
-#include "../gui/Gui.hpp"
 #include "../intrinsics/actions/Escape.hpp"
 #include "../input/boolInput/boolInput.hpp"
 #include "../input/InputHandler.hpp"
@@ -18,6 +18,7 @@
 #include "../sound/Sound.hpp"
 #include "../pack/Pack.hpp"
 #include "../util/BitField.hpp"
+#include "../window.hpp"
 #include "hold.hpp"
 
 namespace Main {
@@ -52,22 +53,9 @@ namespace Main {
         lout << "Launching CherryGrove..." << endl;
         GlobalState::isCGAlive.store(true, memory_order_relaxed);
 
-    //Create Window
+    //Create Main Window
         lout << "Setting up CherryGrove window & initializing input handler..." << endl;
-        if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
-            lerr << "[Main] Failed to set up SDL!" << endl;
-            Fatal::exit(Fatal::SDL_INITIALIZATION_FAILED);
-        }
-        GlobalState::windowHandle = SDL_CreateWindow(settings.misc.windowTitleBase.c_str(), settings.graphics.windowWidth, settings.graphics.windowHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_HIGH_PIXEL_DENSITY);
-        if (GlobalState::windowHandle == nullptr) {
-            lerr << "[Main] Failed to create SDL window: " << SDL_GetError() << endl;
-            SDL_Quit();
-            Fatal::exit(Fatal::SDL_CREATE_WINDOW_FAILED);
-        }
-        auto* icon = IMG_Load("assets/icons/CherryGrove-trs-64.png");
-        if (icon != nullptr) SDL_SetWindowIcon(GlobalState::windowHandle, icon);
-        else lerr << "[Main] Load window icon data failed!" << endl;
-        SDL_DestroySurface(icon);
+        Window::initMainWindow(settings.misc.windowTitleBase.c_str(), settings.graphics.windowWidth, settings.graphics.windowHeight, "assets/icons/CherryGrove-trs-64.png");
 
     //Initialize InputHandler
         InputHandler::init();

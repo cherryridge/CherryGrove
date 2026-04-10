@@ -14,6 +14,7 @@
 #include "../../input/inputPipeline.hpp"
 #include "../../simulation/Simulation.hpp"
 #include "../../util/os/platform.hpp"
+#include "../../window.hpp"
 #include "../gui/Gui.hpp"
 #include "../shader/ShaderPool.hpp"
 #include "../texture/TexturePool.hpp"
@@ -23,14 +24,14 @@ namespace Renderer {
     typedef int32_t i32;
     typedef uint32_t u32;
     typedef uint64_t u64;
-    using std::array, std::thread, std::atomic, std::this_thread::yield, std::memory_order_acquire, std::memory_order_release,  Simulation::playerEntity, bgfx::VertexBufferHandle, bgfx::VertexLayout, bgfx::IndexBufferHandle, bgfx::Init, bgfx::PlatformData, bgfx::Attrib, bgfx::AttribType, bgfx::createVertexBuffer, bgfx::createIndexBuffer, bgfx::makeRef;
+    using std::array, std::thread, std::atomic, std::this_thread::yield, std::memory_order_acquire, std::memory_order_release,  Simulation::playerEntity;
     static void renderLoop() noexcept;
 
     atomic<bool> initialized {false};
     WindowInfoCache cache;
 
-    static VertexBufferHandle vertexBuffer;
-    static IndexBufferHandle indexBuffer;
+    static bgfx::VertexBufferHandle vertexBuffer;
+    static bgfx::IndexBufferHandle indexBuffer;
     static thread rendererThread;
 
     void init() noexcept {
@@ -41,27 +42,23 @@ namespace Renderer {
     void shutdown() noexcept { rendererThread.join(); }
 
     static void bgfx_SP_TP_init() noexcept {
-        Init config;
-        PlatformData pdata;
-        auto propertyHandle = SDL_GetWindowProperties(GlobalState::windowHandle);
+        bgfx::Init config;
+        config.platformData.nwh = Window::getPlatformHandle(Window::getMainWindow());
+        const auto propertyHandle = SDL_GetWindowProperties(Window::getMainWindow());
         #if CG_PLATFORM_WINDOWS
-            pdata.ndt = nullptr;
-            pdata.nwh = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
+            config.platformData.ndt = nullptr;
         #elif CG_PLATFORM_LINUX
             const char* sessionType = secure_getenv("XDG_SESSION_TYPE");
             if ((sessionType && strcmp(sessionType, "wayland") == 0) || getenv("WAYLAND_DISPLAY")) {
-                pdata.ndt = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, nullptr);
-                pdata.nwh = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_WAYLAND_EGL_WINDOW_POINTER, nullptr);
-                pdata.type = bgfx::NativeWindowHandleType::Wayland;
+                config.platformData.ndt = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, nullptr);
+                config.platformData.type = bgfx::NativeWindowHandleType::Wayland;
             }
             else{
-                pdata.ndt = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr);
-                pdata.nwh = reinterpret_cast<void*>(SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, nullptr));
-                pdata.type = bgfx::NativeWindowHandleType::Default;
+                config.platformData.ndt = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr);
+                config.platformData.type = bgfx::NativeWindowHandleType::Default;
             }
         #elif CG_PLATFORM_MACOS
-            pdata.ndt = nullptr;
-            pdata.nwh = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);
+            config.platformData.ndt = nullptr;
         #elif CG_PLATFORM_ANDROID
             Fatal::exit(Fatal::MISC_UNSUPPORTED_PLATFORM);
         #elif CG_PLATFORM_IOS
@@ -72,11 +69,10 @@ namespace Renderer {
         //Let bgfx select the adapter automatically.
         config.vendorId = BGFX_PCI_ID_NONE;
         i32 width, height;
-        SDL_GetWindowSize(GlobalState::windowHandle, &width, &height);
+        SDL_GetWindowSize(Window::getMainWindow(), &width, &height);
         config.resolution.width = width;
         config.resolution.height = height;
         config.resolution.reset = BGFX_RESET_VSYNC;
-        config.platformData = pdata;
         if (!bgfx::init(config)) {
             lerr << "[Renderer] Failed to initialize bgfx!" << endl;
             Fatal::exit(Fatal::BGFX_INITIALIZATION_FAILED);
@@ -88,10 +84,10 @@ namespace Renderer {
         TexturePool::init();
 
     //Initialize vertex layout
-        VertexLayout layout;
-        layout.begin().add(Attrib::Position, 3, AttribType::Float, true).add(Attrib::TexCoord0, 2, AttribType::Float, true).end();
-        vertexBuffer = createVertexBuffer(makeRef(&blockVerticesTemplate, sizeof(blockVerticesTemplate)), layout);
-        indexBuffer = createIndexBuffer(makeRef(&blockIndicesTemplate, sizeof(blockIndicesTemplate)));
+        bgfx::VertexLayout layout;
+        layout.begin().add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float, true).add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float, true).end();
+        vertexBuffer = createVertexBuffer(bgfx::makeRef(&blockVerticesTemplate, sizeof(blockVerticesTemplate)), layout);
+        indexBuffer = createIndexBuffer(bgfx::makeRef(&blockIndicesTemplate, sizeof(blockIndicesTemplate)));
     }
 
     static void renderLoop() noexcept {
@@ -101,15 +97,15 @@ namespace Renderer {
         bgfx_SP_TP_init();
         Gui::init();
         initialized.store(true, memory_order_release);
-        SDL_GetWindowSize(GlobalState::windowHandle, &cache.width, &cache.height);
-        cache.aspectRatio = SDL_GetWindowDisplayScale(GlobalState::windowHandle);
+        SDL_GetWindowSize(Window::getMainWindow(), &cache.width, &cache.height);
+        cache.aspectRatio = SDL_GetWindowDisplayScale(Window::getMainWindow());
         bgfx::reset(cache.width, cache.height, BGFX_RESET_VSYNC);
         while (GlobalState::isCGAlive) {
         //Prepare for rendering
             //Refresh windowHandle size
             //if (sizeUpdateSignal) {
-            //    SDL_GetWindowSize(GlobalState::windowHandle, &cache.width, &cache.height);
-            //    cache.aspectRatio = SDL_GetWindowDisplayScale(GlobalState::windowHandle);
+            //    SDL_GetWindowSize(Window::getMainWindow(), &cache.width, &cache.height);
+            //    cache.aspectRatio = SDL_GetWindowDisplayScale(Window::getMainWindow());
             //    bgfx::reset(cache.width, cache.height);
             //    sizeUpdateSignal = false;
             //}
@@ -134,12 +130,13 @@ namespace Renderer {
                 //todo:
             //Render entities
 
-                bgfx::submit()
+                //bgfx::submit();
             }
             else bgfx::touch(gameViewId);
         //end
             bgfx::frame();
         //Process input events
+            //todo: I think this part is outdated. Review this.
             const u64 nextFrame = InputHandler::nextFrame_M.load(memory_order_acquire);
             while(true) {
                 const auto* ptr = InputHandler::inputQueue_M2R.peek();

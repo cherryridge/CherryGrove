@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <atomic>
-#include <SDL3/SDL.h>
 
 namespace GlobalState {
     using std::atomic;
@@ -11,6 +10,4 @@ namespace GlobalState {
 
     //This is mainly used to control Logger's behavior.
     inline atomic<bool> multiThreadEra{false};
-
-    inline SDL_Window* windowHandle{nullptr};
 }
