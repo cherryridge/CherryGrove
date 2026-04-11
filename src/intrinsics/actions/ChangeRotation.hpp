@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include <atomic>
 
-#include "../../components/entity/Rotation.hpp"
 #include "../../input/mouseMove/MMAction.hpp"
 #include "../../input/Action.hpp"
 #include "../../simulation/Simulation.hpp"
+#include "../../systems/Rotation.hpp"
 
 namespace IntrinsicInput {
     using std::atomic, Util::SlotTable, InputHandler::ActionHandle, InputHandler::EventControlFlags, InputHandler::MouseMove::MouseMoveAction, InputHandler::MouseMove::EventwiseInfo_MM;

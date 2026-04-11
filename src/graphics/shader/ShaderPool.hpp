@@ -13,7 +13,7 @@ namespace ShaderPool {
     MAKE_DISTINCT_HANDLE(ShaderPoolHandle);
 
     namespace detail {
-        inline SlotTable<bgfx::ProgramHandle, ShaderPoolHandle> registry2;
+        inline SlotTable<bgfx::ProgramHandle, ShaderPoolHandle> registry;
 
         //This is a critical function so we always panic if it fails.
         [[nodiscard]] inline bgfx::ShaderHandle loadShader(const ShaderDef& shaderDef) noexcept {
@@ -80,16 +80,16 @@ namespace ShaderPool {
     inline void init() noexcept {}
 
     inline void shutdown() noexcept {
-        for (const auto& programHandle : detail::registry2) bgfx::destroy(programHandle);
+        for (const auto& programHandle : detail::registry) bgfx::destroy(programHandle);
     }
 
     [[nodiscard]] inline ShaderPoolHandle addShader(const ShaderSetDef& shaderSetDef) noexcept {
         const auto programHandle = detail::loadShaderSet(shaderSetDef);
-        return detail::registry2.emplace(programHandle);
+        return detail::registry.emplace(programHandle);
     }
 
     [[nodiscard]] inline bgfx::ProgramHandle getShader(ShaderPoolHandle handle) noexcept {
-        const auto* p = detail::registry2.get(handle);
+        const auto* p = detail::registry.get(handle);
         if (p == nullptr) {
             lerr << "[ShaderPool] Failed to get shader " << handle << "!" << endl;
             Fatal::exit(Fatal::BGFX_GET_SHADER_FAILED);
@@ -98,10 +98,10 @@ namespace ShaderPool {
     }
 
     [[nodiscard]] inline bool removeShader(ShaderPoolHandle handle) noexcept {
-        const auto* p = detail::registry2.get(handle);
+        const auto* p = detail::registry.get(handle);
         if (p == nullptr) return false;
         bgfx::destroy(*p);
-        static_cast<void>(detail::registry2.destroy(handle));
+        static_cast<void>(detail::registry.destroy(handle));
         return true;
     }
 }

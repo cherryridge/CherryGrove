@@ -12,7 +12,7 @@ namespace Components {
     typedef uint64_t u64;
     using std::array, std::vector, Renderer::Vertex;
 
-    //Chunk size: 2^5 = 32, which will probably not change during the whole lifecycle of the game software itself, but we have to be extra aware, so we don't hardcode it anywhere else.
+    //Chunk size: 2^5 = 32, which will probably not change during the whole lifecycle of CherryGrove itself, but we have to be extra aware, so we don't hardcode it anywhere else.
     inline constexpr u8 CHUNK_SIZE_MAGNITUDE = 5;
     inline constexpr u64 CHUNK_SIZE = 1ull << CHUNK_SIZE_MAGNITUDE;
     inline constexpr u64 CHUNK_LAYER_BLOCK_COUNT = CHUNK_SIZE * CHUNK_SIZE;

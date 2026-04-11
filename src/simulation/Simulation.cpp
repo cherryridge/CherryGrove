@@ -1,9 +1,11 @@
 ﻿#include <atomic>
 #include <chrono>
-#include <mutex>
 #include <thread>
 #include <entt/entt.hpp>
 
+#include "../components/Camera.hpp"
+#include "../components/Coordinates.hpp"
+#include "../components/Rotation.hpp"
 #include "../debug/Logger.hpp"
 #include "../graphics/gui/Gui.hpp"
 #include "../input/InputHandler.hpp"
@@ -12,24 +14,22 @@
 #include "../intrinsics/actions/ChangeRotation.hpp"
 #include "../intrinsics/actions/Movement.hpp"
 #include "../main/hold.hpp"
+#include "registry.hpp"
 #include "Simulation.hpp"
 
 namespace Simulation {
-    using std::atomic, std::memory_order_acquire, std::memory_order_release, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::BoolInputKind, InputHandler::MouseMove::SubKind, Util::BitField;
+    typedef uint64_t u64;
+    using std::atomic, std::memory_order_acquire, std::memory_order_release, std::thread, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::BoolInputKind, InputHandler::MouseMove::SubKind, Util::BitField;
     using namespace std::chrono_literals;
-    using namespace std::this_thread;
     static void gameLoop() noexcept;
     static void tick() noexcept;
 
     atomic<bool> gameStarted{false}, gamePaused{false};
+    atomic<float> perf_MSPT{0.0f};
+    atomic<u64> processingTick{0};
 
-    atomic<float> currentTPS{0.0f}, currentMSPT{0.0f}, maxTPS{20.0f};
-
-    thread gameThread;
-    registry gameRegistry;
-    entt::entity playerEntity;
-    mutex registryMutex, playerMutex;
-    InputHandler::ActionID forward, backward, left, right, up, down, moveCamera;
+    static thread gameThread;
+    static InputHandler::ActionID forward, backward, left, right, up, down, moveCamera;
 
     //threaded: Main thread
     void start() noexcept {
@@ -56,11 +56,10 @@ namespace Simulation {
         gameThread = thread(gameLoop);
 
         //Temporary code to spawn player entity
-        using namespace Components;
-        playerEntity = gameRegistry.create();
-        gameRegistry.emplace<CameraComp>(playerEntity, 60.0f);
-        gameRegistry.emplace<CoordinatesComp>(playerEntity, -0.2, -0.5, 1.0, 0u);
-        gameRegistry.emplace<RotationComp>(playerEntity, 90.0, 0.0);
+        const entt::entity playerEntity = registry.create();
+        registry.emplace<Components::Camera>(playerEntity, 60.0f);
+        registry.emplace<Components::EntityCoordinates>(playerEntity, -0.2, -0.5, 1.0, 0u);
+        registry.emplace<Components::Rotation>(playerEntity, 90.0, 0.0);
     }
 
     //threaded: Main thread
@@ -71,7 +70,7 @@ namespace Simulation {
 
         //Clear resources
         gameThread.join();
-        gameRegistry.clear();
+        registry.clear();
 
         //Clear input callbacks
         Main::runOnMainThread.enqueue([]() noexcept {
@@ -97,24 +96,32 @@ namespace Simulation {
         lout << "Game" << flush;
         lout << "Hello from game loop!" << endl;
         while (gameStarted.load(memory_order_acquire)) {
-            auto startTime = steady_clock::now();
+            const auto startTime = steady_clock::now();
             if (!gamePaused.load(memory_order_acquire)) tick();
-            auto endTime = steady_clock::now();
-            auto elapsedTime = duration_cast<microseconds>(endTime - startTime);
-            if (elapsedTime < 20000us) sleep_for(20000us - elapsedTime);
+            const auto endTime = steady_clock::now();
+            const auto elapsedTime = duration_cast<microseconds>(endTime - startTime);
+            perf_MSPT.store(elapsedTime.count() / 1000.0f, memory_order_release);
+            if (elapsedTime < 20000us) std::this_thread::sleep_for(20000us - elapsedTime);
         }
         lout << "Game loop terminated!" << endl;
     }
 
     static void tick() noexcept {
-    //Process player input
+    //1. Update global state and wait for Renderer to finish (if it's not finished already)
+        processingTick.fetch_add(1, memory_order_release);
+
+    //2. Send start signal to all region threads
+
+    //3. Wait for all region threads to finish
+
+    //4. Invoke Renderer to render the state
+
+    //5. Update loading zones
+
+    //6. Save to disk
+
+    //7. Process player input
         InputHandler::processTrigger();
         InputHandler::processPersist();
-    //Update world
-        unique_lock lock(registryMutex);
-        //Simulates tick
-        sleep_for(10ms);
-    //Unblock Renderer thread to allow render
-        lock.unlock();
     }
 }

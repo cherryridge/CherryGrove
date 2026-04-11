@@ -11,6 +11,7 @@ namespace Util::Json {
         TextureDefinition,
         BlockGeometry,
         EntityDefinition,
+        EntityGeometry,
         Count
     };
 }

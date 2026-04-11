@@ -27,7 +27,7 @@ namespace Sound {
     static void audioLoop() noexcept;
 
     atomic<bool> initialized{false};
-    u64 perf_LoopTimeUs{0};
+    u64 perf_audioUSPT{0};
     unique_ptr<Soloud> soLoudInstance;
     SlotTableForAudio<SoundHandle, SoundSource> soundRegistry;
     SlotTableForAudio<PlayHandle, PlayInfo> playRegistry;
@@ -302,7 +302,7 @@ namespace Sound {
         //Update 3D audio if needed.
             if (shouldUpdate3D) soLoudInstance->update3dAudio();
             const auto endTime = steady_clock::now();
-            perf_LoopTimeUs = duration_cast<microseconds>(endTime - startTime).count();
+            perf_audioUSPT = duration_cast<microseconds>(endTime - startTime).count();
         }
         lout << "Terminating audio thread!" << endl;
         initialized.store(false, memory_order_release);

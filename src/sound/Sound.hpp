@@ -10,7 +10,7 @@ namespace Sound {
     typedef uint64_t u64;
     using std::atomic, Components::CoordinatesComp, Components::RotationComp, Components::VelocityComp;
 
-    extern u64 perf_LoopTimeUs;
+    extern u64 perf_audioUSPT;
     extern atomic<bool> initialized;
 
     inline constexpr u32 MAX_DEQUEUE_PER_LOOP = 16, MAX_GC_PER_LOOP = 64;
