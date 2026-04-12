@@ -14,7 +14,7 @@
 #include "../intrinsics/actions/ChangeRotation.hpp"
 #include "../intrinsics/actions/Movement.hpp"
 #include "../main/hold.hpp"
-#include "registry.hpp"
+#include "registries.hpp"
 #include "Simulation.hpp"
 
 namespace Simulation {
