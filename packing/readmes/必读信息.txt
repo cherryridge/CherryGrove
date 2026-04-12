@@ -5,7 +5,7 @@ logs：存放 CherryGrove 运行日志的目录。如果遇到错误，这些文
 packs：存放内容包的目录。允许放入文件夹、.zip 压缩包或者 .7z 压缩包。放入文件夹时，请保证在文件夹中直接包含内容包的 manifest.json；放入压缩包时，请保证在压缩包根目录下有内容包的 manifest.json，否则内容包将无法被识别。
 saves：存放存档的目录。
 shaders：存放 CherryGrove 基本运行所需要的着色器的目录，不是用来放置内容包的，不要随意修改。
-test（可能不存在）：存放开发版 CherryGrove 的测试用途文件，需要了解代码中的测试内容才能正确使用该文件夹。
+tests（可能不存在）：存放开发版 CherryGrove 的测试用途文件，需要了解代码中的测试内容才能正确使用该文件夹。
 
 文件介绍：
 CherryGrove.exe：CherryGrove 软件。

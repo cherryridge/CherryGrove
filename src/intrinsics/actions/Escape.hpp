@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include <atomic>
 
-#include "../../globalState.hpp"
 #include "../../input/Action.hpp"
 #include "../../input/boolInput/BIAction.hpp"
 #include "../../globalState.hpp"

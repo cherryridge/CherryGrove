@@ -37,8 +37,7 @@ namespace Util {
             tail++;
         }
 
-        //It's only meant to be peeked, not actually used.
-        [[nodiscard]] const EntryType* const peek() noexcept {
+        [[nodiscard]] const EntryType* peek() noexcept {
             Entry& entry = storage[head & (size - 1)];
             //Empty
             if (!entry.ready.load(memory_order_acquire)) return nullptr;
@@ -104,8 +103,7 @@ namespace Util {
             entry.ready.store(true, memory_order_release);
         }
 
-        //It's only meant to be peeked, not actually used.
-        [[nodiscard]] const EntryType* const peek() noexcept {
+        [[nodiscard]] const EntryType* peek() noexcept {
             Entry& entry = storage[head & (size - 1)];
             //Empty
             if (!entry.ready.load(memory_order_acquire)) return nullptr;
@@ -171,8 +169,7 @@ namespace Util {
             tail++;
         }
 
-        //OK. Don't peek then.
-        //—We can't promise the pointer remains valid because there are multiple consumers.
+        //Just don't peek. It's not thread-safe at all across all consumer threads.
 
         [[nodiscard]] bool dequeue(EntryType& data) noexcept {
             u64 pos = head.fetch_add(1, memory_order_acquire);

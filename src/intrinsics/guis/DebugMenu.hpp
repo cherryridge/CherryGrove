@@ -1,27 +1,27 @@
 ﻿#pragma once
 #include <atomic>
 #include <format>
-#include <string>
 #include <imgui.h>
 
-#include "../../components/Components.hpp"
-#include "../../graphics/gui/GuiUtils.hpp"
+#include "../../components/Coordinates.hpp"
+#include "../../components/Rotation.hpp"
+#include "../../graphics/gui/util.hpp"
+#include "../../simulation/playerEntity.hpp"
+#include "../../simulation/registries.hpp"
 #include "../../simulation/Simulation.hpp"
 
 namespace Gui::DebugMenu {
-    using namespace ImGui;
-    using namespace GuiUtils;
-    using std::memory_order_acquire, std::format, std::string, std::to_string;
+    using std::memory_order_acquire, std::format, std::to_string;
 
     inline void render() noexcept {
-        tlWindow("DebugMenu");
+        Gui::Util::tlWindow("DebugMenu", true);
         if (Simulation::gameStarted.load(memory_order_acquire)) {
-            auto& coords = Simulation::gameRegistry.get<Components::CoordinatesComp>(Simulation::playerEntity);
-            TextUnformatted(format("({}, {}, {})", coords.x, coords.y, coords.z).c_str());
-            auto& rotation = Simulation::gameRegistry.get<Components::RotationComp>(Simulation::playerEntity);
-            TextUnformatted(format("Yaw: {}, Pitch: {}", rotation.yaw, rotation.pitch).c_str());
+            const auto& coords = Simulation::registry.get<Components::EntityCoordinates>(Simulation::playerEntity);
+            ImGui::TextUnformatted(format("({}, {}, {})", coords.x, coords.y, coords.z).c_str());
+            const auto& rotation = Simulation::registry.get<Components::Rotation>(Simulation::playerEntity);
+            ImGui::TextUnformatted(format("Yaw: {}, Pitch: {}", rotation.yaw, rotation.pitch).c_str());
         }
-        else TextUnformatted("Game stopped.");
-        endWindow();
+        else ImGui::TextUnformatted("Game stopped.");
+        Gui::Util::endWindow(true);
     }
 }

@@ -25,10 +25,8 @@ namespace InputHandler {
         bool wantCaptureMouse{false}, wantCaptureKeyboard{false}, wantTextInput{false}, wantSetMousePos{false};
     };
 
-    //inline atomic<shared_ptr<const FramedSDLEvents>> current{shared_ptr<const FramedSDLEvents>(new FramedSDLEvents{0, {}})};
-    //inline FramedSDLEvents buffer_M{0, {}};
-    inline SPSCQueue<FramedImGuiFlags> flagQueue_R2S;
     inline SPSCQueue<FramedSDLEvents> inputQueue_M2R, inputQueue_M2S;
+    inline SPSCQueue<FramedImGuiFlags> flagQueue_R2S;
 
     //threaded: Written by Main thread, read by Renderer and Simulation.
     inline atomic<u64> nextFrame_M{0};

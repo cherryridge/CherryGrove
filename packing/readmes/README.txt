@@ -5,7 +5,7 @@ logs: Stores logs of CherryGrove. Maybe useful for reporting bugs.
 packs: Stores content packs. Here is the place to add packs to CherryGrove, in format of folder or .zip/.7z archive. Ensure that manifest.json of the pack is one folder away from packs folder.
 saves: Stores CherryGrove worlds.
 shaders: Stores shaders necessary for CherryGrove to run. Not for adding shader packs. Add them to packs folder instead. Don't modify.
-test (may not exist): Stores test files for the development version of CherryGrove.
+tests (may not exist): Stores test files for the development version of CherryGrove.
 
 File Introduction:
 CherryGrove.exe: CherryGrove program.

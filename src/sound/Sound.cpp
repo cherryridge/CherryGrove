@@ -23,7 +23,7 @@
 
 //threaded: Audio Thread
 namespace Sound {
-    using std::atomic, std::this_thread::yield, std::atomic_ref, std::memory_order_acquire, std::memory_order_release, std::thread, std::unique_ptr, std::make_unique, std::vector, SoLoud::SO_NO_ERROR, SoLoud::Soloud, Components::CoordinatesComp, Components::RotationComp, Components::VelocityComp, glm::radians, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, Util::MPSCQueue;
+    using std::atomic, std::this_thread::yield, std::atomic_ref, std::memory_order_acquire, std::memory_order_release, std::thread, std::unique_ptr, std::make_unique, std::vector, SoLoud::SO_NO_ERROR, SoLoud::Soloud, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, Util::MPSCQueue;
     static void audioLoop() noexcept;
 
     atomic<bool> initialized{false};
@@ -44,9 +44,9 @@ namespace Sound {
 
 //Global State
 
-    void updateListenerPosition(const CoordinatesComp& position) noexcept { commandQueue.enqueue(GlobalPosition(position)); }
-    void updateListenerRotation(const RotationComp& rotation) noexcept { commandQueue.enqueue(GlobalRotation(rotation)); }
-    void updateListenerVelocity(const VelocityComp& velocity) noexcept { commandQueue.enqueue(GlobalVelocity(velocity)); }
+    void updateListenerPosition(const Components::EntityCoordinates& position) noexcept { commandQueue.enqueue(GlobalPosition(position)); }
+    void updateListenerRotation(const Components::Rotation& rotation) noexcept { commandQueue.enqueue(GlobalRotation(rotation)); }
+    void updateListenerVelocity(const Components::Velocity& velocity) noexcept { commandQueue.enqueue(GlobalVelocity(velocity)); }
     void updateSoundSpeed(float speed) noexcept { commandQueue.enqueue(speed); }
 
 //SoundSource
@@ -71,7 +71,7 @@ namespace Sound {
 
 //PlayInfo
 
-    PlayHandle play(SoundHandle soundHandle, const CoordinatesComp& position, const VelocityComp& velocity, u32 playCount, float iniProgress, float pitch, float playSpeed) noexcept {
+    PlayHandle play(SoundHandle soundHandle, const Components::EntityCoordinates& position, const Components::Velocity& velocity, u32 playCount, float iniProgress, float pitch, float playSpeed) noexcept {
         atomic<bool> finished{false};
         PlayHandle result{GenerationalHandle(0)};
         commandQueue.enqueue(Play(soundHandle, position, velocity, iniProgress, pitch, playSpeed, result, finished, playCount));
@@ -107,7 +107,7 @@ namespace Sound {
         return success;
     }
 
-    bool updateSourcePosition(PlayHandle handle, const CoordinatesComp& position) noexcept {
+    bool updateSourcePosition(PlayHandle handle, const Components::EntityCoordinates& position) noexcept {
         atomic<bool> finished{false};
         bool success = false;
         commandQueue.enqueue(SourcePosition(handle, position, success, finished));
@@ -116,7 +116,7 @@ namespace Sound {
         return success;
     }
 
-    bool updateSourceVelocity(PlayHandle handle, const VelocityComp& velocity) noexcept {
+    bool updateSourceVelocity(PlayHandle handle, const Components::Velocity& velocity) noexcept {
         atomic<bool> finished{false};
         bool success = false;
         commandQueue.enqueue(SourceVelocity(handle, velocity, success, finished));
@@ -219,9 +219,9 @@ namespace Sound {
                 }
                 case Command::Type::GlobalRotation: {
                     soLoudInstance->set3dListenerAt(
-                        static_cast<float>(sin(radians(command.globalRotation.rotation.yaw)) * cos(radians(command.globalRotation.rotation.pitch))),
-                        static_cast<float>(sin(radians(command.globalRotation.rotation.pitch))),
-                        static_cast<float>(cos(radians(command.globalRotation.rotation.yaw)) * cos(radians(command.globalRotation.rotation.pitch)))
+                        static_cast<float>(glm::sin(glm::radians(command.globalRotation.rotation.yaw)) * glm::cos(glm::radians(command.globalRotation.rotation.pitch))),
+                        static_cast<float>(-glm::sin(glm::radians(command.globalRotation.rotation.pitch))),
+                        static_cast<float>(glm::cos(glm::radians(command.globalRotation.rotation.yaw)) * glm::cos(glm::radians(command.globalRotation.rotation.pitch)))
                     );
                     shouldUpdate3D = true;
                     break;

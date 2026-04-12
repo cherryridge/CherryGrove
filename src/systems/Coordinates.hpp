@@ -6,18 +6,18 @@
 #include "../components/Coordinates.hpp"
 #include "../components/EntityMovementProperties.hpp"
 #include "../components/Rotation.hpp"
+#include "../simulation/registries.hpp"
 
 namespace Systems {
     typedef uint32_t u32;
     typedef int64_t i64;
 
-    [[nodiscard]] inline bool updateEntityCoordinates(
-        entt::registry& registry, entt::entity entity,
+    [[nodiscard]] inline bool updateEntityCoordinates(entt::entity entity,
         bool updateX,    bool updateY,    bool updateZ,
         double nx = 0.0, double ny = 0.0, double nz = 0.0
     ) noexcept {
-        if (registry.all_of<Components::EntityCoordinates>(entity)) {
-            registry.patch<Components::EntityCoordinates>(entity, [updateX, updateY, updateZ, nx, ny, nz](Components::EntityCoordinates& coordinates) noexcept {
+        if (Simulation::registry.all_of<Components::EntityCoordinates>(entity)) {
+            Simulation::registry.patch<Components::EntityCoordinates>(entity, [updateX, updateY, updateZ, nx, ny, nz](Components::EntityCoordinates& coordinates) noexcept {
                 if (updateX) coordinates.x = nx;
                 if (updateY) coordinates.y = ny;
                 if (updateZ) coordinates.z = nz;
@@ -27,13 +27,12 @@ namespace Systems {
         return false;
     }
 
-    [[nodiscard]] inline bool updateBlockCoordinates(
-        entt::registry& registry, entt::entity entity,
+    [[nodiscard]] inline bool updateBlockCoordinates(entt::entity entity,
         bool updateX, bool updateY, bool updateZ,
         i64 nx = 0,   i64 ny = 0,   i64 nz = 0
     ) noexcept {
-        if (registry.all_of<Components::BlockCoordinates>(entity)) {
-            registry.patch<Components::BlockCoordinates>(entity, [updateX, updateY, updateZ, nx, ny, nz](Components::BlockCoordinates& coordinates) noexcept {
+        if (Simulation::registry.all_of<Components::BlockCoordinates>(entity)) {
+            Simulation::registry.patch<Components::BlockCoordinates>(entity, [updateX, updateY, updateZ, nx, ny, nz](Components::BlockCoordinates& coordinates) noexcept {
                 if (updateX) coordinates.x = nx;
                 if (updateY) coordinates.y = ny;
                 if (updateZ) coordinates.z = nz;
@@ -43,14 +42,13 @@ namespace Systems {
         return false;
     }
 
-    [[nodiscard]] inline bool fly(
-        entt::registry& registry, entt::entity entity,
+    [[nodiscard]] inline bool fly(entt::entity entity,
         glm::vec3 direction, u32 deltaTicks = 1
     ) noexcept {
-        if (registry.all_of<Components::EntityCoordinates, Components::Rotation, Components::EntityMovementProperties>(entity)) {
-            const auto& rotation = registry.get<Components::Rotation>(entity);
-            const auto& movementProps = registry.get<Components::EntityMovementProperties>(entity);
-            registry.patch<Components::EntityCoordinates>(entity, [direction, rotation, &movementProps, deltaTicks](Components::EntityCoordinates& coords) {
+        if (Simulation::registry.all_of<Components::EntityCoordinates, Components::Rotation, Components::EntityMovementProperties>(entity)) {
+            const auto& rotation = Simulation::registry.get<Components::Rotation>(entity);
+            const auto& movementProps = Simulation::registry.get<Components::EntityMovementProperties>(entity);
+            Simulation::registry.patch<Components::EntityCoordinates>(entity, [direction, rotation, &movementProps, deltaTicks](Components::EntityCoordinates& coords) {
                 if (movementProps.canFly) {
                     const double
                         yawRad = glm::radians(rotation.yaw),

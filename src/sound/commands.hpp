@@ -4,13 +4,15 @@
 #include <soloud/soloud_wav.h>
 #include <soloud/soloud_wavstream.h>
 
-#include "../components/Components.hpp"
+#include "../components/Coordinates.hpp"
+#include "../components/Rotation.hpp"
+#include "../components/Velocity.hpp"
 #include "enums.hpp"
 #include "types.hpp"
 
 namespace Sound {
     typedef uint32_t u32;
-    using std::atomic, std::move, glm::vec3, SoLoud::Wav, SoLoud::WavStream, Components::CoordinatesComp, Components::VelocityComp, Components::RotationComp;
+    using std::atomic, std::move, glm::vec3, SoLoud::Wav, SoLoud::WavStream;
 
     //todo: Actually use the `fastPlay` parameter: Obviously it's not being used yet.
     //This flag is provided for high performance small sounds that need to be played with minimal latency, such as UI sound effects.
@@ -49,7 +51,7 @@ namespace Sound {
         PlayHandle& result;
         atomic<bool>& finished;
 
-        Play(SoundHandle soundHandle, const CoordinatesComp& position, const VelocityComp& velocity, float iniProgress, float pitch, float playSpeed, PlayHandle& result, atomic<bool>& finished, u32 playCount) noexcept : soundHandle(soundHandle), position(position), velocity(velocity), iniProgress(iniProgress), pitch(pitch), playSpeed(playSpeed), playCount(playCount), result(result), finished(finished) {}
+        Play(SoundHandle soundHandle, const Components::EntityCoordinates& position, const Components::Velocity& velocity, float iniProgress, float pitch, float playSpeed, PlayHandle& result, atomic<bool>& finished, u32 playCount) noexcept : soundHandle(soundHandle), position(position.x, position.y, position.z), velocity(velocity.dx, velocity.dy, velocity.dz), iniProgress(iniProgress), pitch(pitch), playSpeed(playSpeed), playCount(playCount), result(result), finished(finished) {}
         Play(const Play&) noexcept = default;
         ~Play() = default;
     };
@@ -86,47 +88,47 @@ namespace Sound {
     };
 
     struct GlobalPosition {
-        const CoordinatesComp& position;
+        const Components::EntityCoordinates& position;
 
-        GlobalPosition(const CoordinatesComp& position) noexcept : position(position) {}
+        GlobalPosition(const Components::EntityCoordinates& position) noexcept : position(position) {}
         GlobalPosition(const GlobalPosition&) noexcept = default;
         ~GlobalPosition() = default;
     };
 
     struct GlobalRotation {
-        const RotationComp& rotation;
+        const Components::Rotation& rotation;
 
-        GlobalRotation(const RotationComp& rotation) noexcept : rotation(rotation) {}
+        GlobalRotation(const Components::Rotation& rotation) noexcept : rotation(rotation) {}
         GlobalRotation(const GlobalRotation&) noexcept = default;
         ~GlobalRotation() = default;
     };
 
     struct GlobalVelocity {
-        const VelocityComp& velocity;
+        const Components::Velocity& velocity;
 
-        GlobalVelocity(const VelocityComp& velocity) noexcept : velocity(velocity) {}
+        GlobalVelocity(const Components::Velocity& velocity) noexcept : velocity(velocity) {}
         GlobalVelocity(const GlobalVelocity&) noexcept = default;
         ~GlobalVelocity() = default;
     };
 
     struct SourcePosition {
         PlayHandle h;
-        const CoordinatesComp& position;
+        const Components::EntityCoordinates& position;
         bool& success;
         atomic<bool>& finished;
 
-        SourcePosition(PlayHandle h, const CoordinatesComp& position, bool& success, atomic<bool>& finished) noexcept : h(h), position(position), success(success), finished(finished) {}
+        SourcePosition(PlayHandle h, const Components::EntityCoordinates& position, bool& success, atomic<bool>& finished) noexcept : h(h), position(position), success(success), finished(finished) {}
         SourcePosition(const SourcePosition&) noexcept = default;
         ~SourcePosition() = default;
     };
 
     struct SourceVelocity {
         PlayHandle h;
-        const VelocityComp& velocity;
+        const Components::Velocity& velocity;
         bool& success;
         atomic<bool>& finished;
 
-        SourceVelocity(PlayHandle h, const VelocityComp& velocity, bool& success, atomic<bool>& finished) noexcept : h(h), velocity(velocity), success(success), finished(finished) {}
+        SourceVelocity(PlayHandle h, const Components::Velocity& velocity, bool& success, atomic<bool>& finished) noexcept : h(h), velocity(velocity), success(success), finished(finished) {}
         SourceVelocity(const SourceVelocity&) noexcept = default;
         ~SourceVelocity() = default;
     };

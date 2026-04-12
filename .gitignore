@@ -30,6 +30,6 @@ saves/
 !*/saves/
 packs/
 !*/packs/
-test/
-!*/test/
-/options.json
+tests/
+!*/tests/
+/settings.json

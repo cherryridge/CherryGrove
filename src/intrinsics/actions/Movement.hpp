@@ -1,16 +1,14 @@
 ﻿#pragma once
-#include <atomic>
 
-#include "../../components/entity/Coordinates.hpp"
 #include "../../input/Action.hpp"
 #include "../../input/boolInput/BIAction.hpp"
-#include "../../simulation/Simulation.hpp"
+#include "../../settings/Settings.hpp"
+#include "../../simulation/playerEntity.hpp"
+#include "../../systems/fly.hpp"
 #include "../../util/SlotTable.hpp"
 
 namespace IntrinsicInput {
-    using std::atomic, Util::SlotTable, InputHandler::ActionHandle, InputHandler::EventControlFlags, InputHandler::BoolInput::BoolInputAction, InputHandler::BoolInput::EventwiseInfo_BI;
-
-    inline atomic<double> moveSensitivity{0.1}, flySensitivity{0.2};
+    using Util::SlotTable, InputHandler::ActionHandle, InputHandler::EventControlFlags, InputHandler::BoolInput::BoolInputAction, InputHandler::BoolInput::EventwiseInfo_BI;
 
     inline void forward(const SlotTable<BoolInputAction, ActionHandle>& actionInfos, ActionHandle handle, const EventwiseInfo_BI& eventwiseInfo, EventControlFlags& flags) noexcept {
         Components::Coordinates::forwards(Simulation::playerEntity, moveSensitivity);

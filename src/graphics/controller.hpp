@@ -1,68 +1,44 @@
 ﻿#pragma once
-#include <cstdint>
-#include <bgfx/bgfx.h>
-#include <SDL3/SDL.h>
+#include <atomic>
+#include <thread>
 
-#include "../debug/Fatal.hpp" // IWYU pragma: keep
 #include "../debug/Logger.hpp"
-#include "../window.hpp"
-#include "backend/imgui_impl_bgfx.hpp"
+#include "gui/Gui.hpp"
+#include "renderer/Renderer.hpp"
+#include "shader/ShaderPool.hpp"
+#include "texture/TexturePool.hpp"
+#include "hold.hpp"
 
 namespace Graphics {
-    typedef int32_t i32;
+    typedef uint64_t u64;
+    using std::atomic, std::memory_order_release, std::memory_order_acquire, std::thread;
 
-    inline void initBgfx() noexcept {
-        bgfx::Init config;
-        config.platformData.nwh = Window::getPlatformHandle(Window::getMainWindow());
-        const auto propertyHandle = SDL_GetWindowProperties(Window::getMainWindow());
-    #if CG_PLATFORM_WINDOWS
-        config.platformData.ndt = nullptr;
-    #elif CG_PLATFORM_LINUX
-        const char* sessionType = secure_getenv("XDG_SESSION_TYPE");
-        if ((sessionType && strcmp(sessionType, "wayland") == 0) || getenv("WAYLAND_DISPLAY")) {
-            config.platformData.ndt = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, nullptr);
-            config.platformData.type = bgfx::NativeWindowHandleType::Wayland;
+    namespace detail {
+        inline atomic<bool> initialized{false};
+        inline thread graphicsThread;
+
+        inline void initGraphicsThread() noexcept {
+            lout << "Graphics" << flush;
+            lout << "Hello from the brand-new graphics thread!" << endl;
+            Renderer::init();
+            ShaderPool::init();
+            TexturePool::init();
+            Gui::init();
+            initialized.store(true, memory_order_release);
+            hold();
+            lout << "Terminating Graphics thread!" << endl;
+            initialized.store(false, memory_order_release);
+            Gui::shutdown();
+            TexturePool::shutdown();
+            ShaderPool::shutdown();
+            Renderer::shutdown();
         }
-        else{
-            config.platformData.ndt = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr);
-            config.platformData.type = bgfx::NativeWindowHandleType::Default;
-        }
-    #elif CG_PLATFORM_MACOS
-        config.platformData.ndt = nullptr;
-    #elif CG_PLATFORM_ANDROID
-        Fatal::exit(Fatal::MISC_UNSUPPORTED_PLATFORM);
-    #elif CG_PLATFORM_IOS
-        Fatal::exit(Fatal::MISC_UNSUPPORTED_PLATFORM);
-    #endif
-        //Let bgfx select the rendering backend automatically.
-        config.type = bgfx::RendererType::Count;
-        //Let bgfx select the adapter automatically.
-        config.vendorId = BGFX_PCI_ID_NONE;
-        i32 width, height;
-        SDL_GetWindowSize(Window::getMainWindow(), &width, &height);
-        config.resolution.width = width;
-        config.resolution.height = height;
-        config.resolution.reset = BGFX_RESET_VSYNC;
-        if (!bgfx::init(config)) {
-            lerr << "[Renderer] Failed to initialize bgfx!" << endl;
-            Fatal::exit(Fatal::BGFX_INITIALIZATION_FAILED);
-        }
-        lout << "Using rendering backend: " << bgfx::getRendererName(bgfx::getRendererType()) << endl;
-    }
-
-    inline void initImGui() noexcept {
-
-    }
-
-    inline void initRenderer() noexcept {
-
-    }
-
-    inline void initGui() noexcept {
-
     }
 
     inline void init() noexcept {
-        
+        detail::graphicsThread = thread(detail::initGraphicsThread);
+        for (u64 i = 0; !detail::initialized.load(memory_order_acquire); i++) if ((i & 0xFFull) == 0) std::this_thread::yield();
     }
+
+    inline void shutdown() noexcept { detail::graphicsThread.join(); }
 }

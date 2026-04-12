@@ -6,8 +6,8 @@
 #include "../debug/Logger.hpp"
 #include "../settings/Settings.hpp"
 #include "../util/concurrentQueue.hpp"
+#include "../window.hpp"
 #include "Action.hpp"
-#include "SDL3/SDL_events.h"
 #include "boolInput/boolInput.hpp"
 #include "gamepad/gamepad.hpp"
 #include "InputKind.hpp"
@@ -80,7 +80,7 @@ namespace InputHandler {
 
     void setPointerLocked(bool locked) noexcept {
         pointerLocked.store(locked, memory_order_release);
-        SDL_SetWindowRelativeMouseMode(GlobalState::windowHandle, locked);
+        SDL_SetWindowRelativeMouseMode(Window::getMainWindow(), locked);
     }
 
 //#endregion

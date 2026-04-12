@@ -2,18 +2,17 @@
 #include <string>
 #include <boost/container_hash/hash.hpp>
 
-#include "../../../util/string.hpp"
+#include "../util/macros.hpp"
+#include "../util/string.hpp"
 
-namespace EnttComps::Identity {
-    typedef uint64_t u64;
-    using std::string, boost::hash_combine;
+namespace Components {
+    using std::string;
 
-    //There is only one invalid state: colonPos == npos. Everything else is valid.
+    //There is only one invalid state: `colonPos == npos`. Everything else is valid.
     struct NameAndSpace {
         string data;
-        size_t colonPos;
+        size_t colonPos{string::npos};
 
-        [[nodiscard]] NameAndSpace() noexcept : data(""), colonPos(string::npos) {}
         [[nodiscard]] explicit NameAndSpace(const string& raw) noexcept : data(raw) {
             colonPos = data.find(':');
             if (!Util::isValidNameAndSpace(raw)) colonPos = string::npos;
@@ -23,8 +22,8 @@ namespace EnttComps::Identity {
             else colonPos = string::npos;
         }
 
-        [[nodiscard]] bool valid() const noexcept { return colonPos != string::npos; }
-        operator bool() const noexcept { return valid(); }
+        [[nodiscard]] bool isValid() const noexcept { return colonPos != string::npos; }
+        operator bool() const noexcept { return isValid(); }
 
         [[nodiscard]] string getName() const noexcept {
             if (colonPos == string::npos) return "";
@@ -36,15 +35,11 @@ namespace EnttComps::Identity {
             else return data.substr(0, colonPos);
         }
 
-        bool operator==(const NameAndSpace& other) const noexcept { return data == other.data; }
+        bool operator==(const NameAndSpace& other) const noexcept { return data == other.data && colonPos == other.colonPos; }
     };
 }
 
-namespace std {
-    template <>
-    struct hash<EnttComps::Identity::NameAndSpace> {
-        size_t operator()(const EnttComps::Identity::NameAndSpace& ns) const noexcept {
-            return hash<string>()(ns.data);
-        }
-    };
-}
+IMPL_HASH_FOR(Components, NameAndSpace, 555'555'555,
+    boost::hash_combine(seed, input.data);
+    boost::hash_combine(seed, input.colonPos);
+)

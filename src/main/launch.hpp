@@ -68,7 +68,7 @@ namespace Main {
         Sound::init();
 
         {//Debug: Play a.ogg
-            auto handle = Sound::addSound("test/a.ogg", true, true, 1.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
+            auto handle = Sound::addSound("tests/a.ogg", true, true, 1.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
             static_cast<void>(Sound::play(handle, {0.0, 0.0, 0.0}));
         }
 

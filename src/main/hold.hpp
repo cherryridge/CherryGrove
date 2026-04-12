@@ -8,6 +8,7 @@
 #include "../input/inputPipeline.hpp"
 #include "../settings/Settings.hpp"
 #include "../util/concurrentQueue.hpp"
+#include "../window.hpp"
 #include "shutdown.hpp"
 
 namespace Main {
@@ -32,7 +33,7 @@ namespace Main {
 
         //Populate new input frame
             for (frame.actualSize = 0; frame.actualSize < MAXIMUM_INPUT_EVENTS_PER_FRAME; frame.actualSize++) if (SDL_PollEvent(&event)) {
-                if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(GlobalState::windowHandle))) {
+                if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(Window::getMainWindow()))) {
                     GlobalState::isCGAlive.store(false, memory_order_release);
                     goto stop;
                 }
