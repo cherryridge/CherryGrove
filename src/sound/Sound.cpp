@@ -3,7 +3,6 @@
 #include <memory>
 #include <thread>
 #include <vector>
-#include <glm/glm.hpp>
 #include <soloud/soloud.h>
 #include <soloud/soloud_wav.h>
 #include <soloud/soloud_wavstream.h>
@@ -12,6 +11,7 @@
 #include "../debug/Logger.hpp"
 #include "../debug/Fatal.hpp"
 #include "../globalState.hpp"
+#include "../systems/Rotation.hpp"
 #include "../util/concurrentQueue.hpp"
 #include "../util/os/platform.hpp"
 #include "commands.hpp"
@@ -218,10 +218,11 @@ namespace Sound {
                     break;
                 }
                 case Command::Type::GlobalRotation: {
+                    const auto direction = Systems::getUnitVecFromRotation(command.globalRotation.rotation);
                     soLoudInstance->set3dListenerAt(
-                        static_cast<float>(glm::sin(glm::radians(command.globalRotation.rotation.yaw)) * glm::cos(glm::radians(command.globalRotation.rotation.pitch))),
-                        static_cast<float>(-glm::sin(glm::radians(command.globalRotation.rotation.pitch))),
-                        static_cast<float>(glm::cos(glm::radians(command.globalRotation.rotation.yaw)) * glm::cos(glm::radians(command.globalRotation.rotation.pitch)))
+                        direction.x,
+                        direction.y,
+                        direction.z
                     );
                     shouldUpdate3D = true;
                     break;

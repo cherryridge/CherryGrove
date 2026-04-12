@@ -47,7 +47,8 @@ namespace Systems {
         return false;
     }
 
-    [[nodiscard]] inline glm::vec3 getVecFromRotation(const Components::Rotation& rotation) noexcept {
+    // World-space normalized forward vector derived from yaw/pitch.
+    [[nodiscard]] inline glm::vec3 getUnitVecFromRotation(const Components::Rotation& rotation) noexcept {
         return glm::vec3(
             glm::sin(glm::radians(rotation.yaw)) * glm::cos(glm::radians(rotation.pitch)),
             -glm::sin(glm::radians(rotation.pitch)),
@@ -64,10 +65,8 @@ namespace Systems {
         const auto* rotation = registry.try_get<Components::Rotation>(entity);
         const auto* camera = registry.try_get<Components::Camera>(entity);
         if (coords && rotation && camera) {
-            glm::vec3 lookingAt = getVecFromRotation(*rotation);
             const glm::vec3 pos(coords->x, coords->y, coords->z);
-            //The normalized looking at coordinates.
-            lookingAt = pos + glm::normalize(lookingAt);
+            const glm::vec3 lookingAt = pos + getUnitVecFromRotation(*rotation);
             //Using two math libraries to do work is so dumb.
             bx::mtxLookAt(result.data(), reinterpret_cast<const bx::Vec3&>(pos), reinterpret_cast<const bx::Vec3&>(lookingAt), up, bx::Handedness::Right);
             return true;
