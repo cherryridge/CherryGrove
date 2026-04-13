@@ -13,9 +13,6 @@ namespace UmiJSON {
     typedef uint8_t u8;
     using std::span, std::vector, Util::Json::JSONKind, Util::Json::KindMeta, Util::FilePath, Util::OS::readFile, Util::OS::writeFile, Util::OS::ExistBehavior;
 
-    inline void init() noexcept {}
-    inline void shutdown() noexcept {}
-
     template <JSONKind kind>
     [[nodiscard]] inline bool readJSON(const span<const u8> data, typename KindMeta<kind>::LatestType& result) noexcept { return KindMeta<kind>::read(data, result); }
 

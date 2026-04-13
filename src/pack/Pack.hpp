@@ -8,10 +8,7 @@
 #include "../debug/Logger.hpp"
 #include "../settings/pack.hpp"
 #include "../settings/Settings.hpp"
-#include "../umi/frontend/lua/Luau.hpp"
-#include "../umi/frontend/js/V8.hpp"
-#include "../umi/frontend/json/JSON.hpp"
-#include "../umi/frontend/wasm/Wasmtime.hpp"
+#include "../umi/controller.hpp"
 #include "packFetcher.hpp"
 #include "PackMetaInfo.hpp"
 #include "registry.hpp"
@@ -27,11 +24,6 @@ namespace Pack {
         }
         //Just use additional packs/roots instead of symlinking all your packs to `/packs`. It's much safer.
         PHYSFS_permitSymbolicLinks(false);
-
-        UmiJSON::init();
-        UmiV8::init();
-        UmiLuau::init();
-        UmiWasmtime::init();
 
         const Latest<Settings>::Packs& packSettings = Settings::getSettings().packs;
         for (u64 i = 0; i < packSettings.knownPacks.size(); i++) detail::knownPacks.emplace(packSettings.knownPacks[i].id, packSettings.knownPacks[i]);
@@ -50,13 +42,12 @@ namespace Pack {
             lerr << "[Pack] Failed to update known packs." << endl;
             Fatal::exit(Fatal::SETTINGS_FAILED_TO_SAVE);
         }
+
+        Umi::init();
     }
 
     inline void shutdown() noexcept {
-        UmiWasmtime::shutdown();
-        UmiLuau::shutdown();
-        UmiV8::shutdown();
-        UmiJSON::shutdown();
+        Umi::shutdown();
         PHYSFS_deinit();
     }
 }

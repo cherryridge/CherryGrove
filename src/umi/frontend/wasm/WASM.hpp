@@ -1,21 +1,26 @@
-﻿#include <atomic>
+﻿#pragma once
+#include <atomic>
 #include <fstream>
 #include <vector>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <wasmtime.hh>
 
 #include "../../../debug/Logger.hpp"
-#include "Wasmtime.hpp"
 
-namespace UmiWasmtime {
+namespace UmiWASM {
     typedef uint8_t u8;
+    typedef uint32_t u32;
+    typedef u32 ModuleID;
     using std::atomic, std::get, std::ifstream, std::istreambuf_iterator, std::vector, boost::unordered::unordered_flat_map, std::memory_order_relaxed;
+
+    inline constexpr const char* WASMTIME_TEST = "(module\n(func (export \"add\") (param $x i32) (param $y i32) (result i32)\nlocal.get $x\nlocal.get $y\ni32.add\n)\n)";
+    inline constexpr ModuleID INVALID_MODULE_HANDLE = 0;
 
     static wasmtime::Engine engine;
     static unordered_flat_map<ModuleID, wasmtime::Module> registry;
     static atomic<ModuleID> nextId{1};
 
-    void init() noexcept {
+    inline void init() noexcept {
         auto res = wasmtime::Module::compile(engine, WASMTIME_TEST);
         if (!res) {
             lerr << "[Wasmtime] Compilation error occured!" << endl;
@@ -40,9 +45,9 @@ namespace UmiWasmtime {
         else lerr << "[Wasmtime] Function call returned wrong result!" << endl;
     }
 
-    void shutdown() noexcept {}
+    inline void shutdown() noexcept {}
 
-    ModuleID addModule(const char* path) noexcept {
+    inline ModuleID addModule(const char* path) noexcept {
         ifstream file(path, std::ios::in | std::ios::binary);
         if (!file.is_open()) return INVALID_MODULE_HANDLE;
         vector<u8> buffer(istreambuf_iterator<char>(file), {});
