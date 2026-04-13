@@ -39,8 +39,8 @@ namespace Systems {
                 if (rotation.yaw >= 360.0) rotation.yaw -= 360.0;
                 else if (rotation.yaw < 0.0) rotation.yaw += 360.0;
                 rotation.pitch += dPitch;
-                if (rotation.pitch > 89.999) rotation.pitch = 89.999;
-                else if (rotation.pitch < -89.999) rotation.pitch = -89.999;
+                if (rotation.pitch > 89.99999) rotation.pitch = 89.99999;
+                else if (rotation.pitch < -89.99999) rotation.pitch = -89.99999;
             });
             return true;
         }
