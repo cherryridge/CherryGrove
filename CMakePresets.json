@@ -17,7 +17,7 @@
                 "CMAKE_SYSTEM_NAME": "Windows",
                 "CMAKE_C_COMPILER": "clang-cl",
                 "CMAKE_CXX_COMPILER": "clang-cl",
-                "CMAKE_LINKER": "lld-link"
+                "CMAKE_LINKER_TYPE": "MSVC"
             }
         },
         {

@@ -24,6 +24,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR (CMAKE_CXX_COMPILER_ID STREQUAL "Cla
         $<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>
     )
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    # I got a linker error about "__setusermatherr is replaced" when I link using lld and I have no idea why. This is a black magic workaround that seems to work: use MSVC.
+    set(CMAKE_LINKER_TYPE "MSVC" CACHE STRING "" FORCE)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
@@ -48,7 +50,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "App
 endif()
 
 if(WIN32)
-    #Override everything to Windows 10 SDK
+    # Override everything to Windows 10 SDK
     add_compile_options(
         $<$<COMPILE_LANGUAGE:C,CXX>:/U_WIN32_WINNT>
         $<$<COMPILE_LANGUAGE:C,CXX>:/UWINVER>
@@ -180,9 +182,9 @@ set(WITH_TOOLS                  OFF CACHE BOOL "")
 set(WITH_CORE_TOOLS             OFF CACHE BOOL "")
 set(WITH_ALL_TESTS              OFF CACHE BOOL "")
 set(WITH_BENCHMARK_TOOLS        OFF CACHE BOOL "")
-#OK. They just DONT CARE about whether the main project needs lz4 or other compression library.
-#THEY JUST LINK THEIRS PRIVATELY. ALWAYS.
-#I GIVE UP.
+# OK. They just DONT CARE about whether the main project needs lz4 or other compression library.
+# THEY JUST LINK THEIRS PRIVATELY. ALWAYS.
+# I GIVE UP.
 if(WIN32)
     set(ROCKSDB_SKIP_THIRDPARTY OFF CACHE BOOL "")
 endif()
@@ -194,13 +196,13 @@ set(ENV{ZSTD_HOME} ${CMAKE_SOURCE_DIR}/libs/zstd)
 set(ENV{ZSTD_INCLUDE} $ENV{ZSTD_HOME}/lib)
 set(ENV{ZSTD_LIB_DEBUG} ${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib)
 set(ENV{ZSTD_LIB_RELEASE} ${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib)
-#Why the fuck does this exist on non-Linux builds?
+# Why the fuck does this exist on non-Linux builds?
 if(UNIX AND NOT APPLE)
     set(WITH_LIBURING ON  CACHE BOOL "")
 else()
     set(WITH_LIBURING OFF CACHE BOOL "")
 endif()
-#Why the fuck does this option even exist?
+# Why the fuck does this option even exist?
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(WITH_RUNTIME_DEBUG ON  CACHE BOOL "")
 else()
@@ -271,11 +273,11 @@ endif()
 
 #------------Build:Macro-----------
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    #Common usage
+    # Common usage
     $<IF:$<CONFIG:Debug>,DEBUG,NDEBUG>
-    #Required by bx
+    # Required by bx
     BX_CONFIG_DEBUG=$<IF:$<CONFIG:Debug>,1,0>
-    #Actual debug flag for CherryGrove
+    # Actual debug flag for CherryGrove
     $<IF:$<CONFIG:Debug>,CG_DEBUG,CG_RELEASE>
 )
 #----------------------------------
@@ -350,14 +352,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 #--------------Tweaks--------------
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
-    #util/auto_tune_compressor.cc(98)
+    # util/auto_tune_compressor.cc(98)
     target_compile_options(rocksdb PRIVATE /wd4702)
-    #rocksdb/include/rocksdb/advanced_options.h(632)
+    # rocksdb/include/rocksdb/advanced_options.h(632)
     target_compile_options(rocksdb PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>)
 endif()
 
 if(WIN32)
-    #Wasmtime on static lib build
+    # Wasmtime on static lib build
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         WASM_API_EXTERN=
         WASI_API_EXTERN=
@@ -367,15 +369,15 @@ endif()
 
 #------------Link:System-----------
 if(WIN32)
-    #Luau
+    # Luau
     target_link_libraries(${PROJECT_NAME} PRIVATE Kernel32)
-    #SoLoud
+    # SoLoud
     target_link_libraries(${PROJECT_NAME} PRIVATE xaudio2 xapobase)
-    #V8
+    # V8
     target_link_libraries(${PROJECT_NAME} PRIVATE dbghelp)
-    #Wasmtime
-    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 advapi32 userenv ntdll shell32 ole32 bcrypt)
-    #Packing
+    # Wasmtime
+    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 advapi32 userenv ntdll shell32 ole32 oleaut32 bcrypt)
+    # Packing
     target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows")
     target_sources(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/packing/windows/CherryGrove.rc")
 elseif(UNIX AND NOT APPLE)
