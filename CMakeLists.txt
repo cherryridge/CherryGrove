@@ -68,11 +68,6 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 #----------------------------------
 
-#------------Files-----------------
-file(GLOB_RECURSE CG_SOURCES CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
-file(GLOB_RECURSE IMGUI_SOURCES CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/libs/imgui/*.cpp")
-#----------------------------------
-
 #------------gperf-base------------
 find_program(GPERF_EXECUTABLE NAMES gperf)
 if(NOT GPERF_EXECUTABLE)
@@ -258,8 +253,17 @@ set(CGNBT_BUILD_TESTS OFF CACHE BOOL "")
 add_subdirectory("libs/cgnbt")
 #----------------------------------
 
+#------------Files-----------------
+file(GLOB_RECURSE CG_SOURCES CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE IMGUI_SOURCES CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/libs/imgui/*.cpp")
+#----------------------------------
+
 #------------CherryGrove-----------
-add_executable(${PROJECT_NAME} ${CG_SOURCES} ${IMGUI_SOURCES})
+if(WIN32)
+    add_executable(${PROJECT_NAME} WIN32 ${CG_SOURCES} ${IMGUI_SOURCES})
+else()
+    add_executable(${PROJECT_NAME} ${CG_SOURCES} ${IMGUI_SOURCES})
+endif()
 #----------------------------------
 
 #-------------gperf----------------
@@ -341,8 +345,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${SOLOUD_LIB}
     ${V8_LIB}
     ${WASMTIME_LIB}
-
-    CGNBT
 )
 #----------------------------------
 
@@ -365,7 +367,6 @@ endif()
 
 #------------Link:System-----------
 if(WIN32)
-    target_link_options(${PROJECT_NAME} PRIVATE "/SUBSYSTEM:WINDOWS")
     #Luau
     target_link_libraries(${PROJECT_NAME} PRIVATE Kernel32)
     #SoLoud

@@ -63,7 +63,7 @@ namespace InputHandler::BoolInput {
         }
 
     private:
-        static TimeUnit repeatTapGap, comboMinTTL;
+        inline static TimeUnit repeatTapGap, comboMinTTL;
     public:
         [[nodiscard]] static TimeUnit getRepeatTapGap() noexcept { return repeatTapGap; }
         [[nodiscard]] static TimeUnit getComboMinTTL() noexcept { return comboMinTTL; }
