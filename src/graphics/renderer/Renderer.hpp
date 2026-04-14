@@ -21,7 +21,7 @@ namespace Renderer {
     inline bgfx::IndexBufferHandle indexBuffer;
 
     inline void init() noexcept {
-            bgfx::Init config;
+        bgfx::Init config;
         config.platformData.nwh = Window::getPlatformHandle(Window::getMainWindow());
         const auto propertyHandle = SDL_GetWindowProperties(Window::getMainWindow());
     #if CG_PLATFORM_WINDOWS

@@ -60,7 +60,7 @@ namespace Boot {
         app.add_option("-g,--generate", "Generate something instead of launching the game.")->type_name("[KEYWORD]")->check(CLI::IsMember({"schemas", "config"}));
 
         string workingDirectory;
-        app.add_option("Working Directory", workingDirectory, "(Optional) CherryGrove's working directory.")->check(CLI::ExistingPath);
+        app.add_option("WorkingDirectory", workingDirectory, "(Optional) CherryGrove's working directory.")->check(CLI::ExistingPath);
 
         app.footer(string("Use the default config file by executing CherryGrove without any arguments.\nFor more information, please visit https://docs.cherrygrove.dev.\n\nCherryGrove is source-available software because it's a shame of open source to allow unrewarded commercial use.\n") + CG_COPYRIGHT_NOTICE + "\nhttps://cherrygrove.dev");
 

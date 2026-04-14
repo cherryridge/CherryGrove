@@ -18,6 +18,7 @@ namespace Gui::Util {
                 ImGui::PushStyleColor(ImGuiCol_WindowBg, transparent);
                 ImGui::PushStyleColor(ImGuiCol_Border, transparent);
             }
+            ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
             ImGui::Begin(id.data(), NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
             auto drawList = ImGui::GetWindowDrawList();
             drawList->PushClipRectFullScreen();
@@ -26,26 +27,26 @@ namespace Gui::Util {
 
     inline void tlWindow(string_view id, bool styled) noexcept {
         detail::windowBase(id, styled);
-        auto size = ImGui::GetWindowSize();
-        ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
+        const auto mainPos = ImGui::GetMainViewport()->Pos;
+        ImGui::SetWindowPos(mainPos);
     }
 
     inline void blWindow(string_view id, bool styled) noexcept {
         detail::windowBase(id, styled);
-        auto size = ImGui::GetWindowSize();
-        ImGui::SetWindowPos(ImVec2(0.0f, ImGui::GetIO().DisplaySize.y - size.y));
+        const auto winSize = ImGui::GetWindowSize(), mainPos = ImGui::GetMainViewport()->Pos, mainSize = ImGui::GetMainViewport()->Size;
+        ImGui::SetWindowPos(ImVec2(mainPos.x, mainPos.y + mainSize.y - winSize.y));
     }
 
     inline void brWindow(string_view id, bool styled) noexcept {
         detail::windowBase(id, styled);
-        auto size = ImGui::GetWindowSize();
-        ImGui::SetWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - size.x, ImGui::GetIO().DisplaySize.y - size.y));
+        const auto winSize = ImGui::GetWindowSize(), mainPos = ImGui::GetMainViewport()->Pos, mainSize = ImGui::GetMainViewport()->Size;
+        ImGui::SetWindowPos(ImVec2(mainPos.x + mainSize.x - winSize.x, mainPos.y + mainSize.y - winSize.y));
     }
 
     inline void centerWindow(string_view id, bool styled) noexcept {
         detail::windowBase(id, styled);
-        auto size = ImGui::GetWindowSize();
-        ImGui::SetWindowPos(ImVec2((ImGui::GetIO().DisplaySize.x - size.x) / 2.0f, (ImGui::GetIO().DisplaySize.y - size.y) / 2.0f));
+        const auto winSize = ImGui::GetWindowSize(), mainPos = ImGui::GetMainViewport()->Pos, mainSize = ImGui::GetMainViewport()->Size;
+        ImGui::SetWindowPos(ImVec2(mainPos.x + (mainSize.x - winSize.x) / 2.0f, mainPos.y + (mainSize.y - winSize.y) / 2.0f));
     }
     
     inline void endWindow(bool styled) noexcept {

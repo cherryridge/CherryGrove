@@ -9,8 +9,7 @@
 #include "../boot/SessionLock.hpp"
 #include "../debug/Fatal.hpp"
 #include "../globalState.hpp"
-#include "../graphics/gui/Gui.hpp"
-#include "../graphics/renderer/Renderer.hpp"
+#include "../graphics/controller.hpp"
 #include "../intrinsics/actions/Escape.hpp"
 #include "../input/boolInput/boolInput.hpp"
 #include "../input/InputHandler.hpp"
@@ -24,6 +23,8 @@
 namespace Main {
     using std::memory_order_relaxed, std::cout, std::endl, std::filesystem::current_path, Util::BitField;
 
+    inline Boot::SessionLock sessionLock;
+
     //threaded: Main Thread
     //note: This function is definitely pre-logger era, so we can just use `cout`.
     inline void launch(int argc, char** argv) noexcept {
@@ -32,7 +33,7 @@ namespace Main {
         cout << "Working directory: " << current_path() << endl;
 
     //Working directory lock (RAII)
-        Boot::SessionLock sessionLock("cg.lock");
+        sessionLock = Boot::SessionLock("cg.lock");
         cout << "Session lock acquired." << endl;
 
     //Settings
@@ -74,7 +75,7 @@ namespace Main {
 
         lout << "Initializing graphics..." << endl;
         //This is synchronized, we will wait inside.
-        Renderer::init();
+        Graphics::init();
 
         lout << "Initializing pack manager..." << endl;
         Pack::init();

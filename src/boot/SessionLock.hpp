@@ -18,6 +18,8 @@ namespace Boot {
     using std::string, std::string_view, std::filesystem::path, std::filesystem::current_path, std::filesystem::remove, std::span, std::vector, std::to_string;
 
     struct SessionLock {
+        SessionLock() = default;
+
         [[nodiscard]] SessionLock(const string_view fileName) noexcept {
             lockFilePath = (current_path() / fileName).string();
         #if CG_PLATFORM_WINDOWS
@@ -80,9 +82,9 @@ namespace Boot {
         }
 
         SessionLock(const SessionLock&) = delete;
-        SessionLock(SessionLock&&) = delete;
+        SessionLock(SessionLock&&) = default;
         SessionLock& operator=(const SessionLock&) = delete;
-        SessionLock& operator=(SessionLock&&) = delete;
+        SessionLock& operator=(SessionLock&&) = default;
 
         ~SessionLock() {
         #if CG_PLATFORM_WINDOWS

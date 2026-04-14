@@ -7,9 +7,11 @@
 #include <libplatform/libplatform.h>
 #define V8_COMPRESS_POINTERS 1
 #define V8_31BIT_SMIS_ON_64BIT_ARCH 1
-#define V8_ENABLE_SANDBOX 1
 #ifdef DEBUG
     #define V8_ENABLE_CHECKS 1
+#endif
+#if defined(_MSC_VER) && !defined(__clang__)
+    #define __builtin_unreachable() __assume(0)
 #endif
 #include <v8.h>
 

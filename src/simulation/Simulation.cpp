@@ -56,7 +56,7 @@ namespace Simulation {
         gameThread = thread(gameLoop);
 
         //Temporary code to spawn player entity
-        const entt::entity playerEntity = registry.create();
+        playerEntity = registry.create();
         registry.emplace<Components::Camera>(playerEntity, 60.0f);
         registry.emplace<Components::EntityCoordinates>(playerEntity, -0.2, -0.5, 1.0, 0u);
         registry.emplace<Components::Rotation>(playerEntity, 90.0, 0.0);

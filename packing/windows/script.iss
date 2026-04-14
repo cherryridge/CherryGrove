@@ -71,7 +71,7 @@ Source: "..\readmes\必读信息.txt"; DestDir: "{app}"; DestName: "必读信息
 ;end
 
 Source: "..\..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\..\test\*"; DestDir: "{app}\test"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\tests\*"; DestDir: "{app}\tests"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Dirs]
 Name: "{app}\captures"

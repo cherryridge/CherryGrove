@@ -181,7 +181,6 @@ set(WITH_BENCHMARK_TOOLS        OFF CACHE BOOL "")
 set(WITH_TOOLS                  OFF CACHE BOOL "")
 set(WITH_CORE_TOOLS             OFF CACHE BOOL "")
 set(WITH_ALL_TESTS              OFF CACHE BOOL "")
-set(WITH_BENCHMARK_TOOLS        OFF CACHE BOOL "")
 # OK. They just DONT CARE about whether the main project needs lz4 or other compression library.
 # THEY JUST LINK THEIRS PRIVATELY. ALWAYS.
 # I GIVE UP.
@@ -209,6 +208,25 @@ else()
     set(WITH_RUNTIME_DEBUG OFF CACHE BOOL "")
 endif()
 add_subdirectory("libs/rocksdb")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
+    # util/auto_tune_compressor.cc(98)
+    target_compile_options(rocksdb PRIVATE /wd4702)
+    # rocksdb/include/rocksdb/advanced_options.h(632)
+    target_compile_options(rocksdb PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>)
+endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    get_property(ROCKSDB_TARGETS DIRECTORY "${CMAKE_SOURCE_DIR}/libs/rocksdb" PROPERTY BUILDSYSTEM_TARGETS)
+    foreach(ROCKSDB_TARGET IN LISTS ROCKSDB_TARGETS)
+        get_target_property(ROCKSDB_TARGET_TYPE "${ROCKSDB_TARGET}" TYPE)
+        if(NOT ROCKSDB_TARGET_TYPE STREQUAL "UTILITY" AND NOT ROCKSDB_TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
+            # RocksDB already hardcodes /MT and /MTd in its own MSVC flags.
+            # Prevent CMake from adding an extra clang-style -MT/-MTd that
+            # swallows the next option under clang-cl.
+            set_property(TARGET "${ROCKSDB_TARGET}" PROPERTY MSVC_RUNTIME_LIBRARY "")
+            target_compile_options("${ROCKSDB_TARGET}" PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:-Wno-error=unused-command-line-argument>)
+        endif()
+    endforeach()
+endif()
 
 set(FT_DISABLE_ZLIB OFF CACHE BOOL "")
 add_subdirectory("libs/freetype")
@@ -350,14 +368,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 #----------------------------------
 
-#--------------Tweaks--------------
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
-    # util/auto_tune_compressor.cc(98)
-    target_compile_options(rocksdb PRIVATE /wd4702)
-    # rocksdb/include/rocksdb/advanced_options.h(632)
-    target_compile_options(rocksdb PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>)
-endif()
-
+#-----Tweaks for Prebuilt Libs-----
 if(WIN32)
     # Wasmtime on static lib build
     target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -372,7 +383,7 @@ if(WIN32)
     # Luau
     target_link_libraries(${PROJECT_NAME} PRIVATE Kernel32)
     # SoLoud
-    target_link_libraries(${PROJECT_NAME} PRIVATE xaudio2 xapobase)
+    target_link_libraries(${PROJECT_NAME} PRIVATE xaudio2)
     # V8
     target_link_libraries(${PROJECT_NAME} PRIVATE dbghelp)
     # Wasmtime
@@ -417,8 +428,8 @@ endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/saves")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/saves" "${CMAKE_BINARY_DIR}/saves")
 endif()
-if(EXISTS "${CMAKE_SOURCE_DIR}/test")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/test" "${CMAKE_BINARY_DIR}/test")
+if(EXISTS "${CMAKE_SOURCE_DIR}/tests")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/tests" "${CMAKE_BINARY_DIR}/tests")
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/settings.json")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/settings.json" "${CMAKE_BINARY_DIR}/settings.json")

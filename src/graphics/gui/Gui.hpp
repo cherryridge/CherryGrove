@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <cstdint>
+#include <mutex>
 #include <backends/imgui_impl_sdl3.h>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
@@ -23,9 +24,10 @@
 namespace Gui {
     typedef uint8_t u8;
     typedef int32_t i32;
-    using boost::unordered_flat_map, boost::unordered_flat_set, fu2::function_view, Sound::SoundHandle;
+    using std::mutex, std::scoped_lock, boost::unordered_flat_map, boost::unordered_flat_set, fu2::function_view, Sound::SoundHandle;
 
     inline unordered_flat_set<Intrinsics> visibleGuis;
+    inline mutex visibleGuisMutex;
     inline unordered_flat_map<Intrinsics, function_view<void()>> guiRegistry;
 
     inline void init() noexcept {
@@ -40,7 +42,7 @@ namespace Gui {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.DisplaySize.x = static_cast<float>(width);
         io.DisplaySize.y = static_cast<float>(height);
-        io.ConfigViewportsNoAutoMerge = true;
+        io.ConfigViewportsNoAutoMerge = false;
         io.ConfigViewportsNoTaskBarIcon = true;
         //A legacy flag added before ImGui 1.92 which prevents ImGui from trying to create a very large texture for a large font atlas and crashing the app.
         //fixme: Need more information to determine if we can remove this line.
@@ -82,16 +84,30 @@ namespace Gui {
     inline void render() noexcept {
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
-        unordered_flat_set<Intrinsics> visibleGuisBuffer = visibleGuis;
+        ImGuiIO& io = ImGui::GetIO();
+        unordered_flat_set<Intrinsics> visibleGuisBuffer;
+        {
+            scoped_lock lock(visibleGuisMutex);
+            visibleGuisBuffer = visibleGuis;
+        }
         for (const auto& gui : visibleGuisBuffer) {
             if (guiRegistry.find(gui) != guiRegistry.end()) guiRegistry[gui]();
             else lerr << "[GUI] Did you forget to emplace the GUI: " << static_cast<i32>(gui) << "?" << endl;
         }
         ImGui::Render();
         ImGui_Implbgfx_RenderDrawData(ImGui::GetDrawData());
+        if (
+            (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+         && (io.BackendFlags & ImGuiBackendFlags_PlatformHasViewports)
+         && (io.BackendFlags & ImGuiBackendFlags_RendererHasViewports)
+        ) {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
     }
 
     inline void setVisibility(Intrinsics gui, bool visible) noexcept {
+        scoped_lock lock(visibleGuisMutex);
         if (visible && visibleGuis.find(gui) == visibleGuis.end()) visibleGuis.insert(gui);
         else if (!visible && visibleGuis.find(gui) != visibleGuis.end()) visibleGuis.erase(gui);
     }

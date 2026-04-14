@@ -21,7 +21,7 @@ namespace Settings::detail {
 REGISTER_JSON_KIND(Settings, 1, 1, Settings::detail::Types, Settings::detail::upgraders)
 
 namespace Settings {
-    using std::filesystem::exists, std::string, Logger::LOGGER_DYNAMIC_OUT, Logger::LOGGER_DYNAMIC_ERR, Util::Json::Latest, Util::Json::JSONKind::Settings;
+    using std::filesystem::exists, std::filesystem::is_regular_file, std::string, Logger::LOGGER_DYNAMIC_OUT, Logger::LOGGER_DYNAMIC_ERR, Util::Json::Latest, Util::Json::JSONKind::Settings;
 
     namespace detail {
         inline constexpr const char* SETTINGS_FILENAME = "settings.json";
@@ -33,7 +33,8 @@ namespace Settings {
 
     //Note: Maybe pre-logger function.
     [[nodiscard]] inline bool loadSettings() noexcept {
-        return UmiJSON::readJSONFromFile<Settings, false>(detail::SETTINGS_FILENAME, detail::data);
+        if (exists(detail::SETTINGS_FILENAME) && !is_regular_file(detail::SETTINGS_FILENAME)) return UmiJSON::readJSONFromFile<Settings, false>(detail::SETTINGS_FILENAME, detail::data);
+        return true;
     }
 
     //This is usually called automatically by various Setting modification functions so you rarely need to call this manually.

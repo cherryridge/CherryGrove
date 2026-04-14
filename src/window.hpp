@@ -33,6 +33,11 @@ namespace Window {
         }
     }
 
+    inline void shutdown() noexcept {
+        SDL_DestroyWindow(detail::mainWindow);
+        SDL_Quit();
+    }
+
     [[nodiscard]] inline SDL_Window* getMainWindow() noexcept { return detail::mainWindow; }
 
     [[nodiscard]] inline void* getPlatformHandle(SDL_Window* window) noexcept {
