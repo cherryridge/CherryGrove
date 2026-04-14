@@ -48,10 +48,10 @@ namespace Gui {
         //fixme: Need more information to determine if we can remove this line.
         io.Fonts->Flags |= ImFontAtlasFlags_NoPowerOfTwoHeight;
         io.Fonts->Clear();
-        io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 18.0f);
+        io.Fonts->AddFontFromFileTTF("assets/fonts/unifont.otf", 22.0f);
         ImGui::StyleColorsDark();
         ImGuiStyle& style = ImGui::GetStyle();
-        style.FontSizeBase = 18.0f;
+        style.FontSizeBase = 22.0f;
         style.FontScaleDpi = SDL_GetWindowDisplayScale(Window::getMainWindow());
         style.WindowRounding = 0.0f;
         style.WindowTitleAlign = ImVec2(0.5f, 0.0f);

@@ -2,8 +2,10 @@
 #include <filesystem>
 #include <string>
 
+#include "../debug/Fatal.hpp"
 #include "../debug/Logger.hpp"
 #include "../umi/frontend/json/JSON.hpp"
+#include "../util/json/rw.hpp"
 #include "v1.hpp"
 
 namespace Settings::detail {
@@ -33,7 +35,19 @@ namespace Settings {
 
     //note: Maybe pre-logger function.
     [[nodiscard]] inline bool loadSettings() noexcept {
-        if (exists(detail::SETTINGS_FILENAME) && !is_regular_file(detail::SETTINGS_FILENAME)) return UmiJSON::readJSONFromFile<Settings, false>(detail::SETTINGS_FILENAME, detail::data);
+        if (exists(detail::SETTINGS_FILENAME) && is_regular_file(detail::SETTINGS_FILENAME)) return UmiJSON::readJSONFromFile<Settings, false>(detail::SETTINGS_FILENAME, detail::data);
+        else {
+            vector<u8> defaultData;
+            if (!Util::Json::writeJSON(detail::data, defaultData)) {
+                LOGGER_DYNAMIC_ERR("[Settings] Failed to write default settings.");
+                Fatal::exit(Fatal::ISBH_FAILED_TO_WRITE_DEFAULT_SETTINGS);
+            }
+            if (!Util::OS::writeFile(detail::SETTINGS_FILENAME, defaultData, Util::OS::ExistBehavior::Overwrite)) {
+                LOGGER_DYNAMIC_ERR("[Settings] Failed to write default settings to file.");
+                Fatal::exit(Fatal::ISBH_FAILED_TO_WRITE_DEFAULT_SETTINGS);
+            }
+            LOGGER_DYNAMIC_OUT("[Settings] No settings file found. A default one has been created.");
+        }
         return true;
     }
 

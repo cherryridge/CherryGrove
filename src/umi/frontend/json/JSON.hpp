@@ -11,7 +11,7 @@
 
 namespace UmiJSON {
     typedef uint8_t u8;
-    using std::span, std::vector, Util::Json::JSONKind, Util::Json::KindMeta, Util::FilePath, Util::OS::readFile, Util::OS::writeFile, Util::OS::ExistBehavior;
+    using std::span, std::vector, Util::Json::JSONKind, Util::Json::KindMeta, Util::FilePath, Util::OS::readFile, Util::OS::writeFile, Util::OS::ExistBehavior, Util::OS::stripBOM;
 
     template <JSONKind kind>
     [[nodiscard]] inline bool readJSON(const span<const u8> data, typename KindMeta<kind>::LatestType& result) noexcept { return KindMeta<kind>::read(data, result); }
@@ -23,6 +23,7 @@ namespace UmiJSON {
             lerr << "[Umi] Failed to read in JSON file: " << path << "\n";
             return false;
         }
+        stripBOM(data);
         return readJSON<kind>(data, result);
     }
 

@@ -14,18 +14,18 @@
 
 namespace Main {
     typedef uint64_t u64;
-    using std::memory_order_relaxed, std::memory_order_release, std::memory_order_acquire, std::chrono::high_resolution_clock, std::chrono::microseconds, std::chrono::duration_cast, fu2::function_view, Util::MPSCQueue, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
+    using std::memory_order_relaxed, std::memory_order_release, std::memory_order_acquire, std::chrono::high_resolution_clock, std::chrono::microseconds, std::chrono::time_point, std::chrono::duration_cast, fu2::function_view, Util::MPSCQueue, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
 
     inline MPSCQueue<function_view<void()>> runOnMainThread;
 
     //threaded: Main loop.
     inline void hold() noexcept {
-        const u64 maximumMainThreadFunctionsPerFrame = Settings::getSettings().debug.maximumMainThreadFunctionsPerFrame;
-        const auto maximumMainThreadLoopTimeUs = microseconds(Settings::getSettings().debug.maximumMainThreadLoopTimeUs);
-        auto loopStartTime = high_resolution_clock::now();
+        const u64 maxTasks = Settings::getSettings().debug.maxMainThreadTasksPerFrame;
+        const auto maxLoopTime = microseconds(Settings::getSettings().debug.maxMainThreadLoopTimeUs);
 
+        time_point<high_resolution_clock> loopStartTime;
         SDL_Event event;
-        InputHandler::FramedSDLEvents frame{};
+        InputHandler::FramedSDLEvents frame;
         function_view<void()> task;
 
         while (GlobalState::isCGAlive.load(memory_order_acquire)) {
@@ -52,11 +52,11 @@ namespace Main {
             }
 
         #if CG_DEBUG
-            if (high_resolution_clock::now() - loopStartTime > maximumMainThreadLoopTimeUs) lout << "[Main] Can't keep up! Is CherryGrove Minecraft? Input section run for " << duration_cast<microseconds>(high_resolution_clock::now() - loopStartTime).count() << "us while set maximum loop time is " << duration_cast<microseconds>(maximumMainThreadLoopTimeUs).count() << "us" << endl;
+            if (high_resolution_clock::now() - loopStartTime > maxLoopTime) lout << "[Main] Can't keep up! Is CherryGrove Minecraft? Input section run for " << duration_cast<microseconds>(high_resolution_clock::now() - loopStartTime).count() << "us while set maximum loop time is " << duration_cast<microseconds>(maxLoopTime).count() << "us" << endl;
         #endif
 
         //Drain `runOnMainThread` MPSCQueue
-            for (u64 i = 0; i < maximumMainThreadFunctionsPerFrame && high_resolution_clock::now() - loopStartTime < maximumMainThreadLoopTimeUs; i++) if (runOnMainThread.dequeue(task)) task();
+            for (u64 i = 0; i < maxTasks && high_resolution_clock::now() - loopStartTime < maxLoopTime; i++) if (runOnMainThread.dequeue(task)) task();
         }
         stop: shutdown();
     }

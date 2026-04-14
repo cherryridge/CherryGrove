@@ -25,7 +25,7 @@ namespace Gui::MainMenu {
             ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0], 18.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 30.0f));
             ImVec2 btnSize(240.0f, 80.0f);
-            Gui::Util::centerButton("存档（调试）", btnSize, []() noexcept {
+            Gui::Util::centerButton("存档", btnSize, []() noexcept {
                 static_cast<void>(Sound::play(Gui::click, Sound::DUMMY_COORD_2D));
                 Simulation::start();
             });

@@ -4,7 +4,6 @@
 
 #include "../pack/KnownPack.hpp"
 #include "../pack/PackOptionValue.hpp"
-#include "../util/json/formatVersion.hpp"
 #include "base.hpp"
 
 namespace Settings {
@@ -16,7 +15,7 @@ namespace Settings {
 
     struct Settings_v1 {
 
-    u32 formatVersion{INVALID_FORMAT_VERSION};
+    u32 formatVersion{1};
 
     struct Packs {
         vector<KnownPack> knownPacks;
@@ -60,8 +59,8 @@ namespace Settings {
     struct Debug {
         Logger::LoggingMode logging{Logger::LoggingMode::File};
         //I don't know if this is a good idea but let's just try and see.
-        u32 maximumMainThreadFunctionsPerFrame{128};
-        u32 maximumMainThreadLoopTimeUs{1000};
+        u32 maxMainThreadTasksPerFrame{128};
+        u32 maxMainThreadLoopTimeUs{1000};
     } debug;
 
     struct Misc {

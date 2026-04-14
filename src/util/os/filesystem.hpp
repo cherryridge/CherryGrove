@@ -88,6 +88,12 @@ namespace Util::OS {
         }
     }
 
+    //warning: Make sure you passed in the whole file's data. Passing in a slice of the file's data may cause issues or even vulnerabilities if there is a BOM in the file and the slice starts after the BOM.
+    inline void stripBOM(vector<u8>& data) noexcept {
+        if (data.size() < 3) return;
+        if (data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF) data.erase(data.begin(), data.begin() + 3);
+    }
+
     enum struct ExistBehavior : u8 {
         Fail, Overwrite, Append
     };

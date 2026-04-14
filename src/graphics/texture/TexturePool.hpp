@@ -97,6 +97,6 @@ namespace TexturePool {
             return true;
         }
         lerr << "[TexturePool] Texture handle " << handle << " is found in the registry but not in any atlas. This should never happen!!" << endl;
-        Fatal::exit(Fatal::TEXTUREPOOL_TEXTURE_NOT_IN_ATLAS);
+        Fatal::exit(Fatal::ISBH_TEXTUREPOOL_TEXTURE_NOT_IN_ATLAS);
     }
 }
