@@ -1,69 +1,53 @@
 ﻿#pragma once
+#include <filesystem>
 #include <string>
-#include <vector>
-#include <array>
-#include <memory>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/uuid.hpp>
 
+#include "../debug/Fatal.hpp"
+#include "../debug/Logger.hpp"
+#include "../settings/pack.hpp"
+#include "../settings/Settings.hpp"
+#include "../umi/controller.hpp"
+#include "packFetcher.hpp"
+#include "PackMetaInfo.hpp"
+#include "registry.hpp"
+
 namespace Pack {
-    typedef uint8_t u8;
-    typedef uint16_t u16;
-    typedef uint32_t u32;
     typedef uint64_t u64;
+    using std::filesystem::current_path, std::string, boost::uuids::uuid, boost::unordered_flat_map, Util::Json::Latest, Util::Json::JSONKind::Settings;
 
-    using std::string, std::to_string, std::vector, std::array, std::unique_ptr, boost::uuids::uuid;
-
-    //statusFlags map
-    inline constexpr u64 PACK_STATUS_VALID = 0x1u;
-    inline constexpr u64 PACK_STATUS_ENABLED = 0x2u;
-    inline constexpr u64 PACK_STATUS_GLOBAL_ENABLED = 0x4u;
-
-    //featureFlags map
-    inline constexpr u64 PACK_FEATURE_COMPONENT = 0x1u;
-    inline constexpr u64 PACK_FEATURE_BLOCK = 0x2u;
-    inline constexpr u64 PACK_FEATURE_FLUID = 0x4u;
-    inline constexpr u64 PACK_FEATURE_ENTITY = 0x8u;
-    inline constexpr u64 PACK_FEATURE_ITEM = 0x10u;
-    inline constexpr u64 PACK_FEATURE_WORLDGEN = 0x20u;
-    inline constexpr u64 PACK_FEATURE_BIOME = 0x40u;
-    inline constexpr u64 PACK_FEATURE_STRUCTURE = 0x80u;
-    inline constexpr u64 PACK_FEATURE_COMPOSITE = 0x100u;
-    inline constexpr u64 PACK_FEATURE_GUI = 0x200u;
-    inline constexpr u64 PACK_FEATURE_TEXTURE = 0x400u;
-    inline constexpr u64 PACK_FEATURE_SOUND = 0x800u;
-    inline constexpr u64 PACK_FEATURE_TEXT = 0x1000u;
-    inline constexpr u64 PACK_FEATURE_ACHIEVEMENT = 0x2000u;
-    inline constexpr u64 PACK_FEATURE_SHADER = 0x4000u;
-    //#define PACK_FEATURE_FONT 
-
-    struct PackIdentifier {
-        //Yep, not saving space here as well ;-)
-        uuid uuid_f;
-        u32 packVersion;
-
-        PackIdentifier() = default;
-        PackIdentifier(const uuid& _uuid, u32 version) : uuid_f(_uuid), packVersion(version) {}
-
-        bool operator==(const PackIdentifier& other) const {
-            return this->packVersion == other.packVersion && this->uuid_f == other.uuid_f;
+    inline void init() noexcept {
+        if (!PHYSFS_init(current_path().string().c_str())) {
+            lerr << "[Pack] Failed to initialize PhysFS: " << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()) << endl;
+            Fatal::exit(Fatal::FILESYSTEM_CANNOT_INIT_PHYSFS);
         }
-    };
+        //Just use additional packs/roots instead of symlinking all your packs to `/packs`. It's much safer.
+        PHYSFS_permitSymbolicLinks(false);
 
-    inline u64 hash_value(const PackIdentifier& input) noexcept {
-        return std::hash<boost::uuids::uuid>{}(input.uuid_f) ^ (std::hash<uint32_t>{}(input.packVersion) << 1);
+        const Latest<Settings>::Packs& packSettings = Settings::getSettings().packs;
+        for (u64 i = 0; i < packSettings.knownPacks.size(); i++) detail::knownPacks.emplace(packSettings.knownPacks[i].id, packSettings.knownPacks[i]);
+
+        getPacksFromPackRoot("packs");
+        for (u64 i = 0; i < packSettings.additionalPackRoots.size(); i++) getPacksFromPackRoot(packSettings.additionalPackRoots[i]);
+
+        PackMetaInfo info;
+        for (u64 i = 0; i < packSettings.additionalPacks.size(); i++) {
+            if (parsePackManifest(packSettings.additionalPacks[i], info)) tryAddingPack(info);
+            else lerr << "[Pack] Failed to parse pack: " << packSettings.additionalPacks[i] << endl;
+        }
+        lout << "[Pack] Found " << detail::registry.size() << " valid packs." << endl;
+
+        if (!Settings::updateKnownPacks(detail::knownPacks)) {
+            lerr << "[Pack] Failed to update known packs." << endl;
+            Fatal::exit(Fatal::SETTINGS_FAILED_TO_SAVE);
+        }
+
+        Umi::init();
     }
 
-    struct PackDesc {
-        //`0`: nameSpace, `1`: name, `2`: description, `[2, size()-1]`: authors
-        vector<string> metadata;
-        uuid uuid_f;
-        u32 packVersion, minEngineVersion, featureFlags;
-        u16 statusFlags, configFlags;
-        vector<PackIdentifier> dependencies;
-    };
-
-    void init();
-    void shutdown();
-
-    void refreshPacks(const char* rootDir = "packs");
-};
+    inline void shutdown() noexcept {
+        Umi::shutdown();
+        PHYSFS_deinit();
+    }
+}

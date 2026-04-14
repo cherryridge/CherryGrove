@@ -1,18 +1,12 @@
 ﻿#pragma once
 #include <atomic>
-#include <mutex>
-#include <entt/entt.hpp>
 
 namespace Simulation {
-    extern std::atomic<bool> gameStarted;
-    //Signals the Main thread to call `exit`.
-    extern std::atomic<bool> gameStopSignal;
-    extern std::atomic<bool> gamePaused;
-    extern entt::registry gameRegistry;
-    extern entt::entity playerEntity;
-    extern std::mutex registryMutex, playerMutex;
+    using std::atomic;
 
-    void start();
-    //Joins the Game thread. Must NOT be called in game thread.
-    void exit();
+    extern atomic<bool> gameStarted, gamePaused;
+    extern atomic<float> perf_MSPT;
+
+    void start() noexcept;
+    void exit() noexcept;
 }

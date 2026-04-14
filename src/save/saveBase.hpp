@@ -1,14 +1,9 @@
 ﻿#pragma once
-#include <ctime>
-#include <string>
-#include <filesystem>
+#include <cstdint>
 
 namespace Save {
-    struct WorldInfo {
-        std::string name;
-        time_t lastModifiedTime;
-        time_t createdTime;
-        std::filesystem::path location;
-        uint32_t savedVersion;
-    };
+    typedef uint32_t u32;
+
+    inline constexpr u32 LATEST_FORMAT_VERSION = 1;
+    inline constexpr u32 LATEST_ENGINE_VERSION = 1;
 }

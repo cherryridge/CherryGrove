@@ -70,7 +70,7 @@ BEGIN
             VALUE "FileDescription", "CherryGrove"
             VALUE "FileVersion", "0.0.1.0"
             VALUE "InternalName", "CherryGrove.exe"
-            VALUE "LegalCopyright", "Copyright (c) 2025 CherryGrove Contributors."
+            VALUE "LegalCopyright", "Copyright (c) 2026 CherryGrove Contributors."
             VALUE "OriginalFilename", "CherryGrove.exe"
             VALUE "ProductName", "CherryGrove"
             VALUE "ProductVersion", "0.0.1.0"

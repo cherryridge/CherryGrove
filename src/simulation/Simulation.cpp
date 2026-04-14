@@ -1,142 +1,127 @@
 ﻿#include <atomic>
 #include <chrono>
-#include <mutex>
 #include <thread>
 #include <entt/entt.hpp>
 
+#include "../components/Camera.hpp"
+#include "../components/Coordinates.hpp"
+#include "../components/Rotation.hpp"
 #include "../debug/Logger.hpp"
+#include "../graphics/gui/Gui.hpp"
 #include "../input/InputHandler.hpp"
-#include "../input/intrinsic/ChangeRotation.hpp"
-#include "../input/intrinsic/Movement.hpp"
-#include "../components/Components.hpp"
-#include "../graphic/TexturePool.hpp"
-#include "../gui/Gui.hpp"
-#include "../gui/Window.hpp"
+#include "../input/boolInput/boolInput.hpp"
+#include "../input/mouseMove/mouseMove.hpp"
+#include "../intrinsics/actions/ChangeRotation.hpp"
+#include "../intrinsics/actions/Movement.hpp"
+#include "../main/hold.hpp"
+#include "registries.hpp"
 #include "Simulation.hpp"
 
 namespace Simulation {
-    typedef int32_t i32;
-    typedef uint32_t u32;
-    using std::atomic, std::thread, std::mutex, std::unique_lock, entt::registry, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::addBoolInput, InputHandler::MouseMove::addMouseMove, InputHandler::BoolInput::ActionTypes;
+    typedef uint64_t u64;
+    using std::atomic, std::memory_order_acquire, std::memory_order_release, std::thread, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::BoolInputKind, InputHandler::MouseMove::SubKind, Util::BitField;
     using namespace std::chrono_literals;
-    using namespace std::this_thread;
     static void gameLoop() noexcept;
     static void tick() noexcept;
 
-    atomic<bool> gameStarted(false);
-    atomic<bool> gameStopSignal(false);
-    atomic<bool> gamePaused(false);
+    atomic<bool> gameStarted{false}, gamePaused{false};
+    atomic<float> perf_MSPT{0.0f};
+    atomic<u64> processingTick{0};
 
-    atomic<float> currentTPS(0.0f);
-    atomic<float> currentMSPT(0.0f);
-    atomic<float> maxTPS(20.0f);
+    static thread gameThread;
+    static InputHandler::ActionID forward, backward, left, right, up, down, moveCamera;
 
-    thread gameThread;
-    registry gameRegistry;
-    entt::entity playerEntity;
-    mutex registryMutex, playerMutex;
-    InputHandler::ActionID forward, backward, left, right, up, down, moveCamera;
+    //threaded: Main thread
+    void start() noexcept {
+        gameStarted.store(true, memory_order_release);
+        gamePaused.store(false, memory_order_release);
 
-    void start() {
-        gameStarted = true;
+        Gui::setVisibility(Gui::Intrinsics::MainMenu, false);
+        Gui::setVisibility(Gui::Intrinsics::Copyright, false);
+        Gui::setVisibility(Gui::Intrinsics::Version, false);
 
-        Gui::setVisible(Gui::Intrinsics::MainMenu, false);
-        Gui::setVisible(Gui::Intrinsics::Copyright, false);
-        Gui::setVisible(Gui::Intrinsics::Version, false);
-
-        Window::runOnMainThread([]() {
-            forward = addBoolInput(":forward", 10, IntrinsicInput::forward, ActionTypes::Repeat, 28);
-            backward = addBoolInput(":backward", 10, IntrinsicInput::backward, ActionTypes::Repeat, 24);
-            left = addBoolInput(":left", 10, IntrinsicInput::left, ActionTypes::Repeat, 6);
-            right = addBoolInput(":right", 10, IntrinsicInput::right, ActionTypes::Repeat, 9);
-            up = addBoolInput(":up", 10, IntrinsicInput::up, ActionTypes::Repeat, 46);
-            down = addBoolInput(":down", 10, IntrinsicInput::down, ActionTypes::Repeat, 165);
-            moveCamera = addMouseMove(":moveCamera", 10, IntrinsicInput::changeRotationCB);
-            SDL_SetWindowRelativeMouseMode(Window::windowHandle, true);
+        Main::runOnMainThread.enqueue([]() noexcept {
+            forward = InputHandler::BoolInput::add(IntrinsicInput::forward, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            backward = InputHandler::BoolInput::add(IntrinsicInput::backward, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            left = InputHandler::BoolInput::add(IntrinsicInput::left, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            right = InputHandler::BoolInput::add(IntrinsicInput::right, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            up = InputHandler::BoolInput::add(IntrinsicInput::up, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            down = InputHandler::BoolInput::add(IntrinsicInput::down, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
+            moveCamera = InputHandler::MouseMove::add(IntrinsicInput::changeRotationCB, 10, {BitField<SubKind, SubKind::Count>(SubKind::Persist)});
+            InputHandler::setPointerLocked(true);
         });
 
         //Temporary code to show debug menu
-        Gui::setVisible(Gui::Intrinsics::DebugMenu);
-        gameThread = thread(&gameLoop);
+        Gui::setVisibility(Gui::Intrinsics::DebugMenu, true);
+        gameThread = thread(gameLoop);
 
         //Temporary code to spawn player entity
-        using namespace Components;
-        playerEntity = gameRegistry.create();
-        gameRegistry.emplace<CameraComp>(playerEntity, 60.0f);
-        gameRegistry.emplace<CoordinatesComp>(playerEntity, -0.2, -0.5, 1.0, 0u);
-        gameRegistry.emplace<RotationComp>(playerEntity, 90.0, 0.0);
-
-        //Test code to spawn a block
-        TexturePool::TextureID
-            debugpx = TexturePool::addTexture("assets/textures/debug+x.png"),
-            debugnx = TexturePool::addTexture("assets/textures/debug-x.png"),
-            debugpy = TexturePool::addTexture("assets/textures/debug+y.png"),
-            debugny = TexturePool::addTexture("assets/textures/debug-y.png"),
-            debugpz = TexturePool::addTexture("assets/textures/debug+z.png"),
-            debugnz = TexturePool::addTexture("assets/textures/debug-z.png");
-        auto block = gameRegistry.create();
-        CubeFace px(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugpx);
-        CubeFace py(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugpy);
-        CubeFace pz(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugpz);
-        CubeFace nx(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugnx);
-        CubeFace ny(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugny);
-        CubeFace nz(glm::uvec2(0, 0), glm::uvec2(16, 16), 0.0f, 1, debugnz);
-        SubCube sc(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), py, ny, nz, px, pz, nx);
-        gameRegistry.emplace<BlockCoordinatesComp>(block, 2, 0, 0, 0u);
-        gameRegistry.emplace<BlockRenderComp>(block, sc);
+        playerEntity = registry.create();
+        registry.emplace<Components::Camera>(playerEntity, 60.0f);
+        registry.emplace<Components::EntityCoordinates>(playerEntity, -0.2, -0.5, 1.0, 0u);
+        registry.emplace<Components::Rotation>(playerEntity, 90.0, 0.0);
     }
 
-    void exit() {
+    //threaded: Main thread
+    void exit() noexcept {
         //Reset flags
-        gameStarted = false;
-        gamePaused = false;
-        gameStopSignal = false;
+        gameStarted.store(false, memory_order_release);
+        gamePaused.store(false, memory_order_release);
 
         //Clear resources
         gameThread.join();
-        gameRegistry.clear();
+        registry.clear();
 
-        //Clear input callbacks (todo: will be changed to use clear())
-        Window::runOnMainThread([]() {
-            using namespace InputHandler;
-            BoolInput::removeBoolInput(forward, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(backward, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(left, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(right, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(up, ActionTypes::Repeat);
-            BoolInput::removeBoolInput(down, ActionTypes::Repeat);
-            MouseMove::removeMouseMove(moveCamera);
-            SDL_SetWindowRelativeMouseMode(Window::windowHandle, false);
+        //Clear input callbacks
+        Main::runOnMainThread.enqueue([]() noexcept {
+            //fixme: Implement the `canDelete` mechanism properly.
+            static_cast<void>(InputHandler::BoolInput::remove(forward));
+            static_cast<void>(InputHandler::BoolInput::remove(backward));
+            static_cast<void>(InputHandler::BoolInput::remove(left));
+            static_cast<void>(InputHandler::BoolInput::remove(right));
+            static_cast<void>(InputHandler::BoolInput::remove(up));
+            static_cast<void>(InputHandler::BoolInput::remove(down));
+            static_cast<void>(InputHandler::MouseMove::remove(moveCamera));
+            InputHandler::setPointerLocked(false);
         });
 
         //Go back to main menu
-        Gui::setVisible(Gui::Intrinsics::DebugMenu, false);
-        Gui::setVisible(Gui::Intrinsics::MainMenu);
-        Gui::setVisible(Gui::Intrinsics::Copyright);
-        Gui::setVisible(Gui::Intrinsics::Version);
+        Gui::setVisibility(Gui::Intrinsics::DebugMenu, false);
+        Gui::setVisibility(Gui::Intrinsics::MainMenu, true);
+        Gui::setVisibility(Gui::Intrinsics::Copyright, true);
+        Gui::setVisibility(Gui::Intrinsics::Version, true);
     }
 
     static void gameLoop() noexcept {
         lout << "Game" << flush;
         lout << "Hello from game loop!" << endl;
-        while (gameStarted) {
-            auto startTime = steady_clock::now();
-            if (!gamePaused) tick();
-            auto endTime = steady_clock::now();
-            auto elapsedTime = duration_cast<microseconds>(endTime - startTime);
-            if (elapsedTime < 20000us) sleep_for(20000us - elapsedTime);
+        while (gameStarted.load(memory_order_acquire)) {
+            const auto startTime = steady_clock::now();
+            if (!gamePaused.load(memory_order_acquire)) tick();
+            const auto endTime = steady_clock::now();
+            const auto elapsedTime = duration_cast<microseconds>(endTime - startTime);
+            perf_MSPT.store(elapsedTime.count() / 1000.0f, memory_order_release);
+            if (elapsedTime < 20000us) std::this_thread::sleep_for(20000us - elapsedTime);
         }
         lout << "Game loop terminated!" << endl;
     }
 
     static void tick() noexcept {
-    //Process player input
+    //1. Update global state and wait for Renderer to finish (if it's not finished already)
+        processingTick.fetch_add(1, memory_order_release);
+
+    //2. Send start signal to all region threads
+
+    //3. Wait for all region threads to finish
+
+    //4. Invoke Renderer to render the state
+
+    //5. Update loading zones
+
+    //6. Save to disk
+
+    //7. Process player input
+        InputHandler::processTrigger();
         InputHandler::processPersist();
-    //Update world
-        unique_lock lock(registryMutex);
-        //Simulates tick
-        sleep_for(10ms);
-    //Unblock Renderer thread to allow render
-        lock.unlock();
     }
 }

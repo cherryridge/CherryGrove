@@ -1,43 +1,60 @@
 ﻿#pragma once
-#include <cstdint>
+#include <cstdlib>
 
 #include "Logger.hpp"
 
 namespace Fatal {
     typedef int32_t i32;
+    #define DEF inline constexpr i32
 
     //0 is reserved.
     //Integers below 0 are for possible overflows in assigned error code ranges.
 
     //SDL/Window System/GUI System: 1-1000
-    inline constexpr i32 SDL_INITIALIZATION_FALILED                 = 1;
-    inline constexpr i32 SDL_CREATE_WINDOW_FAILED                   = 2;
+    DEF SDL_INITIALIZATION_FAILED                              = 1;
+    DEF SDL_CREATE_WINDOW_FAILED                               = 2;
 
     //bgfx/Renderer: 1001-2000
-    inline constexpr i32 BGFX_INITIALIZATION_FALILED                 = 1001;
-    inline constexpr i32 BGFX_NO_VALID_RENDER_BACKEND                = 1002;
-    inline constexpr i32 BGFX_SHADER_FILE_NOT_FOUND                  = 1003;
-    inline constexpr i32 BGFX_OPEN_SHADER_FILE_FAILED                = 1004;
-    inline constexpr i32 BGFX_READ_SHADER_FILE_FAILED                = 1005;
-    inline constexpr i32 BGFX_GET_SHADER_FAILED                      = 1006;
-    //:)
-    inline constexpr i32 TEXTUREPOOL_MISSING_MISSING_PNG             = 1007;
+    DEF BGFX_INITIALIZATION_FAILED                             = 1001;
+    DEF BGFX_NO_VALID_RENDER_BACKEND                           = 1002;
+    DEF BGFX_CREATE_SHADER_FAILED                              = 1003;
+    DEF BGFX_GET_SHADER_FAILED                                 = 1004;
+    DEF TEXTUREPOOL_MISSING_MISSING_PNG                        = 1005;
+    DEF TEXTUREPOOL_INITIALIZATION_FAILED                      = 1006;
+    DEF TEXTUREPOOL_ATLAS_CREATION_FAILED                      = 1007;
+    DEF IMGUI_INITIALIZATION_FAILED                            = 1008;
 
     //SoLoud/Sound System: 2001-3000
-    inline constexpr i32 SOLOUD_INITIALIZATION_FALILED               = 2001;
+    DEF SOLOUD_INITIALIZATION_FAILED                           = 2001;
 
     //Pack/Pack runtime fatal error: 3001-4000
-    inline constexpr i32 PACK_MALFORMED_CONFIG_JSON                  = 3001;
 
     //InputHandler: 4001-5000
     
 
     //Misc: 5001-6000
-    inline constexpr i32 MISC_MULTIPLE_INSTANCES                     = 5001;
-    inline constexpr i32 MISC_UNSUPPORTED_PLATFORM                   = 5002;
+    
+    //File System/Physfs: 6001-7000
+    DEF FILESYSTEM_NO_WRITE_PERMISSION                         = 6001;
+    DEF FILESYSTEM_CANNOT_GET_EXECUTABLE_PATH                  = 6002;
+    DEF FILESYSTEM_CANNOT_INIT_PHYSFS                          = 6003;
+    
+    //Boot: 7001-8000
+    DEF BOOT_MULTIPLE_INSTANCES                                = 7001;
+    DEF BOOT_INVALID_WORKING_DIR                               = 7002;
+
+    //Settings: 8001-9000
+    DEF SETTINGS_FAILED_TO_LOAD                                = 8001;
+    DEF SETTINGS_FAILED_TO_SAVE                                = 8002;
+
+    //It shouldn't be here (i.e. there is 100% a bug): 9001-10000
+    DEF ISBH_TEXTUREPOOL_TEXTURE_NOT_IN_ATLAS                  = 9001;
+    DEF ISBH_FAILED_TO_WRITE_DEFAULT_SETTINGS                  = 9002;
 
     [[noreturn]] inline void exit(i32 code) noexcept {
-        lerr << "[Fatal] Exit code: " << code << endl;
-        std::abort();
+        Logger::LOGGER_DYNAMIC_ERR("[Fatal] Exit code: ", code);
+        std::exit(code);
     }
+
+    #undef DEF
 }

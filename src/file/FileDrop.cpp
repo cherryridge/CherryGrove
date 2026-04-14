@@ -29,16 +29,21 @@ namespace FileDrop {
 
     }
 
+    //CherryGrove Relocatable Gamesave
+    static void processCGR(const path& _path) {
+
+    }
+
     void processFile(i32 count, const char** paths) {
         for (i32 i = 0; i < count; i++) {
-            std::string pathStr(paths[i]);
-            path _path(pathStr);
+            path _path(paths[i]);
             auto extension =  _path.extension().string();
-            if (extension == ".cgw") processCGW(_path);
-            else if (extension == ".zip") processZip(_path);
+            if      (extension == ".cgw") processCGW(_path);
             else if (extension == ".cgp") processCGP(_path);
+            else if (extension == ".cgr") processCGR(_path);
+            else if (extension == ".zip") processZip(_path);
             else if (is_directory(_path)) processFolder(_path);
-            else lout << "Unidentified file type: " << pathStr << endl;
+            else lout << "Unidentified file type: " << paths[i] << endl;
         }
     }
 }

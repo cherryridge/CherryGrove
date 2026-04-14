@@ -1,18 +1,17 @@
+# Prebuilt Libraries
+
+See https://docs.cherrygrove.dev/cg/releasing/building#grab-prebuilt-depedencies.
+
 # Local Libraries
 
-### Disclaimer: Local libraries may be modified. Check out the links below for original code.
+#### Disclaimer: Local libraries may be modified. Check out the links below for original code.
 
-### All of the local libraries need to be updated periodically.
+---
 
-- [ocornut/imgui](https://github.com/ocornut/imgui): `./imgui`
-  - `92e2df59781d441d83cda284eccfe8dec8d0f7ad` (`docking`)
+### [ocornut/imgui](https://github.com/ocornut/imgui)
 
-- [Madman10K/imgui_impl_bgfx.cpp](https://gist.github.com/Madman10K/0ffc9ba203333d3580d467d972bbf8b6): `./imgui/backends`
-  - `9110d39e126dbd557ad1ff5147526ffeaeb7267c`
-
-- [bkaradzic/bgfx/examples/common/imgui/...](https://github.com/bkaradzic/bgfx/tree/master/examples/common/imgui): `./imgui/backend`
-  - `14e0aa5aff65a12df621fbc9466b42d41d01f013`
-- [bkaradzic/bgfx/src/bgfx_shaders.sh](https://github.com/bkaradzic/bgfx/blob/master/src/bgfx_shader.sh): `./bgfx_shader`
-  - `14e0aa5aff65a12df621fbc9466b42d41d01f013`
-- [bkaradzic/bgfx/examples/common/shaderlib.sh](https://github.com/bkaradzic/bgfx/blob/master/examples/common/shaderlib.sh): `./bgfx_shader`
-  - `14e0aa5aff65a12df621fbc9466b42d41d01f013`
+- Local Path: `libs/imgui`
+- Current Commit: `bbcc83e999c5e08852a83c0c1c4af2ada515f9eb`
+- In Branch: `docking`
+- Current Version: 1.92.8 WIP (+)
+- Reason for Being Local: `imconfig.h` needs to be modified.

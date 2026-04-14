@@ -1,3 +1,3 @@
-makensis windows-x64-chs.nsi
-makensis windows-x64-en.nsi
+iscc /DArch=x64 script.iss
+iscc /DArch=arm64 script.iss
 pause
