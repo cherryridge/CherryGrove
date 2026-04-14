@@ -27,18 +27,18 @@ namespace Boot {
             lockFile = CreateFileA(lockFilePath.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
             if (lockFile != INVALID_HANDLE_VALUE) {
                 bool locked = LockFile(lockFile, 0, 0, 1, 0);
-                if (!locked) goto invoke;
+                if (!locked) goto invokeExistingInstance;
             }
-            else goto invoke;
+            else goto invokeExistingInstance;
         }
         #else
         {
             i32 lockFile = open(lockFilePath.c_str(), O_CREAT | O_RDWR, 0666);
             if (lockFile >= 0) {
                 bool locked = lockf(lockFile, F_TLOCK, 0) == 0;
-                if (!locked) goto invoke;
+                if (!locked) goto invokeExistingInstance;
             }
-            else goto invoke;
+            else goto invokeExistingInstance;
         }
         #endif
         {
@@ -47,7 +47,7 @@ namespace Boot {
             static_cast<void>(Util::OS::writeFile(lockFilePath, pidBytes));
         }
             return;
-        invoke: {
+        invokeExistingInstance: {
             vector<u8> fileData;
             if (Util::OS::readFile<false>(lockFilePath, fileData) && fileData.size() >= sizeof(u32)) {
                 u32 pid;

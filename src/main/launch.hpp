@@ -21,7 +21,7 @@
 #include "hold.hpp"
 
 namespace Main {
-    using std::memory_order_relaxed, std::cout, std::endl, std::filesystem::current_path, Util::BitField;
+    using std::memory_order_relaxed, std::move, std::cout, std::endl, std::filesystem::current_path, Util::BitField;
 
     inline Boot::SessionLock sessionLock;
 
@@ -33,7 +33,7 @@ namespace Main {
         cout << "Working directory: " << current_path() << endl;
 
     //Working directory lock (RAII)
-        sessionLock = Boot::SessionLock("cg.lock");
+        sessionLock = move(Boot::SessionLock("cg.lock"));
         cout << "Session lock acquired." << endl;
 
     //Settings

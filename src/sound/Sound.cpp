@@ -265,7 +265,7 @@ namespace Sound {
                 }
             }
         //Check for looping plays. All looping plays must be check in one go because less frequency means more likely to overshoot.
-            //Note: We have to use iterator because we might erase elements.
+            //note: We have to use iterator because we might erase elements.
             for (auto it = loopPlays.begin(); it != loopPlays.end();) {
                 const auto ptr = playRegistry.getPtr(*it);
                 if (ptr) {

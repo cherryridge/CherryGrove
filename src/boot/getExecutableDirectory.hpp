@@ -12,8 +12,8 @@ namespace Boot {
     typedef uint64_t u64;
     using std::filesystem::path, std::wstring, std::string, std::vector, std::max;
 
-    //Note: Pre-logger function
-    //Note: Pure function
+    //note: Pre-logger function
+    //note: Pure function
     //It may exit on failure. We also can't recover.
     [[nodiscard]] inline path getExecutableDirectory() noexcept {
         #if CG_PLATFORM_WINDOWS

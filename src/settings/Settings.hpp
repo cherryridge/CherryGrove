@@ -31,7 +31,7 @@ namespace Settings {
 
     [[nodiscard]] inline const Latest<Settings>& getSettings() noexcept { return detail::data; }
 
-    //Note: Maybe pre-logger function.
+    //note: Maybe pre-logger function.
     [[nodiscard]] inline bool loadSettings() noexcept {
         if (exists(detail::SETTINGS_FILENAME) && !is_regular_file(detail::SETTINGS_FILENAME)) return UmiJSON::readJSONFromFile<Settings, false>(detail::SETTINGS_FILENAME, detail::data);
         return true;

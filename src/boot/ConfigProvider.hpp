@@ -17,30 +17,30 @@ namespace Boot {
     typedef int64_t i64;
     using std::string, std::vector, std::cout, std::cerr, std::endl, CLI::App, CLI::ParseError, CLI::CallForHelp, CLI::CallForVersion, CLI::AppFormatMode, Util::OS::isWritableDirectory, Util::OS::normalize, std::filesystem::current_path, std::filesystem::path;
 
-    //Note: Pre-logger function
-    //Note: The very first function called within Main::launch, the entry point after OS-specific entry.
+    //note: Pre-logger function
+    //note: The very first function called within Main::launch, the entry point after OS-specific entry.
     inline void setWorkingDirectory(int argc, char** argv) noexcept {
         //Regain I/O of parent console.
-        //Warning: /SUBSYSTEM:WINDOWS will cause PowerShell and Command Prompt to run asynchronously and ignore our console output. Currently, the best solution is to tell users to use `.\CherryGrove.exe -h | Out-Null` in PowerShell, or `start "" /b /wait .\CherryGrove.exe -h` in Command Prompt to wait for the process to finish IN THE DOCUMENTATION.
-        #if CG_PLATFORM_WINDOWS
-            if (AttachConsole(ATTACH_PARENT_PROCESS) || GetLastError() == ERROR_ACCESS_DENIED) {
-                FILE* fp = nullptr;
-                freopen_s(&fp, "CONIN$", "r", stdin);
-                freopen_s(&fp, "CONOUT$", "w", stdout);
-                freopen_s(&fp, "CONOUT$", "w", stderr);
-                SetConsoleOutputCP(CP_UTF8);
-                SetConsoleCP(CP_UTF8);
-                setvbuf(stdout, nullptr, _IONBF, 0);
-                setvbuf(stderr, nullptr, _IONBF, 0);
-                HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-                if (hOut && hOut != INVALID_HANDLE_VALUE) {
-                    DWORD mode = 0;
-                    if (GetConsoleMode(hOut, &mode)) SetConsoleMode(hOut, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-                    CONSOLE_SCREEN_BUFFER_INFO csbi{};
-                    if (GetConsoleScreenBufferInfo(hOut, &csbi) && csbi.dwCursorPosition.X != 0) cout << '\n';
-                }
+        //warning: /subsystem:windows will cause PowerShell and Command Prompt to run asynchronously and ignore our console output. Currently, the best solution is to tell users to use `.\CherryGrove.exe -h | Out-Null` in PowerShell, or `start "" /b /wait .\CherryGrove.exe -h` in Command Prompt to wait for the process to finish IN THE DOCUMENTATION.
+    #if CG_PLATFORM_WINDOWS
+        if (AttachConsole(ATTACH_PARENT_PROCESS) || GetLastError() == ERROR_ACCESS_DENIED) {
+            FILE* fp = nullptr;
+            freopen_s(&fp, "CONIN$", "r", stdin);
+            freopen_s(&fp, "CONOUT$", "w", stdout);
+            freopen_s(&fp, "CONOUT$", "w", stderr);
+            SetConsoleOutputCP(CP_UTF8);
+            SetConsoleCP(CP_UTF8);
+            setvbuf(stdout, nullptr, _IONBF, 0);
+            setvbuf(stderr, nullptr, _IONBF, 0);
+            HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+            if (hOut && hOut != INVALID_HANDLE_VALUE) {
+                DWORD mode = 0;
+                if (GetConsoleMode(hOut, &mode)) SetConsoleMode(hOut, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+                CONSOLE_SCREEN_BUFFER_INFO csbi{};
+                if (GetConsoleScreenBufferInfo(hOut, &csbi) && csbi.dwCursorPosition.X != 0) cout << '\n';
             }
-        #endif
+        }
+    #endif
 
         App app;
         app.allow_windows_style_options(false);
@@ -57,10 +57,10 @@ namespace Boot {
         app.set_help_flag("-h,--help", "Print help message and exit.");
 
         string generateKeyword;
-        app.add_option("-g,--generate", "Generate something instead of launching the game.")->type_name("[KEYWORD]")->check(CLI::IsMember({"schemas", "config"}));
+        app.add_option("-g,--generate", "Generate something (at the working directory) instead of launching the game.\n`schema`: Generate JSON schema files.\n`settings`: Generate the default `settings.json` file.")->type_name("[KEYWORD]")->check(CLI::IsMember({"schemas", "settings"}));
 
         string workingDirectory;
-        app.add_option("WorkingDirectory", workingDirectory, "(Optional) CherryGrove's working directory.")->check(CLI::ExistingPath);
+        app.add_option("WorkingDirectory", workingDirectory, "CherryGrove's working directory.\nOptional. If not provided, CherryGrove will use the executable's directory.")->check(CLI::ExistingPath);
 
         app.footer(string("Use the default config file by executing CherryGrove without any arguments.\nFor more information, please visit https://docs.cherrygrove.dev.\n\nCherryGrove is source-available software because it's a shame of open source to allow unrewarded commercial use.\n") + CG_COPYRIGHT_NOTICE + "\nhttps://cherrygrove.dev");
 
