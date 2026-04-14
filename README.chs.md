@@ -1,6 +1,6 @@
 [English](README.md) | 中文
 
-<p align="center"><img alt="CherryGrove Logo" width="120" src="assets/icons/CherryGrove-trs-2048.png" /></p>
+<p align="center"><img alt="CherryGrove Logo" width="150" src="assets/icons/CherryGrove-trs-2048.png" /></p>
 
 <h1 align="center">CherryGrove</h1>
 
