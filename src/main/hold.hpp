@@ -4,9 +4,10 @@
 #include <function2/function2.hpp>
 #include <SDL3/SDL.h>
 
+#include "../boot/focus/Focus.hpp"
 #include "../globalState.hpp"
 #include "../input/inputPipeline.hpp"
-#include "../settings/Settings.hpp"
+#include "../settings/Settings.hpp" // IWYU pragma: keep
 #include "../util/concurrentQueue.hpp"
 #include "../window.hpp"
 #include "shutdown.hpp"
@@ -29,6 +30,9 @@ namespace Main {
 
         while (GlobalState::isCGAlive.load(memory_order_acquire)) {
             loopStartTime = high_resolution_clock::now();
+
+        //Check for focus messages
+            Boot::Focus::tryReceive();
 
         //Populate new input frame
             for (frame.actualSize = 0; frame.actualSize < MAXIMUM_INPUT_EVENTS_PER_FRAME; frame.actualSize++) {

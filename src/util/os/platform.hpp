@@ -20,6 +20,8 @@
     #undef max
 #elif defined(__linux__)
     #define CG_PLATFORM_LINUX 1
+    #include <fcntl.h>  // IWYU pragma: keep
+    #include <semaphore.h>  // IWYU pragma: keep
     #include <unistd.h>  // IWYU pragma: keep
     #include <climits>  // IWYU pragma: keep
 #elif defined(__ANDROID__)
@@ -34,6 +36,10 @@
         #define CG_PLATFORM_IOS 1
     #elif TARGET_OS_MAC
         #define CG_PLATFORM_MACOS 1
+        #include <fcntl.h>  // IWYU pragma: keep
+        #include <semaphore.h>  // IWYU pragma: keep
+        #include <objc/message.h>  // IWYU pragma: keep
+        #include <objc/runtime.h>  // IWYU pragma: keep
     #else
         #error "Unknown Apple platform"
     #endif
