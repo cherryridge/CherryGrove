@@ -2,7 +2,7 @@
 #include <string>
 #include <boost/container_hash/hash.hpp>
 
-#include "../util/macros.hpp"
+#include "../util/implHashFor.hpp"
 #include "../util/string.hpp"
 
 namespace Components {

@@ -1,11 +1,11 @@
 ﻿#pragma once
 #include <cstdint>
 
-#include "../util/json/wrappers/uuid.hpp"
+#include "../util/wrappers/uuid.hpp"
 
 namespace Pack {
     typedef uint32_t u32;
-    using Util::Json::uuid_JSON;
+    using Util::Wrapper::uuid_JSON;
 
     struct KnownPack {
         uuid_JSON id;

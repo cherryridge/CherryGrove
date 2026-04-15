@@ -7,13 +7,13 @@
 
 #include "../meta.hpp"
 #include "../util/json/helper.hpp"
-#include "../util/json/wrappers/uuid.hpp"
 #include "../util/lexical.hpp"
-#include "base.hpp"
+#include "../util/wrappers/uuid.hpp"
+#include "PackVersionRange.hpp"
 
 namespace Pack {
     typedef uint32_t u32;
-    using std::string, std::vector, Util::Json::uuid_JSON;
+    using std::string, std::vector, Util::Wrapper::uuid_JSON;
 
     struct Manifest_v1 {
         u32 formatVersion{1};

@@ -16,13 +16,13 @@ namespace Boot {
     typedef uint8_t u8;
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::string, std::move, std::string_view, std::filesystem::current_path, std::filesystem::remove, std::span, std::vector;
+    using std::string, std::move, std::string_view, std::filesystem::current_path, std::filesystem::remove, std::span, std::vector, Util::OS::readFile, Util::OS::getU8String;
 
     struct SessionLock {
         SessionLock() = default;
 
         [[nodiscard]] SessionLock(const string_view fileName) noexcept {
-            lockFilePath = (current_path() / fileName).string();
+            lockFilePath = getU8String(current_path() / fileName);
 
         #if CG_PLATFORM_WINDOWS
         {
@@ -49,7 +49,7 @@ namespace Boot {
 
         invokeExistingInstance: {
             vector<u8> fileData;
-            if (Util::OS::readFile<false>(lockFilePath, fileData) && fileData.size() >= sizeof(u32)) {
+            if (readFile<false>(lockFilePath, fileData) && fileData.size() >= sizeof(u32)) {
                 u32 pid;
                 memcpy(&pid, fileData.data(), sizeof(u32));
             #if CG_PLATFORM_WINDOWS

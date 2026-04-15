@@ -2,23 +2,23 @@
 #include <filesystem>
 #include <string>
 #include <boost/unordered/unordered_flat_map.hpp>
-#include <boost/uuid.hpp>
 
 #include "../debug/Fatal.hpp"
 #include "../debug/Logger.hpp"
 #include "../settings/pack.hpp"
 #include "../settings/Settings.hpp"
 #include "../umi/controller.hpp"
+#include "../util/os/filesystem.hpp"
 #include "packFetcher.hpp"
 #include "PackMetaInfo.hpp"
 #include "registry.hpp"
 
 namespace Pack {
     typedef uint64_t u64;
-    using std::filesystem::current_path, std::string, boost::uuids::uuid, boost::unordered_flat_map, Util::Json::Latest, Util::Json::JSONKind::Settings;
+    using std::filesystem::current_path, std::string, boost::unordered_flat_map, Util::OS::getU8String, Util::Json::Latest, Util::Json::JSONKind::Settings;
 
     inline void init() noexcept {
-        if (!PHYSFS_init(current_path().string().c_str())) {
+        if (!PHYSFS_init(getU8String(current_path()).c_str())) {
             lerr << "[Pack] Failed to initialize PhysFS: " << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()) << endl;
             Fatal::exit(Fatal::FILESYSTEM_CANNOT_INIT_PHYSFS);
         }

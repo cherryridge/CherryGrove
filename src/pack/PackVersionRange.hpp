@@ -1,12 +1,10 @@
 ﻿#pragma once
-#include <boost/container_hash/hash.hpp>
-#include <boost/uuid.hpp>
 
-#include "../util/json/wrappers/uuid.hpp"
+#include "../util/wrappers/uuid.hpp"
 
 namespace Pack {
     typedef uint32_t u32;
-    using boost::uuids::uuid, Util::Json::uuid_JSON;
+    using Util::Wrapper::uuid_JSON;
 
     //[min, max], both inclusive. If `max` is `0`, it means there is no upper bound. Use `min == 1` for the same intent.
     struct PackVersionRange {
@@ -17,8 +15,8 @@ namespace Pack {
             return id == other.id && min == other.min && max == other.max;
         }
 
-        [[nodiscard]] bool contains(const uuid& packId, u32 packVersion) const noexcept {
-            if (id.value != packId) return false;
+        [[nodiscard]] bool contains(const uuid_JSON& packId, u32 packVersion) const noexcept {
+            if (id != packId) return false;
             if (max == 0) return packVersion >= min;
             else return packVersion >= min && packVersion <= max;
         }

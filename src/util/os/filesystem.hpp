@@ -30,6 +30,15 @@ namespace Util::OS {
         return true;
     }
 
+    [[nodiscard]] inline string getU8String(const path& input) noexcept {
+    #if defined(__cpp_char8_t)
+        const auto utf8 = input.u8string();
+        return string(reinterpret_cast<const char*>(utf8.data()), utf8.size());
+    #else
+        return input.u8string();
+    #endif
+    }
+
     [[nodiscard]] inline bool isWritableDirectory(const path& p) noexcept {
         error_code ec;
         path _p = p;

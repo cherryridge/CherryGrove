@@ -8,7 +8,7 @@ namespace Pack {
     
     struct PackMetaInfo {
         Latest<Manifest> manifest;
-        string path_;
+        string pathStr;
         bool physfs, disabled;
     };
 }

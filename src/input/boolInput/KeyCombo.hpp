@@ -5,7 +5,7 @@
 #include <glaze/glaze.hpp>
 
 #include "../../debug/Logger.hpp"
-#include "../../util/macros.hpp"
+#include "../../util/implHashFor.hpp"
 #include "biid.hpp"
 
 namespace InputHandler::BoolInput {

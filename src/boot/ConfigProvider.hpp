@@ -15,7 +15,7 @@
 namespace Boot {
     typedef uint32_t u32;
     typedef int64_t i64;
-    using std::string, std::vector, std::cout, std::cerr, std::endl, CLI::App, CLI::ParseError, CLI::CallForHelp, CLI::CallForVersion, CLI::AppFormatMode, Util::OS::isWritableDirectory, Util::OS::normalize, std::filesystem::current_path, std::filesystem::path;
+    using std::string, std::vector, std::cout, std::cerr, std::endl, CLI::App, CLI::ParseError, CLI::CallForHelp, CLI::CallForVersion, CLI::AppFormatMode, Util::OS::isWritableDirectory, Util::OS::normalize, Util::OS::getU8String, std::filesystem::current_path, std::filesystem::path;
 
     //note: Pre-logger function
     //note: The very first function called within Main::launch, the entry point after OS-specific entry.
@@ -100,7 +100,7 @@ namespace Boot {
                 Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
             }
             cout << "[CLI] No working directory specified, using executable directory: " << executablePath << endl;
-            workingDirectory = executablePath.string();
+            workingDirectory = getU8String(executablePath);
         }
         else if (!isWritableDirectory(workingDirectory)) {
             cerr << "[Error][CLI] Specified working directory is not writable: " << workingDirectory << endl;

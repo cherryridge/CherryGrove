@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#define __CONCAT(a, b) a##b
-
 #define IMPL_HASH_FOR(ns, type, _seed, ...)                                     \
 namespace ns {                                                                  \
     [[nodiscard]] inline size_t hash_value(const type& input) noexcept {        \
