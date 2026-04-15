@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <boost/unordered/unordered_flat_map.hpp>
-#include <boost/uuid/uuid.hpp>
+#include <boost/uuid.hpp>
 
 #include "Settings.hpp"
 

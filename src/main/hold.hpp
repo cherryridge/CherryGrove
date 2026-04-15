@@ -52,7 +52,7 @@ namespace Main {
             }
 
         #if CG_DEBUG
-            if (high_resolution_clock::now() - loopStartTime > maxLoopTime) lout << "[Main] Can't keep up! Is CherryGrove Minecraft? Input section run for " << duration_cast<microseconds>(high_resolution_clock::now() - loopStartTime).count() << "us while set maximum loop time is " << duration_cast<microseconds>(maxLoopTime).count() << "us" << endl;
+            if (high_resolution_clock::now() - loopStartTime > maxLoopTime) lout << "Can't keep up! Input section run for " << duration_cast<microseconds>(high_resolution_clock::now() - loopStartTime).count() << "us while set maximum loop time is " << duration_cast<microseconds>(maxLoopTime).count() << "us" << endl;
         #endif
 
         //Drain `runOnMainThread` MPSCQueue

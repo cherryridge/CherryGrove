@@ -1,19 +1,23 @@
 ﻿#pragma once
 #include <string>
-#include <vector>
 #include <boost/uuid.hpp>
 
 namespace Util {
     typedef uint64_t u64;
-    using std::string, std::vector, boost::uuids::uuid, boost::uuids::string_generator;
+    using std::string, boost::uuids::uuid, boost::uuids::string_generator, boost::uuids::to_string;
 
-    inline static string_generator _gen;
-
-    [[nodiscard]] inline uuid uuidFromString(const string& input) noexcept { return _gen(input); }
-
-    [[nodiscard]] inline vector<uuid> uuidsFromStrings(const vector<string>& input) noexcept {
-        vector<uuid> result;
-        for (u64 i = 0; i < input.size(); i++) result.push_back(_gen(input[i]));
-        return result;
+    namespace detail {
+        inline string_generator generator;
     }
+
+    [[nodiscard]] inline uuid uuidFromString(const string& input) noexcept {
+        try {
+            return detail::generator(input);
+        }
+        catch (...) {
+            return uuid{};
+        }
+    }
+
+    [[nodiscard]] inline string uuidToString(const uuid& input) noexcept { return to_string(input); }
 }

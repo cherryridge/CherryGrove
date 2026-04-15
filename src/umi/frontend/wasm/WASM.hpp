@@ -16,9 +16,9 @@ namespace UmiWASM {
     inline constexpr const char* WASMTIME_TEST = "(module\n(func (export \"add\") (param $x i32) (param $y i32) (result i32)\nlocal.get $x\nlocal.get $y\ni32.add\n)\n)";
     inline constexpr ModuleID INVALID_MODULE_HANDLE = 0;
 
-    static wasmtime::Engine engine;
-    static unordered_flat_map<ModuleID, wasmtime::Module> registry;
-    static atomic<ModuleID> nextId{1};
+    inline wasmtime::Engine engine;
+    inline unordered_flat_map<ModuleID, wasmtime::Module> registry;
+    inline atomic<ModuleID> nextId{1};
 
     inline void init() noexcept {
         auto res = wasmtime::Module::compile(engine, WASMTIME_TEST);

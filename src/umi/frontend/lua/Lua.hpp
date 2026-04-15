@@ -10,8 +10,8 @@ namespace UmiLua {
     inline constexpr InstanceID INVALID_INSTANCE_ID = 0;
     using std::atomic, std::move, boost::unordered::unordered_flat_map;
 
-    static unordered_flat_map<u32, lua_State*> contextRegistry;
-    static atomic<InstanceID> nextId{1};
+    inline unordered_flat_map<u32, lua_State*> contextRegistry;
+    inline atomic<InstanceID> nextId{1};
 
     inline void init() noexcept {}
     inline void shutdown() noexcept {

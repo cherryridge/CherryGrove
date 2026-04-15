@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <string>
-#include <boost/uuid/uuid.hpp>
+#include <boost/uuid.hpp>
 #include <glaze/glaze.hpp>
 
 #include "../pack/PackOptionDef.hpp"
