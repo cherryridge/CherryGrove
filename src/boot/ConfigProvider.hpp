@@ -8,14 +8,14 @@
 
 #include "../debug/Fatal.hpp"
 #include "../meta.hpp"
+#include "../settings/Settings.hpp"
 #include "../util/os/filesystem.hpp"
 #include "../util/os/platform.hpp"
 #include "getExecutableDirectory.hpp"
 
 namespace Boot {
-    typedef uint32_t u32;
     typedef int64_t i64;
-    using std::string, std::vector, std::cout, std::cerr, std::endl, CLI::App, CLI::ParseError, CLI::CallForHelp, CLI::CallForVersion, CLI::AppFormatMode, Util::OS::isWritableDirectory, Util::OS::normalize, Util::OS::getU8String, std::filesystem::current_path, std::filesystem::path;
+    using std::string, std::vector, std::filesystem::path, std::cout, std::cerr, std::endl, CLI::App, CLI::ParseError, CLI::CallForHelp, CLI::CallForVersion, CLI::AppFormatMode, Util::OS::isWritableDirectory, Util::OS::normalize, Util::OS::getU8String, std::filesystem::current_path;
 
     //note: Pre-logger function
     //note: The very first function called within Main::launch, the entry point after OS-specific entry.
@@ -52,7 +52,7 @@ namespace Boot {
         app.add_flag("-e,--engine", [](i64) {
             cout << CG_ENGINE_VERSION << endl;
             exit(0);
-        }, "Display (integer) engine version and exit.");
+        }, "Display canonical engine version and exit.");
 
         app.set_help_flag("-h,--help", "Print help message and exit.");
 
@@ -74,42 +74,41 @@ namespace Boot {
             exit(0);
         }
         catch (const ParseError& e) {
-            cerr << "[Error][CLI] Error occured during argument parsing: (" << e.get_exit_code() << ") " << e.get_name() << " " << e.what() << endl;
+            cerr << "(Error) [CLI] Error occured during argument parsing: (" << e.get_exit_code() << ") " << e.get_name() << " " << e.what() << endl;
             exit(Fatal::BOOT_INVALID_WORKING_DIR);
         }
 
         if (generateKeyword == "schemas") {
-            cout << "TODO: Dump schemas" << endl;
+            cout << "Schemas generated." << endl;
             exit(0);
         }
-        else if (generateKeyword == "config") {
-            cout << "TODO: Generate default config" << endl;
+        else if (generateKeyword == "settings") {
+            if (!Settings::saveSettings()) cerr << "(Error) [Boot] Failed to generate default settings." << endl;
+            else cout << "Default settings generated." << endl;
             exit(0);
         }
 
         if (workingDirectory.empty()) {
             const auto executablePath = getExecutableDirectory();
             if (!isWritableDirectory(executablePath)) {
-                //todo: OS-specific diversions
-                //1. Linux tends to put app executable in a read-only directory, according to plan, in this scenario we will:
-                //  a. Try to use PWD. PWD IS NOT SET TO EXECUTABLE DIRECTORY YET. THIS IS LITERALLY THE SECOND FUNCTION FROM THE ENTRYPOINT.
-                //  b. Use the global storage via XDG.
-                //  c. Fail.
-                //2. Research for MacOS common practices.
-                cerr << "[Error][CLI] Current working directory is not writable. TODO: OS-specific diversions" << endl;
-                Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
+                cout << "[CLI] Executable directory is not writable. Trying to use PWD." << endl;
+                workingDirectory = getU8String(current_path());
+                if (!isWritableDirectory(workingDirectory)) {
+                    cerr << "(Error) [CLI] Both executable directory and current working directory is not writable. CherryGrove needs to have a writable working directory. If you're using Linux or macOS, consider providing the working directory argument: `./CherryGrove <path-to-wd>`." << endl;
+                    Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
+                }
             }
             cout << "[CLI] No working directory specified, using executable directory: " << executablePath << endl;
             workingDirectory = getU8String(executablePath);
         }
         else if (!isWritableDirectory(workingDirectory)) {
-            cerr << "[Error][CLI] Specified working directory is not writable: " << workingDirectory << endl;
+            cerr << "(Error) [CLI] Specified working directory is not writable: " << workingDirectory << endl;
             Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
         }
 
         path workingDirectoryPath(workingDirectory);
         if (!normalize(workingDirectoryPath)) {
-            cerr << "[Error][Boot] Invalid working directory path: " << workingDirectoryPath << endl;
+            cerr << "(Error) [Boot] Invalid working directory path: " << workingDirectoryPath << endl;
             Fatal::exit(Fatal::BOOT_INVALID_WORKING_DIR);
         }
         current_path(workingDirectoryPath);

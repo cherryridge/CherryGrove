@@ -5,7 +5,7 @@
 #include <glaze/glaze.hpp>
 
 #include "../implHashFor.hpp"
-#include "../json/helper.hpp"
+#include "../json/helpers.hpp"
 
 namespace Util::Wrapper {
     using std::string, boost::uuids::uuid, boost::uuids::string_generator, boost::uuids::to_string;
@@ -14,9 +14,13 @@ namespace Util::Wrapper {
         inline string_generator generator;
     }
 
-    struct uuid_JSON {
+    JSON_STRUCT uuid_JSON {
+    private:
         uuid value{};
+    public:
+        uuid_JSON(const uuid& value) noexcept : value(value) {}
         auto operator<=>(const uuid_JSON&) const noexcept = default;
+        auto getValue() const noexcept { return value; }
     };
 
     [[nodiscard]] inline bool uuidFromString(const string& input, uuid_JSON& result) noexcept {
@@ -29,39 +33,24 @@ namespace Util::Wrapper {
         }
     }
 
-    [[nodiscard]] inline string uuidToString(const uuid_JSON& input) noexcept { return to_string(input.value); }
+    [[nodiscard]] inline string uuidToString(const uuid_JSON& input) noexcept { return to_string(input.getValue()); }
 }
 
 namespace glz {
     using std::string, boost::uuids::uuid, Util::Wrapper::uuid_JSON, Util::Wrapper::uuidFromString, Util::Wrapper::uuidToString;
 
-    template <>
-    struct meta<uuid_JSON> {
-        using mimic = string;
-        static constexpr bool custom_read = true;
-        static constexpr bool custom_write = true;
-    };
+    GLAZE_DYNAMIC_FROM_START(uuid_JSON)
+        string temp;
+        parse<JSON>::op<Options>(temp, ctx, it, end);
+        GLAZE_DYNAMIC_CONSTRAINT(uuidFromString(temp, result), "`id` is not a valid UUID.")
+    GLAZE_DYNAMIC_FROM_END
 
-    template <>
-    struct from<JSON, uuid_JSON> {
-        template <auto Options>
-        static void op(uuid_JSON& result, auto&& ctx, auto&& it, auto&& end) noexcept {
-            string temp;
-            parse<JSON>::op<Options>(temp, ctx, it, end);
-            GLAZE_CONSTRAINT_ASSERT(uuidFromString(temp, result), "`id` is not a valid UUID.")
-        }
-    };
-
-    template <>
-    struct to<JSON, uuid_JSON> {
-        template <auto Options>
-        static void op(const uuid_JSON& input, is_context auto&& ctx, auto& b, auto& ix) noexcept {
-            const string temp = uuidToString(input);
-            serialize<JSON>::op<Options>(temp, ctx, b, ix);
-        }
-    };
+    GLAZE_DYNAMIC_TO_START(uuid_JSON)
+        const string temp = uuidToString(input);
+        serialize<JSON>::op<Options>(temp, ctx, b, ix);
+    GLAZE_DYNAMIC_TO_END
 }
 
 IMPL_HASH_FOR(Util::Wrapper, uuid_JSON, 666555444,
-    boost::hash_combine(seed, input.value);
+    boost::hash_combine(seed, input.getValue());
 )

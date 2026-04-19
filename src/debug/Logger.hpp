@@ -10,6 +10,7 @@
 
 #include "../globalState.hpp"
 #include "../util/concepts.hpp"
+#include "../util/json/helpers.hpp"
 #include "../util/os/thread.hpp"
 
 //Auto use magic variables
@@ -133,13 +134,11 @@ namespace Logger {
     }
 }
 
-template <>
-struct glz::meta<Logger::LoggingMode> {
-    static constexpr auto value = glz::enumerate(
-        "stdout", Logger::LoggingMode::Stdout,
-        "separate", Logger::LoggingMode::Separate,
-        "file", Logger::LoggingMode::File
-    );
-};
+
+GLAZE_ENUM_START(Logger::LoggingMode)
+    GLAZE_ENUM("stdout", Stdout),
+    GLAZE_ENUM("separate", Separate),
+    GLAZE_ENUM("file", File)
+GLAZE_ENUM_END
 
 using Logger::lout, Logger::lerr;

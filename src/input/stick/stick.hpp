@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <array>
-#include <type_traits>
+#include <utility>
 #include <SDL3/SDL.h>
 
 #include "../types.hpp"
@@ -9,7 +9,7 @@
 namespace InputHandler::Stick {
     typedef int16_t i16;
     typedef uint16_t u16;
-    using std::array, std::underlying_type_t;
+    using std::array, std::to_underlying;
 
 //#region Actionwise API
 
@@ -36,7 +36,7 @@ namespace InputHandler::Stick {
     void updateArguments(array<i16, 8> deadzones_) noexcept;
 
     //This function DOES NOT guarantee to return the most up-to-date states in very high frequency calls due to hot path prioritization. It only guarantees that the returned states are consistent with each other, meaning that they are from the same snapshot.
-    [[nodiscard]] array<i16, static_cast<underlying_type_t<Axis>>(Axis::Count)> getStates() noexcept;
+    [[nodiscard]] array<i16, to_underlying(Axis::Count)> getStates() noexcept;
 
 //#endregion
 }
