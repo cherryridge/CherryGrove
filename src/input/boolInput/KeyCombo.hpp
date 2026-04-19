@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <array>
 #include <bit>
 #include <compare>
 #include <ostream>
@@ -11,7 +12,7 @@
 
 namespace InputHandler::BoolInput {
     typedef uint64_t u64;
-    using std::popcount, std::countr_zero, std::partial_ordering, std::ostream;
+    using std::popcount, std::countr_zero, std::partial_ordering, std::ostream, glz::schema;
 
     JSON_STRUCT KeyCombo {
         u64 lower{0}, middle{0}, higher{0}, align__{0};
@@ -170,6 +171,8 @@ namespace InputHandler::BoolInput {
             logger << "KeyCombo(" << data.lower << ", " << data.middle << ", " << data.higher << ")";
             return logger;
         }
+
+        #undef ASSERT_BIID_IN_BOUND
     };
 }
 
@@ -178,15 +181,17 @@ IMPL_HASH_FOR(InputHandler::BoolInput, KeyCombo, 0,
 )
 
 namespace glz {
+    typedef uint64_t u64;
     using InputHandler::BoolInput::KeyCombo;
 
     GLAZE_DYNAMIC_FROM_START(KeyCombo)
-        //todo: Codex, do not implement this!
+        std::array<u64, 3> temp;
+        parse<JSON>::op<Options>(temp, ctx, it, end);
+        result = KeyCombo(temp[0], temp[1], temp[2]);
     GLAZE_DYNAMIC_FROM_END
-}
 
-template <>
-struct glz::meta<InputHandler::BoolInput::KeyCombo> {
-    using T = InputHandler::BoolInput::KeyCombo;
-    static constexpr auto value = glz::array(&T::lower, &T::middle, &T::higher);
-};
+    GLAZE_DYNAMIC_TO_START(KeyCombo)
+        std::array<u64, 3> temp{input.lower, input.middle, input.higher};
+        serialize<JSON>::op<Options>(temp, ctx, b, ix);
+    GLAZE_DYNAMIC_TO_END
+}
