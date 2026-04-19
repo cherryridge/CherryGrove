@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <array>
-#include <type_traits>
+#include <utility>
 
 #include "../../util/BitField.hpp"
 #include "../Action.hpp"
@@ -8,7 +8,7 @@
 namespace InputHandler::Stick {
     typedef uint8_t u8;
     typedef int16_t i16;
-    using std::array, std::underlying_type_t, Util::BitField;
+    using std::array, std::to_underlying, Util::BitField;
 
     enum struct Subkind : u8 {
         Trigger, Persist,
@@ -31,7 +31,7 @@ namespace InputHandler::Stick {
         //  If `axis` is `Axis::(Left/Right)Trigger`, values[0] is the regulated trigger value.
         //  Other values are always 0.
         //Else if `triggeredKind` is `Persist`, this field is every regulated value of all axises.
-        array<float, static_cast<underlying_type_t<Axis>>(Axis::Count)> values;
+        array<float, to_underlying(Axis::Count)> values;
         //If `triggeredKind` is `Persist`, this field is `Axis::Count`.
         Axis axis;
         Subkind triggeredKind;

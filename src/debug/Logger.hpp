@@ -9,7 +9,7 @@
 #include <glaze/glaze.hpp>
 
 #include "../globalState.hpp"
-#include "../util/concepts.hpp"
+#include "../util/json/helpers.hpp"
 #include "../util/os/thread.hpp"
 
 //Auto use magic variables
@@ -21,7 +21,7 @@ namespace Logger {
     typedef uint32_t u32;
     typedef uint64_t u64;
     //Warning: DO NOT put std::cout or std::cerr here, or we will eventually misuse them.
-    using std::atomic_flag, std::ostream, std::cout, std::cerr, std::enable_if_t, std::is_function_v, std::ostringstream, std::memory_order_acquire, std::memory_order_release, std::forward, std::string, std::to_string, std::this_thread::yield, Util::Equal;
+    using std::atomic_flag, std::ostream, std::cout, std::cerr, std::is_function_v, std::ostringstream, std::memory_order_acquire, std::memory_order_release, std::forward, std::string, std::to_string, std::this_thread::yield;
     using Manip = ostream& (*)(ostream&);
 
     enum struct LoggingMode : u8 { Stdout, Separate, File };
@@ -109,7 +109,7 @@ namespace Logger {
 
     template <typename... Ts>
     inline void LOGGER_DYNAMIC_OUT(Ts&&... ts) noexcept {
-        if (GlobalState::multiThreadEra.load(memory_order_acquire)) {
+        if (GlobalState::multiThreadEra()) {
             ((lout << forward<Ts>(ts)), ...);
             lout << endl;
         }
@@ -121,7 +121,7 @@ namespace Logger {
 
     template <typename... Ts>
     inline void LOGGER_DYNAMIC_ERR(Ts&&... ts) noexcept {
-        if (GlobalState::multiThreadEra.load(memory_order_acquire)) {
+        if (GlobalState::multiThreadEra()) {
             ((lerr << forward<Ts>(ts)), ...);
             lerr << endl;
         }
@@ -133,13 +133,11 @@ namespace Logger {
     }
 }
 
-template <>
-struct glz::meta<Logger::LoggingMode> {
-    static constexpr auto value = glz::enumerate(
-        "stdout", Logger::LoggingMode::Stdout,
-        "separate", Logger::LoggingMode::Separate,
-        "file", Logger::LoggingMode::File
-    );
-};
+
+GLAZE_ENUM_START(Logger::LoggingMode)
+    GLAZE_ENUM("stdout", Stdout),
+    GLAZE_ENUM("separate", Separate),
+    GLAZE_ENUM("file", File)
+GLAZE_ENUM_END
 
 using Logger::lout, Logger::lerr;

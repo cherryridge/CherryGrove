@@ -1,16 +1,15 @@
 ﻿#pragma once
 #include <string>
-#include <boost/uuid.hpp>
 #include <glaze/glaze.hpp>
 
 #include "../pack/PackOptionDef.hpp"
-#include "../util/json/helper.hpp"
+#include "../util/json/helpers.hpp"
 
 namespace Pack {
     typedef int64_t i64;
     using std::string;
 
-    struct PackOptionValue {
+    JSON_STRUCT PackOptionValue {
         using enum PackOptionType;
 
         string identifier;
@@ -104,7 +103,7 @@ namespace glz {
     using std::string, std::move, Pack::PackOptionValue;
     using enum Pack::PackOptionType;
 
-    struct PackOptionValue_glz {
+    JSON_STRUCT PackOptionValue_glz {
         string identifier, type;
         generic value;
     };
@@ -121,30 +120,30 @@ namespace glz {
             result.destroyUnion();
             if (temp.type == "boolean") {
                 result.type = Boolean;
-                GLAZE_CONSTRAINT_ASSERT(temp.value.is_boolean(), "Value for boolean option must be a boolean.")
+                GLAZE_DYNAMIC_CONSTRAINT(temp.value.is_boolean(), "Value for boolean option must be a boolean.")
                 result.boolValue = temp.value.get<bool>();
             }
             else if (temp.type == "integer") {
                 result.type = Integer;
-                GLAZE_CONSTRAINT_ASSERT(temp.value.is_number(), "Value for integer option must be a number.")
+                GLAZE_DYNAMIC_CONSTRAINT(temp.value.is_number(), "Value for integer option must be a number.")
                 result.intValue = temp.value.as<i64>();
             }
             else if (temp.type == "float") {
                 result.type = Float;
-                GLAZE_CONSTRAINT_ASSERT(temp.value.is_number(), "Value for float option must be a number.")
+                GLAZE_DYNAMIC_CONSTRAINT(temp.value.is_number(), "Value for float option must be a number.")
                 result.floatValue = temp.value.as<double>();
             }
             else if (temp.type == "string") {
                 result.type = String;
-                GLAZE_CONSTRAINT_ASSERT(temp.value.is_string(), "Value for string option must be a string.")
+                GLAZE_DYNAMIC_CONSTRAINT(temp.value.is_string(), "Value for string option must be a string.")
                 new (&result.stringValue) string(temp.value.get<string>());
             }
             else if (temp.type == "enum") {
                 result.type = Enum;
-                GLAZE_CONSTRAINT_ASSERT(temp.value.is_string(), "Value for enum option must be a string.")
+                GLAZE_DYNAMIC_CONSTRAINT(temp.value.is_string(), "Value for enum option must be a string.")
                 new (&result.enumValue) string(temp.value.get<string>());
             }
-            else GLAZE_CONSTRAINT_ASSERT(false, "Invalid option type.")
+            else GLAZE_DYNAMIC_CONSTRAINT(false, "Invalid option type.")
         }
     };
 

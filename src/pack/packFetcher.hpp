@@ -6,14 +6,14 @@
 #include <physfs.h>
 
 #include "../debug/Logger.hpp"
-#include "../umi/frontend/json/JSON.hpp"
+#include "../umi/frontend/json/UmiJSON.hpp"
 #include "../util/os/filesystem.hpp"
 #include "KnownPack.hpp"
 #include "PackMetaInfo.hpp"
 #include "registry.hpp"
 
 namespace Pack {
-    using std::move, std::string, std::vector, std::filesystem::path, std::filesystem::directory_iterator, std::filesystem::is_directory, std::filesystem::exists, Util::OS::normalize, boost::unordered_flat_map, Util::Json::Latest, Util::Json::JSONKind::Manifest;
+    using std::move, std::string, std::vector, std::filesystem::path, std::filesystem::directory_iterator, std::filesystem::is_directory, std::filesystem::exists, Util::OS::normalize, Util::OS::getU8String, boost::unordered_flat_map, Util::Json::Latest, Util::Json::JSONKind::Manifest;
 
     namespace detail {
         inline constexpr const char* PACK_MOUNT_PHYSFS_ROOT = "packs/";
@@ -21,30 +21,30 @@ namespace Pack {
     }
 
     inline void tryAddingPack(const PackMetaInfo& info) noexcept {
-        const auto itRegistry = detail::registry.find(info.manifest.id.value);
+        const auto itRegistry = detail::registry.find(info.manifest.id);
         if (itRegistry != detail::registry.end()) {
-            lerr << "[Pack] Pack with ID " << info.manifest.id.value << " already exists in path " << itRegistry->second.path_ << ", skipping adding the pack in path " << info.path_ << ". Do not purposely clash pack IDs. If you want to overwrite a pack's behavior, use the same `nameSpace` and require yourself to load after the target pack." << endl;
+            lerr << "[Pack] Pack with ID " << info.manifest.id.getValue() << " already exists in path " << itRegistry->second.pathStr << ", skipping adding the pack in path " << info.pathStr << ". Do not purposely clash pack IDs. If you want to overwrite a pack's behavior, use the same `nameSpace` and require yourself to load after the target pack." << endl;
             return;
         }
-        detail::registry.emplace(info.manifest.id.value, info);
-        auto itKnownPacks = detail::knownPacks.find(info.manifest.id.value);
+        detail::registry.emplace(info.manifest.id.getValue(), info);
+        auto itKnownPacks = detail::knownPacks.find(info.manifest.id);
         if (itKnownPacks != detail::knownPacks.end()) {
             if (itKnownPacks->second.version != info.manifest.version) {
-                lout << "[Pack] Pack " << info.manifest.id.value << "'s version changed from " << itKnownPacks->second.version << " to " << info.manifest.version << ", todo: prepare for preparing migration." << endl;
+                lout << "[Pack] Pack " << info.manifest.id.getValue() << "'s version changed from " << itKnownPacks->second.version << " to " << info.manifest.version << ", todo: prepare for preparing migration." << endl;
             }
             itKnownPacks->second.version = info.manifest.version;
         }
-        else detail::knownPacks.emplace(info.manifest.id.value, KnownPack{
+        else detail::knownPacks.emplace(info.manifest.id.getValue(), KnownPack{
             .id = info.manifest.id,
             .version = info.manifest.version,
             .disabled = false
         });
-        lout << "[Pack] Added pack: " << info.manifest.name << ", ID: " << info.manifest.id.value << ", version: " << info.manifest.version << endl;
+        lout << "[Pack] Added pack: " << info.manifest.name << ", ID: " << info.manifest.id.getValue() << ", version: " << info.manifest.version << endl;
     }
 
     [[nodiscard]] inline bool parsePackManifest(const path& packPath, PackMetaInfo& result) noexcept {
         if (is_regular_file(packPath)) {
-            const auto ext = packPath.extension().string(), pathStr = packPath.string();
+            const auto ext = getU8String(packPath.extension()), pathStr = getU8String(packPath);
             //Don't error on regular files. Just ignore them.
             if (ext != ".zip" && ext != ".cgp" && ext != ".7z") {
                 lout << "[Pack] Ignoring non-archive file: " << packPath << endl;
@@ -68,7 +68,7 @@ namespace Pack {
             }
             result = {
                 .manifest = move(temp),
-                .path_ = pathStr,
+                .pathStr = pathStr,
                 .physfs = true,
                 .disabled = false
             };
@@ -88,7 +88,7 @@ namespace Pack {
             }
             result = {
                 .manifest = move(temp),
-                .path_ = packPath.string(),
+                .pathStr = getU8String(packPath),
                 .physfs = false,
                 .disabled = false
             };

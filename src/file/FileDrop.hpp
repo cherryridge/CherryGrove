@@ -3,10 +3,11 @@
 #include <string>
 
 #include "../debug/Logger.hpp"
+#include "../util/os/filesystem.hpp"
 
 namespace FileDrop {
     typedef int32_t i32;
-    using std::filesystem::path, std::string;
+    using std::filesystem::path, std::string, Util::OS::getU8String;
 
     //CherryGrove World
     inline void processCGW(const path& _path) noexcept {
@@ -36,7 +37,7 @@ namespace FileDrop {
     inline void processFile(i32 count, const char** paths) noexcept {
         for (i32 i = 0; i < count; i++) {
             const path _path(paths[i]);
-            const auto extension =  _path.extension().string();
+            const auto extension = getU8String(_path.extension());
             if      (extension == ".cgw") processCGW(_path);
             else if (extension == ".cgp") processCGP(_path);
             else if (extension == ".cgr") processCGR(_path);

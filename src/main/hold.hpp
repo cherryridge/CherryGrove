@@ -14,7 +14,7 @@
 
 namespace Main {
     typedef uint64_t u64;
-    using std::memory_order_relaxed, std::memory_order_release, std::memory_order_acquire, std::chrono::high_resolution_clock, std::chrono::microseconds, std::chrono::time_point, std::chrono::duration_cast, fu2::function_view, Util::MPSCQueue, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
+    using std::memory_order_relaxed, std::memory_order_acquire, std::chrono::high_resolution_clock, std::chrono::microseconds, std::chrono::time_point, std::chrono::duration_cast, fu2::function_view, Util::MPSCQueue, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
 
     inline MPSCQueue<function_view<void()>> runOnMainThread;
 
@@ -28,7 +28,7 @@ namespace Main {
         InputHandler::FramedSDLEvents frame;
         function_view<void()> task;
 
-        while (GlobalState::isCGAlive.load(memory_order_acquire)) {
+        while (GlobalState::isCGAlive()) {
             loopStartTime = high_resolution_clock::now();
 
         //Check for focus messages
@@ -38,7 +38,7 @@ namespace Main {
             for (frame.actualSize = 0; frame.actualSize < MAXIMUM_INPUT_EVENTS_PER_FRAME; frame.actualSize++) {
                 if (SDL_PollEvent(&event)) {
                     if (event.type == SDL_EVENT_QUIT || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(Window::getMainWindow()))) {
-                        GlobalState::isCGAlive.store(false, memory_order_release);
+                        GlobalState::setIsCGAlive(false);
                         goto stop;
                     }
                     frame.events[frame.actualSize] = event;

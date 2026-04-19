@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <atomic>
 #include <string_view>
 #include <imgui.h>
 
@@ -10,7 +9,7 @@
 #include "../../graphics/gui/util.hpp"
 
 namespace Gui::MainMenu {
-    using std::memory_order_release, std::string_view;
+    using std::string_view;
 
     inline void render() noexcept {
         Gui::Util::centerWindow("MainMenu", true);
@@ -37,7 +36,7 @@ namespace Gui::MainMenu {
             });
             Gui::Util::centerButton("退出", btnSize, []() noexcept {
                 static_cast<void>(Sound::play(Gui::click, Sound::DUMMY_COORD_2D));
-                GlobalState::isCGAlive.store(false, memory_order_release);
+                GlobalState::setIsCGAlive(false);
             });
             ImGui::PopStyleVar();
             ImGui::PopFont();

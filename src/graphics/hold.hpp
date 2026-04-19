@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <atomic>
 
 #include "gui/Gui.hpp"
 #include "gui/input.hpp"
@@ -10,10 +9,8 @@
 //indexBuffer = createIndexBuffer(bgfx::makeRef(&blockIndicesTemplate, sizeof(blockIndicesTemplate)));
 
 namespace Graphics {
-    using std::memory_order_acquire;
-    
     inline void hold() noexcept {
-        while (GlobalState::isCGAlive.load(memory_order_acquire)) {
+        while (GlobalState::isCGAlive()) {
             Renderer::prepareForFrame();
             Gui::render();
             Renderer::render();

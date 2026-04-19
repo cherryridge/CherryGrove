@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <atomic>
 #include <filesystem>
 #include <iostream>
 #include <SDL3/SDL.h>
@@ -21,7 +20,7 @@
 #include "hold.hpp"
 
 namespace Main {
-    using std::memory_order_relaxed, std::move, std::cout, std::endl, std::filesystem::current_path, Util::BitField;
+    using std::move, std::cout, std::endl, std::filesystem::current_path, Util::BitField;
 
     inline Boot::SessionLock sessionLock;
 
@@ -52,7 +51,7 @@ namespace Main {
 
     //Mark the starting of CherryGrove
         lout << "Launching CherryGrove..." << endl;
-        GlobalState::isCGAlive.store(true, memory_order_relaxed);
+        GlobalState::setIsCGAlive(true);
 
     //Create Main Window
         lout << "Setting up CherryGrove window & initializing input handler..." << endl;
@@ -62,7 +61,7 @@ namespace Main {
         InputHandler::init();
 
     //Enter the multi-thread era as we are going to spawn the first thread.
-        GlobalState::multiThreadEra.store(true, memory_order_relaxed);
+        GlobalState::setMultiThreadEra(true);
 
         lout << "Initializing SoLoud..." << endl;
         //This is synchronized, we will wait inside.

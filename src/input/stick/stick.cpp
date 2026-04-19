@@ -2,7 +2,6 @@
 #include <array>
 #include <atomic>
 #include <limits>
-#include <type_traits>
 #include <utility>
 #include <vector>
 #include <SDL3/SDL.h>
@@ -19,16 +18,16 @@ namespace InputHandler::Stick {
     typedef uint8_t u8;
     typedef int16_t i16;
     typedef uint32_t u32;
-    using std::atomic, std::sqrt, std::clamp, std::array, std::underlying_type_t, std::numeric_limits, std::pair, std::vector, Util::SlotTable;
+    using std::atomic, std::sqrt, std::clamp, std::array, std::to_underlying, std::numeric_limits, std::pair, std::vector, Util::SlotTable;
 
     //[LeftStickK, LeftStickB, RightStickK, RightStickB, LeftTriggerK, LeftTriggerB, RightTriggerK, RightTriggerB]
     static array<float, 8> deadzones{};
     //note: We must store the raw values in `state` and apply deadzones before the callbacks to allow `processPersist` to work with raw values later.
-    static array<i16, static_cast<underlying_type_t<Axis>>(Axis::Count)> state{}, stateSnapshot{};
+    static array<i16, to_underlying(Axis::Count)> state{}, stateSnapshot{};
     static atomic<u32> snapshotSeq{0};
 
     static SlotTable<StickAction, ActionHandle> actionInfos;
-    static array<vector<ActionHandle>, static_cast<underlying_type_t<Axis>>(Axis::Count)> axisToHandle;
+    static array<vector<ActionHandle>, to_underlying(Axis::Count)> axisToHandle;
 
     [[nodiscard]] ActionID add(StickActionCallback cb, ActionPriority priority, const ActionwiseInfo_ST& info) noexcept {
         const ActionID id = InputHandler::internal::getNextId();
@@ -36,7 +35,7 @@ namespace InputHandler::Stick {
         if (info.triggerAxises.none()) [[unlikely]] lerr << "[InputHandler] Attempt to add a StickAction with no axis. This action will never be triggered. ActionID: " << id << endl;
     #endif
         const ActionHandle handle = actionInfos.emplace(id, priority, cb, info);
-        for (u8 axis = 0; axis < static_cast<underlying_type_t<Axis>>(Axis::Count); axis++) if (info.triggerAxises.get(static_cast<Axis>(axis))) {
+        for (u8 axis = 0; axis < to_underlying(Axis::Count); axis++) if (info.triggerAxises.get(static_cast<Axis>(axis))) {
             auto it = axisToHandle[axis].begin();
             for (; it != axisToHandle[axis].end(); ++it) if (
                 priority > actionInfos.get(*it)->priority
@@ -61,7 +60,7 @@ namespace InputHandler::Stick {
         if (actionInfo == nullptr) return false;
         const auto triggerAxises = actionInfo->actionwiseInfo.triggerAxises;
         static_cast<void>(actionInfos.destroy(location.actionHandle));
-        for (u8 axis = 0; axis < static_cast<underlying_type_t<Axis>>(Axis::Count); axis++) if (triggerAxises.get(static_cast<Axis>(axis))) for (u64 i = 0; i < axisToHandle[axis].size(); i++) if (axisToHandle[axis][i] == location.actionHandle) {
+        for (u8 axis = 0; axis < to_underlying(Axis::Count); axis++) if (triggerAxises.get(static_cast<Axis>(axis))) for (u64 i = 0; i < axisToHandle[axis].size(); i++) if (axisToHandle[axis][i] == location.actionHandle) {
             axisToHandle[axis].erase(axisToHandle[axis].begin() + i);
             break;
         }
@@ -138,7 +137,7 @@ namespace InputHandler::Stick {
                 break;
         }
 
-        state[static_cast<underlying_type_t<Axis>>(axis)] = event.gaxis.value;
+        state[to_underlying(axis)] = event.gaxis.value;
         InputHandler::writeSnapshot(state, stateSnapshot, snapshotSeq);
 
         EventwiseInfo_ST eventwiseInfo{
@@ -154,12 +153,12 @@ namespace InputHandler::Stick {
         else eventwiseInfo.values[0] = _regulate1D(axisIndex, deadzoneIndex);
 
         vector<ActionHandle> triggerKindHandles;
-        for (u64 i = 0; i < axisToHandle[static_cast<underlying_type_t<Axis>>(axis)].size(); i++) {
-            const auto* actionInfo = actionInfos.get(axisToHandle[static_cast<underlying_type_t<Axis>>(axis)][i]);
+        for (u64 i = 0; i < axisToHandle[to_underlying(axis)].size(); i++) {
+            const auto* actionInfo = actionInfos.get(axisToHandle[to_underlying(axis)][i]);
         #if CG_DEBUG
             ASSERT_NOT_NULLPTR(actionInfo, )
         #endif
-            if (actionInfo->actionwiseInfo.allowedKinds.get(InputHandler::Stick::Subkind::Trigger)) triggerKindHandles.push_back(axisToHandle[static_cast<underlying_type_t<Axis>>(axis)][i]);
+            if (actionInfo->actionwiseInfo.allowedKinds.get(InputHandler::Stick::Subkind::Trigger)) triggerKindHandles.push_back(axisToHandle[to_underlying(axis)][i]);
         }
 
         InputHandler::process(actionInfos, triggerKindHandles, eventwiseInfo);
@@ -167,7 +166,7 @@ namespace InputHandler::Stick {
 
     void processPersist() noexcept {
         vector<ActionHandle> persistKindHandles;
-        for (u8 axis = 0; axis < static_cast<underlying_type_t<Axis>>(Axis::Count); axis++) for (u64 i = 0; i < axisToHandle[axis].size(); i++) {
+        for (u8 axis = 0; axis < to_underlying(Axis::Count); axis++) for (u64 i = 0; i < axisToHandle[axis].size(); i++) {
             const auto* actionInfo = actionInfos.get(axisToHandle[axis][i]);
         #if CG_DEBUG
             ASSERT_NOT_NULLPTR(actionInfo, )
@@ -213,5 +212,5 @@ namespace InputHandler::Stick {
         }
     }
 
-    [[nodiscard]] array<i16, static_cast<underlying_type_t<Axis>>(Axis::Count)> getStates() noexcept { return InputHandler::readSnapshot(stateSnapshot, snapshotSeq); }
+    [[nodiscard]] array<i16, to_underlying(Axis::Count)> getStates() noexcept { return InputHandler::readSnapshot(stateSnapshot, snapshotSeq); }
 }
