@@ -1,21 +1,20 @@
 ﻿#pragma once
-#include <format>
 #include <limits>
 #include <string>
 #include <vector>
 #include <glaze/glaze.hpp>
 
 #include "../meta.hpp"
-#include "../util/json/helper.hpp"
+#include "../util/json/helpers.hpp"
 #include "../util/lexical.hpp"
 #include "../util/wrappers/uuid.hpp"
 #include "PackVersionRange.hpp"
 
 namespace Pack {
     typedef uint32_t u32;
-    using std::string, std::vector, Util::Wrapper::uuid_JSON;
+    using std::string, std::vector, glz::schema, Util::Wrapper::uuid_JSON;
 
-    struct Manifest_v1 {
+    JSON_STRUCT Manifest_v1 {
         u32 formatVersion{1};
 
         uuid_JSON id;
@@ -29,30 +28,56 @@ namespace Pack {
         vector<PackVersionRange> mustExist;
         vector<PackVersionRange> sendWarning;
         vector<PackVersionRange> sendError;
+
+        struct glaze_json_schema {
+            schema id{
+                .description = "Pack's UUID. Must be unique. Do not use full 0 UUID.",
+            };
+            schema version{
+                .description = "Your pack's version, using `u32` integer. This field should be increment only. Do not use `0` or `u32::max`."
+            };
+            schema minEngineVersion{
+                .description = "Your pack's minimum compatible engine version, inclusive."
+            };
+            schema nameSpace{
+                .description = "Your pack's registry namespace. You may purposely set this to the same as other packs to attempt to overwrite them. This field should be a valid conventional identifier."
+            };
+            schema name{
+                .description = "Human readable name for your pack."
+            };
+            schema description{
+                .description = "Human readable description for your pack."
+            };
+            schema authors{
+                .description = "Author credits for human reading.",
+            };
+            schema mustBefore{
+                .description = "Pack + Pack version minimum & maximum that must be loaded before your pack loads."
+            };
+            schema mustExist{
+                .description = "Pack + Pack version minimum & maximum that must be loaded alongside with your pack, but you claim no constraint on the order."
+            };
+            schema sendWarning{
+                .description = "Pack + Pack version minimum & maximum that if loaded alongside with your pack, we will send user a warning about it on your behalf, which user can decide whether to stop loading or continue anyway. There is currently no way to customize the message."
+            };
+            schema sendError{
+                .description = "Pack + Pack version minimum & maximum that if loaded alongside with your pack, we will stop pack loading and give user an error about it. There is currently no way to customize the message."
+            };
+        };
     };
 }
 
-namespace glz {
-    typedef uint32_t u32;
-    using std::format, std::numeric_limits, Pack::Manifest_v1;
-
-    template <>
-    struct meta<Manifest_v1> {
-        using T = Manifest_v1;
-
-        static constexpr auto modify = object(
-            GLAZE_CONSTRAINT_DECL(id, !id.value.is_nil(),
-                "UUID `00000000-0000-0000-0000-000000000000` is not a valid pack ID."
-            ),
-            GLAZE_CONSTRAINT_DECL(version, version > 0 && version < numeric_limits<u32>::max(),
-                "`version` must be between 1 and u32::max - 1. Do not use these edge values. They're reserved for special purposes in pack version resolution."
-            ),
-            GLAZE_CONSTRAINT_DECL(minEngineVersion, minEngineVersion > 0 && minEngineVersion <= CG_ENGINE_VERSION,
-                "`minEngineVersion` must be between 1 and the current engine version."
-            ),
-            GLAZE_CONSTRAINT_DECL(nameSpace, Util::isValidIdentifier(nameSpace),
-                "`nameSpace` should be a valid conventional identifier."
-            )
-        );
-    };
-}
+GLAZE_STATIC_CONSTRAINT_BEGIN(Pack::Manifest_v1)
+    GLAZE_STATIC_CONSTRAINT(id, !id.getValue().is_nil(),
+        "UUID `00000000-0000-0000-0000-000000000000` is not a valid pack ID."
+    ),
+    GLAZE_STATIC_CONSTRAINT(version, version > 0 && version < std::numeric_limits<uint32_t>::max(),
+        "`version` must be between 1 and u32::max - 1. Do not use these edge values. They're reserved for special purposes in pack version resolution."
+    ),
+    GLAZE_STATIC_CONSTRAINT(minEngineVersion, minEngineVersion > 0 && minEngineVersion <= CG_ENGINE_VERSION,
+        "`minEngineVersion` must be between 1 and the current engine version."
+    ),
+    GLAZE_STATIC_CONSTRAINT(nameSpace, Util::isValidIdentifier(nameSpace),
+        "`nameSpace` should be a valid conventional identifier."
+    )
+GLAZE_STATIC_CONSTRAINT_END

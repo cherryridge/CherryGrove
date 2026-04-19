@@ -6,13 +6,14 @@
 
 #include "../../debug/Logger.hpp"
 #include "../../util/implHashFor.hpp"
+#include "../../util/json/helpers.hpp"
 #include "biid.hpp"
 
 namespace InputHandler::BoolInput {
     typedef uint64_t u64;
     using std::popcount, std::countr_zero, std::partial_ordering, std::ostream;
 
-    struct KeyCombo {
+    JSON_STRUCT KeyCombo {
         u64 lower{0}, middle{0}, higher{0}, align__{0};
 
         [[nodiscard]] explicit KeyCombo() noexcept = default;
@@ -175,6 +176,14 @@ namespace InputHandler::BoolInput {
 IMPL_HASH_FOR(InputHandler::BoolInput, KeyCombo, 0,
     seed = (input.lower ^ 3'25'20'9'12'21ull) ^ std::rotl(input.middle, 21) ^ std::rotl(input.higher, 38);
 )
+
+namespace glz {
+    using InputHandler::BoolInput::KeyCombo;
+
+    GLAZE_DYNAMIC_FROM_START(KeyCombo)
+        //todo: Codex, do not implement this!
+    GLAZE_DYNAMIC_FROM_END
+}
 
 template <>
 struct glz::meta<InputHandler::BoolInput::KeyCombo> {
