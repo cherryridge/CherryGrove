@@ -1,29 +1,18 @@
 ﻿#pragma once
 #include <filesystem>
 #include <string>
+#include <vector>
 
 #include "../debug/Fatal.hpp"
 #include "../debug/Logger.hpp"
-#include "../umi/frontend/json/JSON.hpp"
+#include "../umi/frontend/json/UmiJSON.hpp"
+#include "../util/json/formatVersion.hpp"
 #include "../util/json/rw.hpp"
-#include "v1.hpp"
-
-namespace Settings::detail {
-    using Util::Json::packUpgraders, Util::Json::TypeList;
-
-    using Types = TypeList<
-        Settings_v1
-    >;
-
-    inline constexpr auto upgraders = packUpgraders<
-        //
-    >();
-}
-
-REGISTER_JSON_KIND(Settings, 1, 1, Settings::detail::Types, Settings::detail::upgraders)
+#include "JSONKind_Settings.hpp" // IWYU pragma: keep
 
 namespace Settings {
-    using std::filesystem::exists, std::filesystem::is_regular_file, std::string, Logger::LOGGER_DYNAMIC_OUT, Logger::LOGGER_DYNAMIC_ERR, Util::Json::Latest, Util::Json::JSONKind::Settings;
+    typedef uint8_t u8;
+    using std::filesystem::exists, std::filesystem::is_regular_file, std::string, std::vector, Logger::LOGGER_DYNAMIC_OUT, Logger::LOGGER_DYNAMIC_ERR, Util::Json::Latest, Util::Json::JSONKind::Settings;
 
     namespace detail {
         inline constexpr const char* SETTINGS_FILENAME = "settings.json";

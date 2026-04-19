@@ -6,7 +6,7 @@
 #include <physfs.h>
 
 #include "../debug/Logger.hpp"
-#include "../umi/frontend/json/JSON.hpp"
+#include "../umi/frontend/json/UmiJSON.hpp"
 #include "../util/os/filesystem.hpp"
 #include "KnownPack.hpp"
 #include "PackMetaInfo.hpp"
@@ -23,23 +23,23 @@ namespace Pack {
     inline void tryAddingPack(const PackMetaInfo& info) noexcept {
         const auto itRegistry = detail::registry.find(info.manifest.id);
         if (itRegistry != detail::registry.end()) {
-            lerr << "[Pack] Pack with ID " << info.manifest.id.value << " already exists in path " << itRegistry->second.pathStr << ", skipping adding the pack in path " << info.pathStr << ". Do not purposely clash pack IDs. If you want to overwrite a pack's behavior, use the same `nameSpace` and require yourself to load after the target pack." << endl;
+            lerr << "[Pack] Pack with ID " << info.manifest.id.getValue() << " already exists in path " << itRegistry->second.pathStr << ", skipping adding the pack in path " << info.pathStr << ". Do not purposely clash pack IDs. If you want to overwrite a pack's behavior, use the same `nameSpace` and require yourself to load after the target pack." << endl;
             return;
         }
-        detail::registry.emplace(info.manifest.id.value, info);
+        detail::registry.emplace(info.manifest.id.getValue(), info);
         auto itKnownPacks = detail::knownPacks.find(info.manifest.id);
         if (itKnownPacks != detail::knownPacks.end()) {
             if (itKnownPacks->second.version != info.manifest.version) {
-                lout << "[Pack] Pack " << info.manifest.id.value << "'s version changed from " << itKnownPacks->second.version << " to " << info.manifest.version << ", todo: prepare for preparing migration." << endl;
+                lout << "[Pack] Pack " << info.manifest.id.getValue() << "'s version changed from " << itKnownPacks->second.version << " to " << info.manifest.version << ", todo: prepare for preparing migration." << endl;
             }
             itKnownPacks->second.version = info.manifest.version;
         }
-        else detail::knownPacks.emplace(info.manifest.id.value, KnownPack{
+        else detail::knownPacks.emplace(info.manifest.id.getValue(), KnownPack{
             .id = info.manifest.id,
             .version = info.manifest.version,
             .disabled = false
         });
-        lout << "[Pack] Added pack: " << info.manifest.name << ", ID: " << info.manifest.id.value << ", version: " << info.manifest.version << endl;
+        lout << "[Pack] Added pack: " << info.manifest.name << ", ID: " << info.manifest.id.getValue() << ", version: " << info.manifest.version << endl;
     }
 
     [[nodiscard]] inline bool parsePackManifest(const path& packPath, PackMetaInfo& result) noexcept {

@@ -26,7 +26,7 @@ namespace Pack {
         PHYSFS_permitSymbolicLinks(false);
 
         const Latest<Settings>::Packs& packSettings = Settings::getSettings().packs;
-        for (u64 i = 0; i < packSettings.knownPacks.size(); i++) detail::knownPacks.emplace(packSettings.knownPacks[i].id.value, packSettings.knownPacks[i]);
+        for (u64 i = 0; i < packSettings.knownPacks.size(); i++) detail::knownPacks.emplace(packSettings.knownPacks[i].id.getValue(), packSettings.knownPacks[i]);
 
         getPacksFromPackRoot("packs");
         for (u64 i = 0; i < packSettings.additionalPackRoots.size(); i++) getPacksFromPackRoot(packSettings.additionalPackRoots[i]);

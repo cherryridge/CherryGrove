@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "frontend/lua/Lua.hpp"
-#include "frontend/js/JS.hpp"
-#include "frontend/wasm/WASM.hpp"
+#include "frontend/lua/UmiLua.hpp"
+#include "frontend/js/UmiJS.hpp"
+#include "frontend/wasm/UmiWASM.hpp"
 
 namespace Umi {
     inline void init() noexcept {

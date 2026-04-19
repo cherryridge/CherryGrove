@@ -18,6 +18,7 @@ namespace Util::Wrapper {
     private:
         uuid value{};
     public:
+        uuid_JSON() noexcept = default;
         uuid_JSON(const uuid& value) noexcept : value(value) {}
         auto operator<=>(const uuid_JSON&) const noexcept = default;
         auto getValue() const noexcept { return value; }
