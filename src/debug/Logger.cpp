@@ -35,11 +35,10 @@ namespace Logger {
                 cerr.clear();
                 break;
             }
+            //todo: Do we need to do anything in Linux or macOS?
             #elif CG_PLATFORM_LINUX
-                //todo: 
                 break;
             #elif CG_PLATFORM_MACOS
-                //todo: 
                 break;
             #elif CG_PLATFORM_ANDROID
             #elif CG_PLATFORM_IOS

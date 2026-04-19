@@ -24,7 +24,6 @@ namespace UmiLua {
     inline InstanceID createInstance() noexcept {
         lua_State* temp = luaL_newstate();
         luaL_openlibs(temp);
-        //todo: add UMI bindings
         InstanceID id = nextId.fetch_add(1, std::memory_order_relaxed);
         contextRegistry.emplace(id, move(temp));
         return id;

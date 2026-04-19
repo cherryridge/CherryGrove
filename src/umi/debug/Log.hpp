@@ -6,7 +6,7 @@
 namespace Umi {
     using std::string_view;
 
-    //todo:
+    //todo: wHeN cAn We StArT tO aCtUaLlY wRiTe FuCkInG uMi?¿
     inline void message(const string_view str) noexcept {
         lout << str << '\n';
     }

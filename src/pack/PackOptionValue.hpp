@@ -9,7 +9,7 @@ namespace Pack {
     typedef int64_t i64;
     using std::string;
 
-    struct PackOptionValue {
+    JSON_STRUCT PackOptionValue {
         using enum PackOptionType;
 
         string identifier;
@@ -103,7 +103,7 @@ namespace glz {
     using std::string, std::move, Pack::PackOptionValue;
     using enum Pack::PackOptionType;
 
-    struct PackOptionValue_glz {
+    JSON_STRUCT PackOptionValue_glz {
         string identifier, type;
         generic value;
     };

@@ -221,3 +221,5 @@ namespace Settings {
 
     };
 }
+
+//todo: static constraints

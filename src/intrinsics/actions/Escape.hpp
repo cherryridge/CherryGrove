@@ -9,10 +9,10 @@
 #include "../../util/SlotTable.hpp"
 
 namespace IntrinsicInput {
-    using std::memory_order_acquire, std::memory_order_release, Util::SlotTable, InputHandler::ActionHandle, InputHandler::EventControlFlags, InputHandler::BoolInput::BoolInputAction, InputHandler::BoolInput::EventwiseInfo_BI;
+    using std::memory_order_acquire, Util::SlotTable, InputHandler::ActionHandle, InputHandler::EventControlFlags, InputHandler::BoolInput::BoolInputAction, InputHandler::BoolInput::EventwiseInfo_BI;
 
     inline void escapeCB(const SlotTable<BoolInputAction, ActionHandle>& actionInfos, ActionHandle handle, const EventwiseInfo_BI& eventwiseInfo, EventControlFlags& flags) noexcept {
         if (Simulation::gameStarted.load(memory_order_acquire)) Main::runOnMainThread.enqueue(Simulation::exit);
-        else GlobalState::isCGAlive.store(false, memory_order_release);
+        else GlobalState::setIsCGAlive(false);
     }
 }

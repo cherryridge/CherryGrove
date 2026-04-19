@@ -9,7 +9,7 @@ namespace InputHandler {
     typedef uint64_t u64;
     using std::atomic;
 
-    //todo: Eliminate these.
+    //todo: Eliminate these and design a better system.
     extern atomic<bool> sendToImGui, sendToSimulation;
 
     inline constexpr u64 MAXIMUM_INPUT_EVENTS_PER_FRAME = 64;

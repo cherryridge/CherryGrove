@@ -25,7 +25,7 @@ namespace Pack {
     typedef int64_t i64;
     using std::string, std::vector;
 
-    struct PackOptionDef {
+    JSON_STRUCT PackOptionDef {
         using enum PackOptionType;
 
         string identifier, label, description;
