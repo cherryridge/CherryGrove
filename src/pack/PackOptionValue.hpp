@@ -1,17 +1,22 @@
 ﻿#pragma once
 #include <string>
+#include <string_view>
+#include <vector>
 #include <glaze/glaze.hpp>
 
-#include "../pack/PackOptionDef.hpp"
 #include "../util/json/helpers.hpp"
+#include "../util/lexical.hpp"
+#include "../util/wrappers/uuid.hpp"
+#include "PackOptionDef.hpp"
 
 namespace Pack {
     typedef int64_t i64;
-    using std::string;
+    using std::string, std::string_view, std::vector, glz::schema, Util::Wrapper::uuid_JSON;
 
     JSON_STRUCT PackOptionValue {
         using enum PackOptionType;
 
+        uuid_JSON id;
         string identifier;
         union {
             bool boolValue;
@@ -21,6 +26,15 @@ namespace Pack {
             string enumValue;
         };
         PackOptionType type;
+
+        struct glaze_json_schema {
+            schema id{};
+            schema identifier{};
+            schema type{
+                .enumeration = vector<string_view>{"boolean", "integer", "float", "string", "enum"}
+            };
+            schema value{};
+        };
 
         [[nodiscard]] explicit PackOptionValue() noexcept : type(Count) {}
 
@@ -100,10 +114,11 @@ namespace Pack {
 
 namespace glz {
     typedef int64_t i64;
-    using std::string, std::move, Pack::PackOptionValue;
+    using std::string, std::move, Util::Wrapper::uuid_JSON, Pack::PackOptionValue;
     using enum Pack::PackOptionType;
 
     JSON_STRUCT PackOptionValue_glz {
+        uuid_JSON id;
         string identifier, type;
         generic value;
     };
@@ -115,6 +130,14 @@ namespace glz {
             PackOptionValue_glz temp;
             parse<JSON>::op<Options>(temp, ctx, it, end);
 
+            GLAZE_DYNAMIC_CONSTRAINT(!temp.id.value().is_nil(),
+                "UUID `00000000-0000-0000-0000-000000000000` is not a valid pack ID."
+            )
+            result.id = temp.id;
+
+            GLAZE_DYNAMIC_CONSTRAINT(Util::isValidIdentifier(temp.identifier),
+                "`identifier` should be a valid conventional identifier."
+            )
             result.identifier = move(temp.identifier);
 
             result.destroyUnion();

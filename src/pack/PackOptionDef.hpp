@@ -1,9 +1,13 @@
 ﻿#pragma once
+#include <format>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <glaze/glaze.hpp>
 
 #include "../util/json/helpers.hpp"
+#include "../util/lexical.hpp"
+#include "glaze/json/schema.hpp"
 
 namespace Pack {
     typedef uint8_t u8;
@@ -23,7 +27,7 @@ GLAZE_ENUM_END
 
 namespace Pack {
     typedef int64_t i64;
-    using std::string, std::vector;
+    using std::string, std::vector, glz::schema;
 
     JSON_STRUCT PackOptionDef {
         using enum PackOptionType;
@@ -40,7 +44,7 @@ namespace Pack {
             string defaultString;
             struct {
                 string defaultEnum;
-                vector<string> enumValues;
+                vector<string> values;
             };
         };
         PackOptionType type;
@@ -62,8 +66,8 @@ namespace Pack {
         TYPE const string& defaultString
         INIT defaultString(defaultString), type(String) {}
 
-        TYPE const string& defaultEnum, const vector<string>& enumValues
-        INIT defaultEnum(defaultEnum), enumValues(enumValues), type(Enum) {}
+        TYPE const string& defaultEnum, const vector<string>& values
+        INIT defaultEnum(defaultEnum), values(values), type(Enum) {}
 
         #undef TYPE
         #undef INIT
@@ -79,7 +83,7 @@ namespace Pack {
                     break;
                 case Enum:
                     defaultEnum.~string();
-                    enumValues.~vector();
+                    values.~vector();
                     break;
                 case Count:
                     break;
@@ -111,7 +115,7 @@ namespace Pack {
                     break;
                 case Enum:
                     new (&defaultEnum) string(other.defaultEnum);
-                    new (&enumValues) vector<string>(other.enumValues);
+                    new (&values) vector<string>(other.values);
                     break;
                 case Count:
                     break;
@@ -130,72 +134,120 @@ namespace Pack {
 namespace glz {
     typedef int64_t i64;
     typedef uint64_t u64;
-    using std::move, std::string, std::vector, Pack::PackOptionDef;
+    using std::move, std::format, std::string, std::string_view, std::vector, Pack::PackOptionDef;
     using enum Pack::PackOptionType;
 
     JSON_STRUCT PackOptionDef_glz {
-        string identifier, label, description, type;
+        string identifier, label, description{"No description"}, type;
         generic defaultValue, min, max;
-        vector<string> enumValues;
+        vector<string> values;
+
+        struct glaze_json_schema {
+            schema identifier{
+                .description = "Required. identifier of this option."
+            };
+            schema label{
+                .description = "Optional. The human readable title of this option."
+            };
+            schema description{
+                .description = "Optional. The human readable description of this option."
+            };
+            schema type{
+                .description = "Required. The type of this option.",
+                .enumeration = vector<string_view>{"boolean", "integer", "float", "string", "enum"}
+            };
+            schema defaultValue{
+                .description = "Required. The default value of this option. Every "
+            };
+            schema min{
+                .description = "Optional. Minimum value. Applicable to `integer` and `float` type."
+            };
+            schema max{
+                .description = "Optional. Maximum value. Applicable to `integer` and `float` type."
+            };
+            schema values{
+                .description = "Optional. Possible values of the enum. Applicable to `enum` type."
+            };
+        };
     };
 
-    GLAZE_BIND_START(PackOptionDef_glz)
-        GLAZE_BIND_LITERAL(identifier),
-        GLAZE_BIND_LITERAL(label),
-        GLAZE_BIND_LITERAL(description),
-        GLAZE_BIND_LITERAL(type),
-        GLAZE_BIND("default", defaultValue),
-        GLAZE_BIND_LITERAL(min),
-        GLAZE_BIND_LITERAL(max),
-        GLAZE_BIND("values", enumValues)
-    GLAZE_BIND_END
+    GLAZE_RENAME_START(PackOptionDef_glz)
+        GLAZE_RENAME(defaultValue, "default")
+    GLAZE_RENAME_END
 
     GLAZE_DYNAMIC_FROM_START(PackOptionDef)
         PackOptionDef_glz temp;
         parse<JSON>::op<Options>(temp, ctx, it, end);
 
+        GLAZE_DYNAMIC_CONSTRAINT(Util::isValidIdentifier(temp.identifier),
+            "`identifier` should be a valid conventional identifier."
+        )
         result.identifier = move(temp.identifier);
-        result.label = move(temp.label);
+
+        if (temp.label.empty()) result.label = temp.identifier;
+        else result.label = move(temp.label);
         result.description = move(temp.description);
 
         result.destroyUnion();
         if (temp.type == "boolean") {
             result.type = Boolean;
-            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_boolean(), "Default value for boolean option must be a boolean.")
+            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_boolean(),
+                "Default value for boolean option must be a boolean."
+            )
             result.defaultBool = temp.defaultValue.get<bool>();
         }
         else if (temp.type == "integer") {
             result.type = Integer;
-            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_number() && temp.min.is_number() && temp.max.is_number(), "Default, min, and max values for integer option must be numbers.")
-            result.defaultInt = temp.defaultValue.as<i64>();
+            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_number() && temp.min.is_number() && temp.max.is_number(),
+                "Default, min, and max values for integer option must be numbers."
+            )
             result.intMin = temp.min.as<i64>();
             result.intMax = temp.max.as<i64>();
-            GLAZE_DYNAMIC_CONSTRAINT(result.intMin <= result.intMax, "Integer min cannot be greater than integer max.")
+            result.defaultInt = temp.defaultValue.as<i64>();
+            GLAZE_DYNAMIC_CONSTRAINT(result.intMin <= result.intMax,
+                format("Minimum value ({}) cannot be greater than maximum value ({}).", result.intMin, result.intMax)
+            )
+            GLAZE_DYNAMIC_CONSTRAINT(result.defaultInt >= result.intMin && result.defaultInt <= result.intMax,
+                format("Integer value ({}) must be in the min-max range [{}, {}].", result.defaultInt, result.intMin, result.intMax)
+            )
         }
         else if (temp.type == "float") {
             result.type = Float;
-            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_number() && temp.min.is_number() && temp.max.is_number(), "Default, min, and max values for float option must be numbers.")
-            result.defaultFloat = temp.defaultValue.as<double>();
+            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_number() && temp.min.is_number() && temp.max.is_number(),
+                "Default, min, and max values for float option must be numbers."
+            )
             result.floatMin = temp.min.as<double>();
             result.floatMax = temp.max.as<double>();
-            GLAZE_DYNAMIC_CONSTRAINT(result.floatMin <= result.floatMax, "Float min cannot be greater than float max.")
+            result.defaultFloat = temp.defaultValue.as<double>();
+            GLAZE_DYNAMIC_CONSTRAINT(result.floatMin <= result.floatMax,
+                format("Minimum value ({}) cannot be greater than maximum value ({}).", result.floatMin, result.floatMax)
+            )
+            GLAZE_DYNAMIC_CONSTRAINT(result.defaultInt >= result.intMin && result.defaultInt <= result.intMax,
+                format("Float value ({}) must be in the min-max range [{}, {}].", result.defaultFloat, result.floatMin, result.floatMax)
+            )
         }
         else if (temp.type == "string") {
             result.type = String;
-            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_string(), "Default value for string option must be a string.")
+            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_string(),
+                "Default value for string option must be a string."
+            )
             new (&result.defaultString) string(temp.defaultValue.get<string>());
         }
         else if (temp.type == "enum") {
             result.type = Enum;
-            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_string(), "Default value for enum option must be a string.")
+            GLAZE_DYNAMIC_CONSTRAINT(temp.defaultValue.is_string(),
+                "Default value for enum option must be a string."
+            )
             new (&result.defaultEnum) string(temp.defaultValue.get<string>());
-            new (&result.enumValues) vector<string>(move(temp.enumValues));
+            new (&result.values) vector<string>(move(temp.values));
             bool foundDefault = false;
-            for (u64 i = 0; i < result.enumValues.size(); i++) if (result.enumValues[i] == result.defaultEnum) {
+            for (u64 i = 0; i < result.values.size(); i++) if (result.values[i] == result.defaultEnum) {
                 foundDefault = true;
                 break;
             }
-            GLAZE_DYNAMIC_CONSTRAINT(foundDefault, "Default enum value must be one of the values in the enum.")
+            GLAZE_DYNAMIC_CONSTRAINT(foundDefault,
+                format("Default enum value `{}` must be one of the values in the enum.", result.defaultEnum)
+            )
         }
         else GLAZE_DYNAMIC_CONSTRAINT(false, "Invalid option type.")
     GLAZE_DYNAMIC_FROM_END
@@ -231,7 +283,7 @@ namespace glz {
             case Enum:
                 temp.type = "enum";
                 temp.defaultValue = input.defaultEnum;
-                temp.enumValues = input.enumValues;
+                temp.values = input.values;
                 break;
             case Count:
                 break;
@@ -240,3 +292,6 @@ namespace glz {
         serialize<JSON>::op<Options>(temp, ctx, b, ix);
     GLAZE_DYNAMIC_TO_END
 }
+
+//This is needed because `PackOptionDef` has a fucking field called `default` which is a C++ reserved keyword so we cannot define `glaze_json_schema` on it because we cannot write `schema default` so we need to bridge its schema to `PackOptionDef_glz` and mimic it and this sentence is going insane in length because I'm really pissed about these tangled shit of Glaze although it's a really neat and fast library.
+GLAZE_MIMIC(Pack::PackOptionDef, glz::PackOptionDef_glz)

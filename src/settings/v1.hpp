@@ -222,12 +222,6 @@ namespace Settings {
     };
 }
 
-GLAZE_STATIC_CONSTRAINT_BEGIN(Settings::Settings_v1)
-    GLAZE_STATIC_CONSTRAINT(formatVersion, formatVersion == 1,
-        "`formatVersion` must be 1 for settings v1."
-    )
-GLAZE_STATIC_CONSTRAINT_END
-
 GLAZE_STATIC_CONSTRAINT_BEGIN(Settings::Settings_v1::Graphics)
     GLAZE_STATIC_CONSTRAINT(fov, fov >= 30.0f && fov <= 140.0f,
         "`fov` must be between 30 and 140."

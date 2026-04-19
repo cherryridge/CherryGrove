@@ -180,6 +180,8 @@ IMPL_HASH_FOR(InputHandler::BoolInput, KeyCombo, 0,
     seed = (input.lower ^ 3'25'20'9'12'21ull) ^ std::rotl(input.middle, 21) ^ std::rotl(input.higher, 38);
 )
 
+GLAZE_MIMIC(InputHandler::BoolInput::KeyCombo, std::array<uint64_t, 3>)
+
 namespace glz {
     typedef uint64_t u64;
     using InputHandler::BoolInput::KeyCombo;

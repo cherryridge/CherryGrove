@@ -4,21 +4,27 @@
 //Make it easy to distinguish and remind ourselves.
 #define JSON_STRUCT struct
 
+#define GLAZE_MIMIC(fromType, ...) \
+template <>                        \
+struct glz::meta<fromType> {       \
+    using mimic = __VA_ARGS__;     \
+};
+
 //---------------------------------------------------------------------------------------
 
-#define GLAZE_DYNAMIC_FROM_START(type)                                             \
-template <>                                                                        \
-    struct from<JSON, type> {                                                      \
-        template <auto Options>                                                    \
-        static void op(type& result, auto&& ctx, auto&& it, auto&& end) noexcept {
+#define GLAZE_DYNAMIC_FROM_START(type)                                         \
+template <>                                                                    \
+struct from<JSON, type> {                                                      \
+    template <auto Options>                                                    \
+    static void op(type& result, auto&& ctx, auto&& it, auto&& end) noexcept {
 
 #define GLAZE_DYNAMIC_FROM_END }};
 
-#define GLAZE_DYNAMIC_TO_START(type)                                                           \
-template <>                                                                                    \
-    struct to<JSON, type> {                                                                    \
-        template <auto Options>                                                                \
-        static void op(const type& input, is_context auto&& ctx, auto& b, auto& ix) noexcept { \
+#define GLAZE_DYNAMIC_TO_START(type)                                                       \
+template <>                                                                                \
+struct to<JSON, type> {                                                                    \
+    template <auto Options>                                                                \
+    static void op(const type& input, is_context auto&& ctx, auto& b, auto& ix) noexcept { \
 
 #define GLAZE_DYNAMIC_TO_END }};
 
@@ -31,11 +37,11 @@ if (!(condition)) {                                  \
 
 //---------------------------------------------------------------------------------------
 
-#define GLAZE_STATIC_CONSTRAINT_BEGIN(type)    \
-template <>                                    \
-    struct glz::meta<type> {                   \
-        using T = type;                        \
-        static constexpr auto modify = object(
+#define GLAZE_STATIC_CONSTRAINT_BEGIN(type) \
+template <>                                 \
+struct glz::meta<type> {                    \
+    using T = type;                         \
+    static constexpr auto modify = object(
 
 #define GLAZE_STATIC_CONSTRAINT(field, condition, message)                              \
 #field, custom<                                                                         \
@@ -54,16 +60,15 @@ template <>                                    \
 
 //---------------------------------------------------------------------------------------
 
-#define GLAZE_BIND_START(type)                \
-template <>                                   \
-    struct meta<type> {                       \
-        using T = type;                       \
-        static constexpr auto value = object(
+#define GLAZE_RENAME_START(type)           \
+template <>                                \
+struct meta<type> {                        \
+    using T = type;                        \
+    static constexpr auto modify = object(
 
-#define GLAZE_BIND(str, field) str, &T::field
-#define GLAZE_BIND_LITERAL(str) #str, &T::str
+#define GLAZE_RENAME(field, str) str, &T::field
 
-#define GLAZE_BIND_END ); };
+#define GLAZE_RENAME_END ); };
 
 //---------------------------------------------------------------------------------------
 
