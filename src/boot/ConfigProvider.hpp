@@ -9,6 +9,7 @@
 #include "../debug/Fatal.hpp"
 #include "../meta.hpp"
 #include "../settings/Settings.hpp"
+#include "../util/json/generateSchemas.hpp"
 #include "../util/os/filesystem.hpp"
 #include "../util/os/platform.hpp"
 #include "getExecutableDirectory.hpp"
@@ -57,7 +58,7 @@ namespace Boot {
         app.set_help_flag("-h,--help", "Print help message and exit.");
 
         string generateKeyword;
-        app.add_option("-g,--generate", "Generate something (at the working directory) instead of launching the game.\n`schema`: Generate JSON schema files.\n`settings`: Generate the default `settings.json` file.")->type_name("[KEYWORD]")->check(CLI::IsMember({"schemas", "settings"}));
+        app.add_option("-g,--generate", generateKeyword, "Generate something (at the working directory) instead of launching the game.\n`schema`: Generate JSON schema files.\n`settings`: Generate the default `settings.json` file.")->type_name("[KEYWORD]")->check(CLI::IsMember({"schema", "settings"}));
 
         string workingDirectory;
         app.add_option("WorkingDirectory", workingDirectory, "CherryGrove's working directory.\nOptional. If not provided, CherryGrove will use the executable's directory.")->check(CLI::ExistingPath);
@@ -78,7 +79,8 @@ namespace Boot {
             exit(Fatal::BOOT_INVALID_WORKING_DIR);
         }
 
-        if (generateKeyword == "schemas") {
+        if (generateKeyword == "schema") {
+            Util::Json::generateSchemas();
             cout << "Schemas generated." << endl;
             exit(0);
         }

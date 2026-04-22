@@ -139,7 +139,7 @@ namespace glz {
 
     JSON_STRUCT PackOptionDef_glz {
         string identifier, label, description{"No description"}, type;
-        generic defaultValue, min, max;
+        generic_u64 defaultValue, min, max;
         vector<string> values;
 
         struct glaze_json_schema {

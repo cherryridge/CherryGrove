@@ -19,6 +19,12 @@ namespace Settings {
 
     u32 formatVersion{1};
 
+    struct glaze_json_schema {
+        schema formatVersion{
+            .constant = 1
+        };
+    };
+
     JSON_STRUCT Packs {
         vector<KnownPack> knownPacks;
         vector<PackOptionValue> packOptions;

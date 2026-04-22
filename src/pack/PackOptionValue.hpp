@@ -28,7 +28,9 @@ namespace Pack {
         PackOptionType type;
 
         struct glaze_json_schema {
-            schema id{};
+            schema id{
+                .format = glz::detail::defined_formats::uuid
+            };
             schema identifier{};
             schema type{
                 .enumeration = vector<string_view>{"boolean", "integer", "float", "string", "enum"}
@@ -120,7 +122,7 @@ namespace glz {
     JSON_STRUCT PackOptionValue_glz {
         uuid_JSON id;
         string identifier, type;
-        generic value;
+        generic_u64 value;
     };
 
     template <>

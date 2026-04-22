@@ -16,7 +16,8 @@ namespace Pack {
 
         struct glaze_json_schema {
             schema id{
-                .description = "Pack UUID."
+                .description = "Pack UUID.",
+                .format = glz::detail::defined_formats::uuid
             };
             schema version{
                 .description = "Known pack version.",

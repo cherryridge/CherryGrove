@@ -1,13 +1,13 @@
 ﻿#pragma once
-#include <glaze/glaze.hpp>
 #include <limits>
+#include <glaze/glaze.hpp>
 
 #include "../util/json/helpers.hpp"
 #include "../util/wrappers/uuid.hpp"
 
 namespace Pack {
     typedef uint32_t u32;
-    using glz::schema, Util::Wrapper::uuid_JSON;
+    using std::numeric_limits, glz::schema, Util::Wrapper::uuid_JSON;
 
     //[min, max], both inclusive. If `max` is `0`, it means there is no upper bound. Use `min == 1` for the same intent.
     JSON_STRUCT PackVersionRange {
@@ -16,13 +16,16 @@ namespace Pack {
 
         struct glaze_json_schema {
             schema id{
-                .description = "Pack UUID"
+                .description = "Pack UUID",
+                .format = glz::detail::defined_formats::uuid
             };
             schema min{
-                .description = "Minimum applicable version, inclusive. Use `0` for unlimited backwards."
+                .description = "Minimum applicable version, inclusive. Use `0` for unlimited backwards.",
+                .maximum = numeric_limits<u32>::max() - 1ull
             };
             schema max{
-                .description = "Maximum applicable version, inclusive. Use `0` for unlimited forwards. Do not use `u32::max`."
+                .description = "Maximum applicable version, inclusive. Use `0` for unlimited forwards. Do not use `u32::max`.",
+                .maximum = numeric_limits<u32>::max() - 1ull
             };
         };
 
@@ -46,3 +49,5 @@ GLAZE_STATIC_CONSTRAINT_BEGIN(Pack::PackVersionRange)
         "Do not use `u32::max`. Use `0` instead."
     )
 GLAZE_STATIC_CONSTRAINT_END
+
+//todo: Can we make a dynamic validation that `max` must be greater than or equal to `min`?
