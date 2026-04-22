@@ -19,6 +19,12 @@ namespace Settings {
 
     u32 formatVersion{1};
 
+    struct glaze_json_schema {
+        schema formatVersion{
+            .constant = 1
+        };
+    };
+
     JSON_STRUCT Packs {
         vector<KnownPack> knownPacks;
         vector<PackOptionValue> packOptions;
@@ -222,4 +228,47 @@ namespace Settings {
     };
 }
 
-//todo: static constraints
+GLAZE_STATIC_CONSTRAINT_BEGIN(Settings::Settings_v1::Graphics)
+    GLAZE_STATIC_CONSTRAINT(fov, fov >= 30.0f && fov <= 140.0f,
+        "`fov` must be between 30 and 140."
+    ),
+    GLAZE_STATIC_CONSTRAINT(gamma, gamma >= 0.1f && gamma <= 10.0f,
+        "`gamma` must be between 0.1 and 10."
+    ),
+    GLAZE_STATIC_CONSTRAINT(maxFPS, maxFPS <= 240,
+        "`maxFPS` must be between 0 and 240."
+    ),
+    GLAZE_STATIC_CONSTRAINT(renderDistance, renderDistance >= 1 && renderDistance <= 256,
+        "`renderDistance` must be between 1 and 256."
+    ),
+    GLAZE_STATIC_CONSTRAINT(windowWidth, windowWidth >= 1,
+        "`windowWidth` must be at least 1."
+    ),
+    GLAZE_STATIC_CONSTRAINT(windowHeight, windowHeight >= 1,
+        "`windowHeight` must be at least 1."
+    )
+GLAZE_STATIC_CONSTRAINT_END
+
+GLAZE_STATIC_CONSTRAINT_BEGIN(Settings::Settings_v1::Simulation)
+    GLAZE_STATIC_CONSTRAINT(simulationDistance, simulationDistance >= 1 && simulationDistance <= 1024,
+        "`simulationDistance` must be between 1 and 1024."
+    ),
+    GLAZE_STATIC_CONSTRAINT(maxPlanckTimePerSec, maxPlanckTimePerSec >= 1 && maxPlanckTimePerSec <= 1024,
+        "`maxPlanckTimePerSec` must be between 1 and 1024."
+    )
+GLAZE_STATIC_CONSTRAINT_END
+
+GLAZE_STATIC_CONSTRAINT_BEGIN(Settings::Settings_v1::Input)
+    GLAZE_STATIC_CONSTRAINT(mouseSensitivity, mouseSensitivity >= 0.1f && mouseSensitivity <= 5.0f,
+        "`mouseSensitivity` must be between 0.1 and 5."
+    ),
+    GLAZE_STATIC_CONSTRAINT(scrollSensitivity, scrollSensitivity >= 0.1f && scrollSensitivity <= 5.0f,
+        "`scrollSensitivity` must be between 0.1 and 5."
+    ),
+    GLAZE_STATIC_CONSTRAINT(repeatTapGap, repeatTapGap >= 1 && repeatTapGap <= 1000,
+        "`repeatTapGap` must be between 1 and 1000."
+    ),
+    GLAZE_STATIC_CONSTRAINT(comboMinTTL, comboMinTTL >= 1 && comboMinTTL <= 1000,
+        "`comboMinTTL` must be between 1 and 1000."
+    )
+GLAZE_STATIC_CONSTRAINT_END

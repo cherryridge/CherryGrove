@@ -94,6 +94,10 @@
 	path = libs/glm
 	url = https://github.com/g-truc/glm
 
+[submodule "libs/libarchive"]
+	path = libs/libarchive
+	url = https://github.com/libarchive/libarchive
+
 [submodule "libs/luau"]
 	path = libs/luau
 	url = https://github.com/luau-lang/luau

@@ -3,9 +3,9 @@
 #include "../../input/Action.hpp"
 #include "../../input/boolInput/BIAction.hpp"
 #include "../../simulation/playerEntity.hpp"
-#include "../../systems/Rotation.hpp"
-#include "../../systems/fly.hpp"
 #include "../../util/SlotTable.hpp"
+#include "../systems/fly.hpp"
+#include "../systems/Rotation.hpp"
 
 namespace IntrinsicInput {
     using Util::SlotTable, InputHandler::ActionHandle, InputHandler::EventControlFlags, InputHandler::BoolInput::BoolInputAction, InputHandler::BoolInput::EventwiseInfo_BI;

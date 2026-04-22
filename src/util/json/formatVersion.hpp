@@ -169,16 +169,16 @@ namespace Util::Json {
     template <JSONKind kind>
     struct KindMeta;
 
-    #define REGISTER_JSON_KIND(kind_, minFV, latestFV, List, upgraders)                         \
-    template <> struct Util::Json::KindMeta<Util::Json::JSONKind::kind_> {                      \
-        static constexpr auto kind = Util::Json::JSONKind::kind_;                               \
-        using LatestType = Util::Json::LastType<List>;                                          \
-        static bool read(const std::span<const u8> data, LatestType& result) noexcept {         \
+    #define REGISTER_JSON_KIND(kind_, minFV, latestFV, List, upgraders) \
+    template <> struct Util::Json::KindMeta<Util::Json::JSONKind::kind_> { \
+        static constexpr auto kind = Util::Json::JSONKind::kind_; \
+        using LatestType = Util::Json::LastType<List>; \
+        static bool read(const std::span<const u8> data, LatestType& result) noexcept { \
             return Util::Json::detail::process<minFV, latestFV, List, upgraders>(data, result); \
-        }                                                                                       \
-        static bool write(const LatestType& input, vector<u8>& result) noexcept {               \
-            return writeJSON(input, result);                                                    \
-        }                                                                                       \
+        } \
+        static bool write(const LatestType& input, vector<u8>& result) noexcept { \
+            return writeJSON(input, result); \
+        } \
     };
 
     template <JSONKind kind>

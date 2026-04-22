@@ -38,18 +38,18 @@ namespace Util {
         template <typename Ret, typename... Args>
         struct FunctionTraits<function<Ret(Args...)>> : FunctionTraitsBase<Ret, Args...> {};
 
-        #define MAKE_MEMBER_FUNCTION_TRAITS(CV, REF, NOEXCEPT)                                              \
-        template <typename Ret, typename Struct, typename... Args>                                          \
+        #define MAKE_MEMBER_FUNCTION_TRAITS(CV, REF, NOEXCEPT) \
+        template <typename Ret, typename Struct, typename... Args> \
         struct FunctionTraits<Ret(Struct::*)(Args...) CV REF NOEXCEPT> : FunctionTraitsBase<Ret, Args...> { \
-            using StructType = Struct;                                                                      \
+            using StructType = Struct; \
         };
 
-        #define MAKE_NOEXCEPT_VARIANTS(CV, REF)    \
+        #define MAKE_NOEXCEPT_VARIANTS(CV, REF) \
             MAKE_MEMBER_FUNCTION_TRAITS(CV, REF, ) \
             MAKE_MEMBER_FUNCTION_TRAITS(CV, REF, noexcept)
 
-        #define MAKE_REF_VARIANTS(CV)     \
-            MAKE_NOEXCEPT_VARIANTS(CV, )  \
+        #define MAKE_REF_VARIANTS(CV) \
+            MAKE_NOEXCEPT_VARIANTS(CV, ) \
             MAKE_NOEXCEPT_VARIANTS(CV, &) \
             MAKE_NOEXCEPT_VARIANTS(CV, &&)
 

@@ -12,7 +12,8 @@
 
 namespace Pack {
     typedef uint32_t u32;
-    using std::string, std::vector, glz::schema, Util::Wrapper::uuid_JSON;
+    typedef uint64_t u64;
+    using std::numeric_limits, std::string, std::vector, glz::schema, Util::Wrapper::uuid_JSON;
 
     JSON_STRUCT Manifest_v1 {
         u32 formatVersion{1};
@@ -30,14 +31,22 @@ namespace Pack {
         vector<PackVersionRange> sendError;
 
         struct glaze_json_schema {
+            schema formatVersion{
+                .constant = 1
+            };
             schema id{
                 .description = "Pack's UUID. Must be unique. Do not use full 0 UUID.",
+                .format = glz::detail::defined_formats::uuid
             };
             schema version{
-                .description = "Your pack's version, using `u32` integer. This field should be increment only. Do not use `0` or `u32::max`."
+                .description = "Your pack's version, using `u32` integer. This field should be increment only. Do not use `0` or `u32::max`.",
+                .minimum = 1,
+                .maximum = numeric_limits<u32>::max() - 1ull
             };
             schema minEngineVersion{
-                .description = "Your pack's minimum compatible engine version, inclusive."
+                .description = "Your pack's minimum compatible engine version, inclusive.",
+                .minimum = 1,
+                .maximum = static_cast<u64>(CG_ENGINE_VERSION)
             };
             schema nameSpace{
                 .description = "Your pack's registry namespace. You may purposely set this to the same as other packs to attempt to overwrite them. This field should be a valid conventional identifier."
@@ -68,7 +77,7 @@ namespace Pack {
 }
 
 GLAZE_STATIC_CONSTRAINT_BEGIN(Pack::Manifest_v1)
-    GLAZE_STATIC_CONSTRAINT(id, !id.getValue().is_nil(),
+    GLAZE_STATIC_CONSTRAINT(id, !id.value().is_nil(),
         "UUID `00000000-0000-0000-0000-000000000000` is not a valid pack ID."
     ),
     GLAZE_STATIC_CONSTRAINT(version, version > 0 && version < std::numeric_limits<uint32_t>::max(),

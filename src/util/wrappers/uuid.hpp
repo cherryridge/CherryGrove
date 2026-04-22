@@ -16,12 +16,12 @@ namespace Util::Wrapper {
 
     JSON_STRUCT uuid_JSON {
     private:
-        uuid value{};
+        uuid value_{};
     public:
         uuid_JSON() noexcept = default;
-        uuid_JSON(const uuid& value) noexcept : value(value) {}
+        uuid_JSON(const uuid& value) noexcept : value_(value) {}
         auto operator<=>(const uuid_JSON&) const noexcept = default;
-        auto getValue() const noexcept { return value; }
+        auto value() const noexcept { return value_; }
     };
 
     [[nodiscard]] inline bool uuidFromString(const string& input, uuid_JSON& result) noexcept {
@@ -34,8 +34,10 @@ namespace Util::Wrapper {
         }
     }
 
-    [[nodiscard]] inline string uuidToString(const uuid_JSON& input) noexcept { return to_string(input.getValue()); }
+    [[nodiscard]] inline string uuidToString(const uuid_JSON& input) noexcept { return to_string(input.value()); }
 }
+
+GLAZE_MIMIC(Util::Wrapper::uuid_JSON, std::string)
 
 namespace glz {
     using std::string, boost::uuids::uuid, Util::Wrapper::uuid_JSON, Util::Wrapper::uuidFromString, Util::Wrapper::uuidToString;
@@ -53,5 +55,5 @@ namespace glz {
 }
 
 IMPL_HASH_FOR(Util::Wrapper, uuid_JSON, 666555444,
-    boost::hash_combine(seed, input.getValue());
+    boost::hash_combine(seed, input.value());
 )

@@ -5,10 +5,10 @@
 #include <glm/glm.hpp>
 #include <entt/entt.hpp>
 
+#include "../../simulation/registries.hpp"
 #include "../components/Camera.hpp"
 #include "../components/Coordinates.hpp"
 #include "../components/Rotation.hpp"
-#include "../simulation/registries.hpp"
 
 namespace Systems {
     using std::array, Simulation::registry;

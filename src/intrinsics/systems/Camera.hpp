@@ -4,8 +4,8 @@
 #include <bx/math.h>
 #include <entt/entt.hpp>
 
+#include "../../simulation/registries.hpp"
 #include "../components/Camera.hpp"
-#include "../simulation/registries.hpp"
 
 namespace Systems {
     using std::array;

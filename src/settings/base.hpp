@@ -15,7 +15,8 @@ namespace Settings {
 
     JSON_STRUCT Keybind {
         string nameSpace, identifier;
-        KeyCombo combo;
+        //Default initialize this because otherwise it will not be counted as an aggregate member by Glaze, which will cause issues with the JSON parsing.
+        KeyCombo combo{};
 
         struct glaze_json_schema {
             schema nameSpace{

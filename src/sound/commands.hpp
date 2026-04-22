@@ -4,9 +4,9 @@
 #include <soloud/soloud_wav.h>
 #include <soloud/soloud_wavstream.h>
 
-#include "../components/Coordinates.hpp"
-#include "../components/Rotation.hpp"
-#include "../components/Velocity.hpp"
+#include "../intrinsics/components/Coordinates.hpp"
+#include "../intrinsics/components/Rotation.hpp"
+#include "../intrinsics/components/Velocity.hpp"
 #include "enums.hpp"
 #include "types.hpp"
 

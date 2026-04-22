@@ -14,16 +14,16 @@ namespace Sound {
     using std::shared_ptr, glm::vec3, SoLoud::handle, std::numeric_limits, std::clamp;
 
     inline constexpr const char* NOT_ACTIVE_STR = "[Sound] The play is not active!! Check it!!";
-    #define ASSERT_ACTIVE               \
-    if (!active) {                      \
+    #define ASSERT_ACTIVE \
+    if (!active) { \
         lerr << NOT_ACTIVE_STR << endl; \
-        return false;                   \
+        return false; \
     }
     inline constexpr const char* NOT_PLAYING_STR = "[Sound] The play handle is invalid! Use `play` to start it first?";
-    #define ASSERT_PLAYING                                     \
+    #define ASSERT_PLAYING \
     if (!soLoudInstance->isValidVoiceHandle(instanceHandle)) { \
-        lerr << NOT_PLAYING_STR << endl;                       \
-        return false;                                          \
+        lerr << NOT_PLAYING_STR << endl; \
+        return false; \
     }
 
     struct PlayInfo {

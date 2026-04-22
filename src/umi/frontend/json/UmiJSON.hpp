@@ -7,7 +7,7 @@
 #include "../../../util/json/formatVersion.hpp"
 #include "../../../util/os/filesystem.hpp"
 
-#include "manifest/JSONKind_Manifest.hpp"
+#include "JSONKind_Manifest.hpp"
 
 namespace UmiJSON {
     typedef uint8_t u8;

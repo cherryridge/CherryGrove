@@ -4,7 +4,7 @@
 #include "../../input/mouseMove/MMAction.hpp"
 #include "../../settings/Settings.hpp"
 #include "../../simulation/playerEntity.hpp"
-#include "../../systems/Rotation.hpp"
+#include "../systems/Rotation.hpp"
 
 namespace IntrinsicInput {
     using Util::SlotTable, InputHandler::ActionHandle, InputHandler::EventControlFlags, InputHandler::MouseMove::MouseMoveAction, InputHandler::MouseMove::EventwiseInfo_MM;

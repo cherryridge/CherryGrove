@@ -16,7 +16,8 @@ namespace Pack {
 
         struct glaze_json_schema {
             schema id{
-                .description = "Pack UUID."
+                .description = "Pack UUID.",
+                .format = glz::detail::defined_formats::uuid
             };
             schema version{
                 .description = "Known pack version.",
@@ -31,7 +32,7 @@ namespace Pack {
 }
 
 GLAZE_STATIC_CONSTRAINT_BEGIN(Pack::KnownPack)
-    GLAZE_STATIC_CONSTRAINT(id, !id.getValue().is_nil(),
+    GLAZE_STATIC_CONSTRAINT(id, !id.value().is_nil(),
         "UUID `00000000-0000-0000-0000-000000000000` is not a valid pack ID."
     ),
     GLAZE_STATIC_CONSTRAINT(version, version >= 1,
