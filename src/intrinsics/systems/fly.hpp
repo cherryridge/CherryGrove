@@ -3,10 +3,10 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include "../../simulation/registries.hpp"
 #include "../components/Coordinates.hpp"
 #include "../components/EntityMovementProperties.hpp"
 #include "../components/Rotation.hpp"
-#include "../simulation/registries.hpp"
 
 namespace Systems {
     typedef uint32_t u32;

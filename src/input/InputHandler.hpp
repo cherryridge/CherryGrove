@@ -21,16 +21,16 @@ namespace InputHandler {
         void registerId(ActionID id, ActionLocation al) noexcept;
 
         inline constexpr const char* NULLPTR_ERROR = "[InputHandler] Unexpected nullptr encountered!";
-        #define ASSERT_NOT_NULLPTR(ptr, ret)                       \
-        if ((ptr) == nullptr) {                                    \
+        #define ASSERT_NOT_NULLPTR(ptr, ret) \
+        if ((ptr) == nullptr) { \
             lerr << InputHandler::internal::NULLPTR_ERROR << endl; \
-            return ret;                                            \
+            return ret; \
         }
 
-        #define ASSERT_CAN_DELETE(id, ret)                                                                       \
-        if (!InputHandler::getCanDelete()) {                                                                     \
+        #define ASSERT_CAN_DELETE(id, ret) \
+        if (!InputHandler::getCanDelete()) { \
             lerr << "[InputHandler] Deletion attempted while deletion is not allowed. ActionID: " << id << endl; \
-            return ret;                                                                                          \
+            return ret; \
         }
     }
 

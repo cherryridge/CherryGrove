@@ -36,10 +36,10 @@ namespace InputHandler::BoolInput {
         }
 
         constexpr static const char* OUT_OF_BOUND_ERROR = "[InputHandler] Attempt to get/add/remove key with out-of-bound BIID: ";
-        #define ASSERT_BIID_IN_BOUND(biid)              \
-        if (biid >= BIID_COUNT) {                       \
+        #define ASSERT_BIID_IN_BOUND(biid) \
+        if (biid >= BIID_COUNT) { \
             lerr << OUT_OF_BOUND_ERROR << biid << endl; \
-            return false;                               \
+            return false; \
         }
 
         [[nodiscard]] bool hasKey(BoolInputID biid) const noexcept {

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "../../../../pack/v1.hpp"
-#include "../../../../util/json/formatVersion.hpp"
+#include "../../../pack/v1.hpp"
+#include "../../../util/json/formatVersion.hpp"
 
 namespace UmiJSON::Manifest {
     using Util::Json::TypeList, Util::Json::packUpgraders;

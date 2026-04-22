@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include <atomic>
 
-#include "../components/Coordinates.hpp"
-#include "../components/Rotation.hpp"
-#include "../components/Velocity.hpp"
+#include "../intrinsics/components/Coordinates.hpp"
+#include "../intrinsics/components/Rotation.hpp"
+#include "../intrinsics/components/Velocity.hpp"
 #include "enums.hpp"
 #include "types.hpp"
 

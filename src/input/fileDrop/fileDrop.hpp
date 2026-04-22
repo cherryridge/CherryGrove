@@ -2,8 +2,10 @@
 #include <filesystem>
 #include <string>
 
-#include "../debug/Logger.hpp"
-#include "../util/os/filesystem.hpp"
+#include "../../debug/Logger.hpp"
+#include "../../util/os/filesystem.hpp"
+
+//todo: Implement this as an input component.
 
 namespace FileDrop {
     typedef int32_t i32;

@@ -3,8 +3,8 @@
 #include <format>
 #include <imgui.h>
 
-#include "../../components/Coordinates.hpp"
-#include "../../components/Rotation.hpp"
+#include "../components/Coordinates.hpp"
+#include "../components/Rotation.hpp"
 #include "../../graphics/gui/util.hpp"
 #include "../../simulation/playerEntity.hpp"
 #include "../../simulation/registries.hpp"

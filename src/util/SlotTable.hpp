@@ -49,20 +49,20 @@ namespace Util {
         }
     };
 
-    #define MAKE_DISTINCT_HANDLE(type)                                                                                     \
-    struct type {                                                                                                          \
-        Util::GenerationalHandle value;                                                                                    \
-        bool operator==(const type& other) const noexcept { return value == other.value; }                                 \
+    #define MAKE_DISTINCT_HANDLE(type) \
+    struct type { \
+        Util::GenerationalHandle value; \
+        bool operator==(const type& other) const noexcept { return value == other.value; } \
         std::strong_ordering operator<=>(const Util::GenerationalHandle& other) const noexcept { return value <=> other; } \
-        std::strong_ordering operator<=>(const type& other) const noexcept { return value <=> other.value; }               \
-        friend Logger::Logger& operator<<(Logger::Logger& os, const type& data) noexcept {                                 \
-            os << #type << " (idx " << data.value.getIndex() << ", gen " << data.value.getGeneration() << ")";             \
-            return os;                                                                                                     \
-        }                                                                                                                  \
-        friend std::ostream& operator<<(std::ostream& os, const type& data) noexcept {                                     \
-            os << #type << " (idx " << data.value.getIndex() << ", gen " << data.value.getGeneration() << ")";             \
-            return os;                                                                                                     \
-        }                                                                                                                  \
+        std::strong_ordering operator<=>(const type& other) const noexcept { return value <=> other.value; } \
+        friend Logger::Logger& operator<<(Logger::Logger& os, const type& data) noexcept { \
+            os << #type << " (idx " << data.value.getIndex() << ", gen " << data.value.getGeneration() << ")"; \
+            return os; \
+        } \
+        friend std::ostream& operator<<(std::ostream& os, const type& data) noexcept { \
+            os << #type << " (idx " << data.value.getIndex() << ", gen " << data.value.getGeneration() << ")"; \
+            return os; \
+        } \
     };
 
     //Use SlotTable with `HandleType` as plain `GenerationalHandle` is deprecated and should be replaced by distinct handles for better type safety.

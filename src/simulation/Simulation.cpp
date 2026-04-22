@@ -3,9 +3,6 @@
 #include <thread>
 #include <entt/entt.hpp>
 
-#include "../components/Camera.hpp"
-#include "../components/Coordinates.hpp"
-#include "../components/Rotation.hpp"
 #include "../debug/Logger.hpp"
 #include "../graphics/gui/Gui.hpp"
 #include "../input/InputHandler.hpp"
@@ -13,6 +10,9 @@
 #include "../input/mouseMove/mouseMove.hpp"
 #include "../intrinsics/actions/ChangeRotation.hpp"
 #include "../intrinsics/actions/Movement.hpp"
+#include "../intrinsics/components/Camera.hpp"
+#include "../intrinsics/components/Coordinates.hpp"
+#include "../intrinsics/components/Rotation.hpp"
 #include "../main/hold.hpp"
 #include "registries.hpp"
 #include "Simulation.hpp"
