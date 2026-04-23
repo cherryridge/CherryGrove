@@ -473,8 +473,8 @@ function(make_shader_compilation_commands result)
         get_filename_component(SHADER_NAME_EXT "${SHADER_PATH}" NAME)
         get_filename_component(SHADER_NAME "${SHADER_PATH}" NAME_WE)
         list(APPEND commands
-            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --bin2c "${SHADER_NAME}_vert_dx11" --type vertex -p s_5_0 -O 3
-            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --bin2c "${SHADER_NAME}_vert_dx12" --type vertex -p s_6_9 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --platform windows --bin2c "${SHADER_NAME}_vert_dx11" --type vertex -p s_5_0 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --platform windows --bin2c "${SHADER_NAME}_vert_dx12" --type vertex -p s_6_9 -O 3
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_opengl.h" --bin2c "${SHADER_NAME}_vert_opengl" --type vertex -p 440
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_vulkan.h" --bin2c "${SHADER_NAME}_vert_vulkan" --type vertex -p spirv16-13
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_metal.h" --bin2c "${SHADER_NAME}_vert_metal" --type vertex -p metal31-14 --platform osx
@@ -485,8 +485,8 @@ function(make_shader_compilation_commands result)
         get_filename_component(SHADER_NAME_EXT "${SHADER_PATH}" NAME)
         get_filename_component(SHADER_NAME "${SHADER_PATH}" NAME_WE)
         list(APPEND commands
-            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --bin2c "${SHADER_NAME}_frag_dx11" --type fragment -p s_5_0 -O 3
-            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --bin2c "${SHADER_NAME}_frag_dx12" --type fragment -p s_6_9 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --platform windows --bin2c "${SHADER_NAME}_frag_dx11" --type fragment -p s_5_0 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --platform windows --bin2c "${SHADER_NAME}_frag_dx12" --type fragment -p s_6_9 -O 3
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_opengl.h" --bin2c "${SHADER_NAME}_frag_opengl" --type fragment -p 440
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_vulkan.h" --bin2c "${SHADER_NAME}_frag_vulkan" --type fragment -p spirv16-13
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_metal.h" --bin2c "${SHADER_NAME}_frag_metal" --type fragment -p metal31-14 --platform osx
