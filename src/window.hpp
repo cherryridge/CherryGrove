@@ -45,7 +45,7 @@ namespace Window {
     #if CG_PLATFORM_WINDOWS
         return SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
     #elif CG_PLATFORM_LINUX
-        const void* waylandSurface = SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr);
+        void* waylandSurface = SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr);
         if (waylandSurface != nullptr) return waylandSurface;
         else return reinterpret_cast<void*>(static_cast<uintptr_t>(SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr)));
     #elif CG_PLATFORM_MACOS
