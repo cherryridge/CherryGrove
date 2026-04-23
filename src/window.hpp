@@ -47,7 +47,7 @@ namespace Window {
     #elif CG_PLATFORM_LINUX
         void* waylandSurface = SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr);
         if (waylandSurface != nullptr) return waylandSurface;
-        else return reinterpret_cast<void*>(static_cast<uintptr_t>(SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr)));
+        else return reinterpret_cast<void*>(SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr));
     #elif CG_PLATFORM_MACOS
         return SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);
     #elif CG_PLATFORM_ANDROID
