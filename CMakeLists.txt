@@ -427,6 +427,7 @@ elseif(UNIX AND NOT APPLE)
         ${JACK_LIBRARIES}
         Threads::Threads
         dl
+        atomic
     )
 elseif(APPLE)
     find_library(AUDIO_TOOLBOX_LIBRARY AudioToolbox)
