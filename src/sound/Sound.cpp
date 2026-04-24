@@ -13,7 +13,6 @@
 #include "../globalState.hpp"
 #include "../intrinsics/systems/Rotation.hpp"
 #include "../util/concurrentQueue.hpp"
-#include "../util/os/platform.hpp"
 #include "commands.hpp"
 #include "SoundSource.hpp"
 #include "PlayInfo.hpp"
@@ -129,20 +128,9 @@ namespace Sound {
 
     static void initSoLoud() noexcept {
         soLoudInstance = make_unique<Soloud>();
-        #if CG_PLATFORM_WINDOWS
-            const auto preferredBackend = Soloud::XAUDIO2;
-        #elif CG_PLATFORM_LINUX
-            const auto preferredBackend = Soloud::JACK;
-        #elif CG_PLATFORM_MACOS
-            const auto preferredBackend = Soloud::COREAUDIO;
-        #elif CG_PLATFORM_ANDROID
-            const auto preferredBackend = Soloud::OPENSLES;
-        #elif CG_PLATFORM_IOS
-            const auto preferredBackend = Soloud::COREAUDIO;
-        #endif
-        const auto code = soLoudInstance->init(SoLoud::Soloud::CLIP_ROUNDOFF, preferredBackend);
+        const auto code = soLoudInstance->init(Soloud::CLIP_ROUNDOFF, Soloud::AUTO);
         if (code != SO_NO_ERROR) {
-            lerr << "[Sound] SoLoud initialization failed: " << soLoudInstance->getErrorString(code) << endl;
+            lerr << "[Sound] SoLoud initialization failed after trying available backends: " << soLoudInstance->getErrorString(code) << endl;
             Fatal::exit(Fatal::SOLOUD_INITIALIZATION_FAILED);
         }
         lout << "[Sound] Backend: " << soLoudInstance->getBackendString() << ", channels: " << soLoudInstance->getBackendChannels() << ", bufsize: " << soLoudInstance->getBackendBufferSize() << endl;

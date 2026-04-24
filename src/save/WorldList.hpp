@@ -9,9 +9,9 @@
 
 #include "../debug/Logger.hpp"
 #include "../util/os/filesystem.hpp"
-#include "saveBase.hpp"
 
 namespace Save {
+    typedef uint32_t u32;
     using std::time_t, std::string, std::vector, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::filesystem::directory_iterator, std::filesystem::path, boost::unordered_flat_map, Util::OS::getU8String;
 
     struct WorldInfo {

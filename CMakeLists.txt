@@ -21,6 +21,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR (CMAKE_CXX_COMPILER_ID STREQUAL "Cla
     target_compile_options(ScopedFlags INTERFACE
         $<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>
         $<$<COMPILE_LANGUAGE:CXX>:/Zc:preprocessor>
+        $<$<COMPILE_LANGUAGE:CXX>:/bigobj>
         $<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>
     )
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -158,10 +159,11 @@ set(LUAU_STATIC_CRT   ON  CACHE BOOL "")
 set(LUAU_BUILD_SHARED OFF CACHE BOOL "")
 add_subdirectory("libs/luau")
 
+#-----Enjoy the legacy of RocksDB! 100+ Lines just to make it happy and not destroy everything.-----
+
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 set(LZ4_BUILD_CLI     OFF CACHE BOOL "")
 add_subdirectory("libs/lz4/build/cmake")
-
 set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "")
 set(BUILD_TESTING       OFF CACHE BOOL "")
 set(ZSTD_BUILD_STATIC   ON  CACHE BOOL "")
@@ -170,7 +172,33 @@ if(MSVC OR CMAKE_CXX_SIMULATE_ID MATCHES "MSVC")
     set(ZSTD_USE_STATIC_RUNTIME ON CACHE BOOL "")
 endif()
 add_subdirectory("libs/zstd/build/cmake")
-
+if(WIN32)
+    set(CG_LZ4_LIBRARY "${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/lz4.lib")
+    set(CG_ZSTD_LIBRARY "${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib")
+else()
+    set(CG_LZ4_LIBRARY "${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/liblz4.a")
+    set(CG_ZSTD_LIBRARY "${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/libzstd.a")
+endif()
+set(lz4_ROOT_DIR     "${CMAKE_SOURCE_DIR}/libs/lz4"     CACHE PATH "" FORCE)
+set(lz4_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/libs/lz4/lib" CACHE PATH "" FORCE)
+set(lz4_LIBRARIES    "${CG_LZ4_LIBRARY}"                CACHE FILEPATH "" FORCE)
+set(zstd_ROOT_DIR    "${CMAKE_SOURCE_DIR}/libs/zstd"    CACHE PATH "" FORCE)
+set(ZSTD_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/zstd/lib" CACHE PATH "" FORCE)
+set(ZSTD_INCLUDE_DIRS "${ZSTD_INCLUDE_DIR}"             CACHE PATH "" FORCE)
+set(ZSTD_LIBRARY     "${CG_ZSTD_LIBRARY}"               CACHE FILEPATH "" FORCE)
+set(ZSTD_LIBRARIES   "${CG_ZSTD_LIBRARY}"               CACHE FILEPATH "" FORCE)
+if(WIN32)
+    set(ZSTD_LIBRARY_DEBUG "${CG_ZSTD_LIBRARY}" CACHE FILEPATH "" FORCE)
+    set(ZSTD_LIBRARY_RELEASE "${CG_ZSTD_LIBRARY}" CACHE FILEPATH "" FORCE)
+endif()
+set(ENV{LZ4_HOME} "${CMAKE_SOURCE_DIR}/libs/lz4")
+set(ENV{LZ4_INCLUDE} "${CMAKE_SOURCE_DIR}/libs/lz4/lib")
+set(ENV{LZ4_LIB_DEBUG} "${CG_LZ4_LIBRARY}")
+set(ENV{LZ4_LIB_RELEASE} "${CG_LZ4_LIBRARY}")
+set(ENV{ZSTD_HOME} "${CMAKE_SOURCE_DIR}/libs/zstd")
+set(ENV{ZSTD_INCLUDE} "${CMAKE_SOURCE_DIR}/libs/zstd/lib")
+set(ENV{ZSTD_LIB_DEBUG} "${CG_ZSTD_LIBRARY}")
+set(ENV{ZSTD_LIB_RELEASE} "${CG_ZSTD_LIBRARY}")
 set(WITH_LZ4                    ON  CACHE BOOL "")
 set(WITH_ZSTD                   ON  CACHE BOOL "")
 set(WITH_WINDOWS_UTF8_FILENAMES ON  CACHE BOOL "")
@@ -188,14 +216,6 @@ set(WITH_ALL_TESTS              OFF CACHE BOOL "")
 if(WIN32)
     set(ROCKSDB_SKIP_THIRDPARTY OFF CACHE BOOL "")
 endif()
-set(ENV{LZ4_HOME} ${CMAKE_SOURCE_DIR}/libs/lz4)
-set(ENV{LZ4_INCLUDE} $ENV{LZ4_HOME}/lib)
-set(ENV{LZ4_LIB_DEBUG} ${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/lz4.lib)
-set(ENV{LZ4_LIB_RELEASE} ${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/lz4.lib)
-set(ENV{ZSTD_HOME} ${CMAKE_SOURCE_DIR}/libs/zstd)
-set(ENV{ZSTD_INCLUDE} $ENV{ZSTD_HOME}/lib)
-set(ENV{ZSTD_LIB_DEBUG} ${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib)
-set(ENV{ZSTD_LIB_RELEASE} ${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib)
 # Why the fuck does this exist on non-Linux builds?
 if(UNIX AND NOT APPLE)
     set(WITH_LIBURING ON  CACHE BOOL "")
@@ -228,6 +248,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIAN
         endif()
     endforeach()
 endif()
+
+#-----Did you enjoy it?-----
 
 set(FT_DISABLE_ZLIB OFF CACHE BOOL "")
 add_subdirectory("libs/freetype")
@@ -405,6 +427,7 @@ elseif(UNIX AND NOT APPLE)
         ${JACK_LIBRARIES}
         Threads::Threads
         dl
+        atomic
     )
 elseif(APPLE)
     find_library(AUDIO_TOOLBOX_LIBRARY AudioToolbox)
@@ -451,8 +474,8 @@ function(make_shader_compilation_commands result)
         get_filename_component(SHADER_NAME_EXT "${SHADER_PATH}" NAME)
         get_filename_component(SHADER_NAME "${SHADER_PATH}" NAME_WE)
         list(APPEND commands
-            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --bin2c "${SHADER_NAME}_vert_dx11" --type vertex -p s_5_0 -O 3
-            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --bin2c "${SHADER_NAME}_vert_dx12" --type vertex -p s_6_9 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --platform windows --bin2c "${SHADER_NAME}_vert_dx11" --type vertex -p s_5_0 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --platform windows --bin2c "${SHADER_NAME}_vert_dx12" --type vertex -p s_6_9 -O 3
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_opengl.h" --bin2c "${SHADER_NAME}_vert_opengl" --type vertex -p 440
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_vulkan.h" --bin2c "${SHADER_NAME}_vert_vulkan" --type vertex -p spirv16-13
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_metal.h" --bin2c "${SHADER_NAME}_vert_metal" --type vertex -p metal31-14 --platform osx
@@ -463,8 +486,8 @@ function(make_shader_compilation_commands result)
         get_filename_component(SHADER_NAME_EXT "${SHADER_PATH}" NAME)
         get_filename_component(SHADER_NAME "${SHADER_PATH}" NAME_WE)
         list(APPEND commands
-            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --bin2c "${SHADER_NAME}_frag_dx11" --type fragment -p s_5_0 -O 3
-            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --bin2c "${SHADER_NAME}_frag_dx12" --type fragment -p s_6_9 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx11.h" --platform windows --bin2c "${SHADER_NAME}_frag_dx11" --type fragment -p s_5_0 -O 3
+            COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_dx12.h" --platform windows --bin2c "${SHADER_NAME}_frag_dx12" --type fragment -p s_6_9 -O 3
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_opengl.h" --bin2c "${SHADER_NAME}_frag_opengl" --type fragment -p 440
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_vulkan.h" --bin2c "${SHADER_NAME}_frag_vulkan" --type fragment -p spirv16-13
             COMMAND ${SHADERC_EXECUTABLE} --verbose -f "${SHADER_PATH}" -i "${CMAKE_SOURCE_DIR}/libs/bgfx/source/src" -o "${CMAKE_BINARY_DIR}/shaders/${SHADER_NAME_EXT}_metal.h" --bin2c "${SHADER_NAME}_frag_metal" --type fragment -p metal31-14 --platform osx

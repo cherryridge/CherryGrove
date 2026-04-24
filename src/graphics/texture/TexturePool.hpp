@@ -26,6 +26,8 @@ namespace TexturePool {
 
     inline void shutdown() noexcept {
         internal::destroyUniforms();
+        internal::textureRegistry.reset();
+        internal::atlasRegistry.reset();
     }
 
     [[nodiscard]] inline bool addTexture(const vector<u8>& fileData, TextureHandle& result, bool linear, const string& debug_texture_path = string{}) noexcept {

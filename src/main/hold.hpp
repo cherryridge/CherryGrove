@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <atomic>
 #include <chrono>
+#include <bgfx/bgfx.h>
 #include <function2/function2.hpp>
 #include <SDL3/SDL.h>
 
@@ -21,7 +22,9 @@ namespace Main {
     //threaded: Main loop.
     inline void hold() noexcept {
         const u64 maxTasks = Settings::getSettings().debug.maxMainThreadTasksPerFrame;
-        const auto maxLoopTime = microseconds(Settings::getSettings().debug.maxMainThreadLoopTimeUs);
+        const microseconds
+            maxLoopTime = microseconds(Settings::getSettings().debug.maxMainThreadLoopTimeUs),
+            maxRenderWaitTime = microseconds(Settings::getSettings().debug.maxMainThreadRenderWaitTimeUs);
 
         time_point<high_resolution_clock> loopStartTime;
         SDL_Event event;
@@ -30,7 +33,7 @@ namespace Main {
 
         while (GlobalState::isCGAlive()) {
             loopStartTime = high_resolution_clock::now();
-
+            
         //Check for focus messages
             Boot::Focus::tryReceive();
 
@@ -50,6 +53,9 @@ namespace Main {
                 InputHandler::inputQueue_M2R.enqueue(frame);
                 if (Simulation::gameStarted.load(memory_order_acquire)) InputHandler::inputQueue_M2S.enqueue(frame);
             }
+
+        //Render bgfx frame.
+            bgfx::renderFrame(maxRenderWaitTime.count());
 
         #if CG_DEBUG
             if (high_resolution_clock::now() - loopStartTime > maxLoopTime) lout << "Can't keep up! Input section run for " << duration_cast<microseconds>(high_resolution_clock::now() - loopStartTime).count() << "us while set maximum loop time is " << duration_cast<microseconds>(maxLoopTime).count() << "us" << endl;

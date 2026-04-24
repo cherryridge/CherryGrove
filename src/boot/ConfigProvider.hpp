@@ -92,16 +92,21 @@ namespace Boot {
 
         if (workingDirectory.empty()) {
             const auto executablePath = getExecutableDirectory();
-            if (!isWritableDirectory(executablePath)) {
+            if (isWritableDirectory(executablePath)) {
+                cout << "[CLI] No working directory specified, using executable directory: " << executablePath << endl;
+                workingDirectory = getU8String(executablePath);
+            }
+            else {
                 cout << "[CLI] Executable directory is not writable. Trying to use PWD." << endl;
-                workingDirectory = getU8String(current_path());
-                if (!isWritableDirectory(workingDirectory)) {
+                std::error_code ec;
+                const path currentPath = current_path(ec);
+                if (ec || !isWritableDirectory(currentPath)) {
                     cerr << "(Error) [CLI] Both executable directory and current working directory is not writable. CherryGrove needs to have a writable working directory. If you're using Linux or macOS, consider providing the working directory argument: `./CherryGrove <path-to-wd>`." << endl;
                     Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
                 }
+                cout << "[CLI] No working directory specified, using current working directory: " << currentPath << endl;
+                workingDirectory = getU8String(currentPath);
             }
-            cout << "[CLI] No working directory specified, using executable directory: " << executablePath << endl;
-            workingDirectory = getU8String(executablePath);
         }
         else if (!isWritableDirectory(workingDirectory)) {
             cerr << "(Error) [CLI] Specified working directory is not writable: " << workingDirectory << endl;

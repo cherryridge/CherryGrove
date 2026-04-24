@@ -7,6 +7,7 @@
 #include "../pack/KnownPack.hpp"
 #include "../pack/PackOptionValue.hpp"
 #include "base.hpp"
+#include "glaze/json/schema.hpp"
 
 namespace Settings {
     typedef int16_t i16;
@@ -193,7 +194,8 @@ namespace Settings {
         Logger::LoggingMode logging{Logger::LoggingMode::File};
         //I don't know if this is a good idea but let's just try and see.
         u32 maxMainThreadTasksPerFrame{128};
-        u32 maxMainThreadLoopTimeUs{1000};
+        u32 maxMainThreadLoopTimeUs{2000};
+        u32 maxMainThreadRenderWaitTimeUs{500};
 
         struct glaze_json_schema {
             schema logging{
@@ -205,6 +207,9 @@ namespace Settings {
                 .defaultValue = 128
             };
             schema maxMainThreadLoopTimeUs{
+                .defaultValue = 1000
+            };
+            schema maxMainThreadRenderWaitTimeUs{
                 .defaultValue = 1000
             };
         };

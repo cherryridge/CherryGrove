@@ -18,6 +18,11 @@ namespace glz::detail {
     };
 }
 
+template <class T, class From, class To>
+struct glz::meta<glz::custom_t<T, From, To>> {
+    static constexpr std::string_view name = glz::name_v<T>;
+};
+
 //Make it easy to distinguish and remind ourselves.
 #define JSON_STRUCT struct
 
