@@ -9,9 +9,9 @@
 #include "../debug/Fatal.hpp"
 #include "../globalState.hpp"
 #include "../graphics/controller.hpp"
-#include "../intrinsics/actions/Escape.hpp"
 #include "../input/boolInput/boolInput.hpp"
 #include "../input/InputHandler.hpp"
+#include "../intrinsics/actions/Escape.hpp"
 #include "../settings/Settings.hpp"
 #include "../sound/Sound.hpp"
 #include "../pack/Pack.hpp"
@@ -73,7 +73,8 @@ namespace Main {
         }
 
         lout << "Initializing graphics..." << endl;
-        //This is synchronized, we will wait inside.
+        //Call this on the SDL/main thread before `bgfx::init` so bgfx uses this thread as its render thread.
+        bgfx::renderFrame();
         Graphics::init();
 
         lout << "Initializing pack manager..." << endl;

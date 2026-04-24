@@ -14,7 +14,7 @@ namespace Graphics {
     using std::atomic, std::memory_order_release, std::memory_order_acquire, std::thread;
 
     namespace detail {
-        inline atomic<bool> initialized{false};
+        inline atomic<bool> initialized{false}, shutdownComplete{false};
         inline thread graphicsThread;
 
         inline void initGraphicsThread() noexcept {
@@ -32,13 +32,18 @@ namespace Graphics {
             TexturePool::shutdown();
             ShaderPool::shutdown();
             Renderer::shutdown();
+            shutdownComplete.store(true, memory_order_release);
         }
     }
 
     inline void init() noexcept {
         detail::graphicsThread = thread(detail::initGraphicsThread);
-        for (u64 i = 0; !detail::initialized.load(memory_order_acquire); i++) if ((i & 0xFFull) == 0) std::this_thread::yield();
+        while (!detail::initialized.load(memory_order_acquire)) bgfx::renderFrame();
     }
 
-    inline void shutdown() noexcept { detail::graphicsThread.join(); }
+    inline void shutdown() noexcept {
+        if (!detail::graphicsThread.joinable()) return;
+        while (!detail::shutdownComplete.load(memory_order_acquire)) bgfx::renderFrame();
+        detail::graphicsThread.join();
+    }
 }
