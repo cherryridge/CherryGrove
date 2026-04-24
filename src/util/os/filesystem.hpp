@@ -1,7 +1,9 @@
 ﻿#pragma once
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <span>
+#include <string>
 #include <vector>
 #include <physfs.h>
 
@@ -10,7 +12,7 @@
 namespace Util::OS {
     typedef uint8_t u8;
     typedef uint64_t u64;
-    using std::filesystem::path, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::absolute, std::filesystem::perms, std::error_code, std::ifstream, std::span, std::ofstream, std::streamsize, std::vector;
+    using std::chrono::steady_clock, std::to_string, std::filesystem::path, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::absolute, std::filesystem::remove, std::error_code, std::ifstream, std::span, std::ofstream, std::streamsize, std::vector;
 
     [[nodiscard]] inline bool normalize(path& p) noexcept {
         error_code ec;
@@ -41,17 +43,33 @@ namespace Util::OS {
 
     [[nodiscard]] inline bool isWritableDirectory(const path& p) noexcept {
         error_code ec;
-        path _p = p;
-        if (!normalize(_p)) return false;
-        if (!exists(_p) || !is_directory(_p)) return false;
-        const auto st = status(_p, ec);
-        if (ec) return false;
-        const auto permissions = st.permissions();
-        return (
-            ((permissions & perms::owner_write)  != perms::none)
-         || ((permissions & perms::group_write)  != perms::none)
-         || ((permissions & perms::others_write) != perms::none)
-        );
+        path path_ = p;
+        if (!normalize(path_)) return false;
+        const bool pathExists = exists(path_, ec);
+        if (ec || !pathExists) return false;
+        const bool directory = is_directory(path_, ec);
+        if (ec || !directory) return false;
+        const string prefix = ".cherrygrove-write-probe-" + to_string(steady_clock::now().time_since_epoch().count()) + "-";
+        for (u64 attempt = 0; attempt < 16; attempt++) {
+            const path probePath = path_ / (prefix + to_string(attempt) + ".tmp");
+            const bool probeExists = exists(probePath, ec);
+            if (ec) return false;
+            if (probeExists) continue;
+            ofstream probe(probePath, std::ios::binary | std::ios::out | std::ios::noreplace);
+            if (!probe.is_open()) {
+                const bool collision = exists(probePath, ec);
+                if (!ec && collision) continue;
+                return false;
+            }
+            probe.put('\0');
+            bool writable = static_cast<bool>(probe);
+            probe.close();
+            writable = writable && !probe.fail();
+            remove(probePath, ec);
+            if (ec) return false;
+            return writable;
+        }
+        return false;
     }
 
     template <bool physfs, FilePath PathType>
