@@ -157,6 +157,21 @@ namespace Util {
         [[nodiscard]] bool isEmpty() const noexcept { return freeList.size() == storage.size(); }
         [[nodiscard]] size_t size() const noexcept { return storage.size() - freeList.size(); }
 
+        void clear() noexcept {
+            freeList.clear();
+            freeList.reserve(storage.size());
+            for (size_t index = 0; index < storage.size(); index++) {
+                auto& slot = storage[index];
+                if ((slot.generation & 1) != 0) slot.generation++;
+                freeList.emplace_back(static_cast<u32>(index));
+            }
+        }
+
+        void reset() noexcept {
+            storage.clear();
+            freeList.clear();
+        }
+
         [[nodiscard]] bool destroy(HandleType handle) noexcept {
             const GenerationalHandle genHandle = getHandle(handle);
             const u32 generation = genHandle.getGeneration(), index = genHandle.getIndex();
