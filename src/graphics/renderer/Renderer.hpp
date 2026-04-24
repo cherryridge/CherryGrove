@@ -27,12 +27,11 @@ namespace Renderer {
     #if CG_PLATFORM_WINDOWS
         config.platformData.ndt = nullptr;
     #elif CG_PLATFORM_LINUX
-        const char* sessionType = secure_getenv("XDG_SESSION_TYPE");
-        if ((sessionType && strcmp(sessionType, "wayland") == 0) || getenv("WAYLAND_DISPLAY")) {
+        if (Window::isLinuxWayland()) {
             config.platformData.ndt = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, nullptr);
             config.platformData.type = bgfx::NativeWindowHandleType::Wayland;
         }
-        else{
+        else {
             config.platformData.ndt = SDL_GetPointerProperty(propertyHandle, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr);
             config.platformData.type = bgfx::NativeWindowHandleType::Default;
         }

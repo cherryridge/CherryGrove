@@ -40,14 +40,27 @@ namespace Window {
 
     [[nodiscard]] inline SDL_Window* getMainWindow() noexcept { return detail::mainWindow; }
 
+    [[nodiscard]] inline bool isLinuxWayland() noexcept {
+    #if CG_PLATFORM_LINUX
+        if (detail::mainWindow == nullptr) return false;
+        const auto properties = SDL_GetWindowProperties(detail::mainWindow);
+        void* waylandDisplay = SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, nullptr);
+        if (waylandDisplay != nullptr) return true;
+        void* waylandSurface = SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr);
+        return waylandSurface != nullptr;
+    #else
+        static_cast<void>(detail::mainWindow);
+        return false;
+    #endif
+    }
+
     [[nodiscard]] inline void* getPlatformHandle(SDL_Window* window) noexcept {
         const auto properties = SDL_GetWindowProperties(window);
     #if CG_PLATFORM_WINDOWS
         return SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr);
     #elif CG_PLATFORM_LINUX
-        void* waylandSurface = SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr);
-        if (waylandSurface != nullptr) return waylandSurface;
-        else return reinterpret_cast<void*>(SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr));
+        if (isLinuxWayland()) return SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, nullptr);
+        else return reinterpret_cast<void*>(static_cast<uintptr_t>(SDL_GetNumberProperty(properties, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0)));
     #elif CG_PLATFORM_MACOS
         return SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);
     #elif CG_PLATFORM_ANDROID
