@@ -194,8 +194,8 @@ namespace Settings {
         Logger::LoggingMode logging{Logger::LoggingMode::File};
         //I don't know if this is a good idea but let's just try and see.
         u32 maxMainThreadTasksPerFrame{128};
-        u32 maxMainThreadLoopTimeUs{5000};
-        u32 maxMainThreadRenderWaitTimeUs{1000};
+        u32 maxMainThreadLoopTimeUs{2000};
+        u32 maxMainThreadRenderWaitTimeUs{500};
 
         struct glaze_json_schema {
             schema logging{

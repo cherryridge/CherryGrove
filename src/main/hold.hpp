@@ -15,16 +15,16 @@
 
 namespace Main {
     typedef uint64_t u64;
-    using std::memory_order_relaxed, std::memory_order_acquire, std::chrono::high_resolution_clock, std::chrono::milliseconds, std::chrono::time_point, std::chrono::duration_cast, fu2::function_view, Util::MPSCQueue, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
+    using std::memory_order_relaxed, std::memory_order_acquire, std::chrono::high_resolution_clock, std::chrono::microseconds, std::chrono::time_point, std::chrono::duration_cast, fu2::function_view, Util::MPSCQueue, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
 
     inline MPSCQueue<function_view<void()>> runOnMainThread;
 
     //threaded: Main loop.
     inline void hold() noexcept {
         const u64 maxTasks = Settings::getSettings().debug.maxMainThreadTasksPerFrame;
-        const milliseconds
-            maxLoopTime = milliseconds(Settings::getSettings().debug.maxMainThreadLoopTimeUs / 1000),
-            maxRenderWaitTime = milliseconds(Settings::getSettings().debug.maxMainThreadRenderWaitTimeUs / 1000);
+        const microseconds
+            maxLoopTime = microseconds(Settings::getSettings().debug.maxMainThreadLoopTimeUs),
+            maxRenderWaitTime = microseconds(Settings::getSettings().debug.maxMainThreadRenderWaitTimeUs);
 
         time_point<high_resolution_clock> loopStartTime;
         SDL_Event event;
@@ -58,7 +58,7 @@ namespace Main {
             bgfx::renderFrame(maxRenderWaitTime.count());
 
         #if CG_DEBUG
-            if (high_resolution_clock::now() - loopStartTime > maxLoopTime) lout << "Can't keep up! Input section run for " << duration_cast<milliseconds>(high_resolution_clock::now() - loopStartTime).count() << "ms while set maximum loop time is " << duration_cast<milliseconds>(maxLoopTime).count() << "ms" << endl;
+            if (high_resolution_clock::now() - loopStartTime > maxLoopTime) lout << "Can't keep up! Input section run for " << duration_cast<microseconds>(high_resolution_clock::now() - loopStartTime).count() << "us while set maximum loop time is " << duration_cast<microseconds>(maxLoopTime).count() << "us" << endl;
         #endif
 
         //Drain `runOnMainThread` MPSCQueue
