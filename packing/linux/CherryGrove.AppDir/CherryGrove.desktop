@@ -1,0 +1,9 @@
+﻿[Desktop Entry]
+Type=Application
+Name=CherryGrove
+GenericName=CherryGrove
+Exec=AppRun %F
+Icon=cherrygrove
+Terminal=false
+Categories=Game;
+StartupNotify=true
