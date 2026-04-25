@@ -1,10 +1,10 @@
-name: Build Release (Stable)
+name: Build Release (Windows)
 
 on:
   push:
     branches:
       - stable
-  workflow_call:
+  workflow_dispatch:
     inputs:
       branch:
         type: string
