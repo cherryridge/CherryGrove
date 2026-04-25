@@ -29,8 +29,8 @@ cat > "$desktopFilePath" <<EOF
 Type=Application
 Name=CherryGrove
 Exec="${desktopExecPath}"
-Path="${appImageDir}"
-Icon="${iconFilePath}"
+Path=${appImageDir}
+Icon=${iconFilePath}
 Terminal=false
 Categories=Game;
 StartupNotify=true
