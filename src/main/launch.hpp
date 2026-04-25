@@ -4,8 +4,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
-#include "../boot/ConfigProvider.hpp"
 #include "../boot/SessionLock.hpp"
+#include "../boot/setWorkingDirectory.hpp"
 #include "../debug/Fatal.hpp"
 #include "../globalState.hpp"
 #include "../graphics/controller.hpp"
@@ -16,11 +16,12 @@
 #include "../sound/Sound.hpp"
 #include "../pack/Pack.hpp"
 #include "../util/BitField.hpp"
+#include "../util/os/filesystem.hpp"
 #include "../window.hpp"
 #include "hold.hpp"
 
 namespace Main {
-    using std::move, std::cout, std::endl, std::filesystem::current_path, Util::BitField;
+    using std::move, std::cout, std::endl, std::filesystem::current_path, Util::BitField, Util::OS::getU8String;
 
     inline Boot::SessionLock sessionLock;
 
@@ -29,7 +30,7 @@ namespace Main {
     inline void launch(int argc, char** argv) noexcept {
     //Get working directory
         Boot::setWorkingDirectory(argc, argv);
-        cout << "Working directory: " << current_path() << endl;
+        cout << "Working directory: " << getU8String(current_path()) << endl;
 
     //Working directory lock (RAII)
         sessionLock = move(Boot::SessionLock("cg.lock"));

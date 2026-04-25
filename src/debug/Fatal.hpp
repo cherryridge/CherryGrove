@@ -42,6 +42,7 @@ namespace Fatal {
     //Boot: 7001-8000
     DEF BOOT_MULTIPLE_INSTANCES                                = 7001;
     DEF BOOT_INVALID_WORKING_DIR                               = 7002;
+    DEF BOOT_SET_WORKING_DIR_FAILED                            = 7003;
 
     //Settings: 8001-9000
     DEF SETTINGS_FAILED_TO_LOAD                                = 8001;
