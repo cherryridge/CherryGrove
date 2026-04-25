@@ -1,0 +1,130 @@
+name: Release Pipeline (Linux)
+
+on:
+  push:
+    branches:
+      - stable
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        default: stable
+        description: The branch to build from
+
+permissions:
+  contents: read
+
+jobs:
+  build-linux:
+    name: Build Release (Linux ${{matrix.arch}})
+    runs-on: ${{matrix.runner}}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-24.04
+            preset: linux-x64-release
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            preset: linux-arm64-release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Setup toolchain
+        run: |
+          set -euo pipefail
+          lsb_release -cs
+          sudo apt update
+          sudo apt install -y --no-install-recommends ca-certificates gpg wget
+          sudo mkdir -p /etc/apt/keyrings
+          wget -O- https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/llvm.gpg >/dev/null
+          cat <<EOF | sudo tee /etc/apt/sources.list.d/llvm.sources >/dev/null
+          Types: deb
+          URIs: http://apt.llvm.org/${ubuntu_codename}/
+          Suites: llvm-toolchain-${ubuntu_codename}
+          Components: main
+          Signed-By: /etc/apt/keyrings/llvm.gpg
+          EOF
+          sudo apt update
+          sudo apt install -y --no-install-recommends 7zip build-essential clang clangd curl g++-14 gperf jq libc++-dev libc++abi-dev libasound2-dev libaudio-dev libdbus-1-dev libdecor-0-dev libdrm-dev libegl1-mesa-dev libfribidi-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libibus-1.0-dev libjack-jackd2-dev libpipewire-0.3-dev libpulse-dev libsndio-dev libstdc++-14-dev libthai-dev libudev-dev liburing-dev libwayland-dev libx11-dev libxcursor-dev libxext-dev libxfixes-dev libxi-dev libxinerama-dev libxkbcommon-dev libxrandr-dev libxss-dev libxtst-dev lld pkg-config wine64
+          if ! command -v 7z >/dev/null 2>&1 && command -v 7zz >/dev/null 2>&1; then
+            sudo ln -s "$(command -v 7zz)" /usr/local/bin/7z
+          fi
+          clang++ --version
+          ld.lld --version
+          g++-14 --version
+          7z i
+
+      - name: Fetch prebuilt libraries
+        run: |
+          set -euo pipefail
+          bash ./libs/fetch_prebuilt_libs.sh 7z "${{matrix.arch}}"
+
+      - name: Configure
+        run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf
+
+      - name: Build
+        run: cmake --build --preset ${{matrix.preset}} --parallel
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: CherryGrove-linux-${{matrix.arch}}-release-executable
+          path: out/${{matrix.preset}}/CherryGrove
+          if-no-files-found: error
+
+  package-linux:
+    name: Package Linux Release
+    runs-on: ubuntu-24.04
+    needs: build-linux
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Install package dependencies
+        run: |
+          set -euo pipefail
+          sudo apt update
+          sudo apt install -y --no-install-recommends ca-certificates file tar wget
+
+      - name: Download x64 executable
+        uses: actions/download-artifact@v4
+        with:
+          name: CherryGrove-linux-x64-release-executable
+          path: out/linux-x64-release
+
+      - name: Download arm64 executable
+        uses: actions/download-artifact@v4
+        with:
+          name: CherryGrove-linux-arm64-release-executable
+          path: out/linux-arm64-release
+
+      - name: Package
+        working-directory: packing/linux
+        run: |
+          set -euo pipefail
+          chmod +x ./pack.sh
+          APPIMAGE_EXTRACT_AND_RUN=1 ./pack.sh
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: CherryGrove-linux-release
+          path: |
+            packing/linux/CherryGrove_linux_x64.tar.gz
+            packing/linux/CherryGrove_linux_arm64.tar.gz
+          if-no-files-found: error

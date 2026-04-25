@@ -1,0 +1,39 @@
+﻿name: Release Pipeline (macOS)
+
+on:
+  push:
+    branches:
+      - stable
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        default: stable
+        description: The branch to build from
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    name: Build Release (macOS ${{matrix.arch}})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            preset: macos-x64-release
+          - arch: arm64
+            preset: macos-arm64-release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup CMake and Ninja
+        uses: lukka/get-cmake@latest

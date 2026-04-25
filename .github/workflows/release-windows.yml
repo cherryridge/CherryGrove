@@ -1,10 +1,16 @@
-name: Build Release (Windows)
+name: Release Pipeline (Windows)
 
 on:
   push:
     branches:
       - stable
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        default: stable
+        description: The branch to build from
 
 permissions:
   contents: read
