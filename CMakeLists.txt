@@ -421,10 +421,8 @@ elseif(UNIX AND NOT APPLE)
     find_package(ALSA REQUIRED)
     find_package(PkgConfig REQUIRED)
     find_package(Threads REQUIRED)
-    pkg_check_modules(JACK REQUIRED jack)
     target_link_libraries(${PROJECT_NAME} PRIVATE
         ${ALSA_LIBRARIES}
-        ${JACK_LIBRARIES}
         Threads::Threads
         dl
         atomic

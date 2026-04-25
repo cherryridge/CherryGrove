@@ -36,7 +36,7 @@ namespace Sound {
 
     //threaded: Main Thread
     void init() noexcept {
-        audioThread = thread(&audioLoop);
+        audioThread = thread(audioLoop);
         while (!initialized.load(memory_order_acquire)) yield();
     }
     void shutdown() noexcept { audioThread.join(); }
