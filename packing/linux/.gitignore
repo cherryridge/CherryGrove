@@ -1,3 +1,5 @@
+*.AppImage
+appimagetool
 CherryGrove.AppDir/assets/
 CherryGrove.AppDir/lib/
 CherryGrove.AppDir/cherrygrove.png
