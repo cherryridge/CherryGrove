@@ -101,11 +101,29 @@ endfunction()
 #----------------------------------
 
 #------------Dep:Prebuilt----------
+set(CG_PREBUILT_ARCH_SOURCE "")
+if(CMAKE_CXX_COMPILER_TARGET)
+    set(CG_PREBUILT_ARCH_SOURCE "${CMAKE_CXX_COMPILER_TARGET}")
+elseif(CMAKE_C_COMPILER_TARGET)
+    set(CG_PREBUILT_ARCH_SOURCE "${CMAKE_C_COMPILER_TARGET}")
+else()
+    set(CG_PREBUILT_ARCH_SOURCE "${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+string(TOLOWER "${CG_PREBUILT_ARCH_SOURCE}" CG_PREBUILT_ARCH_SOURCE)
+if(CG_PREBUILT_ARCH_SOURCE MATCHES "^(amd64|x64|x86_64)(-|$)")
+    set(CG_PREBUILT_ARCH_TAG "x64")
+elseif(CG_PREBUILT_ARCH_SOURCE MATCHES "^(arm64|aarch64)(-|$)")
+    set(CG_PREBUILT_ARCH_TAG "arm64")
+else()
+    message(FATAL_ERROR "Unsupported target architecture for prebuilt libraries: ${CG_PREBUILT_ARCH_SOURCE}")
+endif()
+message(STATUS "Detected target architecture for prebuilt libraries: ${CG_PREBUILT_ARCH_TAG}")
+
 set(BGFX_BGFX_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bgfx$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 set(BGFX_BX_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bx$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 set(BGFX_BIMG_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bimg$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 
-set(SOLOUD_LIB "${CMAKE_SOURCE_DIR}/libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>soloud_static_x64$<$<CONFIG:Debug>:_d>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
+set(SOLOUD_LIB "${CMAKE_SOURCE_DIR}/libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>soloud_static_${CG_PREBUILT_ARCH_TAG}$<$<CONFIG:Debug>:_d>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 
 set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<IF:$<PLATFORM_ID:Windows>,v8_monolith.lib,libv8_monolith.a>")
 
