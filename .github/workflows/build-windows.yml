@@ -39,6 +39,13 @@ jobs:
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
+      - name: Install gperf
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          C:\msys64\usr\bin\bash.exe -lc 'pacman --noconfirm -Sy --needed gperf'
+          C:\msys64\usr\bin\gperf.exe --version
+
       - name: Fetch prebuilt libraries
         shell: pwsh
         run: |
@@ -46,7 +53,7 @@ jobs:
           & .\libs\fetch_prebuilt_libs.ps1 "${env:ProgramFiles}\7-Zip\7z.exe" "${{matrix.arch}}"
 
       - name: Configure
-        run: cmake --preset ${{matrix.preset}}
+        run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=C:/msys64/usr/bin/gperf.exe
 
       - name: Build
         run: cmake --build --preset ${{matrix.preset}} --parallel
