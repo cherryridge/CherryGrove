@@ -20,7 +20,7 @@ switch ($osArch) {
 
 $headers = @{ 'User-Agent' = 'ps-github-latest-release' }
 
-function Download-Library {
+function Get-Library {
     param (
         [string]$name
     )
@@ -50,9 +50,9 @@ function Download-Library {
     Remove-Item -Force $assetRelease.name
 }
 
-Download-Library -name 'bgfx'
-Download-Library -name 'soloud'
-Download-Library -name 'v8'
-Download-Library -name 'wasmtime'
+Get-Library -name 'bgfx'
+Get-Library -name 'soloud'
+Get-Library -name 'v8'
+Get-Library -name 'wasmtime'
 
 Write-Host "All done."
