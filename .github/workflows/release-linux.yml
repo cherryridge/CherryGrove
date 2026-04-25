@@ -43,18 +43,12 @@ jobs:
       - name: Setup toolchain
         run: |
           set -euo pipefail
-          lsb_release -cs
+          ubuntu_codename="$(lsb_release -cs)"
           sudo apt update
           sudo apt install -y --no-install-recommends ca-certificates gpg wget
           sudo mkdir -p /etc/apt/keyrings
           wget -O- https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/llvm.gpg >/dev/null
-          cat <<EOF | sudo tee /etc/apt/sources.list.d/llvm.sources >/dev/null
-          Types: deb
-          URIs: http://apt.llvm.org/${ubuntu_codename}/
-          Suites: llvm-toolchain-${ubuntu_codename}
-          Components: main
-          Signed-By: /etc/apt/keyrings/llvm.gpg
-          EOF
+          printf '%s\n' 'Types: deb' "URIs: http://apt.llvm.org/${ubuntu_codename}/" "Suites: llvm-toolchain-${ubuntu_codename}" 'Components: main' 'Signed-By: /etc/apt/keyrings/llvm.gpg' | sudo tee /etc/apt/sources.list.d/llvm.sources >/dev/null
           sudo apt update
           sudo apt install -y --no-install-recommends 7zip build-essential clang clangd curl g++-14 gperf jq libc++-dev libc++abi-dev libasound2-dev libaudio-dev libdbus-1-dev libdecor-0-dev libdrm-dev libegl1-mesa-dev libfribidi-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libibus-1.0-dev libjack-jackd2-dev libpipewire-0.3-dev libpulse-dev libsndio-dev libstdc++-14-dev libthai-dev libudev-dev liburing-dev libwayland-dev libx11-dev libxcursor-dev libxext-dev libxfixes-dev libxi-dev libxinerama-dev libxkbcommon-dev libxrandr-dev libxss-dev libxtst-dev lld pkg-config wine64
           if ! command -v 7z >/dev/null 2>&1 && command -v 7zz >/dev/null 2>&1; then
