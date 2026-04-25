@@ -5,12 +5,6 @@ on:
     branches:
       - stable
   workflow_dispatch:
-    inputs:
-      branch:
-        type: string
-        description: "The branch to build from (defaults to 'stable')"
-        default: "stable"
-        required: false
 
 permissions:
   contents: read
@@ -34,7 +28,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          ref: ${{inputs.branch || github.ref}}
           fetch-depth: 0
           submodules: recursive
 
@@ -74,7 +67,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          ref: ${{inputs.branch || github.ref}}
           fetch-depth: 0
           submodules: recursive
 
