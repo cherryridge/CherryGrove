@@ -126,7 +126,7 @@ namespace Logger {
             lerr << endl;
         }
         else {
-            cerr << "(Error)";
+            cerr << "(Error) ";
             ((cerr << forward<Ts>(ts)), ...);
             cerr << endl;
         }

@@ -3,7 +3,8 @@ set -euo pipefail
 
 baseAppId="dev.cherryridge.cherrygrove"
 
-appImagePath="${APPIMAGE:-$0}"
+appImagePath="$(realpath "${APPIMAGE:-$0}")"
+appImageDir="$(dirname "$appImagePath")"
 appImageHash="$(printf '%s' "$appImagePath" | sha256sum | cut -c1-16)"
 
 instanceAppId="${baseAppId}.${appImageHash}"
@@ -25,8 +26,8 @@ cat > "$desktopFilePath" <<EOF
 [Desktop Entry]
 Type=Application
 Name=CherryGrove
-Exec=/home/ljm12914/Desktop/CherryGrove_linux_x64.AppImage
-Path=/home/ljm12914/Desktop
+Exec=${appImagePath}
+Path=${appImageDir}
 Icon=${instanceAppId}
 Terminal=false
 Categories=Game;
@@ -40,4 +41,5 @@ update-desktop-database "$applicationsDir" 2>/dev/null || true
 export SDL_APP_ID="$instanceAppId"
 export SDL_APP_NAME="CherryGrove"
 
+cd "$appImageDir"
 exec "$APPDIR/CherryGrove" "$@"
