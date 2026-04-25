@@ -1,4 +1,6 @@
 *.AppImage
+*.tar.gz
 appimagetool
+CherryGrove
 CherryGrove.AppDir/cherrygrove.png
 CherryGrove.AppDir/CherryGrove
