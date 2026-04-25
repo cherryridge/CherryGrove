@@ -1,0 +1,128 @@
+name: Build Release (Stable)
+
+on:
+  push:
+    branches:
+      - stable
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        description: "The branch to build from (defaults to 'stable')"
+        default: "stable"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    name: Build Windows ${{matrix.arch}} Release
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            msvc_arch: x64
+            preset: windows-x64-release
+          - arch: arm64
+            msvc_arch: x64_arm64
+            preset: windows-arm64-release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          ref: ${{inputs.branch || github.ref}}
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup MSVC toolchain
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{matrix.msvc_arch}}
+
+      - name: Setup CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Fetch prebuilt libraries
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & .\libs\fetch_prebuilt_libs.ps1 "${env:ProgramFiles}\7-Zip\7z.exe" "${{matrix.arch}}"
+
+      - name: Configure
+        run: cmake --preset ${{matrix.preset}}
+
+      - name: Build
+        run: cmake --build --preset ${{matrix.preset}} --parallel
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: CherryGrove-windows-${{matrix.arch}}-release-executable
+          path: out/${{matrix.preset}}/CherryGrove.exe
+          if-no-files-found: error
+
+  package-windows:
+    name: Package Windows Release
+    runs-on: windows-latest
+    needs: build-windows
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          ref: ${{inputs.branch || github.ref}}
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          choco install innosetup --yes --no-progress
+          $exitCode = $LASTEXITCODE
+          $validExitCodes = @(0, 1605, 1614, 1641, 3010)
+          if ($validExitCodes -notcontains $exitCode) {
+            exit $exitCode
+          }
+          $innoSetupPath = "${env:ProgramFiles(x86)}\Inno Setup 6"
+          if (-not (Test-Path -LiteralPath (Join-Path $innoSetupPath 'ISCC.exe'))) {
+            $innoSetupPath = "${env:ProgramFiles}\Inno Setup 6"
+          }
+          if (-not (Test-Path -LiteralPath (Join-Path $innoSetupPath 'ISCC.exe'))) {
+            throw "ISCC.exe was not found after installing Inno Setup."
+          }
+          Add-Content -LiteralPath $env:GITHUB_PATH -Value $innoSetupPath
+
+      - name: Download x64 executable
+        uses: actions/download-artifact@v4
+        with:
+          name: CherryGrove-windows-x64-release-executable
+          path: out/windows-x64-release
+
+      - name: Download arm64 executable
+        uses: actions/download-artifact@v4
+        with:
+          name: CherryGrove-windows-arm64-release-executable
+          path: out/windows-arm64-release
+
+      - name: Package
+        shell: pwsh
+        working-directory: packing/windows
+        run: |
+          $ErrorActionPreference = 'Stop'
+          .\pack.ps1
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: CherryGrove-windows-release
+          path: |
+            packing/windows/CherryGrove_windows_x64.exe
+            packing/windows/CherryGrove_windows_arm64.exe
+            packing/windows/CherryGrove_windows_x64.zip
+            packing/windows/CherryGrove_windows_arm64.zip
+          if-no-files-found: error

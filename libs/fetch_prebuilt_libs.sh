@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: ./get_deps.sh [7z_path]
+# Usage: ./fetch_prebuilt_libs.sh [7z_path] [arch]
 SEVEN_ZIP="${1:-7z}"
+SPECIFIED_ARCH="${2:-}"
 
 # --- Detect OS ---
 case "${OSTYPE:-$(uname | tr '[:upper:]' '[:lower:]')}" in
@@ -13,13 +14,20 @@ case "${OSTYPE:-$(uname | tr '[:upper:]' '[:lower:]')}" in
 esac
 
 # --- Detect Arch ---
-uname_m="$(uname -m | tr '[:upper:]' '[:lower:]')"
-case "$uname_m" in
-    x86_64|amd64) arch_tag="x64"   ;;
-    aarch64|arm64) arch_tag="arm64" ;;
-    i386|i686) echo "x86 is not supported." >&2; exit 1 ;;
-    *) echo "Architecture not detected: $uname_m" >&2; exit 1 ;;
-esac
+if [[ -n "$SPECIFIED_ARCH" ]]; then
+    case "$SPECIFIED_ARCH" in
+        x64|arm64) arch_tag="$SPECIFIED_ARCH" ;;
+        *) echo "Invalid architecture specified: $SPECIFIED_ARCH. Valid values are 'x64' and 'arm64'." >&2; exit 1 ;;
+    esac
+else
+    uname_m="$(uname -m | tr '[:upper:]' '[:lower:]')"
+    case "$uname_m" in
+        x86_64|amd64) arch_tag="x64"   ;;
+        aarch64|arm64) arch_tag="arm64" ;;
+        i386|i686) echo "x86 is not supported." >&2; exit 1 ;;
+        *) echo "Architecture not detected: $uname_m" >&2; exit 1 ;;
+    esac
+fi
 
 # --- Tool checks ---
 command -v curl >/dev/null 2>&1 || { echo "curl is required." >&2; exit 1; }

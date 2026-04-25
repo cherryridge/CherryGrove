@@ -4,18 +4,29 @@
 #>
 
 param(
-    [string] $7zPath = '7z'
+    [string] $7zPath = '7z',
+    [string] $specifiesArch
 )
 
-$osArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::ProcessArchitecture
-if (-not $osArch) {
-    $osArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::OSArchitecture
+if ($specifiesArch) {
+    if ($specifiesArch -in @('x64', 'arm64')) {
+        $archTag = $specifiesArch
+    }
+    else {
+        throw "Invalid architecture specified: $specifiesArch. Valid values are 'x64' and 'arm64'."
+    }
 }
-switch ($osArch) {
-    'X64'   { $archTag = 'x64'; break }
-    'Arm64' { $archTag = 'arm64'; break }
-    'X86'   { throw "x86 is not supported." }
-    default { throw "Architecture not detected." }
+else {
+    $osArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::ProcessArchitecture
+    if (-not $osArch) {
+        $osArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::OSArchitecture
+    }
+    switch ($osArch) {
+        'X64'   { $archTag = 'x64'; break }
+        'Arm64' { $archTag = 'arm64'; break }
+        'X86'   { throw "x86 is not supported." }
+        default { throw "Architecture not detected." }
+    }
 }
 
 $headers = @{ 'User-Agent' = 'ps-github-latest-release' }
