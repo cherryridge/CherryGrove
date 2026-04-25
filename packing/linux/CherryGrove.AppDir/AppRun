@@ -6,6 +6,9 @@ baseAppId="dev.cherryridge.cherrygrove"
 appImagePath="$(realpath "${APPIMAGE:-$0}")"
 appImageDir="$(dirname "$appImagePath")"
 appImageHash="$(printf '%s' "$appImagePath" | sha256sum | cut -c1-16)"
+desktopExecPath="${appImagePath//\\/\\\\}"
+desktopExecPath="${desktopExecPath//\"/\\\"}"
+desktopExecPath="${desktopExecPath//%/%%}"
 
 instanceAppId="${baseAppId}.${appImageHash}"
 
@@ -25,9 +28,9 @@ cat > "$desktopFilePath" <<EOF
 [Desktop Entry]
 Type=Application
 Name=CherryGrove
-Exec=${appImagePath}
-Path=${appImageDir}
-Icon=${iconFilePath}
+Exec="${desktopExecPath}"
+Path="${appImageDir}"
+Icon="${iconFilePath}"
 Terminal=false
 Categories=Game;
 StartupNotify=true
