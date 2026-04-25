@@ -10,12 +10,10 @@ app_dir="$script_dir/CherryGrove.AppDir"
 
 chmod +x -- "$app_dir/AppRun"
 
-rm -rf -- "$app_dir/assets"
-cp -a -- "$repo_root/assets" "$app_dir/"
+rm -rf -- "$app_dir/cherrygrove.png"
+cp -a -- "$repo_root/assets/icons/CherryGrove-trs-256.png" "$app_dir/cherrygrove.png"
 
-cp -a -- "$app_dir/assets/icons/CherryGrove-trs-512.png" "$app_dir/cherrygrove.png"
-cp -a -- "$repo_root/LICENSE" "$app_dir/LICENSE"
-
+rm -rf -- "$app_dir/CherryGrove"
 cp -a -- "$repo_root/out/linux-x64-release/CherryGrove" "$app_dir/CherryGrove"
 chmod +x -- "$app_dir/CherryGrove"
 ARCH=x86_64 ./appimagetool -v --comp zstd CherryGrove.AppDir CherryGrove_linux_x64.AppImage
