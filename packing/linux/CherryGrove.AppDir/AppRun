@@ -18,9 +18,8 @@ iconSourcePath="${APPDIR}/cherrygrove.png"
 
 mkdir -p "$applicationsDir" "$iconsDir"
 
-if [ ! -f "$iconFilePath" ]; then
-    cp "$iconSourcePath" "$iconFilePath"
-fi
+cp -f "$iconSourcePath" "$iconFilePath"
+chmod 0644 "$iconFilePath"
 
 cat > "$desktopFilePath" <<EOF
 [Desktop Entry]
@@ -28,7 +27,7 @@ Type=Application
 Name=CherryGrove
 Exec=${appImagePath}
 Path=${appImageDir}
-Icon=${instanceAppId}
+Icon=${iconFilePath}
 Terminal=false
 Categories=Game;
 StartupNotify=true
