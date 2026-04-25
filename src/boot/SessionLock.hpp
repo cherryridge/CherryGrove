@@ -16,17 +16,18 @@ namespace Boot {
     typedef uint8_t u8;
     typedef int32_t i32;
     typedef uint32_t u32;
-    using std::string, std::move, std::string_view, std::filesystem::current_path, std::filesystem::remove, std::span, std::vector, Util::OS::readFile, Util::OS::getU8String;
+    using std::string, std::move, std::string_view, std::filesystem::current_path, std::filesystem::path, std::filesystem::remove, std::error_code, std::span, std::vector, Util::OS::readFile, Util::OS::getU8String;
 
     struct SessionLock {
         SessionLock() = default;
 
         [[nodiscard]] SessionLock(const string_view fileName) noexcept {
-            lockFilePath = getU8String(current_path() / fileName);
+            lockFilePath = current_path() / path(fileName);
+            lockFileStr = getU8String(lockFilePath);
 
         #if CG_PLATFORM_WINDOWS
         {
-            lockFile = CreateFileA(lockFilePath.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+            lockFile = CreateFileW(lockFilePath.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
             if (lockFile != INVALID_HANDLE_VALUE) {
                 bool locked = LockFile(lockFile, 0, 0, 1, 0);
                 if (!locked) goto invokeExistingInstance;
@@ -35,7 +36,7 @@ namespace Boot {
         }
         #else
         {
-            lockFile = open(lockFilePath.c_str(), O_CREAT | O_RDWR, 0666);
+            lockFile = open(lockFileStr.c_str(), O_CREAT | O_RDWR, 0666);
             if (lockFile >= 0) {
                 bool locked = lockf(lockFile, F_TLOCK, 0) == 0;
                 if (!locked) goto invokeExistingInstance;
@@ -43,7 +44,7 @@ namespace Boot {
             else goto invokeExistingInstance;
         }
         #endif
-            Focus::connect(lockFilePath);
+            Focus::connect(lockFileStr);
             if (!writePidToLockFile()) Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
             return;
 
@@ -56,7 +57,7 @@ namespace Boot {
                 AllowSetForegroundWindow(pid);
             #endif
             }
-            Focus::sendMessage(lockFilePath);
+            Focus::sendMessage(lockFileStr);
             Fatal::exit(Fatal::BOOT_MULTIPLE_INSTANCES);
         }
         }
@@ -64,18 +65,22 @@ namespace Boot {
         SessionLock(const SessionLock&) = delete;
         SessionLock(SessionLock&& other) noexcept :
             lockFilePath(move(other.lockFilePath)),
+            lockFileStr(move(other.lockFileStr)),
             lockFile(other.lockFile) {
             other.lockFile = invalidLockFile();
             other.lockFilePath.clear();
+            other.lockFileStr.clear();
         }
         SessionLock& operator=(const SessionLock&) = delete;
         SessionLock& operator=(SessionLock&& other) noexcept {
             if (this == &other) return *this;
             releaseLock();
             lockFilePath = move(other.lockFilePath);
+            lockFileStr = move(other.lockFileStr);
             lockFile = other.lockFile;
             other.lockFile = invalidLockFile();
             other.lockFilePath.clear();
+            other.lockFileStr.clear();
             return *this;
         }
 
@@ -88,7 +93,8 @@ namespace Boot {
         [[nodiscard]] static constexpr i32 invalidLockFile() noexcept { return -1; }
     #endif
 
-        string lockFilePath;
+        path lockFilePath;
+        string lockFileStr;
 
     #if CG_PLATFORM_WINDOWS
         HANDLE lockFile{INVALID_HANDLE_VALUE};
@@ -124,6 +130,7 @@ namespace Boot {
         void releaseLock() noexcept {
             if (lockFile == invalidLockFile()) {
                 lockFilePath.clear();
+                lockFileStr.clear();
                 return;
             }
 
@@ -139,8 +146,10 @@ namespace Boot {
             lockFile = invalidLockFile();
 
             if (!lockFilePath.empty()) {
-                remove(lockFilePath);
+                error_code ec;
+                remove(lockFilePath, ec);
                 lockFilePath.clear();
+                lockFileStr.clear();
             }
         }
     };
