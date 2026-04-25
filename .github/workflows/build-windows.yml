@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-windows:
-    name: Build Windows ${{matrix.arch}} Release
+    name: Build Release (Windows ${{matrix.arch}})
     runs-on: windows-latest
     strategy:
       fail-fast: false
