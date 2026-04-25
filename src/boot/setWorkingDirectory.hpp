@@ -64,9 +64,9 @@ namespace Boot {
 
         string workingDirectory;
         app.add_option("WorkingDirectory", workingDirectory, "CherryGrove's working directory.\nOptional. If not provided, CherryGrove will use the executable's directory.")->check(CLI::ExistingPath);
-        
+
         app.footer(string("Use the default config file by executing CherryGrove without any arguments.\nFor more information, please visit https://docs.cherrygrove.dev.\n\nCherryGrove is source-available software because it's a shame of open source to allow unrewarded commercial use.\n") + CG_COPYRIGHT_NOTICE + "\nhttps://cherrygrove.dev");
-        
+
         try { app.parse(argc, argv); }
         catch (const CallForHelp&) {
             cout << app.help("", AppFormatMode::All) << endl;
@@ -80,7 +80,7 @@ namespace Boot {
             cerr << "(Error) [CLI] Error occured during argument parsing: (" << e.get_exit_code() << ") " << e.get_name() << " " << e.what() << endl;
             exit(Fatal::BOOT_INVALID_WORKING_DIR);
         }
-        
+
         if (generateKeyword == "schema") {
             Util::Json::generateSchemas();
             cout << "Schemas generated." << endl;
@@ -91,7 +91,7 @@ namespace Boot {
             else cout << "Default settings generated." << endl;
             exit(0);
         }
-        
+
         path workingDirectoryPath;
         if (workingDirectory.empty()) {
             const auto executablePath = getExecutableDirectory();
