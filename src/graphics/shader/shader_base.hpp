@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "ShaderDef.hpp"
 
 #include "base.vert_dx11.h"

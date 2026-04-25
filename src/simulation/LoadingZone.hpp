@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <thread>
 #include <vector>
 #include <boost/unordered/unordered_flat_map.hpp>

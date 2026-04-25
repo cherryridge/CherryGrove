@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../../util/os/platform.hpp" // IWYU pragma: keep
 #if CG_PLATFORM_MACOS
 

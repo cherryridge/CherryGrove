@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <atomic>
 #include <format>
 #include <imgui.h>

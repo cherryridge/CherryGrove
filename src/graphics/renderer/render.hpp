@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <array>
 #include <atomic>
 #include <bgfx/bgfx.h>

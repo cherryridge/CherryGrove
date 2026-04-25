@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <glm/glm.hpp>
 #include <SDL3/SDL.h>
 

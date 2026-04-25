@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <atomic>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <luacode.h>

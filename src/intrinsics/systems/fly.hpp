@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstdint>
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>

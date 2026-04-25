@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <limits>
 #include <SDL3/SDL.h>
 

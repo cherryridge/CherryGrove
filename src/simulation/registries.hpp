@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstdint>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <entt/entt.hpp>

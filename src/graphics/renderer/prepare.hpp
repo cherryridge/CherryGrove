@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <bgfx/bgfx.h>
 
 #include "size.hpp"

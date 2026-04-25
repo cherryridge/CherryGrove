@@ -1,4 +1,4 @@
-﻿#include <atomic>
+#include <atomic>
 #include <ctime>
 #include <filesystem>
 #include <format>

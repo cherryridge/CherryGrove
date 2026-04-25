@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "../../input/Action.hpp"
 #include "../../input/boolInput/BIAction.hpp"

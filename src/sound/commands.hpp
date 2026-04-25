@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <atomic>
 #include <glm/glm.hpp>
 #include <soloud/soloud_wav.h>

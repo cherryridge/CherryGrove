@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <array>
 #include <utility>
 #include <SDL3/SDL.h>

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <array>
 #include <bx/bx.h>
 #include <bx/math.h>

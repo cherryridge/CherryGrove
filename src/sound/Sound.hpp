@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <atomic>
 
 #include "../intrinsics/components/Coordinates.hpp"

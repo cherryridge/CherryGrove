@@ -1,4 +1,4 @@
-﻿#include <atomic>
+#include <atomic>
 #include <chrono>
 #include <thread>
 #include <entt/entt.hpp>

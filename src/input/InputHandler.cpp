@@ -1,4 +1,4 @@
-﻿#include <atomic>
+#include <atomic>
 #include <chrono>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <SDL3/SDL.h>

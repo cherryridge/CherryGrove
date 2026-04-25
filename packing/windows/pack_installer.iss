@@ -1,4 +1,4 @@
-﻿[Setup]
+[Setup]
 AppName=CherryGrove
 AppId=CherryGrove
 AppVersion=0.0.1

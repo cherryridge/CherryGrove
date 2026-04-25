@@ -1,4 +1,4 @@
-﻿#include <algorithm>
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <limits>

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <filesystem>
 #include <iostream>
 #include <SDL3/SDL.h>

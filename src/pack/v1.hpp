@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <limits>
 #include <string>
 #include <vector>

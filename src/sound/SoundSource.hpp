@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <soloud/soloud_wav.h>
 #include <soloud/soloud_wavstream.h>
 

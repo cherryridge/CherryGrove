@@ -1,4 +1,4 @@
-﻿#include <vector>
+#include <vector>
 #include <SDL3/SDL.h>
 
 #include "../../debug/Logger.hpp"
