@@ -1,4 +1,4 @@
-﻿# Put prebuilt wasmtime library files here
+# Put prebuilt wasmtime library files here
 
 Go to [dep_wasmtime](https://github.com/cherryridge/dep_wasmtime/releases) and download the file corresponding to your operating system and your development requirements. Then put the archive's content (without root folder) into corresponding `debug` or `release` folders in this directory.
 
