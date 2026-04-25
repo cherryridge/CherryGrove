@@ -13,17 +13,18 @@ iconsDir="${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor/256x256/apps"
 
 desktopFilePath="${applicationsDir}/${instanceAppId}.desktop"
 iconFilePath="${iconsDir}/${instanceAppId}.png"
+iconSourcePath="${APPDIR}/cherrygrove.png"
 
 mkdir -p "$applicationsDir" "$iconsDir"
 
 if [ ! -f "$iconFilePath" ]; then
-    cp "${APPDIR}/usr/share/icons/hicolor/256x256/apps/${baseAppId}.png" "$iconFilePath"
+    cp "$iconSourcePath" "$iconFilePath"
 fi
 
 cat > "$desktopFilePath" <<EOF
 [Desktop Entry]
 Type=Application
-Name=Your Game
+Name=CherryGrove
 Exec=${appImagePath} %F
 Icon=${instanceAppId}
 Terminal=false
@@ -35,6 +36,7 @@ EOF
 gtk-update-icon-cache -q "${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor" 2>/dev/null || true
 update-desktop-database "$applicationsDir" 2>/dev/null || true
 
-export YOURGAME_APP_ID="$instanceAppId"
+export SDL_APP_ID="$instanceAppId"
+export SDL_APP_NAME="CherryGrove"
 
 exec "$APPDIR/CherryGrove" "$@"
