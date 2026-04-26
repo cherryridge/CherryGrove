@@ -227,6 +227,7 @@ set(WITH_TESTS                  OFF CACHE BOOL "")
 set(WITH_BENCHMARK_TOOLS        OFF CACHE BOOL "")
 set(WITH_TOOLS                  OFF CACHE BOOL "")
 set(WITH_CORE_TOOLS             OFF CACHE BOOL "")
+set(WITH_TRACE_TOOLS            OFF CACHE BOOL "")
 set(WITH_ALL_TESTS              OFF CACHE BOOL "")
 # OK. They just DONT CARE about whether the main project needs lz4 or other compression library.
 # THEY JUST LINK THEIRS PRIVATELY. ALWAYS.
