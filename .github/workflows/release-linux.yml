@@ -52,8 +52,10 @@ jobs:
           Signed-By: /etc/apt/keyrings/llvm.gpg
           EOF
           sudo apt update
-          sudo apt install clang clangd lld libc++-dev libc++abi-dev
+          sudo apt install -y -t llvm-toolchain-noble clang clangd lld
+          sudo apt install -y libc++-dev libc++abi-dev
           clang++ --version
+          clang++ --version | grep -Eq 'clang version (2[2-9]|[3-9][0-9])\.'
           ld.lld --version
 
       - name: Setup CMake and Ninja
