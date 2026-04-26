@@ -50,7 +50,7 @@ namespace Boot {
         app.allow_config_extras(false);
         app.set_help_all_flag("");
 
-        app.set_version_flag("-v, --version", CG_SEMATIC_VERSION, "Display sematic version and exit.");
+        app.set_version_flag("-v, --version", CG_SEMATIC_VERSION, "Display semantic version and exit.");
 
         app.add_flag("-e,--engine", [](i64) {
             cout << CG_ENGINE_VERSION << endl;

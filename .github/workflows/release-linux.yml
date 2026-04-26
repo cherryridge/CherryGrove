@@ -47,8 +47,10 @@ jobs:
           printf '%s\n' 'Types: deb' 'URIs: http://apt.llvm.org/noble/' 'Suites: llvm-toolchain-noble' 'Components: main' 'Signed-By: /etc/apt/keyrings/llvm.gpg' | sudo tee /etc/apt/sources.list.d/llvm.sources >/dev/null
           sudo apt update
           sudo apt install -y clang clangd lld libc++-dev libc++abi-dev
-          clang++ --version
           sudo apt install -y g++-14 libstdc++-14-dev
+          clang++ --version
+          which clang clang++ ld.lld ar llvm-ar ranlib llvm-ranlib
+          ld.lld --version
 
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -84,7 +86,7 @@ jobs:
         run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf
 
       - name: Build
-        run: cmake --build --preset ${{matrix.preset}} --parallel
+        run: cmake --build --preset ${{matrix.preset}} --verbose --parallel 2
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
