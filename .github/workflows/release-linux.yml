@@ -26,13 +26,9 @@ jobs:
           - arch: x64
             runner: ubuntu-24.04
             preset: linux-x64-release
-            cmake_extra_args: ""
-            build_parallel: 2
           - arch: arm64
             runner: ubuntu-24.04-arm
             preset: linux-arm64-release
-            cmake_extra_args: -DCMAKE_AR=/usr/bin/ar -DCMAKE_RANLIB=/usr/bin/ranlib
-            build_parallel: 1
 
     steps:
       - name: Checkout
@@ -88,7 +84,22 @@ jobs:
       - name: Install Wine64
         run: |
           set -euo pipefail
-          sudo apt install -y wine64
+          if [[ "${{matrix.arch}}" == "arm64" ]]; then
+            sudo apt install -y software-properties-common
+            sudo add-apt-repository -y ppa:fex-emu/fex
+            sudo apt update
+            apt-cache policy wine64 fex-emu-armv8.0 fex-emu-wine
+            sudo apt install -y wine64 fex-emu-armv8.0 fex-emu-wine
+            fex_wow64_dll="$(find /usr/lib -path '*/wine/aarch64-windows/libwow64fex.dll' -print -quit)"
+            test -n "$fex_wow64_dll"
+            sudo cp -f "$fex_wow64_dll" "$(dirname "$fex_wow64_dll")/xtajit.dll"
+            echo "D3D4LINUX_WINE=/usr/bin/wine64" >> "$GITHUB_ENV"
+            echo "WINEPREFIX=$RUNNER_TEMP/wine-arm64" >> "$GITHUB_ENV"
+            echo "WINEDEBUG=-all" >> "$GITHUB_ENV"
+            D3D4LINUX_WINE=/usr/bin/wine64 WINEPREFIX="$RUNNER_TEMP/wine-arm64" WINEDEBUG=-all timeout 180s wine64 wineboot --init
+          else
+            sudo apt install -y wine64
+          fi
     
       - name: Install Linux-Only Dependencies
         run: |
@@ -96,31 +107,10 @@ jobs:
           sudo apt install -y build-essential pkg-config libasound2-dev libpulse-dev libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
 
       - name: Configure
-        run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf ${{matrix.cmake_extra_args}}
+        run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf
 
       - name: Build
-        run: |
-          set -euo pipefail
-          monitor_build() {
-            while true; do
-              sleep 60
-              echo "::group::Build monitor $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-              pgrep -a -f 'ninja|cmake|clang|ld\.lld|ar|ranlib' || true
-              ps -eo pid,ppid,stat,etime,pcpu,pmem,args --sort=-pcpu | head -40
-              free -h
-              df -h "$GITHUB_WORKSPACE"
-              du -sh "out/${{matrix.preset}}" 2>/dev/null || true
-              echo "::endgroup::"
-            done
-          }
-          monitor_build &
-          monitor_pid="$!"
-          cleanup() {
-            kill "$monitor_pid" 2>/dev/null || true
-            wait "$monitor_pid" 2>/dev/null || true
-          }
-          trap cleanup EXIT
-          cmake --build --preset ${{matrix.preset}} --verbose --parallel ${{matrix.build_parallel}}
+        run: cmake --build --preset ${{matrix.preset}} --verbose --parallel
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
