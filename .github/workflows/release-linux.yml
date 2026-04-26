@@ -49,7 +49,13 @@ jobs:
           sudo apt install -y clang clangd lld libc++-dev libc++abi-dev
           sudo apt install -y g++-14 libstdc++-14-dev
           clang++ --version
-          which clang clang++ ld.lld ar llvm-ar ranlib llvm-ranlib
+          command -v clang
+          command -v clang++
+          command -v ld.lld
+          command -v ar
+          command -v ranlib
+          command -v llvm-ar || true
+          command -v llvm-ranlib || true
           ld.lld --version
 
       - name: Setup CMake and Ninja
