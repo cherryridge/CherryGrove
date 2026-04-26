@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Sematic version to release
+        description: Semantic version to release
         required: true
 
 jobs:

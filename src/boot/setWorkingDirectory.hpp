@@ -50,7 +50,7 @@ namespace Boot {
         app.allow_config_extras(false);
         app.set_help_all_flag("");
 
-        app.set_version_flag("-v, --version", CG_SEMATIC_VERSION, "Display semantic version and exit.");
+        app.set_version_flag("-v, --version", CG_SEMANTIC_VERSION, "Display semantic version and exit.");
 
         app.add_flag("-e,--engine", [](i64) {
             cout << CG_ENGINE_VERSION << endl;
@@ -73,7 +73,7 @@ namespace Boot {
             exit(0);
         }
         catch (const CallForVersion&) {
-            cout << CG_SEMATIC_VERSION << endl;
+            cout << CG_SEMANTIC_VERSION << endl;
             exit(0);
         }
         catch (const ParseError& e) {
