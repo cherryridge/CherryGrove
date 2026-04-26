@@ -93,10 +93,12 @@ jobs:
             fex_wow64_dll="$(find /usr/lib -path '*/wine/aarch64-windows/libwow64fex.dll' -print -quit)"
             test -n "$fex_wow64_dll"
             sudo cp -f "$fex_wow64_dll" "$(dirname "$fex_wow64_dll")/xtajit.dll"
-            echo "D3D4LINUX_WINE=/usr/bin/wine64" >> "$GITHUB_ENV"
+            wine_cmd="$(command -v wine64 || command -v wine)"
+            test -n "$wine_cmd"
+            echo "D3D4LINUX_WINE=$wine_cmd" >> "$GITHUB_ENV"
             echo "WINEPREFIX=$RUNNER_TEMP/wine-arm64" >> "$GITHUB_ENV"
             echo "WINEDEBUG=-all" >> "$GITHUB_ENV"
-            D3D4LINUX_WINE=/usr/bin/wine64 WINEPREFIX="$RUNNER_TEMP/wine-arm64" WINEDEBUG=-all timeout 180s wine64 wineboot --init
+            D3D4LINUX_WINE="$wine_cmd" WINEPREFIX="$RUNNER_TEMP/wine-arm64" WINEDEBUG=-all timeout 180s "$wine_cmd" wineboot --init
           else
             sudo apt install -y wine64
           fi
