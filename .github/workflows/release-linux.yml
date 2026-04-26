@@ -44,13 +44,7 @@ jobs:
           sudo apt install ca-certificates gpg wget
           sudo mkdir -p /etc/apt/keyrings
           wget -O- https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/llvm.gpg >/dev/null
-          sudo tee /etc/apt/sources.list.d/llvm.sources >/dev/null <<'EOF'
-          Types: deb
-          URIs: http://apt.llvm.org/noble/
-          Suites: llvm-toolchain-noble
-          Components: main
-          Signed-By: /etc/apt/keyrings/llvm.gpg
-          EOF
+          printf '%s\n' 'Types: deb' 'URIs: http://apt.llvm.org/noble/' 'Suites: llvm-toolchain-noble' 'Components: main' 'Signed-By: /etc/apt/keyrings/llvm.gpg' | sudo tee /etc/apt/sources.list.d/llvm.sources >/dev/null
           sudo apt update
           LLVM_MAJOR="$(apt-cache search --names-only '^clang-[0-9]+$' | awk '{print $1}' | sed -n 's/^clang-\([0-9]\+\)$/\1/p' | sort -n | tail -n1)"
           test -n "$LLVM_MAJOR"
@@ -88,23 +82,8 @@ jobs:
             sudo apt install -y software-properties-common
             sudo add-apt-repository -y ppa:fex-emu/fex
             wget -O- https://ftp-master.debian.org/keys/archive-key-13.asc | gpg --dearmor | sudo tee /etc/apt/keyrings/debian-trixie.gpg >/dev/null
-            sudo tee /etc/apt/sources.list.d/debian-trixie.sources >/dev/null <<'EOF'
-            Types: deb
-            URIs: http://deb.debian.org/debian
-            Suites: trixie
-            Components: main
-            Architectures: arm64
-            Signed-By: /etc/apt/keyrings/debian-trixie.gpg
-            EOF
-            sudo tee /etc/apt/preferences.d/debian-wine >/dev/null <<'EOF'
-            Package: *
-            Pin: release n=trixie
-            Pin-Priority: -1
-
-            Package: wine wine64 wine64-preloader wine64-tools wine-common libwine libwine-dev fonts-wine
-            Pin: release n=trixie
-            Pin-Priority: 1001
-            EOF
+            printf '%s\n' 'Types: deb' 'URIs: http://deb.debian.org/debian' 'Suites: trixie' 'Components: main' 'Architectures: arm64' 'Signed-By: /etc/apt/keyrings/debian-trixie.gpg' | sudo tee /etc/apt/sources.list.d/debian-trixie.sources >/dev/null
+            printf '%s\n' 'Package: *' 'Pin: release n=trixie' 'Pin-Priority: -1' '' 'Package: wine wine64 wine64-preloader wine64-tools wine-common libwine libwine-dev fonts-wine' 'Pin: release n=trixie' 'Pin-Priority: 1001' | sudo tee /etc/apt/preferences.d/debian-wine >/dev/null
             sudo apt update
             apt-cache policy wine wine64 libwine fex-emu-armv8.0 fex-emu-wine
             sudo apt install -y wine wine64 fex-emu-armv8.0 fex-emu-wine
@@ -122,12 +101,7 @@ jobs:
             D3D4LINUX_WINE="$wine_cmd" WINEPREFIX="$RUNNER_TEMP/wine-arm64" WINEARCH=win64 WINEDEBUG=-all timeout 180s "$wine_cmd" wineboot --init
             fex_arm64ec_dll="$(find /usr/lib -path '*/wine/aarch64-windows/libarm64ecfex.dll' -print -quit)"
             if [[ -n "$fex_arm64ec_dll" ]]; then
-              cat > "$RUNNER_TEMP/fex.reg" <<'EOF'
-            Windows Registry Editor Version 5.00
-
-            [HKEY_LOCAL_MACHINE\Software\Microsoft\Wow64\amd64]
-            @="libarm64ecfex.dll"
-            EOF
+              printf '%s\n' 'Windows Registry Editor Version 5.00' '' '[HKEY_LOCAL_MACHINE\Software\Microsoft\Wow64\amd64]' '@="libarm64ecfex.dll"' > "$RUNNER_TEMP/fex.reg"
               D3D4LINUX_WINE="$wine_cmd" WINEPREFIX="$RUNNER_TEMP/wine-arm64" WINEARCH=win64 WINEDEBUG=-all "$wine_cmd" regedit "$RUNNER_TEMP/fex.reg"
             fi
           else
