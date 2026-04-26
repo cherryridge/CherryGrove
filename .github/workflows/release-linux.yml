@@ -52,8 +52,11 @@ jobs:
           Signed-By: /etc/apt/keyrings/llvm.gpg
           EOF
           sudo apt update
-          sudo apt install -y -t llvm-toolchain-noble clang clangd lld
-          sudo apt install -y libc++-dev libc++abi-dev
+          LLVM_MAJOR="$(apt-cache search --names-only '^clang-[0-9]+$' | awk '{print $1}' | sed -n 's/^clang-\([0-9]\+\)$/\1/p' | sort -n | tail -n1)"
+          test -n "$LLVM_MAJOR"
+          sudo apt install -y -t llvm-toolchain-noble "clang-${LLVM_MAJOR}" "clangd-${LLVM_MAJOR}" "lld-${LLVM_MAJOR}" "libc++-${LLVM_MAJOR}-dev" "libc++abi-${LLVM_MAJOR}-dev"
+          export PATH="/usr/lib/llvm-${LLVM_MAJOR}/bin:$PATH"
+          echo "/usr/lib/llvm-${LLVM_MAJOR}/bin" >> "$GITHUB_PATH"
           clang++ --version
           clang++ --version | grep -Eq 'clang version (2[2-9]|[3-9][0-9])\.'
           ld.lld --version
