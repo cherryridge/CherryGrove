@@ -399,6 +399,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Luau.Compiler
     Luau.VM
     Luau.CodeGen
+    Luau.Require
     libzstd_static
     rocksdb
     freetype
