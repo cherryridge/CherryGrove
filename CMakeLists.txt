@@ -175,7 +175,7 @@ set(LUAU_BUILD_TESTS  OFF CACHE BOOL "")
 set(LUAU_BUILD_WEB    OFF CACHE BOOL "")
 set(LUAU_STATIC_CRT   ON  CACHE BOOL "")
 set(LUAU_BUILD_SHARED OFF CACHE BOOL "")
-add_subdirectory("libs/luau")
+add_subdirectory("libs/luau" EXCLUDE_FROM_ALL)
 
 #-----Enjoy the legacy of RocksDB! 100+ Lines just to make it happy and not destroy everything.-----
 
