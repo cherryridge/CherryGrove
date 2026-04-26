@@ -45,10 +45,13 @@ jobs:
           sudo mkdir -p /etc/apt/keyrings
           wget -O- https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/llvm.gpg >/dev/null
           printf '%s\n' 'Types: deb' 'URIs: http://apt.llvm.org/noble/' 'Suites: llvm-toolchain-noble' 'Components: main' 'Signed-By: /etc/apt/keyrings/llvm.gpg' | sudo tee /etc/apt/sources.list.d/llvm.sources >/dev/null
+          printf '%s\n' 'Package: clang clang-* clangd clangd-* lld lld-* libc++* libc++abi* libclang* libllvm* llvm llvm-*' 'Pin: origin apt.llvm.org' 'Pin-Priority: 1001' '' 'Package: clang clang-* clangd clangd-* lld lld-* libc++* libc++abi* libclang* libllvm* llvm llvm-*' 'Pin: release o=Ubuntu' 'Pin-Priority: -1' | sudo tee /etc/apt/preferences.d/llvm >/dev/null
           sudo apt update
+          apt-cache policy clang clangd lld
           sudo apt install -y clang clangd lld libc++-dev libc++abi-dev
           sudo apt install -y g++-14 libstdc++-14-dev
           clang++ --version
+          clang++ --version | grep -Eq 'clang version (2[2-9]|[3-9][0-9])\.'
           command -v clang
           command -v clang++
           command -v ld.lld
