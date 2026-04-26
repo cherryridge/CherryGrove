@@ -26,9 +26,11 @@ jobs:
           - arch: x64
             runner: ubuntu-24.04
             preset: linux-x64-release
+            cmake_extra_args: ""
           - arch: arm64
             runner: ubuntu-24.04-arm
             preset: linux-arm64-release
+            cmake_extra_args: -DCMAKE_AR=/usr/bin/ar -DCMAKE_RANLIB=/usr/bin/ranlib
 
     steps:
       - name: Checkout
@@ -92,7 +94,7 @@ jobs:
           sudo apt install -y build-essential pkg-config libasound2-dev libpulse-dev libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
 
       - name: Configure
-        run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf
+        run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf ${{matrix.cmake_extra_args}}
 
       - name: Build
         run: cmake --build --preset ${{matrix.preset}} --verbose --parallel 2
