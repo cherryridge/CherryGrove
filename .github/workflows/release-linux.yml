@@ -1,10 +1,6 @@
 name: Release Pipeline (Linux)
 
 on:
-  push:
-    branches:
-      - stable
-  workflow_dispatch:
   workflow_call:
     inputs:
       branch:
@@ -57,7 +53,7 @@ jobs:
 
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
-    
+
       - name: Install 7z
         run: |
           set -euo pipefail
@@ -74,47 +70,19 @@ jobs:
         run: |
           set -euo pipefail
           bash ./libs/fetch_prebuilt_libs.sh 7z "${{matrix.arch}}"
-
-      - name: Install Wine64
-        run: |
-          set -euo pipefail
-          if [[ "${{matrix.arch}}" == "arm64" ]]; then
-            sudo apt install -y software-properties-common
-            sudo add-apt-repository -y ppa:fex-emu/fex
-            wget -O- https://ftp-master.debian.org/keys/archive-key-13.asc | gpg --dearmor | sudo tee /etc/apt/keyrings/debian-trixie.gpg >/dev/null
-            printf '%s\n' 'Types: deb' 'URIs: http://deb.debian.org/debian' 'Suites: trixie' 'Components: main' 'Architectures: arm64' 'Signed-By: /etc/apt/keyrings/debian-trixie.gpg' | sudo tee /etc/apt/sources.list.d/debian-trixie.sources >/dev/null
-            printf '%s\n' 'Package: *' 'Pin: release n=trixie' 'Pin-Priority: -1' '' 'Package: wine wine64 wine64-preloader wine64-tools wine-common libwine libwine-dev fonts-wine' 'Pin: release n=trixie' 'Pin-Priority: 1001' | sudo tee /etc/apt/preferences.d/debian-wine >/dev/null
-            sudo apt update
-            apt-cache policy wine wine64 libwine fex-emu-armv8.0 fex-emu-wine
-            sudo apt install -y wine wine64 fex-emu-armv8.0 fex-emu-wine
-            find /usr/lib -path '*/wine/aarch64-windows/*fex*.dll' -print
-            fex_wow64_dll="$(find /usr/lib -path '*/wine/aarch64-windows/libwow64fex.dll' -print -quit)"
-            if [[ -n "$fex_wow64_dll" ]]; then
-              sudo cp -f "$fex_wow64_dll" "$(dirname "$fex_wow64_dll")/xtajit.dll"
-            fi
-            wine_cmd="$(command -v wine || command -v wine64)"
-            test -n "$wine_cmd"
-            echo "D3D4LINUX_WINE=$wine_cmd" >> "$GITHUB_ENV"
-            echo "WINEPREFIX=$RUNNER_TEMP/wine-arm64" >> "$GITHUB_ENV"
-            echo "WINEARCH=win64" >> "$GITHUB_ENV"
-            echo "WINEDEBUG=-all" >> "$GITHUB_ENV"
-            D3D4LINUX_WINE="$wine_cmd" WINEPREFIX="$RUNNER_TEMP/wine-arm64" WINEARCH=win64 WINEDEBUG=-all timeout 180s "$wine_cmd" wineboot --init
-            fex_arm64ec_dll="$(find /usr/lib -path '*/wine/aarch64-windows/libarm64ecfex.dll' -print -quit)"
-            if [[ -n "$fex_arm64ec_dll" ]]; then
-              printf '%s\n' 'Windows Registry Editor Version 5.00' '' '[HKEY_LOCAL_MACHINE\Software\Microsoft\Wow64\amd64]' '@="libarm64ecfex.dll"' > "$RUNNER_TEMP/fex.reg"
-              D3D4LINUX_WINE="$wine_cmd" WINEPREFIX="$RUNNER_TEMP/wine-arm64" WINEARCH=win64 WINEDEBUG=-all "$wine_cmd" regedit "$RUNNER_TEMP/fex.reg"
-            fi
-          else
-            sudo apt install -y wine64
-          fi
-    
       - name: Install Linux-Only Dependencies
         run: |
           set -euo pipefail
           sudo apt install -y build-essential pkg-config libasound2-dev libpulse-dev libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
 
       - name: Configure
-        run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf
+        run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf -DCG_COMPILE_SHADERS=OFF
+
+      - name: Download shaders
+        uses: actions/download-artifact@v4
+        with:
+          name: CherryGrove-shaders
+          path: out/${{matrix.preset}}/shaders
 
       - name: Build
         run: cmake --build --preset ${{matrix.preset}} --verbose --parallel
@@ -161,7 +129,7 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x ./pack.sh
-          APPIMAGE_EXTRACT_AND_RUN=1 ./pack.sh
+          ./pack.sh
 
       - name: Upload packages
         uses: actions/upload-artifact@v4

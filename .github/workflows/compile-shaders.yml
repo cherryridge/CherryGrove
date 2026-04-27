@@ -1,0 +1,81 @@
+name: Compile Shaders
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-shaders:
+    name: Compile Shaders
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup MSVC toolchain
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Setup CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Install gperf
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          C:\msys64\usr\bin\bash.exe -lc 'pacman --noconfirm -Sy --needed gperf'
+          C:\msys64\usr\bin\gperf.exe --version
+
+      - name: Fetch bgfx shader compiler
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $headers = @{ 'User-Agent' = 'ps-github-latest-release' }
+          $release = Invoke-RestMethod -Method GET -Uri https://api.github.com/repos/cherryridge/dep_bgfx/releases/latest -Headers $headers
+          $asset = $release.assets | Where-Object { $_.name -like '*windows_x64_release.7z' } | Select-Object -First 1
+          if (-not $asset) {
+            throw 'Could not find a Windows x64 release asset in the latest dep_bgfx release.'
+          }
+
+          $archive = Join-Path $env:RUNNER_TEMP $asset.name
+          Invoke-WebRequest -Uri $asset.browser_download_url -Headers $headers -OutFile $archive
+
+          $destination = 'libs\bgfx\release'
+          Get-ChildItem -LiteralPath $destination -Force | Where-Object { $_.Name -ne '.gitignore' } | Remove-Item -Recurse -Force
+          & "${env:ProgramFiles}\7-Zip\7z.exe" x $archive "-o$destination" -y
+          & "libs\bgfx\release\bin\shaderc.exe" --version
+
+      - name: Configure
+        run: cmake --preset windows-x64-release -DGPERF_EXECUTABLE=C:/msys64/usr/bin/gperf.exe -DCG_COMPILE_SHADERS=OFF
+
+      - name: Compile shaders
+        run: cmake --build --preset windows-x64-release --target compile_shaders --parallel
+
+      - name: Check shader output
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $shaderDir = Join-Path 'out' "${env:PRESET}\shaders"
+          if (-not (Test-Path -LiteralPath $shaderDir)) {
+            throw "Shader output directory was not created: $shaderDir"
+          }
+          $shaderFiles = Get-ChildItem -LiteralPath $shaderDir -File
+          if ($shaderFiles.Count -eq 0) {
+            throw "Shader output directory is empty: $shaderDir"
+          }
+
+      - name: Upload shaders
+        uses: actions/upload-artifact@v4
+        with:
+          name: CherryGrove-shaders
+          path: out/windows-x64-release/shaders/*
+          if-no-files-found: error

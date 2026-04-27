@@ -1,10 +1,6 @@
 ﻿name: Release Pipeline (macOS)
 
 on:
-  push:
-    branches:
-      - stable
-  workflow_dispatch:
   workflow_call:
     inputs:
       branch:
@@ -37,3 +33,9 @@ jobs:
 
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
+
+      - name: Download shaders
+        uses: actions/download-artifact@v4
+        with:
+          name: CherryGrove-shaders
+          path: out/${{matrix.preset}}/shaders

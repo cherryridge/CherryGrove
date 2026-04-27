@@ -1,19 +1,27 @@
 ﻿name: Release
 
 on:
+  push:
+    branches:
+      - stable
   workflow_dispatch:
-    inputs:
-      version:
-        description: Semantic version to release
-        required: true
 
 jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6.0.2
-        with:
-          fetch-depth: 0
-          submodules: recursive
+  compile-shaders:
+    name: Compile Shaders
+    uses: ./.github/workflows/compile-shaders.yml
+
+  release-linux:
+    name: Release Linux
+    needs: compile-shaders
+    uses: ./.github/workflows/release-linux.yml
+
+  release-windows:
+    name: Release Windows
+    needs: compile-shaders
+    uses: ./.github/workflows/release-windows.yml
+
+  release-macos:
+    name: Release macOS
+    needs: compile-shaders
+    uses: ./.github/workflows/release-macos.yml

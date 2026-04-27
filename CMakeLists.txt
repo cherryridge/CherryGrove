@@ -528,5 +528,9 @@ add_custom_target(compile_shaders
     VERBATIM
     COMMAND_EXPAND_LISTS
 )
-add_dependencies(${PROJECT_NAME} compile_shaders)
+
+option(CG_COMPILE_SHADERS "Compile shaders as part of the main build. If turned off, shaders will not be compiled automatically and you need to put the shaders in, or the compilation will fail." ON)
+if(CG_COMPILE_SHADERS)
+    add_dependencies(${PROJECT_NAME} compile_shaders)
+endif()
 #----------------------------------
