@@ -33,22 +33,11 @@ jobs:
           C:\msys64\usr\bin\bash.exe -lc 'pacman --noconfirm -Sy --needed gperf'
           C:\msys64\usr\bin\gperf.exe --version
 
-      - name: Fetch bgfx shader compiler
+      - name: Fetch prebuilt libraries
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $headers = @{ 'User-Agent' = 'ps-github-latest-release' }
-          $release = Invoke-RestMethod -Method GET -Uri https://api.github.com/repos/cherryridge/dep_bgfx/releases/latest -Headers $headers
-          $asset = $release.assets | Where-Object { $_.name -like '*windows_x64_release.7z' } | Select-Object -First 1
-          if (-not $asset) {
-            throw 'Could not find a Windows x64 release asset in the latest dep_bgfx release.'
-          }
-          $archive = Join-Path $env:RUNNER_TEMP $asset.name
-          Invoke-WebRequest -Uri $asset.browser_download_url -Headers $headers -OutFile $archive
-          $destination = 'libs\bgfx\release'
-          Get-ChildItem -LiteralPath $destination -Force | Where-Object { $_.Name -ne '.gitignore' } | Remove-Item -Recurse -Force
-          & "${env:ProgramFiles}\7-Zip\7z.exe" x $archive "-o$destination" -y
-          & "libs\bgfx\release\bin\shaderc.exe" --version
+          & .\libs\fetch_prebuilt_libs.ps1 "${env:ProgramFiles}\7-Zip\7z.exe" "${{matrix.arch}}"
 
       - name: Configure
         run: cmake --preset windows-x64-release -DGPERF_EXECUTABLE=C:/msys64/usr/bin/gperf.exe -DCG_COMPILE_SHADERS=OFF
