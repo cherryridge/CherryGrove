@@ -30,7 +30,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          fetch-depth: 0
           submodules: recursive
 
       - name: Setup clang Toolchain
@@ -103,7 +102,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          fetch-depth: 0
           submodules: recursive
 
       - name: Install package dependencies

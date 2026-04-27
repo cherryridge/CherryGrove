@@ -30,7 +30,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          fetch-depth: 0
           submodules: recursive
 
       - name: Setup MSVC toolchain
@@ -82,7 +81,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          fetch-depth: 0
           submodules: recursive
 
       - name: Install Inno Setup

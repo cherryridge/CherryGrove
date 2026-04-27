@@ -16,7 +16,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          fetch-depth: 0
           submodules: recursive
 
       - name: Setup MSVC toolchain
@@ -38,17 +37,14 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-
           $headers = @{ 'User-Agent' = 'ps-github-latest-release' }
           $release = Invoke-RestMethod -Method GET -Uri https://api.github.com/repos/cherryridge/dep_bgfx/releases/latest -Headers $headers
           $asset = $release.assets | Where-Object { $_.name -like '*windows_x64_release.7z' } | Select-Object -First 1
           if (-not $asset) {
             throw 'Could not find a Windows x64 release asset in the latest dep_bgfx release.'
           }
-
           $archive = Join-Path $env:RUNNER_TEMP $asset.name
           Invoke-WebRequest -Uri $asset.browser_download_url -Headers $headers -OutFile $archive
-
           $destination = 'libs\bgfx\release'
           Get-ChildItem -LiteralPath $destination -Force | Where-Object { $_.Name -ne '.gitignore' } | Remove-Item -Recurse -Force
           & "${env:ProgramFiles}\7-Zip\7z.exe" x $archive "-o$destination" -y
