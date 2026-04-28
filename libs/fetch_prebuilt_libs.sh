@@ -43,7 +43,7 @@ download_library() {
     local api="https://api.github.com/repos/${repo}/releases/latest"
     echo "Downloading ${name} for ${os_tag} ${arch_tag}..."
     # Fetch release JSON
-    json="$(curl -fsSL --retry 10 --retry-delay 5 -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: ${api_ver}" -A "$ua" "$api")" || { echo "Failed to query $api" >&2; return 1; }
+    json="$(curl -fsSL --retry 20 --retry-delay 12 -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: ${api_ver}" -A "$ua" "$api")" || { echo "Failed to query $api" >&2; return 1; }
 
     # Pick matching assets by filename
     # Example match: "*linux_x64_debug.7z"
@@ -64,9 +64,9 @@ download_library() {
     file_dbg="$(basename "$url_dbg")"
     file_rel="$(basename "$url_rel")"
     echo "Downloading $file_dbg ..."
-    curl -fL --retry 10 --retry-delay 5 -A "$ua" -o "$file_dbg" "$url_dbg"
+    curl -fL --retry 20 --retry-delay 12 -A "$ua" -o "$file_dbg" "$url_dbg"
     echo "Downloading $file_rel ..."
-    curl -fL --retry 10 --retry-delay 5 -A "$ua" -o "$file_rel" "$url_rel"
+    curl -fL --retry 20 --retry-delay 12 -A "$ua" -o "$file_rel" "$url_rel"
 
     # Clean destinations except .gitignore
     script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
