@@ -14,6 +14,10 @@ namespace Logger {
 
     static ofstream logFile;
     static atomic_flag logFileFlag{}, coutFlag{}, cerrFlag{};
+
+    thread_local std::ostringstream Logger::buffer;
+    thread_local std::string Logger::threadName;
+
     Logger lout(&cout, &coutFlag), lerr(&cerr, &cerrFlag, "(Error)", true);
 
     void init(LoggingMode mode) noexcept {

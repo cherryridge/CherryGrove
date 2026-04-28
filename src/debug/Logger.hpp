@@ -102,9 +102,6 @@ namespace Logger {
         }
     };
 
-    inline thread_local ostringstream Logger::buffer;
-    inline thread_local string Logger::threadName;
-
     extern Logger lout, lerr;
 
     template <typename... Ts>
