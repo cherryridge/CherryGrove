@@ -1,4 +1,4 @@
-﻿name: Release Pipeline (macOS)
+name: Release Pipeline (macOS)
 
 on:
   workflow_call:
