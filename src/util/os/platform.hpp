@@ -40,6 +40,11 @@
         #include <semaphore.h>  // IWYU pragma: keep
         #include <objc/message.h>  // IWYU pragma: keep
         #include <objc/runtime.h>  // IWYU pragma: keep
+        #if !defined(__OBJC__)
+            #ifdef nil
+                #undef nil
+            #endif
+        #endif
     #else
         #error "Unknown Apple platform"
     #endif
