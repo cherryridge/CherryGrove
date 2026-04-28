@@ -68,7 +68,8 @@ jobs:
       - name: Fetch prebuilt libraries
         run: |
           set -euo pipefail
-          bash ./libs/fetch_prebuilt_libs.sh 7z "${{matrix.arch}}"
+          chmod +x ./libs/fetch_prebuilt_libs.sh
+          ./libs/fetch_prebuilt_libs.sh 7z "${{matrix.arch}}"
 
       - name: Install Linux-Only Dependencies
         run: |

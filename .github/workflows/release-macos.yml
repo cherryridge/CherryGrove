@@ -33,8 +33,83 @@ jobs:
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
+      - name: Install 7z
+        run: |
+          set -euo pipefail
+          brew install 7zip
+          7z
+
+      - name: Install gperf
+        run: |
+          set -euo pipefail
+          brew install gperf
+          gperf --version
+
+      - name: Fetch prebuilt libraries
+        run: |
+          set -euo pipefail
+          chmod +x ./libs/fetch_prebuilt_libs.sh
+          ./libs/fetch_prebuilt_libs.sh 7z "${{matrix.arch}}"
+
+      - name: Configure
+        run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf -DCG_COMPILE_SHADERS=OFF
+
       - name: Download shaders
         uses: actions/download-artifact@v4
         with:
           name: CherryGrove-shaders
           path: out/${{matrix.preset}}/shaders
+
+      - name: Build
+        run: cmake --build --preset ${{matrix.preset}} --verbose --parallel
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: CherryGrove-macos-${{matrix.arch}}-release-executable
+          path: out/${{matrix.preset}}/CherryGrove
+          if-no-files-found: error
+
+  package-macos:
+    name: Package macOS Release
+    runs-on: macos-latest
+    needs: build-macos
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          submodules: recursive
+
+      - name: Install package dependencies
+        run: |
+          set -euo pipefail
+          brew install --no-quarantine create-dmg file gnu-tar wget
+
+      - name: Download x64 executable
+        uses: actions/download-artifact@v4
+        with:
+          name: CherryGrove-macos-x64-release-executable
+          path: out/macos-x64-release
+
+      - name: Download arm64 executable
+        uses: actions/download-artifact@v4
+        with:
+          name: CherryGrove-macos-arm64-release-executable
+          path: out/macos-arm64-release
+
+      - name: Package
+        working-directory: packing/macos
+        run: |
+          set -euo pipefail
+          chmod +x ./pack.sh
+          ./pack.sh
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: CherryGrove-macos-release
+          path: |
+            out/macos-x64-release/CherryGrove-macos-x64.dmg
+            out/macos-arm64-release/CherryGrove-macos-arm64.dmg
+          if-no-files-found: error
