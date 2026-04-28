@@ -28,7 +28,7 @@ namespace Boot::Focus {
 
             id nsWindow = reinterpret_cast<id>(Window::getPlatformHandle(mainWindow));
             if (nsWindow == nullptr) return;
-            Class nsApplicationClass = reinterpret_cast<Class>(objc_getClass("NSApplication"));
+            id nsApplicationClass = reinterpret_cast<id>(objc_getClass("NSApplication"));
             if (nsApplicationClass != nullptr) {
                 id sharedApplication = reinterpret_cast<id (*)(id, SEL)>(objc_msgSend)(nsApplicationClass, sel_registerName("sharedApplication"));
                 if (sharedApplication != nullptr) {

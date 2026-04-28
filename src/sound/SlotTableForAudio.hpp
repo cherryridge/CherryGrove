@@ -19,7 +19,7 @@ namespace Sound {
         struct Entry {
             shared_ptr<EntryType> data;
             //Generation 0 is for INVALID handles, which are used when adding new entries to the table that is deemed invalid for some reason. Do not change this for God's sake.
-            u32 generation{1};
+            mutable u32 generation{1};
         };
 
         vector<Entry> storage;

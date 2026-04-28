@@ -1,4 +1,4 @@
-name: Release Pipeline (Linux)
+name: Release (Linux)
 
 on:
   workflow_call:

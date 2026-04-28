@@ -1,4 +1,4 @@
-name: Release Pipeline (Windows)
+name: Release (Windows)
 
 on:
   workflow_call:
