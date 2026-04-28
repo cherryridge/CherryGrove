@@ -31,7 +31,7 @@ else {
 
 $headers = @{ 'User-Agent' = 'ps-github-latest-release' }
 $retryCount = 20
-$retryDelaySec = 12
+$retryDelaySec = 5
 
 function Invoke-WithRetry {
     param (

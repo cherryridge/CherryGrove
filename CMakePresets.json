@@ -58,7 +58,9 @@
             "cacheVariables": {
                 "CMAKE_SYSTEM_NAME": "Darwin",
                 "CMAKE_C_COMPILER": "clang",
-                "CMAKE_CXX_COMPILER": "clang++"
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_OBJC_COMPILER": "clang",
+                "CMAKE_OBJCXX_COMPILER": "clang++"
             }
         },
         {
