@@ -278,6 +278,7 @@ endif()
 #-----Did you enjoy it?-----
 
 set(FT_DISABLE_ZLIB OFF CACHE BOOL "")
+set(FT_DISABLE_BROTLI ON CACHE BOOL "")
 add_subdirectory("libs/freetype")
 
 set(SDL_SHARED        OFF CACHE BOOL "")
