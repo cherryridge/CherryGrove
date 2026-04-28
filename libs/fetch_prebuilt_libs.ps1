@@ -30,6 +30,9 @@ else {
 }
 
 $headers = @{ 'User-Agent' = 'ps-github-latest-release' }
+if ($env:GITHUB_TOKEN) {
+    $headers['Authorization'] = "Bearer $($env:GITHUB_TOKEN)"
+}
 $retryCount = 20
 $retryDelaySec = 5
 
