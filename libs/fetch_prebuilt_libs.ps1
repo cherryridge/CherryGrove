@@ -30,13 +30,36 @@ else {
 }
 
 $headers = @{ 'User-Agent' = 'ps-github-latest-release' }
+$retryCount = 10
+$retryDelaySec = 5
+
+function Invoke-WithRetry {
+    param (
+        [scriptblock]$Operation,
+        [string]$Description
+    )
+    for ($attempt = 1; $attempt -le $retryCount; $attempt++) {
+        try {
+            return & $Operation
+        }
+        catch {
+            if ($attempt -ge $retryCount) {
+                throw
+            }
+            Write-Warning "$Description failed (attempt $attempt/$retryCount). Retrying in $retryDelaySec seconds..."
+            Start-Sleep -Seconds $retryDelaySec
+        }
+    }
+}
 
 function Get-Library {
     param (
         [string]$name
     )
     Write-Host "Downloading $name for Windows $archTag..."
-    $release = Invoke-RestMethod -Method GET -Uri https://api.github.com/repos/cherryridge/dep_$name/releases/latest -Headers $headers
+    $release = Invoke-WithRetry -Description "Fetch release for dep_$name" -Operation {
+        Invoke-RestMethod -Method GET -Uri https://api.github.com/repos/cherryridge/dep_$name/releases/latest -Headers $headers -ErrorAction Stop
+    }
     if(-not $release -or $release.assets.Count -eq 0) {
         Write-Error "No assets found on latest release of dep_$name, check it at https://api.github.com/repos/cherryridge/dep_$name/releases/latest."
         return
@@ -48,9 +71,13 @@ function Get-Library {
         return
     }
     Write-Host "Downloading $($assetDebug.name): $($assetDebug.browser_download_url)..."
-    Invoke-WebRequest -Uri $assetDebug.browser_download_url -Headers $headers -OutFile $assetDebug.name
+    $null = Invoke-WithRetry -Description "Download $($assetDebug.name)" -Operation {
+        Invoke-WebRequest -Uri $assetDebug.browser_download_url -Headers $headers -OutFile $assetDebug.name -ErrorAction Stop
+    }
     Write-Host "Downloading $($assetRelease.name): $($assetRelease.browser_download_url)..."
-    Invoke-WebRequest -Uri $assetRelease.browser_download_url -Headers $headers -OutFile $assetRelease.name
+    $null = Invoke-WithRetry -Description "Download $($assetRelease.name)" -Operation {
+        Invoke-WebRequest -Uri $assetRelease.browser_download_url -Headers $headers -OutFile $assetRelease.name -ErrorAction Stop
+    }
     Get-ChildItem -Path "$PSScriptRoot\$name\debug" -Force | Where-Object { $_.name -ne '.gitignore'} | Remove-Item -Recurse -Force
     Get-ChildItem -Path "$PSScriptRoot\$name\release" -Force | Where-Object { $_.name -ne '.gitignore'} | Remove-Item -Recurse -Force
     Write-Host "Extracting $($assetDebug.name) to $PSScriptRoot\$name\debug..."
