@@ -175,7 +175,8 @@
             "inherits": "macos-base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_SYSTEM_PROCESSOR": "x86_64"
+                "CMAKE_SYSTEM_PROCESSOR": "x86_64",
+                "CMAKE_OSX_ARCHITECTURES": "x86_64"
             }
         },
         {
@@ -183,7 +184,8 @@
             "inherits": "macos-base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_SYSTEM_PROCESSOR": "x86_64"
+                "CMAKE_SYSTEM_PROCESSOR": "x86_64",
+                "CMAKE_OSX_ARCHITECTURES": "x86_64"
             }
         },
         {
