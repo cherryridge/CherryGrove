@@ -2,10 +2,6 @@ cmake_minimum_required(VERSION "4.0")
 
 project("CherryGrove")
 
-if(APPLE)
-    enable_language(OBJC)
-endif()
-
 #------------Basic-----------------
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,6 +15,9 @@ set(CMAKE_SUPPRESS_REGENERATION ON CACHE BOOL "" FORCE)
 if(UNIX AND NOT APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
     set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> qcT <TARGET> <LINK_FLAGS> <OBJECTS>")
     set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcT <TARGET> <LINK_FLAGS> <OBJECTS>")
+endif()
+if(APPLE)
+    enable_language(OBJC)
 endif()
 #----------------------------------
 
