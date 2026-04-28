@@ -60,7 +60,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $shaderDir = Join-Path 'out' "${env:PRESET}\shaders"
+          $shaderDir = Join-Path 'out' "windows-x64-release\shaders"
           if (-not (Test-Path -LiteralPath $shaderDir)) {
             throw "Shader output directory was not created: $shaderDir"
           }
