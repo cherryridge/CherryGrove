@@ -74,10 +74,6 @@
 	path = libs/cli11
 	url = https://github.com/CLIUtils/CLI11
 
-[submodule "libs/entt"]
-	path = libs/entt
-	url = https://github.com/skypjack/entt
-
 [submodule "libs/flecs"]
 	path = libs/flecs
 	url = https://github.com/SanderMertens/flecs
