@@ -78,6 +78,10 @@
 	path = libs/entt
 	url = https://github.com/skypjack/entt
 
+[submodule "libs/flecs"]
+	path = libs/flecs
+	url = https://github.com/SanderMertens/flecs
+
 [submodule "libs/freetype"]
 	path = libs/freetype
 	url = https://github.com/freetype/freetype
