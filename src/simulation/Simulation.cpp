@@ -1,7 +1,7 @@
 #include <atomic>
 #include <chrono>
 #include <thread>
-#include <entt/entt.hpp>
+#include <flecs.h>
 
 #include "../debug/Logger.hpp"
 #include "../graphics/gui/Gui.hpp"
@@ -56,10 +56,10 @@ namespace Simulation {
         gameThread = thread(gameLoop);
 
         //Temporary code to spawn player entity
-        playerEntity = registry.create();
-        registry.emplace<Components::Camera>(playerEntity, 60.0f);
-        registry.emplace<Components::EntityCoordinates>(playerEntity, -0.2, -0.5, 1.0, 0u);
-        registry.emplace<Components::Rotation>(playerEntity, 90.0, 0.0);
+        playerEntity = registry.entity()
+            .set<Components::Camera>({60.0f})
+            .set<Components::EntityCoordinates>({-0.2, -0.5, 1.0, 0u})
+            .set<Components::Rotation>({90.0, 0.0});
     }
 
     //threaded: Main thread
@@ -70,7 +70,8 @@ namespace Simulation {
 
         //Clear resources
         gameThread.join();
-        registry.clear();
+        registry.reset();
+        playerEntity = flecs::entity();
 
         //Clear input callbacks
         Main::runOnMainThread.enqueue([]() noexcept {

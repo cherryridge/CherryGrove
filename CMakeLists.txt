@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY FALSE)
 set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY FALSE)
 set(CMAKE_SUPPRESS_REGENERATION ON CACHE BOOL "" FORCE)
@@ -277,6 +278,12 @@ endif()
 
 #-----Did you enjoy it?-----
 
+set(FLECS_STATIC ON  CACHE BOOL "")
+set(FLECS_SHARED OFF CACHE BOOL "")
+set(FLECS_PIC    ON  CACHE BOOL "")
+set(FLECS_TESTS  OFF CACHE BOOL "")
+add_subdirectory("libs/flecs")
+
 set(FT_DISABLE_ZLIB OFF CACHE BOOL "")
 set(FT_DISABLE_BROTLI ON CACHE BOOL "")
 add_subdirectory("libs/freetype")
@@ -375,7 +382,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/boost/uuid/include"
 
     "libs/cli11/include"
-    "libs/entt/single_include"
+    "libs/flecs/include"
     "libs/function2/include"
     "libs/glaze/include"
     "libs/glm"
@@ -403,14 +410,15 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ScopedFlags
 
-    physfs-static
-    Luau.Compiler
-    Luau.VM
-    Luau.CodeGen
-    Luau.Require
-    libzstd_static
-    rocksdb
+    flecs_static
     freetype
+    libzstd_static
+    Luau.CodeGen
+    Luau.Compiler
+    Luau.Require
+    Luau.VM
+    physfs-static
+    rocksdb
     SDL3-static
     SDL3_image-static
 

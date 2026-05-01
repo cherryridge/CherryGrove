@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdint>
 #include <mutex>
 #include <backends/imgui_impl_sdl3.h>
 #include <boost/unordered/unordered_flat_map.hpp>

@@ -1,6 +1,6 @@
 #pragma once
-#include <entt/entt.hpp>
+#include <flecs.h>
 
 namespace Simulation {
-    inline entt::entity playerEntity{entt::null};
+    inline flecs::entity playerEntity;
 }

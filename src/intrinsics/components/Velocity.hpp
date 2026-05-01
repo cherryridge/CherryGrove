@@ -1,5 +1,5 @@
 #pragma once
-#include <entt/entt.hpp>
+#include <flecs.h>
 
 #include "Acceleration.hpp"
 
@@ -15,30 +15,28 @@ namespace Components {
     typedef uint32_t u32;
 
     [[nodiscard]] inline bool updateVelocity(
-        entt::registry& registry, entt::entity entity,
+        flecs::world& registry, flecs::entity entity,
         bool updateX,     bool updateY,     bool updateZ,
         float ndx = 0.0f, float ndy = 0.0f, float ndz = 0.0f
     ) noexcept {
-        if (registry.all_of<Components::Velocity>(entity)) {
-            registry.patch<Components::Velocity>(entity, [updateX, updateY, updateZ, ndx, ndy, ndz](Components::Velocity& velocity) noexcept {
-                if (updateX) velocity.dx = ndx;
-                if (updateY) velocity.dy = ndy;
-                if (updateZ) velocity.dz = ndz;
-            });
+        if (entity.has<Components::Velocity>()) {
+            auto& velocity = entity.ensure<Components::Velocity>();
+            if (updateX) velocity.dx = ndx;
+            if (updateY) velocity.dy = ndy;
+            if (updateZ) velocity.dz = ndz;
             return true;
         }
         return false;
     }
 
     //Entity must have `AccelerationComp`.
-    [[nodiscard]] inline bool updateVelocityByAcceleration(entt::registry& registry, entt::entity entity, u32 deltaTick = 1) noexcept {
-        if (!registry.all_of<Components::Velocity, Components::Acceleration>(entity)) return false;
-        const auto& acc = registry.get<Components::Acceleration>(entity);
-        registry.patch<Components::Velocity>(entity, [&acc, entity, deltaTick](Components::Velocity& velocity) noexcept {
-            velocity.dx += acc.d2x * deltaTick;
-            velocity.dy += acc.d2y * deltaTick;
-            velocity.dz += acc.d2z * deltaTick;
-        });
+    [[nodiscard]] inline bool updateVelocityByAcceleration(flecs::world& registry, flecs::entity entity, u32 deltaTick = 1) noexcept {
+        if (!entity.has<Components::Velocity>() || !entity.has<Components::Acceleration>()) return false;
+        const auto& acc = entity.get<Components::Acceleration>();
+        auto& velocity = entity.ensure<Components::Velocity>();
+        velocity.dx += acc.d2x * deltaTick;
+        velocity.dy += acc.d2y * deltaTick;
+        velocity.dz += acc.d2z * deltaTick;
         return true;
     }
 }

@@ -2,46 +2,43 @@
 #include <array>
 #include <bx/bx.h>
 #include <bx/math.h>
+#include <flecs.h>
 #include <glm/glm.hpp>
-#include <entt/entt.hpp>
 
-#include "../../simulation/registries.hpp"
 #include "../components/Camera.hpp"
 #include "../components/Coordinates.hpp"
 #include "../components/Rotation.hpp"
 
 namespace Systems {
-    using std::array, Simulation::registry;
+    using std::array;
 
     //In world space.
     inline constexpr bx::Vec3 bxUp = { 0.0f, 1.0f, 0.0f };
 
-    [[nodiscard]] inline bool updateRotation(entt::entity entity,
+    [[nodiscard]] inline bool updateRotation(flecs::entity entity,
         bool updateYaw, bool updatePitch,
         double yaw,     double pitch
     ) noexcept {
-        if (registry.all_of<Components::Rotation>(entity)) {
-            registry.patch<Components::Rotation>(entity, [updateYaw, updatePitch, yaw, pitch](Components::Rotation& rotation) noexcept {
-                if (updateYaw) rotation.yaw = yaw;
-                if (updatePitch) rotation.pitch = pitch;
-            });
+        if (entity.has<Components::Rotation>()) {
+            auto& rotation = entity.ensure<Components::Rotation>();
+            if (updateYaw) rotation.yaw = yaw;
+            if (updatePitch) rotation.pitch = pitch;
             return true;
         }
         return false;
     }
 
-    [[nodiscard]] inline bool deltaRotation(entt::entity entity,
+    [[nodiscard]] inline bool deltaRotation(flecs::entity entity,
         double dYaw, double dPitch
     ) noexcept {
-        if (registry.all_of<Components::Rotation>(entity)) {
-            registry.patch<Components::Rotation>(entity, [dYaw, dPitch](Components::Rotation& rotation) noexcept {
-                rotation.yaw += dYaw;
-                if (rotation.yaw >= 360.0) rotation.yaw -= 360.0;
-                else if (rotation.yaw < 0.0) rotation.yaw += 360.0;
-                rotation.pitch += dPitch;
-                if (rotation.pitch > 89.99999) rotation.pitch = 89.99999;
-                else if (rotation.pitch < -89.99999) rotation.pitch = -89.99999;
-            });
+        if (entity.has<Components::Rotation>()) {
+            auto& rotation = entity.ensure<Components::Rotation>();
+            rotation.yaw += dYaw;
+            if (rotation.yaw >= 360.0) rotation.yaw -= 360.0;
+            else if (rotation.yaw < 0.0) rotation.yaw += 360.0;
+            rotation.pitch += dPitch;
+            if (rotation.pitch > 89.99999) rotation.pitch = 89.99999;
+            else if (rotation.pitch < -89.99999) rotation.pitch = -89.99999;
             return true;
         }
         return false;
@@ -85,13 +82,13 @@ namespace Systems {
     }
 
     //Entity must have a `CoordinatesComp` by now.
-    [[nodiscard]] inline bool getViewMtx(entt::entity entity,
+    [[nodiscard]] inline bool getViewMtx(flecs::entity entity,
         array<float, 16>& result
     ) noexcept {
         //Using `EntityCoordinates` directly for camera position until `CameraOffset` or `Eye` is implemented.
-        const auto* coords = registry.try_get<Components::EntityCoordinates>(entity);
-        const auto* rotation = registry.try_get<Components::Rotation>(entity);
-        const auto* camera = registry.try_get<Components::Camera>(entity);
+        const auto* coords = entity.try_get<Components::EntityCoordinates>();
+        const auto* rotation = entity.try_get<Components::Rotation>();
+        const auto* camera = entity.try_get<Components::Camera>();
         if (coords && rotation && camera) {
             const glm::vec3 pos(coords->x, coords->y, coords->z);
             const glm::vec3 lookingAt = pos + getUnitVecFromRotation(*rotation);
