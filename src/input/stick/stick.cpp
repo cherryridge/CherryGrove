@@ -8,7 +8,8 @@
 
 #include "../../debug/Logger.hpp"
 #include "../../util/SlotTable.hpp"
-#include "../InputHandler.hpp"
+#include "../actionIds.hpp"
+#include "../canDelete.hpp"
 #include "../utils.hpp"
 #include "STAction.hpp"
 
@@ -18,7 +19,7 @@ namespace InputHandler::Stick {
     typedef uint8_t u8;
     typedef int16_t i16;
     typedef uint32_t u32;
-    using std::atomic, std::sqrt, std::clamp, std::array, std::to_underlying, std::numeric_limits, std::pair, std::vector, Util::SlotTable;
+    using std::atomic, std::sqrt, std::clamp, std::array, std::to_underlying, std::numeric_limits, std::pair, std::vector, Util::SlotTable, InputHandler::internal::ActionLocation, InputHandler::internal::getLocation, InputHandler::internal::getNextId, InputHandler::internal::registerId, InputHandler::internal::unregisterId, InputHandler::utils::readSnapshot, InputHandler::utils::writeSnapshot, InputHandler::utils::process;
 
     //[LeftStickK, LeftStickB, RightStickK, RightStickB, LeftTriggerK, LeftTriggerB, RightTriggerK, RightTriggerB]
     static array<float, 8> deadzones{};
@@ -30,7 +31,7 @@ namespace InputHandler::Stick {
     static array<vector<ActionHandle>, to_underlying(Axis::Count)> axisToHandle;
 
     [[nodiscard]] ActionID add(StickActionCallback cb, ActionPriority priority, const ActionwiseInfo_ST& info) noexcept {
-        const ActionID id = InputHandler::internal::getNextId();
+        const ActionID id = getNextId();
     #if CG_DEBUG
         if (info.triggerAxises.none()) [[unlikely]] lerr << "[InputHandler] Attempt to add a StickAction with no axis. This action will never be triggered. ActionID: " << id << endl;
     #endif
@@ -46,7 +47,7 @@ namespace InputHandler::Stick {
             ) break;
             axisToHandle[axis].insert(it, handle);
         }
-        InputHandler::internal::registerId(id, {InputKind::StickMove, handle});
+        registerId(id, {InputKind::StickMove, handle});
         return id;
     }
 
@@ -55,7 +56,7 @@ namespace InputHandler::Stick {
         ASSERT_CAN_DELETE(id, false)
     #endif
         ActionLocation location;
-        if (!InputHandler::getLocation(id, location, InputKind::StickMove)) return false;
+        if (!getLocation(id, location, InputKind::StickMove)) return false;
         const auto* actionInfo = actionInfos.get(location.actionHandle);
         if (actionInfo == nullptr) return false;
         const auto triggerAxises = actionInfo->actionwiseInfo.triggerAxises;
@@ -64,7 +65,7 @@ namespace InputHandler::Stick {
             axisToHandle[axis].erase(axisToHandle[axis].begin() + i);
             break;
         }
-        InputHandler::internal::unregisterId(id);
+        unregisterId(id);
         return true;
     }
 
@@ -77,7 +78,7 @@ namespace InputHandler::Stick {
 
     [[nodiscard]] bool get(ActionID id, StickAction& result) noexcept {
         ActionLocation location;
-        if (!InputHandler::getLocation(id, location, InputKind::StickMove)) return false;
+        if (!getLocation(id, location, InputKind::StickMove)) return false;
         return get(location.actionHandle, result);
     }
 
@@ -138,9 +139,9 @@ namespace InputHandler::Stick {
         }
 
         state[to_underlying(axis)] = event.gaxis.value;
-        InputHandler::writeSnapshot(state, stateSnapshot, snapshotSeq);
+        writeSnapshot(state, stateSnapshot, snapshotSeq);
 
-        EventwiseInfo_ST eventwiseInfo{
+        EventwiseInfo_ST eventwiseInfo {
             .axis = axis,
             .triggeredKind = InputHandler::Stick::Subkind::Trigger
         };
@@ -161,7 +162,7 @@ namespace InputHandler::Stick {
             if (actionInfo->actionwiseInfo.allowedKinds.get(InputHandler::Stick::Subkind::Trigger)) triggerKindHandles.push_back(axisToHandle[to_underlying(axis)][i]);
         }
 
-        InputHandler::process(actionInfos, triggerKindHandles, eventwiseInfo);
+        process(actionInfos, triggerKindHandles, eventwiseInfo);
     }
 
     void processPersist() noexcept {
@@ -183,7 +184,7 @@ namespace InputHandler::Stick {
             .axis = Axis::Count,
             .triggeredKind = InputHandler::Stick::Subkind::Persist
         };
-        InputHandler::process(actionInfos, persistKindHandles, eventwiseInfo);
+        process(actionInfos, persistKindHandles, eventwiseInfo);
     }
 
     void processDevice(const SDL_Event& event) noexcept {
@@ -194,7 +195,7 @@ namespace InputHandler::Stick {
         }
     #endif
         state.fill(0);
-        InputHandler::writeSnapshot(state, stateSnapshot, snapshotSeq);
+        writeSnapshot(state, stateSnapshot, snapshotSeq);
     }
 
     void updateArguments(array<i16, 8> deadzones_) noexcept {
@@ -212,5 +213,5 @@ namespace InputHandler::Stick {
         }
     }
 
-    [[nodiscard]] array<i16, to_underlying(Axis::Count)> getStates() noexcept { return InputHandler::readSnapshot(stateSnapshot, snapshotSeq); }
+    [[nodiscard]] array<i16, to_underlying(Axis::Count)> getStates() noexcept { return readSnapshot(stateSnapshot, snapshotSeq); }
 }

@@ -9,7 +9,8 @@
 #include "../../debug/Logger.hpp"
 #include "../../simulation/Time.hpp"
 #include "../../util/SlotTable.hpp"
-#include "../InputHandler.hpp"
+#include "../actionIds.hpp"
+#include "../canDelete.hpp"
 #include "../types.hpp"
 #include "../utils.hpp"
 #include "biid.hpp"
@@ -19,10 +20,9 @@
 #include "KeyState.hpp"
 
 namespace InputHandler::BoolInput {
-    typedef uint8_t u8;
     typedef uint32_t u32;
     typedef uint64_t u64;
-    using std::lower_bound, std::array, std::atomic, std::vector, Simulation::TimePoint, Simulation::TimeUnit, Util::SlotTable, boost::unordered_flat_map;
+    using std::lower_bound, std::array, std::atomic, std::vector, boost::unordered_flat_map, Simulation::TimeUnit, Util::SlotTable, InputHandler::internal::ActionLocation, InputHandler::internal::getLocation, InputHandler::internal::getNextId, InputHandler::internal::registerId, InputHandler::internal::unregisterId, InputHandler::utils::readSnapshot, InputHandler::utils::writeSnapshot, InputHandler::utils::process, InputHandler::utils::insertSort, InputHandler::utils::remove;
 
     namespace detail {
         inline array<KeyState, BIID_COUNT> state{}, stateSnapshot{};
@@ -55,12 +55,12 @@ namespace InputHandler::BoolInput {
 
     //There is no guarantee that any of the action's property isn't duplicated anywhere. Implement it in UMI.
     [[nodiscard]] inline ActionID add(BoolInputActionCallback cb, ActionPriority priority, const ActionwiseInfo_BI& info) noexcept {
-        const ActionID id = InputHandler::internal::getNextId();
+        const ActionID id = getNextId();
     #if CG_DEBUG
         if (info.allowedKinds.none()) [[unlikely]] lerr << "[InputHandler::BoolInput] Action " << id << " is not listening to any BoolInputKind. This action will never be triggered." << endl;
     #endif
         const ActionHandle handle = detail::actionInfos.emplace(id, priority, cb, info);
-        InputHandler::internal::registerId(id, {InputKind::BoolInput, handle});
+        registerId(id, {InputKind::BoolInput, handle});
         return id;
     }
 
@@ -71,9 +71,9 @@ namespace InputHandler::BoolInput {
         ASSERT_CAN_DELETE(id, false)
     #endif
         ActionLocation location;
-        if (!InputHandler::getLocation(id, location, InputKind::BoolInput)) return false;
+        if (!getLocation(id, location, InputKind::BoolInput)) return false;
         if (!detail::actionInfos.destroy(location.actionHandle)) return false;
-        InputHandler::internal::unregisterId(id);
+        unregisterId(id);
         for (auto it = detail::bindings.begin(); it != detail::bindings.end(); ++it) if (it->actionHandle == location.actionHandle) detail::removeBinding(it.handle());
         return true;
     }
@@ -87,7 +87,7 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] inline bool get(ActionID id, BoolInputAction& result) noexcept {
         ActionLocation location;
-        if (!InputHandler::getLocation(id, location, InputKind::BoolInput)) return false;
+        if (!getLocation(id, location, InputKind::BoolInput)) return false;
         return get(location.actionHandle, result);
     }
 
@@ -123,7 +123,7 @@ namespace InputHandler::BoolInput {
     //Will not make `addBindings` with vector input because there is no room for internal optimization.
     [[nodiscard]] inline bool addBinding(ActionID id, const KeyCombo& combo) noexcept {
         ActionLocation location;
-        if (!InputHandler::getLocation(id, location, InputKind::BoolInput)) return false;
+        if (!getLocation(id, location, InputKind::BoolInput)) return false;
         return addBinding(location.actionHandle, combo);
     }
 
@@ -147,7 +147,7 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] inline bool bindingExists(ActionID id, const KeyCombo& combo) noexcept {
         ActionLocation location;
-        if (!InputHandler::getLocation(id, location, InputKind::BoolInput)) return false;
+        if (!getLocation(id, location, InputKind::BoolInput)) return false;
         return bindingExists(location.actionHandle, combo);
     }
 
@@ -164,7 +164,7 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] inline bool getBindings(ActionID id, vector<KeyCombo>& result) noexcept {
         ActionLocation location;
-        if (!InputHandler::getLocation(id, location, InputKind::BoolInput)) return false;
+        if (!getLocation(id, location, InputKind::BoolInput)) return false;
         return getBindings(location.actionHandle, result);
     }
 
@@ -190,7 +190,7 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] inline bool removeBinding(ActionID id, const KeyCombo& combo) noexcept {
         ActionLocation location;
-        if (!InputHandler::getLocation(id, location, InputKind::BoolInput)) return false;
+        if (!getLocation(id, location, InputKind::BoolInput)) return false;
         return removeBinding(location.actionHandle, combo);
     }
 
@@ -206,7 +206,7 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] inline bool removeBindings(ActionID id) noexcept {
         ActionLocation location;
-        if (!InputHandler::getLocation(id, location, InputKind::BoolInput)) return false;
+        if (!getLocation(id, location, InputKind::BoolInput)) return false;
         return removeBindings(location.actionHandle);
     }
 
@@ -279,7 +279,7 @@ namespace InputHandler::BoolInput {
         if (down) detail::state[biid].onPhysicalPress(Simulation::now());
         else detail::state[biid].onPhysicalRelease(Simulation::now());
 
-        InputHandler::writeSnapshot(detail::state, detail::stateSnapshot, detail::snapshotSeq);
+        writeSnapshot(detail::state, detail::stateSnapshot, detail::snapshotSeq);
 
         KeyCombo currentCombo = detail::getCurrentCombo();
         //note: — Why bother the released one since we have TTL so the released one will definitely be virtually down? — Because players can set TTL to 0. Feel the fucking frustration of coding in ultra flexibility hell!
@@ -305,7 +305,7 @@ namespace InputHandler::BoolInput {
             if (currentCombo >= record->combo && actionInfo->actionwiseInfo.allowedKinds.get(triggeredKind)) comboGroups[record->combo].push_back(record->actionHandle);
         }
 
-        for (const auto& [combo, actions] : comboGroups) InputHandler::process(detail::actionInfos, actions, {
+        for (const auto& [combo, actions] : comboGroups) process(detail::actionInfos, actions, {
             .triggeredCombo = combo,
             .repeatedTriggerCount = detail::state[biid].tapCount,
             .lastActiveId = biid,
@@ -339,7 +339,7 @@ namespace InputHandler::BoolInput {
             }
         }
 
-        for (const auto& [combo, actions] : comboGroups2) InputHandler::process(detail::actionInfos, actions, {
+        for (const auto& [combo, actions] : comboGroups2) process(detail::actionInfos, actions, {
             .triggeredCombo = combo,
             .repeatedTriggerCount = 1,
             .lastActiveId = INVALID_BIID,
@@ -382,7 +382,7 @@ namespace InputHandler::BoolInput {
 
     //This function DOES NOT guarantee to return the most up-to-date states in very high frequency calls due to hot path prioritization. It only guarantees that the returned states are consistent with each other, meaning that they are from the same snapshot.
     [[nodiscard]] inline array<KeyState, BIID_COUNT> getStates() noexcept {
-        return InputHandler::readSnapshot(detail::stateSnapshot, detail::snapshotSeq);
+        return readSnapshot(detail::stateSnapshot, detail::snapshotSeq);
     }
 
 //#endregion

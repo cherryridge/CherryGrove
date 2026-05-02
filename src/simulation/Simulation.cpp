@@ -6,6 +6,7 @@
 #include "../debug/Logger.hpp"
 #include "../graphics/gui/Gui.hpp"
 #include "../input/InputHandler.hpp"
+#include "../input/pointerLock.hpp"
 #include "../input/boolInput/boolInput.hpp"
 #include "../input/mouseMove/mouseMove.hpp"
 #include "../intrinsics/actions/ChangeRotation.hpp"

@@ -1,54 +1,130 @@
 #pragma once
 #include <atomic>
+#include <chrono>
 #include <SDL3/SDL.h>
 
-#include "Action.hpp"
-#include "types.hpp"
+#include "../debug/Logger.hpp"
+#include "../settings/Settings.hpp"
+#include "../util/concurrentQueue.hpp"
+#include "boolInput/boolInput.hpp"
+#include "config.hpp"
+#include "gamepad/gamepad.hpp"
+#include "inputPipeline.hpp"
+#include "mouseMove/mouseMove.hpp"
+#include "scroll/scroll.hpp"
+#include "stick/stick.hpp"
 
 namespace InputHandler {
+    typedef int16_t i16;
     typedef uint64_t u64;
-    using std::atomic;
+    using std::atomic, std::chrono::milliseconds, Util::SPSCQueue;
 
-    //todo: Eliminate these and design a better system.
-    extern atomic<bool> sendToImGui, sendToSimulation;
-
-    inline constexpr u64 MAXIMUM_INPUT_EVENTS_PER_FRAME = 64;
-
-    namespace internal {
-        //This function is now single-threaded. There is really no point for it to be atomic provided that separate input kinds cannot add inputs concurrently within itself, and coordinating mods to add *different kinds* of inputs concurrently will probably bring more overhead.
-        [[nodiscard]] ActionID getNextId() noexcept;
-        void unregisterId(ActionID id) noexcept;
-        void registerId(ActionID id, ActionLocation al) noexcept;
-
-        inline constexpr const char* NULLPTR_ERROR = "[InputHandler] Unexpected nullptr encountered!";
-        #define ASSERT_NOT_NULLPTR(ptr, ret) \
-        if ((ptr) == nullptr) { \
-            lerr << InputHandler::internal::NULLPTR_ERROR << endl; \
-            return ret; \
-        }
-
-        #define ASSERT_CAN_DELETE(id, ret) \
-        if (!InputHandler::getCanDelete()) { \
-            lerr << "[InputHandler] Deletion attempted while deletion is not allowed. ActionID: " << id << endl; \
-            return ret; \
-        }
+    namespace detail {
+        //todo: Eliminate these and design a better system.
+        inline atomic<bool> sendToImGui{true}, sendToSimulation{true};
     }
 
-    [[nodiscard]] bool getLocation(ActionID id, ActionLocation& result, InputKind expectedKind) noexcept;
+//#region: Lifecycle
 
-    void init() noexcept;
-    void shutdown() noexcept;
+    //threaded: Main Thread
+    inline void init() noexcept {
+        Gamepad::init();
+        const auto& settings = Settings::getSettings();
+        BoolInput::updateArguments(milliseconds(settings.input.repeatTapGap), milliseconds(settings.input.comboMinTTL));
+        Stick::updateArguments(settings.input.deadzones);
+        //todo: query settings for bindings.
+    }
 
-    [[nodiscard]] bool getCanDelete() noexcept;
-    void setCanDelete(bool canDelete) noexcept;
+    //threaded: Main Thread
+    inline void shutdown() noexcept { Gamepad::shutdown(); }
 
-    [[nodiscard]] bool getPointerLocked() noexcept;
-    void setPointerLocked(bool locked) noexcept;
+//#endregion
 
-    //threaded: Main thread
-    void submitEvent(const SDL_Event& event) noexcept;
+//#region: Input Processing
 
     //threaded: Simulation thread
-    void processTrigger() noexcept;
-    void processPersist() noexcept;
+    //Router for different event types.
+    inline void processTrigger() noexcept {
+        FramedSDLEvents events;
+        FramedImGuiFlags flags;
+        u64 i = 0;
+        
+        for (; i < MAXIMUM_INPUT_EVENTS_PER_FRAME; i++) {
+            if (!inputQueue_M2S.dequeue(events)) break;
+            
+            switch(event.type) {
+            //Device events
+                case SDL_EVENT_GAMEPAD_ADDED:
+                case SDL_EVENT_JOYSTICK_BATTERY_UPDATED:
+                    Gamepad::processDevice(event);
+                    break;
+                case SDL_EVENT_GAMEPAD_REMOVED:
+                    Gamepad::processDevice(event);
+                    Stick::processDevice(event);
+                    [[fallthrough]];
+                case SDL_EVENT_KEYBOARD_REMOVED:
+                case SDL_EVENT_MOUSE_REMOVED:
+                    BoolInput::processDevice(event);
+                    break;
+            //Input events
+                case SDL_EVENT_KEY_DOWN:
+                case SDL_EVENT_KEY_UP:
+                case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                case SDL_EVENT_MOUSE_BUTTON_UP:
+                case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+                case SDL_EVENT_GAMEPAD_BUTTON_UP:
+                    BoolInput::processTrigger(event);
+                    break;
+                case SDL_EVENT_MOUSE_MOTION:
+                    MouseMove::processTrigger(event);
+                    break;
+                case SDL_EVENT_MOUSE_WHEEL:
+                    Scroll::processTrigger(event);
+                    break;
+                case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+                    Stick::processTrigger(event);
+                    break;
+                case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
+                case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
+                case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
+                #if CG_DEBUG
+                    lout << "Gamepad touch is not supported yet!" << endl;
+                #endif
+                    break;
+                case SDL_EVENT_FINGER_DOWN:
+                case SDL_EVENT_FINGER_UP:
+                case SDL_EVENT_FINGER_CANCELED:
+                case SDL_EVENT_FINGER_MOTION:
+                #if CG_DEBUG
+                    lout << "Touch is not supported yet!" << endl;
+                #endif
+                    break;
+                case SDL_EVENT_PEN_DOWN:
+                case SDL_EVENT_PEN_UP:
+                case SDL_EVENT_PEN_MOTION:
+                case SDL_EVENT_PEN_AXIS:
+                #if CG_DEBUG
+                    lout << "Pen is not supported yet!" << endl;
+                #endif
+                    break;
+                default:
+                #if CG_DEBUG
+                    lout << "Got this event type, fyi: " << event.type << endl;
+                #endif
+                    break;
+            }
+        }
+    #if CG_DEBUG
+        if (i == MAXIMUM_INPUT_EVENTS_PER_FRAME) lout << "[InputHandler] Maximum events per frame reached: " << MAXIMUM_INPUT_EVENTS_PER_FRAME << endl;
+    #endif
+    }
+
+    //threaded: Simulation thread
+    inline void processPersist() noexcept {
+        BoolInput::processPersist();
+        MouseMove::processPersist();
+        Stick::processPersist();
+    }
+
+//#endregion
 }
