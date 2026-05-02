@@ -324,10 +324,8 @@ add_subdirectory("libs/sdl_image")
 
 #------------Dep:Internal----------
 set(CGNBT_HAS_BOOST  ON CACHE BOOL "")
-set(CGNBT_HAS_PHYSFS ON CACHE BOOL "")
 set(CGNBT_HAS_ZSTD   ON CACHE BOOL "")
 set(CGNBT_BOOST_DIRECTORY  "${CMAKE_SOURCE_DIR}/libs/boost"  CACHE STRING "")
-set(CGNBT_PHYSFS_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/physfs" CACHE STRING "")
 set(CGNBT_ZSTD_DIRECTORY   "${CMAKE_SOURCE_DIR}/libs/zstd"   CACHE STRING "")
 set(CGNBT_BUILD_TESTS OFF CACHE BOOL "")
 add_subdirectory("libs/cgnbt")
