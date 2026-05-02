@@ -19,6 +19,7 @@ namespace InputHandler::Stick {
     typedef uint8_t u8;
     typedef int16_t i16;
     typedef uint32_t u32;
+    typedef uint64_t u64;
     using std::atomic, std::sqrt, std::clamp, std::array, std::to_underlying, std::numeric_limits, std::pair, std::vector, Util::SlotTable, InputHandler::internal::ActionLocation, InputHandler::internal::getLocation, InputHandler::internal::getNextId, InputHandler::internal::registerId, InputHandler::internal::unregisterId, InputHandler::utils::readSnapshot, InputHandler::utils::writeSnapshot, InputHandler::utils::process;
 
     //[LeftStickK, LeftStickB, RightStickK, RightStickB, LeftTriggerK, LeftTriggerB, RightTriggerK, RightTriggerB]

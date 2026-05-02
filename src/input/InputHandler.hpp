@@ -1,5 +1,4 @@
 #pragma once
-#include <atomic>
 #include <chrono>
 #include <SDL3/SDL.h>
 
@@ -17,12 +16,7 @@
 namespace InputHandler {
     typedef int16_t i16;
     typedef uint64_t u64;
-    using std::atomic, std::chrono::milliseconds, Util::SPSCQueue;
-
-    namespace detail {
-        //todo: Eliminate these and design a better system.
-        inline atomic<bool> sendToImGui{true}, sendToSimulation{true};
-    }
+    using std::chrono::milliseconds, Util::SPSCQueue;
 
 //#region: Lifecycle
 
@@ -42,76 +36,90 @@ namespace InputHandler {
 
 //#region: Input Processing
 
+    namespace detail {
+        inline FramedImGuiFlags cachedFlags{};
+    }
+
     //threaded: Simulation thread
     //Router for different event types.
     inline void processTrigger() noexcept {
         FramedSDLEvents events;
-        FramedImGuiFlags flags;
+        {
+            FramedImGuiFlags flags;
+            while (flagQueue_R2S.dequeue(flags)) detail::cachedFlags = flags;
+        }
+        const bool blockMouse = detail::cachedFlags.wantCaptureMouse;
+        const bool blockKeyboard = detail::cachedFlags.wantCaptureKeyboard;
         u64 i = 0;
-        
         for (; i < MAXIMUM_INPUT_EVENTS_PER_FRAME; i++) {
             if (!inputQueue_M2S.dequeue(events)) break;
-            
-            switch(event.type) {
-            //Device events
-                case SDL_EVENT_GAMEPAD_ADDED:
-                case SDL_EVENT_JOYSTICK_BATTERY_UPDATED:
-                    Gamepad::processDevice(event);
-                    break;
-                case SDL_EVENT_GAMEPAD_REMOVED:
-                    Gamepad::processDevice(event);
-                    Stick::processDevice(event);
-                    [[fallthrough]];
-                case SDL_EVENT_KEYBOARD_REMOVED:
-                case SDL_EVENT_MOUSE_REMOVED:
-                    BoolInput::processDevice(event);
-                    break;
-            //Input events
-                case SDL_EVENT_KEY_DOWN:
-                case SDL_EVENT_KEY_UP:
-                case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                case SDL_EVENT_MOUSE_BUTTON_UP:
-                case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
-                case SDL_EVENT_GAMEPAD_BUTTON_UP:
-                    BoolInput::processTrigger(event);
-                    break;
-                case SDL_EVENT_MOUSE_MOTION:
-                    MouseMove::processTrigger(event);
-                    break;
-                case SDL_EVENT_MOUSE_WHEEL:
-                    Scroll::processTrigger(event);
-                    break;
-                case SDL_EVENT_GAMEPAD_AXIS_MOTION:
-                    Stick::processTrigger(event);
-                    break;
-                case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
-                case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
-                case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
-                #if CG_DEBUG
-                    lout << "Gamepad touch is not supported yet!" << endl;
-                #endif
-                    break;
-                case SDL_EVENT_FINGER_DOWN:
-                case SDL_EVENT_FINGER_UP:
-                case SDL_EVENT_FINGER_CANCELED:
-                case SDL_EVENT_FINGER_MOTION:
-                #if CG_DEBUG
-                    lout << "Touch is not supported yet!" << endl;
-                #endif
-                    break;
-                case SDL_EVENT_PEN_DOWN:
-                case SDL_EVENT_PEN_UP:
-                case SDL_EVENT_PEN_MOTION:
-                case SDL_EVENT_PEN_AXIS:
-                #if CG_DEBUG
-                    lout << "Pen is not supported yet!" << endl;
-                #endif
-                    break;
-                default:
-                #if CG_DEBUG
-                    lout << "Got this event type, fyi: " << event.type << endl;
-                #endif
-                    break;
+            for (u64 j = 0; j < events.actualSize; j++) {
+                const SDL_Event& event = events.events[j];
+                switch (event.type) {
+                //Device events
+                    case SDL_EVENT_GAMEPAD_ADDED:
+                    case SDL_EVENT_JOYSTICK_BATTERY_UPDATED:
+                        Gamepad::processDevice(event);
+                        break;
+                    case SDL_EVENT_GAMEPAD_REMOVED:
+                        Gamepad::processDevice(event);
+                        Stick::processDevice(event);
+                        [[fallthrough]];
+                    case SDL_EVENT_KEYBOARD_REMOVED:
+                    case SDL_EVENT_MOUSE_REMOVED:
+                        BoolInput::processDevice(event);
+                        break;
+                //Input events
+                    case SDL_EVENT_KEY_DOWN:
+                    case SDL_EVENT_KEY_UP:
+                        if (!blockKeyboard) BoolInput::processTrigger(event);
+                        break;
+                    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                    case SDL_EVENT_MOUSE_BUTTON_UP:
+                        if (!blockMouse) BoolInput::processTrigger(event);
+                        break;
+                    case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+                    case SDL_EVENT_GAMEPAD_BUTTON_UP:
+                        BoolInput::processTrigger(event);
+                        break;
+                    case SDL_EVENT_MOUSE_MOTION:
+                        if (!blockMouse) MouseMove::processTrigger(event);
+                        break;
+                    case SDL_EVENT_MOUSE_WHEEL:
+                        if (!blockMouse) Scroll::processTrigger(event);
+                        break;
+                    case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+                        Stick::processTrigger(event);
+                        break;
+                    case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
+                    case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
+                    case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
+                    #if CG_DEBUG
+                        lout << "Gamepad touch is not supported yet!" << endl;
+                    #endif
+                        break;
+                    case SDL_EVENT_FINGER_DOWN:
+                    case SDL_EVENT_FINGER_UP:
+                    case SDL_EVENT_FINGER_CANCELED:
+                    case SDL_EVENT_FINGER_MOTION:
+                    #if CG_DEBUG
+                        lout << "Touch is not supported yet!" << endl;
+                    #endif
+                        break;
+                    case SDL_EVENT_PEN_DOWN:
+                    case SDL_EVENT_PEN_UP:
+                    case SDL_EVENT_PEN_MOTION:
+                    case SDL_EVENT_PEN_AXIS:
+                    #if CG_DEBUG
+                        lout << "Pen is not supported yet!" << endl;
+                    #endif
+                        break;
+                    default:
+                    #if CG_DEBUG
+                        lout << "Got this event type, fyi: " << event.type << endl;
+                    #endif
+                        break;
+                }
             }
         }
     #if CG_DEBUG

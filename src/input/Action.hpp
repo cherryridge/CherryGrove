@@ -15,7 +15,7 @@ namespace InputHandler {
     struct Action;
 
     template <typename ActionwiseInfo, typename EventwiseInfo>
-    using ActionCallback = function_view<void(const SlotTable<Action<ActionwiseInfo, EventwiseInfo>, ActionHandle>& actionInfos, ActionHandle handle, const EventwiseInfo& eventwiseInfo, EventControlFlags& flags)>;
+    using ActionCallback = function_view<void(const SlotTable<Action<ActionwiseInfo, EventwiseInfo>, ActionHandle>& actionInfos, ActionHandle handle, const EventwiseInfo& eventwiseInfo, EventControlFlags& flags) const>;
 
     template <typename ActionwiseInfo, typename EventwiseInfo>
     struct Action {
