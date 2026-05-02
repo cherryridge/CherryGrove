@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include <function2/function2.hpp>
 
 #include "../debug/Logger.hpp"
@@ -7,7 +6,7 @@
 #include "types.hpp"
 
 namespace InputHandler {
-    using std::vector, fu2::function_view, Util::SlotTable, Util::GenerationalHandle;
+    using fu2::function_view, Util::SlotTable, Util::GenerationalHandle;
 
     MAKE_DISTINCT_HANDLE(ActionHandle)
 

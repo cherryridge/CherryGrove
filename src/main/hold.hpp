@@ -15,25 +15,22 @@
 
 namespace Main {
     typedef uint64_t u64;
-    using std::memory_order_relaxed, std::memory_order_acquire, std::chrono::high_resolution_clock, std::chrono::microseconds, std::chrono::time_point, std::chrono::duration_cast, fu2::function_view, Util::MPSCQueue, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
+    using std::memory_order_relaxed, std::memory_order_acquire, std::chrono::high_resolution_clock, std::chrono::microseconds, std::chrono::milliseconds, std::chrono::time_point, std::chrono::duration_cast, fu2::function_view, Util::MPSCQueue, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
 
     inline MPSCQueue<function_view<void()>> runOnMainThread;
 
     //threaded: Main loop.
     inline void hold() noexcept {
         const u64 maxTasks = Settings::getSettings().debug.maxMainThreadTasksPerFrame;
-        const microseconds
-            maxLoopTime = microseconds(Settings::getSettings().debug.maxMainThreadLoopTimeUs),
-            maxRenderWaitTime = microseconds(Settings::getSettings().debug.maxMainThreadRenderWaitTimeUs);
+        const microseconds maxTaskTime = microseconds(Settings::getSettings().debug.maxMainThreadTaskTimeUs);
+        const milliseconds maxRenderWaitTime = milliseconds(Settings::getSettings().debug.maxMainThreadRenderWaitTimeMs);
 
-        time_point<high_resolution_clock> loopStartTime;
+        time_point<high_resolution_clock> taskStartTime;
         SDL_Event event;
         InputHandler::FramedSDLEvents frame;
         function_view<void()> task;
 
         while (GlobalState::isCGAlive()) {
-            loopStartTime = high_resolution_clock::now();
-            
         //Check for focus messages
             Boot::Focus::tryReceive();
 
@@ -56,13 +53,13 @@ namespace Main {
 
         //Render bgfx frame.
             bgfx::renderFrame(maxRenderWaitTime.count());
-
-        #if CG_DEBUG
-            if (high_resolution_clock::now() - loopStartTime > maxLoopTime) lout << "Can't keep up! Input section run for " << duration_cast<microseconds>(high_resolution_clock::now() - loopStartTime).count() << "us while set maximum loop time is " << duration_cast<microseconds>(maxLoopTime).count() << "us" << endl;
-        #endif
-
+    
         //Drain `runOnMainThread` MPSCQueue
-            for (u64 i = 0; i < maxTasks && high_resolution_clock::now() - loopStartTime < maxLoopTime; i++) if (runOnMainThread.dequeue(task)) task();
+            taskStartTime = high_resolution_clock::now();
+            for (u64 i = 0; i < maxTasks && high_resolution_clock::now() - taskStartTime < maxTaskTime; i++) if (runOnMainThread.dequeue(task)) task();
+        #if CG_DEBUG
+            if (high_resolution_clock::now() - taskStartTime > maxTaskTime) lout << "Can't keep up! Main thread task list run for " << duration_cast<microseconds>(high_resolution_clock::now() - taskStartTime).count() << " / " << duration_cast<microseconds>(maxTaskTime).count() << "us" << endl;
+        #endif
         }
         stop: shutdown();
     }

@@ -14,7 +14,6 @@
 #include "stick/stick.hpp"
 
 namespace InputHandler {
-    typedef int16_t i16;
     typedef uint64_t u64;
     using std::chrono::milliseconds, Util::SPSCQueue;
 
