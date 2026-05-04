@@ -2,11 +2,6 @@ name: Release (Linux)
 
 on:
   workflow_call:
-    inputs:
-      branch:
-        type: string
-        default: stable
-        description: The branch to build from
 
 permissions:
   contents: read
@@ -16,7 +11,7 @@ jobs:
     name: Build Release (Linux ${{matrix.arch}})
     runs-on: ${{matrix.runner}}
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
     strategy:
       fail-fast: false
       matrix:
