@@ -69,8 +69,10 @@ namespace Main {
         Sound::init();
 
         {//Debug: Play a.ogg
-            auto handle = Sound::addSound("tests/a.ogg", true, true, 1.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
-            static_cast<void>(Sound::play(handle, {0.0, 0.0, 0.0}));
+            Util::Promise<Sound::SoundHandle> p;
+            Sound::addSound(&p, "tests/a.ogg", true, true, 1.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
+            const auto handle = p.wait();
+            Sound::play(nullptr, handle, {0.0, 0.0, 0.0});
         }
 
         lout << "Initializing graphics..." << endl;

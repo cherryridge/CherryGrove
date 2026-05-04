@@ -25,17 +25,17 @@ namespace Gui::MainMenu {
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 30.0f));
             ImVec2 btnSize(240.0f, 80.0f);
             Gui::Util::centerButton("存档", btnSize, []() noexcept {
-                static_cast<void>(Sound::play(Gui::click, Sound::DUMMY_COORD_2D));
+                static_cast<void>(Sound::play(nullptr, Gui::click, Sound::DUMMY_COORD_2D));
                 Simulation::start();
             });
             Gui::Util::centerButton("内容包", btnSize, []() noexcept {
-                static_cast<void>(Sound::play(Gui::click, Sound::DUMMY_COORD_2D));
+                static_cast<void>(Sound::play(nullptr, Gui::click, Sound::DUMMY_COORD_2D));
             });
             Gui::Util::centerButton("设置", btnSize, []() noexcept {
-                static_cast<void>(Sound::play(Gui::click, Sound::DUMMY_COORD_2D));
+                static_cast<void>(Sound::play(nullptr, Gui::click, Sound::DUMMY_COORD_2D));
             });
             Gui::Util::centerButton("退出", btnSize, []() noexcept {
-                static_cast<void>(Sound::play(Gui::click, Sound::DUMMY_COORD_2D));
+                static_cast<void>(Sound::play(nullptr, Gui::click, Sound::DUMMY_COORD_2D));
                 GlobalState::setIsCGAlive(false);
             });
             ImGui::PopStyleVar();
