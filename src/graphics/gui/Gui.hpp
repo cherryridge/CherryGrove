@@ -13,7 +13,7 @@
 #include "../../intrinsics/guis/DebugMenu.hpp"
 #include "../../intrinsics/guis/MainMenu.hpp"
 #include "../../intrinsics/guis/Version.hpp"
-#include "../../sound/Sound.hpp"
+#include "../../sound/API.hpp"
 #include "../../util/Promise.hpp"
 #include "../../window.hpp"
 #include "../backend/imgui_impl_bgfx.hpp"

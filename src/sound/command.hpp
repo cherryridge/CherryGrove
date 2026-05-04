@@ -1,18 +1,15 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <soloud/soloud_wav.h>
-#include <soloud/soloud_wavstream.h>
 
 #include "../intrinsics/components/Coordinates.hpp"
 #include "../intrinsics/components/Rotation.hpp"
 #include "../intrinsics/components/Velocity.hpp"
 #include "../util/Promise.hpp"
-#include "enums.hpp"
 #include "types.hpp"
 
-namespace Sound {
+namespace Sound::detail {
     typedef uint32_t u32;
-    using std::move, glm::vec3, SoLoud::Wav, SoLoud::WavStream, Util::Promise;
+    using std::move, glm::vec3, Util::Promise, Components::EntityCoordinates, Components::Rotation, Components::Velocity;
 
     //todo: Actually use the `fastPlay` parameter: Obviously it's not being used yet.
     //This flag is provided for high performance small sounds that need to be played with minimal latency, such as UI sound effects.
@@ -25,19 +22,11 @@ namespace Sound {
         float volume, maxDistance, minDistance, dopplerFactor, rolloff;
         Promise<SoundHandle>* promise;
         bool soundSpeedDelay, fastPlay;
-
-        AddSource(const char* filePath, bool isStream, bool is2D, Attenuation attn, InaudibleBehavior iabh, float volume, float maxDistance, float minDistance, float dopplerFactor, float rolloff, Promise<SoundHandle>* promise, bool soundSpeedDelay, bool fastPlay) noexcept : filePath(filePath), isStream(isStream), is2D(is2D), attn(attn), iabh(iabh), volume(volume), maxDistance(maxDistance), minDistance(minDistance), dopplerFactor(dopplerFactor), rolloff(rolloff), promise(promise), soundSpeedDelay(soundSpeedDelay), fastPlay(fastPlay) {}
-        AddSource(const AddSource&) noexcept = default;
-        ~AddSource() = default;
     };
 
     struct DeleteSource {
         SoundHandle h;
         Promise<bool>* promise;
-
-        DeleteSource(SoundHandle h, Promise<bool>* promise) noexcept : h(h), promise(promise) {}
-        DeleteSource(const DeleteSource&) noexcept = default;
-        ~DeleteSource() = default;
     };
 
     struct Play {
@@ -46,82 +35,46 @@ namespace Sound {
         float iniProgress, pitch, playSpeed;
         u32 playCount;
         Promise<PlayHandle>* promise;
-
-        Play(SoundHandle soundHandle, const Components::EntityCoordinates& position, const Components::Velocity& velocity, float iniProgress, float pitch, float playSpeed, Promise<PlayHandle>* promise, u32 playCount) noexcept : soundHandle(soundHandle), position(position.x, position.y, position.z), velocity(velocity.dx, velocity.dy, velocity.dz), iniProgress(iniProgress), pitch(pitch), playSpeed(playSpeed), playCount(playCount), promise(promise) {}
-        Play(const Play&) noexcept = default;
-        ~Play() = default;
     };
 
     struct Pause {
         PlayHandle h;
         Promise<bool>* promise;
-
-        Pause(PlayHandle h, Promise<bool>* promise) noexcept : h(h), promise(promise) {}
-        Pause(const Pause&) noexcept = default;
-        ~Pause() = default;
     };
 
     struct Resume {
         PlayHandle h;
         Promise<bool>* promise;
         float progress;
-
-        Resume(PlayHandle h, Promise<bool>* promise, float progress) noexcept : h(h), promise(promise), progress(progress) {}
-        Resume(const Resume&) noexcept = default;
-        ~Resume() = default;
     };
 
     struct Stop {
         PlayHandle h;
         Promise<bool>* promise;
-
-        Stop(PlayHandle h, Promise<bool>* promise) noexcept : h(h), promise(promise) {}
-        Stop(const Stop&) noexcept = default;
-        ~Stop() = default;
     };
 
     struct GlobalPosition {
-        Components::EntityCoordinates position;
-
-        GlobalPosition(const Components::EntityCoordinates& position) noexcept : position(position) {}
-        GlobalPosition(const GlobalPosition&) noexcept = default;
-        ~GlobalPosition() = default;
+        EntityCoordinates position;
     };
 
     struct GlobalRotation {
-        Components::Rotation rotation;
-
-        GlobalRotation(const Components::Rotation& rotation) noexcept : rotation(rotation) {}
-        GlobalRotation(const GlobalRotation&) noexcept = default;
-        ~GlobalRotation() = default;
+        Rotation rotation;
     };
 
     struct GlobalVelocity {
-        Components::Velocity velocity;
-
-        GlobalVelocity(const Components::Velocity& velocity) noexcept : velocity(velocity) {}
-        GlobalVelocity(const GlobalVelocity&) noexcept = default;
-        ~GlobalVelocity() = default;
+        Velocity velocity;
     };
 
     struct SourcePosition {
         PlayHandle h;
-        Components::EntityCoordinates position;
+        EntityCoordinates position;
         Promise<bool>* promise;
-
-        SourcePosition(PlayHandle h, const Components::EntityCoordinates& position, Promise<bool>* promise) noexcept : h(h), position(position), promise(promise) {}
-        SourcePosition(const SourcePosition&) noexcept = default;
-        ~SourcePosition() = default;
     };
 
     struct SourceVelocity {
         PlayHandle h;
-        Components::Velocity velocity;
+        Velocity velocity;
         Promise<bool>* promise;
-
-        SourceVelocity(PlayHandle h, const Components::Velocity& velocity, Promise<bool>* promise) noexcept : h(h), velocity(velocity), promise(promise) {}
-        SourceVelocity(const SourceVelocity&) noexcept = default;
-        ~SourceVelocity() = default;
     };
 
     struct Command {
@@ -172,8 +125,8 @@ namespace Sound {
 
         [[nodiscard]] Command(float payload) noexcept : type(Type::UpdateSoundSpeed) { new (&updateSoundSpeed) float (payload); }
 
-        Command& operator=(const Command& copymove) noexcept {
-            if (this == &copymove) goto same;
+        Command& operator=(const Command& other) noexcept {
+            if (this == &other) goto same;
             switch (type) {
                 case Type::AddSource:        addSource.~AddSource();           break;
                 case Type::DeleteSource:     deleteSource.~DeleteSource();     break;
@@ -189,21 +142,21 @@ namespace Sound {
                 case Type::SourceVelocity:   sourceVelocity.~SourceVelocity(); break;
                 default:                                                       break;
             }
-            type = copymove.type;
+            type = other.type;
             switch (type) {
-                case Type::AddSource:        new (&addSource)        AddSource      (copymove.addSource);        break;
-                case Type::DeleteSource:     new (&deleteSource)     DeleteSource   (copymove.deleteSource);     break;
-                case Type::Play:             new (&play)             Play           (copymove.play);             break;
-                case Type::Pause:            new (&pause)            Pause          (copymove.pause);            break;
-                case Type::Resume:           new (&resume)           Resume         (copymove.resume);           break;
-                case Type::Stop:             new (&stop)             Stop           (copymove.stop);             break;
-                case Type::GlobalPosition:   new (&globalPosition)   GlobalPosition (copymove.globalPosition);   break;
-                case Type::GlobalRotation:   new (&globalRotation)   GlobalRotation (copymove.globalRotation);   break;
-                case Type::GlobalVelocity:   new (&globalVelocity)   GlobalVelocity (copymove.globalVelocity);   break;
-                case Type::UpdateSoundSpeed: new (&updateSoundSpeed) float          (copymove.updateSoundSpeed); break;
-                case Type::SourcePosition:   new (&sourcePosition)   SourcePosition (copymove.sourcePosition);   break;
-                case Type::SourceVelocity:   new (&sourceVelocity)   SourceVelocity (copymove.sourceVelocity);   break;
-                default:                                                                                         break;
+                case Type::AddSource:        new (&addSource)        AddSource      (other.addSource);        break;
+                case Type::DeleteSource:     new (&deleteSource)     DeleteSource   (other.deleteSource);     break;
+                case Type::Play:             new (&play)             Play           (other.play);             break;
+                case Type::Pause:            new (&pause)            Pause          (other.pause);            break;
+                case Type::Resume:           new (&resume)           Resume         (other.resume);           break;
+                case Type::Stop:             new (&stop)             Stop           (other.stop);             break;
+                case Type::GlobalPosition:   new (&globalPosition)   GlobalPosition (other.globalPosition);   break;
+                case Type::GlobalRotation:   new (&globalRotation)   GlobalRotation (other.globalRotation);   break;
+                case Type::GlobalVelocity:   new (&globalVelocity)   GlobalVelocity (other.globalVelocity);   break;
+                case Type::UpdateSoundSpeed: new (&updateSoundSpeed) float          (other.updateSoundSpeed); break;
+                case Type::SourcePosition:   new (&sourcePosition)   SourcePosition (other.sourcePosition);   break;
+                case Type::SourceVelocity:   new (&sourceVelocity)   SourceVelocity (other.sourceVelocity);   break;
+                default:                                                                                      break;
             }
             same: return *this;
         }

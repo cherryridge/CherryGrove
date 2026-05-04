@@ -5,11 +5,11 @@
 #include <glm/glm.hpp>
 #include <soloud/soloud.h>
 
-#include "externs/soundRegistry.hpp"
+#include "soundRegistry.hpp"
 #include "SoundSource.hpp"
 #include "types.hpp"
 
-namespace Sound {
+namespace Sound::detail {
     typedef uint32_t u32;
     using std::shared_ptr, glm::vec3, SoLoud::handle, std::numeric_limits, std::clamp;
 

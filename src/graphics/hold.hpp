@@ -8,7 +8,7 @@
 //vertexBuffer = createVertexBuffer(bgfx::makeRef(&blockVerticesTemplate, sizeof(blockVerticesTemplate)), layout);
 //indexBuffer = createIndexBuffer(bgfx::makeRef(&blockIndicesTemplate, sizeof(blockIndicesTemplate)));
 
-namespace Graphics {
+namespace Graphics::detail {
     inline void hold() noexcept {
         while (GlobalState::isCGAlive()) {
             Renderer::prepareForFrame();

@@ -6,7 +6,7 @@
 #include "../graphics/controller.hpp"
 #include "../input/InputHandler.hpp"
 #include "../simulation/Simulation.hpp"
-#include "../sound/Sound.hpp"
+#include "../sound/controller.hpp"
 #include "../window.hpp"
 
 namespace Main {

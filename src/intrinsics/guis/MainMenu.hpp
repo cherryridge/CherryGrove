@@ -2,11 +2,11 @@
 #include <string_view>
 #include <imgui.h>
 
-#include "../../simulation/Simulation.hpp"
-#include "../../sound/Sound.hpp"
 #include "../../globalState.hpp"
 #include "../../graphics/gui/click.hpp"
 #include "../../graphics/gui/util.hpp"
+#include "../../simulation/Simulation.hpp"
+#include "../../sound/API.hpp"
 
 namespace Gui::MainMenu {
     using std::string_view;

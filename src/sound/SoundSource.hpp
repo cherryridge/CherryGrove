@@ -3,10 +3,10 @@
 #include <soloud/soloud_wavstream.h>
 
 #include "../debug/Logger.hpp"
-#include "enums.hpp"
-#include "externs/soLoudInstance.hpp"
+#include "soLoudInstance.hpp"
+#include "types.hpp"
 
-namespace Sound {
+namespace Sound::detail {
     typedef uint32_t u32;
     using std::move, SoLoud::Wav, SoLoud::WavStream, SoLoud::SO_NO_ERROR;
 
