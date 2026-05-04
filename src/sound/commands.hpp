@@ -37,7 +37,7 @@ namespace Sound {
         SoundHandle h;
         bool& success;
         atomic<bool>& finished;
-        
+
         DeleteSource(SoundHandle h, bool& success, atomic<bool>& finished) noexcept : h(h), success(success), finished(finished) {}
         DeleteSource(const DeleteSource&) noexcept = default;
         ~DeleteSource() = default;
