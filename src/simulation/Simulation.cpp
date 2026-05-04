@@ -20,7 +20,7 @@
 
 namespace Simulation {
     typedef uint64_t u64;
-    using std::atomic, std::memory_order_acquire, std::memory_order_release, std::thread, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::BoolInputKind, InputHandler::MouseMove::SubKind, Util::BitField;
+    using std::atomic, std::memory_order_acquire, std::memory_order_release, std::thread, std::chrono::steady_clock, std::chrono::duration_cast, std::chrono::microseconds, InputHandler::BoolInput::BoolInputKind, InputHandler::MouseMove::SubKind;
     using namespace std::chrono_literals;
     static void gameLoop() noexcept;
     static void tick() noexcept;
@@ -42,13 +42,13 @@ namespace Simulation {
         Gui::setVisibility(Gui::Intrinsics::Version, false);
 
         Main::runOnMainThread.enqueue([]() noexcept {
-            forward = InputHandler::BoolInput::add(IntrinsicInput::forward, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
-            backward = InputHandler::BoolInput::add(IntrinsicInput::backward, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
-            left = InputHandler::BoolInput::add(IntrinsicInput::left, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
-            right = InputHandler::BoolInput::add(IntrinsicInput::right, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
-            up = InputHandler::BoolInput::add(IntrinsicInput::up, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
-            down = InputHandler::BoolInput::add(IntrinsicInput::down, 10, {BitField<BoolInputKind, BoolInputKind::Count>(BoolInputKind::Persist)});
-            moveCamera = InputHandler::MouseMove::add(IntrinsicInput::changeRotationCB, 10, {BitField<SubKind, SubKind::Count>(SubKind::Persist)});
+            forward = InputHandler::BoolInput::add(IntrinsicInput::forward, 10, {BoolInputKind::Persist});
+            backward = InputHandler::BoolInput::add(IntrinsicInput::backward, 10, {BoolInputKind::Persist});
+            left = InputHandler::BoolInput::add(IntrinsicInput::left, 10, {BoolInputKind::Persist});
+            right = InputHandler::BoolInput::add(IntrinsicInput::right, 10, {BoolInputKind::Persist});
+            up = InputHandler::BoolInput::add(IntrinsicInput::up, 10, {BoolInputKind::Persist});
+            down = InputHandler::BoolInput::add(IntrinsicInput::down, 10, {BoolInputKind::Persist});
+            moveCamera = InputHandler::MouseMove::add(IntrinsicInput::changeRotationCB, 10, {SubKind::Persist});
             InputHandler::setPointerLocked(true);
         });
 
@@ -65,16 +65,16 @@ namespace Simulation {
 
     //threaded: Main thread
     void exit() noexcept {
-        //Reset flags
+    //Reset flags
         gameStarted.store(false, memory_order_release);
         gamePaused.store(false, memory_order_release);
 
-        //Clear resources
+    //Clear resources
         gameThread.join();
         registry.reset();
         playerEntity = flecs::entity();
 
-        //Clear input callbacks
+    //Clear input callbacks
         Main::runOnMainThread.enqueue([]() noexcept {
             //fixme: Implement the `canDelete` mechanism properly.
             static_cast<void>(InputHandler::BoolInput::remove(forward));
@@ -87,7 +87,7 @@ namespace Simulation {
             InputHandler::setPointerLocked(false);
         });
 
-        //Go back to main menu
+    //Go back to main menu
         Gui::setVisibility(Gui::Intrinsics::DebugMenu, false);
         Gui::setVisibility(Gui::Intrinsics::MainMenu, true);
         Gui::setVisibility(Gui::Intrinsics::Copyright, true);

@@ -16,13 +16,12 @@
 #include "../sound/API.hpp"
 #include "../sound/controller.hpp"
 #include "../pack/Pack.hpp"
-#include "../util/BitField.hpp"
 #include "../util/os/filesystem.hpp"
 #include "../window.hpp"
 #include "hold.hpp"
 
 namespace Main {
-    using std::move, std::cout, std::endl, std::filesystem::current_path, Util::BitField, Util::OS::getU8String;
+    using std::move, std::cout, std::endl, std::filesystem::current_path, Util::OS::getU8String;
 
     inline Boot::SessionLock sessionLock;
 
@@ -90,9 +89,7 @@ namespace Main {
         Gui::setVisibility(Gui::Intrinsics::Version, true);
 
     //Set up intrinsic inputs
-        static_cast<void>(InputHandler::BoolInput::add(IntrinsicInput::escapeCB, 10, {
-            .allowedKinds = BitField<InputHandler::BoolInput::BoolInputKind, InputHandler::BoolInput::BoolInputKind::Count>(InputHandler::BoolInput::BoolInputKind::Down)
-        }));
+        static_cast<void>(InputHandler::BoolInput::add(IntrinsicInput::escapeCB, 10, {InputHandler::BoolInput::BoolInputKind::Down}));
 
         hold();
     }
