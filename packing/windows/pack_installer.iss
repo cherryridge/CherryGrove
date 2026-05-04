@@ -1,4 +1,4 @@
-﻿[Setup]
+[Setup]
 AppName=CherryGrove
 AppId=CherryGrove
 AppVersion=0.0.1
@@ -8,7 +8,7 @@ DefaultDirName={userappdata}\CherryGrove
 DefaultGroupName=CherryGrove
 AllowNoIcons=yes
 DisableProgramGroupPage=no
-OutputBaseFilename=CherryGrove_setup_windows_{#Arch}
+OutputBaseFilename=CherryGrove_windows_{#Arch}
 OutputDir=.
 SetupIconFile=..\..\assets\icons\CherryGrove-trs.ico
 UninstallDisplayIcon={app}\CherryGrove.exe
@@ -71,12 +71,10 @@ Source: "..\readmes\必读信息.txt"; DestDir: "{app}"; DestName: "必读信息
 ;end
 
 Source: "..\..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\..\tests\*"; DestDir: "{app}\tests"; Flags: ignoreversion recursesubdirs createallsubdirs
-
-[Dirs]
-Name: "{app}\captures"
-Name: "{app}\packs"
-Name: "{app}\saves"
+Source: "..\..\packs\*"; DestDir: "{app}\packs"; Flags: skipifsourcedoesntexist ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\saves\*"; DestDir: "{app}\saves"; Flags: skipifsourcedoesntexist ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\tests\*"; DestDir: "{app}\tests"; Flags: skipifsourcedoesntexist ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\settings.json"; DestDir: "{app}"; Flags: skipifsourcedoesntexist ignoreversion onlyifdoesntexist
 
 [Icons]
 ;Start Menu shortcut

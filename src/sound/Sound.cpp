@@ -1,4 +1,4 @@
-﻿#include <atomic>
+#include <atomic>
 #include <chrono>
 #include <memory>
 #include <thread>
@@ -36,12 +36,12 @@ namespace Sound {
 
     //threaded: Main Thread
     void init() noexcept {
-        audioThread = thread(&audioLoop);
+        audioThread = thread(audioLoop);
         while (!initialized.load(memory_order_acquire)) yield();
     }
     void shutdown() noexcept { audioThread.join(); }
 
-//Global State
+//Global state — fire-and-forget.
 
     void updateListenerPosition(const Components::EntityCoordinates& position) noexcept { commandQueue.enqueue(GlobalPosition(position)); }
     void updateListenerRotation(const Components::Rotation& rotation) noexcept { commandQueue.enqueue(GlobalRotation(rotation)); }
@@ -50,78 +50,38 @@ namespace Sound {
 
 //SoundSource
 
-    SoundHandle addSound(const char* filePath, bool isStream, bool is2D, float volume, float maxDistance, float minDistance, float dopplerFactor, Attenuation attn, InaudibleBehavior iabh, float rolloff, bool soundSpeedDelay, bool fastPlay) noexcept {
-        atomic<bool> finished{false};
-        SoundHandle result{GenerationalHandle(0)};
-        commandQueue.enqueue(AddSource(filePath, isStream, is2D, attn, iabh, volume, maxDistance, minDistance, dopplerFactor, rolloff, result, finished, soundSpeedDelay, fastPlay));
-        //todo: Implement an event/promise mechanism for every thread to send and receive messages instead of dead waiting for Audio Thread.
-        while (!finished.load(memory_order_acquire)) yield();
-        return result;
+    void addSound(Promise<SoundHandle>* promise, const char* filePath, bool isStream, bool is2D, float volume, float maxDistance, float minDistance, float dopplerFactor, Attenuation attn, InaudibleBehavior iabh, float rolloff, bool soundSpeedDelay, bool fastPlay) noexcept {
+        commandQueue.enqueue(AddSource(filePath, isStream, is2D, attn, iabh, volume, maxDistance, minDistance, dopplerFactor, rolloff, promise, soundSpeedDelay, fastPlay));
     }
 
-    bool deleteSound(SoundHandle handle) noexcept {
-        atomic<bool> finished{false};
-        bool success = false;
-        commandQueue.enqueue(DeleteSource(handle, success, finished));
-        //todo: Implement an event/promise mechanism for every thread to send and receive messages instead of dead waiting for Audio Thread.
-        while (!finished.load(memory_order_acquire)) yield();
-        return success;
+    void deleteSound(Promise<bool>* promise, SoundHandle handle) noexcept {
+        commandQueue.enqueue(DeleteSource(handle, promise));
     }
 
 //PlayInfo
 
-    PlayHandle play(SoundHandle soundHandle, const Components::EntityCoordinates& position, const Components::Velocity& velocity, u32 playCount, float iniProgress, float pitch, float playSpeed) noexcept {
-        atomic<bool> finished{false};
-        PlayHandle result{GenerationalHandle(0)};
-        commandQueue.enqueue(Play(soundHandle, position, velocity, iniProgress, pitch, playSpeed, result, finished, playCount));
-        //todo: Implement an event/promise mechanism for every thread to send and receive messages instead of dead waiting for Audio Thread.
-        while (!finished.load(memory_order_acquire)) yield();
-        return result;
+    void play(Promise<PlayHandle>* promise, SoundHandle soundHandle, const Components::EntityCoordinates& position, const Components::Velocity& velocity, u32 playCount, float iniProgress, float pitch, float playSpeed) noexcept {
+        commandQueue.enqueue(Play(soundHandle, position, velocity, iniProgress, pitch, playSpeed, promise, playCount));
     }
 
-    bool pause(PlayHandle handle) noexcept {
-        atomic<bool> finished{false};
-        bool success = false;
-        commandQueue.enqueue(Pause(handle, success, finished));
-        //todo: Implement an event/promise mechanism for every thread to send and receive messages instead of dead waiting for Audio Thread.
-        while (!finished.load(memory_order_acquire)) yield();
-        return success;
+    void pause(Promise<bool>* promise, PlayHandle handle) noexcept {
+        commandQueue.enqueue(Pause(handle, promise));
     }
 
-    bool resume(PlayHandle handle, float progress) noexcept {
-        atomic<bool> finished{false};
-        bool success = false;
-        commandQueue.enqueue(Resume(handle, success, finished, progress));
-        //todo: Implement an event/promise mechanism for every thread to send and receive messages instead of dead waiting for Audio Thread.
-        while (!finished.load(memory_order_acquire)) yield();
-        return success;
+    void resume(Promise<bool>* promise, PlayHandle handle, float progress) noexcept {
+        commandQueue.enqueue(Resume(handle, promise, progress));
     }
 
-    bool stop(PlayHandle handle) noexcept {
-        atomic<bool> finished{false};
-        bool success = false;
-        commandQueue.enqueue(Stop(handle, success, finished));
-        //todo: Implement an event/promise mechanism for every thread to send and receive messages instead of dead waiting for Audio Thread.
-        while (!finished.load(memory_order_acquire)) yield();
-        return success;
+    void stop(Promise<bool>* promise, PlayHandle handle) noexcept {
+        commandQueue.enqueue(Stop(handle, promise));
     }
 
-    bool updateSourcePosition(PlayHandle handle, const Components::EntityCoordinates& position) noexcept {
-        atomic<bool> finished{false};
-        bool success = false;
-        commandQueue.enqueue(SourcePosition(handle, position, success, finished));
-        //todo: Implement an event/promise mechanism for every thread to send and receive messages instead of dead waiting for Audio Thread.
-        while (!finished.load(memory_order_acquire)) yield();
-        return success;
+    void updateSourcePosition(Promise<bool>* promise, PlayHandle handle, const Components::EntityCoordinates& position) noexcept {
+        commandQueue.enqueue(SourcePosition(handle, position, promise));
     }
 
-    bool updateSourceVelocity(PlayHandle handle, const Components::Velocity& velocity) noexcept {
-        atomic<bool> finished{false};
-        bool success = false;
-        commandQueue.enqueue(SourceVelocity(handle, velocity, success, finished));
-        //todo: Implement an event/promise mechanism for every thread to send and receive messages instead of dead waiting for Audio Thread.
-        while (!finished.load(memory_order_acquire)) yield();
-        return success;
+    void updateSourceVelocity(Promise<bool>* promise, PlayHandle handle, const Components::Velocity& velocity) noexcept {
+        commandQueue.enqueue(SourceVelocity(handle, velocity, promise));
     }
 
 //Audio Thread
@@ -151,12 +111,13 @@ namespace Sound {
             if (++dequeueCounter <= MAX_DEQUEUE_PER_LOOP && commandQueue.dequeue(command)) switch (command.type) {
                 case Command::Type::AddSource: {
                     const auto& [handle, ptr] = soundRegistry.emplace(command.addSource.filePath, command.addSource.isStream, command.addSource.is2D, command.addSource.volume, command.addSource.maxDistance, command.addSource.minDistance, command.addSource.dopplerFactor, command.addSource.attn, command.addSource.iabh, command.addSource.rolloff, command.addSource.soundSpeedDelay, command.addSource.fastPlay);
-                    if (ptr->active) command.addSource.result = handle;
+                    SoundHandle result;
+                    if (ptr->active) result = handle;
                     else {
-                        command.addSource.result = SoundHandle{GenerationalHandle(0)};
+                        result = SoundHandle{GenerationalHandle(0)};
                         static_cast<void>(soundRegistry.destroy(handle));
                     }
-                    command.addSource.finished.store(true, memory_order_release);
+                    if (command.addSource.promise) command.addSource.promise->fulfill(result);
                     break;
                 }
                 //Why we don't stop and destroy every play that depends on this source:
@@ -165,39 +126,40 @@ namespace Sound {
                 //3. It's tricky to implement.
                 //4. Sounds are often short and one-shot except for BGM, so 99% of the time the mechanism will be useless.
                 case Command::Type::DeleteSource: {
-                    command.deleteSource.success = soundRegistry.destroy(command.deleteSource.h);
-                    command.deleteSource.finished.store(true, memory_order_release);
+                    const bool success = soundRegistry.destroy(command.deleteSource.h);
+                    if (command.deleteSource.promise) command.deleteSource.promise->fulfill(success);
                     break;
                 }
                 case Command::Type::Play: {
                     const auto& [handle, ptr] = playRegistry.emplace(command.play.soundHandle, command.play.position, command.play.velocity, command.play.playCount, command.play.pitch, command.play.playSpeed);
+                    PlayHandle result;
                     if (ptr->active && ptr->play()) {
-                        command.play.result = handle;
+                        result = handle;
                         if (command.play.playCount > 1) loopPlays.push_back(handle);
                     }
                     else {
-                        command.play.result = PlayHandle{GenerationalHandle(0)};
+                        result = PlayHandle{GenerationalHandle(0)};
                         static_cast<void>(playRegistry.destroy(handle));
                     }
-                    command.play.finished.store(true, memory_order_release);
+                    if (command.play.promise) command.play.promise->fulfill(result);
                     break;
                 }
                 case Command::Type::Pause: {
                     const auto ptr = playRegistry.getPtr(command.pause.h);
-                    command.pause.success = ptr && ptr->pause();
-                    command.pause.finished.store(true, memory_order_release);
+                    const bool success = ptr && ptr->pause();
+                    if (command.pause.promise) command.pause.promise->fulfill(success);
                     break;
                 }
                 case Command::Type::Resume: {
                     const auto ptr = playRegistry.getPtr(command.resume.h);
-                    command.resume.success = ptr && ptr->resume(command.resume.progress);
-                    command.resume.finished.store(true, memory_order_release);
+                    const bool success = ptr && ptr->resume(command.resume.progress);
+                    if (command.resume.promise) command.resume.promise->fulfill(success);
                     break;
                 }
                 case Command::Type::Stop: {
                     const auto ptr = playRegistry.getPtr(command.stop.h);
-                    command.stop.success = ptr && ptr->stop() && playRegistry.destroy(command.stop.h);
-                    command.stop.finished.store(true, memory_order_release);
+                    const bool success = ptr && ptr->stop() && playRegistry.destroy(command.stop.h);
+                    if (command.stop.promise) command.stop.promise->fulfill(success);
                     break;
                 }
                 case Command::Type::GlobalPosition: {
@@ -227,24 +189,24 @@ namespace Sound {
                 }
                 case Command::Type::SourcePosition: {
                     const auto ptr = playRegistry.getPtr(command.sourcePosition.h);
+                    bool success = false;
                     if (ptr && ptr->active && ptr->playActive()) {
                         soLoudInstance->set3dSourcePosition(ptr->instanceHandle, static_cast<float>(command.sourcePosition.position.x), static_cast<float>(command.sourcePosition.position.y), static_cast<float>(command.sourcePosition.position.z));
-                        command.sourcePosition.success = true;
+                        success = true;
                         shouldUpdate3D = true;
                     }
-                    else command.sourcePosition.success = false;
-                    command.sourcePosition.finished.store(true, memory_order_release);
+                    if (command.sourcePosition.promise) command.sourcePosition.promise->fulfill(success);
                     break;
                 }
                 case Command::Type::SourceVelocity: {
                     const auto ptr = playRegistry.getPtr(command.sourceVelocity.h);
+                    bool success = false;
                     if (ptr && ptr->active && ptr->playActive()) {
                         soLoudInstance->set3dSourceVelocity(ptr->instanceHandle, command.sourceVelocity.velocity.dx, command.sourceVelocity.velocity.dy, command.sourceVelocity.velocity.dz);
-                        command.sourceVelocity.success = true;
+                        success = true;
                         shouldUpdate3D = true;
                     }
-                    else command.sourceVelocity.success = false;
-                    command.sourceVelocity.finished.store(true, memory_order_release);
+                    if (command.sourceVelocity.promise) command.sourceVelocity.promise->fulfill(success);
                     break;
                 }
                 default: {

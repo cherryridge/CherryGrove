@@ -1,4 +1,4 @@
-﻿CompileFlags:
+CompileFlags:
   Add:
     - -xc++
     - -Xclang

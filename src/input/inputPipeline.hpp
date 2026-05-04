@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <array>
 #include <atomic>
 #include <memory>
@@ -6,7 +6,7 @@
 #include <SDL3/SDL.h>
 
 #include "../util/concurrentQueue.hpp"
-#include "InputHandler.hpp"
+#include "config.hpp"
 
 namespace InputHandler {
     typedef uint64_t u64;

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <array>
 #include <string_view>
 #include <vector>
@@ -194,8 +194,8 @@ namespace Settings {
         Logger::LoggingMode logging{Logger::LoggingMode::File};
         //I don't know if this is a good idea but let's just try and see.
         u32 maxMainThreadTasksPerFrame{128};
-        u32 maxMainThreadLoopTimeUs{2000};
-        u32 maxMainThreadRenderWaitTimeUs{500};
+        u32 maxMainThreadTaskTimeUs{2000};
+        u32 maxMainThreadRenderWaitTimeMs{1};
 
         struct glaze_json_schema {
             schema logging{
@@ -206,10 +206,10 @@ namespace Settings {
             schema maxMainThreadTasksPerFrame{
                 .defaultValue = 128
             };
-            schema maxMainThreadLoopTimeUs{
+            schema maxMainThreadTaskTimeUs{
                 .defaultValue = 1000
             };
-            schema maxMainThreadRenderWaitTimeUs{
+            schema maxMainThreadRenderWaitTimeMs{
                 .defaultValue = 1000
             };
         };

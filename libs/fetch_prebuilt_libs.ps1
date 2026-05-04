@@ -4,28 +4,65 @@
 #>
 
 param(
-    [string] $7zPath = '7z'
+    [string] $7zPath = '7z',
+    [string] $specifiesArch
 )
 
-$osArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::ProcessArchitecture
-if (-not $osArch) {
-    $osArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::OSArchitecture
+if ($specifiesArch) {
+    if ($specifiesArch -in @('x64', 'arm64')) {
+        $archTag = $specifiesArch
+    }
+    else {
+        throw "Invalid architecture specified: $specifiesArch. Valid values are 'x64' and 'arm64'."
+    }
 }
-switch ($osArch) {
-    'X64'   { $archTag = 'x64'; break }
-    'Arm64' { $archTag = 'arm64'; break }
-    'X86'   { throw "x86 is not supported." }
-    default { throw "Architecture not detected." }
+else {
+    $osArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::ProcessArchitecture
+    if (-not $osArch) {
+        $osArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::OSArchitecture
+    }
+    switch ($osArch) {
+        'X64'   { $archTag = 'x64'; break }
+        'Arm64' { $archTag = 'arm64'; break }
+        'X86'   { throw "x86 is not supported." }
+        default { throw "Architecture not detected." }
+    }
 }
 
 $headers = @{ 'User-Agent' = 'ps-github-latest-release' }
+if ($env:GITHUB_TOKEN) {
+    $headers['Authorization'] = "Bearer $($env:GITHUB_TOKEN)"
+}
+$retryCount = 20
+$retryDelaySec = 5
 
-function Download-Library {
+function Invoke-WithRetry {
+    param (
+        [scriptblock]$Operation,
+        [string]$Description
+    )
+    for ($attempt = 1; $attempt -le $retryCount; $attempt++) {
+        try {
+            return & $Operation
+        }
+        catch {
+            if ($attempt -ge $retryCount) {
+                throw
+            }
+            Write-Warning "$Description failed (attempt $attempt/$retryCount). Retrying in $retryDelaySec seconds..."
+            Start-Sleep -Seconds $retryDelaySec
+        }
+    }
+}
+
+function Get-Library {
     param (
         [string]$name
     )
     Write-Host "Downloading $name for Windows $archTag..."
-    $release = Invoke-RestMethod -Method GET -Uri https://api.github.com/repos/cherryridge/dep_$name/releases/latest -Headers $headers
+    $release = Invoke-WithRetry -Description "Fetch release for dep_$name" -Operation {
+        Invoke-RestMethod -Method GET -Uri https://api.github.com/repos/cherryridge/dep_$name/releases/latest -Headers $headers -ErrorAction Stop
+    }
     if(-not $release -or $release.assets.Count -eq 0) {
         Write-Error "No assets found on latest release of dep_$name, check it at https://api.github.com/repos/cherryridge/dep_$name/releases/latest."
         return
@@ -37,9 +74,13 @@ function Download-Library {
         return
     }
     Write-Host "Downloading $($assetDebug.name): $($assetDebug.browser_download_url)..."
-    Invoke-WebRequest -Uri $assetDebug.browser_download_url -Headers $headers -OutFile $assetDebug.name
+    $null = Invoke-WithRetry -Description "Download $($assetDebug.name)" -Operation {
+        Invoke-WebRequest -Uri $assetDebug.browser_download_url -Headers $headers -OutFile $assetDebug.name -ErrorAction Stop
+    }
     Write-Host "Downloading $($assetRelease.name): $($assetRelease.browser_download_url)..."
-    Invoke-WebRequest -Uri $assetRelease.browser_download_url -Headers $headers -OutFile $assetRelease.name
+    $null = Invoke-WithRetry -Description "Download $($assetRelease.name)" -Operation {
+        Invoke-WebRequest -Uri $assetRelease.browser_download_url -Headers $headers -OutFile $assetRelease.name -ErrorAction Stop
+    }
     Get-ChildItem -Path "$PSScriptRoot\$name\debug" -Force | Where-Object { $_.name -ne '.gitignore'} | Remove-Item -Recurse -Force
     Get-ChildItem -Path "$PSScriptRoot\$name\release" -Force | Where-Object { $_.name -ne '.gitignore'} | Remove-Item -Recurse -Force
     Write-Host "Extracting $($assetDebug.name) to $PSScriptRoot\$name\debug..."
@@ -50,9 +91,9 @@ function Download-Library {
     Remove-Item -Force $assetRelease.name
 }
 
-Download-Library -name 'bgfx'
-Download-Library -name 'soloud'
-Download-Library -name 'v8'
-Download-Library -name 'wasmtime'
+Get-Library -name 'bgfx'
+Get-Library -name 'soloud'
+Get-Library -name 'v8'
+Get-Library -name 'wasmtime'
 
 Write-Host "All done."

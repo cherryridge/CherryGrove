@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "gui/Gui.hpp"
 #include "gui/input.hpp"

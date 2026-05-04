@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+baseAppId="dev.cherryridge.cherrygrove"
+
+appImagePath="$(realpath "${APPIMAGE:-$0}")"
+appImageDir="$(dirname "$appImagePath")"
+appImageHash="$(printf '%s' "$appImagePath" | sha256sum | cut -c1-16)"
+desktopExecPath="${appImagePath//\\/\\\\}"
+desktopExecPath="${desktopExecPath//\"/\\\"}"
+desktopExecPath="${desktopExecPath//%/%%}"
+
+instanceAppId="${baseAppId}.${appImageHash}"
+
+applicationsDir="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+iconsDir="${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor/256x256/apps"
+
+desktopFilePath="${applicationsDir}/${instanceAppId}.desktop"
+iconFilePath="${iconsDir}/${instanceAppId}.png"
+iconSourcePath="${APPDIR}/cherrygrove.png"
+
+mkdir -p "$applicationsDir" "$iconsDir"
+
+cp -f "$iconSourcePath" "$iconFilePath"
+chmod 0644 "$iconFilePath"
+
+cat > "$desktopFilePath" <<EOF
+[Desktop Entry]
+Type=Application
+Name=CherryGrove
+Exec="${desktopExecPath}"
+Path=${appImageDir}
+Icon=${iconFilePath}
+Terminal=false
+Categories=Game;
+StartupNotify=true
+StartupWMClass=${instanceAppId}
+EOF
+
+gtk-update-icon-cache -q "${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor" 2>/dev/null || true
+update-desktop-database "$applicationsDir" 2>/dev/null || true
+
+export SDL_APP_ID="$instanceAppId"
+export SDL_APP_NAME="CherryGrove"
+
+cd "$appImageDir"
+exec "$APPDIR/CherryGrove" "$@"

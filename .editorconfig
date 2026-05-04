@@ -1,6 +1,6 @@
 root = true
 [*.{c,cpp,h,hpp}]
-charset = utf-8-bom
+charset = utf-8
 [*]
 indent_style = space
 indent_size = 4

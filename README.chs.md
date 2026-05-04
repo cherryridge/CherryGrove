@@ -16,7 +16,7 @@
 
 ## 文档
 
-文档位于 https://docs.cherrygrove.dev。中文版尚未发布，可先查阅英文版。
+文档位于 [https://docs.cherrygrove.dev](https://docs.cherrygrove.dev)。中文版尚未发布，可先查阅英文版。
 
 ## 贡献
 

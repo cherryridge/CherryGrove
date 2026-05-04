@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string>
 
 #include "../umi/frontend/json/JSONKind_Manifest.hpp" // IWYU pragma: keep

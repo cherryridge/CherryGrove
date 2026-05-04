@@ -1,7 +1,9 @@
-﻿#pragma once
+#pragma once
+#include <exception>
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <system_error>
 #include <vector>
 #include <CLI/App.hpp>
 #include <CLI/CLI.hpp>
@@ -16,7 +18,7 @@
 
 namespace Boot {
     typedef int64_t i64;
-    using std::string, std::vector, std::filesystem::path, std::cout, std::cerr, std::endl, CLI::App, CLI::ParseError, CLI::CallForHelp, CLI::CallForVersion, CLI::AppFormatMode, Util::OS::isWritableDirectory, Util::OS::normalize, Util::OS::getU8String, std::filesystem::current_path;
+    using std::string, std::vector, std::filesystem::path, std::cout, std::cerr, std::endl, std::exception, std::filesystem::current_path, std::error_code, CLI::App, CLI::ParseError, CLI::CallForHelp, CLI::CallForVersion, CLI::AppFormatMode, CLI::to_path, Util::OS::isWritableDirectory, Util::OS::normalize, Util::OS::getU8String;
 
     //note: Pre-logger function
     //note: The very first function called within Main::launch, the entry point after OS-specific entry.
@@ -48,7 +50,7 @@ namespace Boot {
         app.allow_config_extras(false);
         app.set_help_all_flag("");
 
-        app.set_version_flag("-v, --version", CG_SEMATIC_VERSION, "Display sematic version and exit.");
+        app.set_version_flag("-v, --version", CG_SEMANTIC_VERSION, "Display semantic version and exit.");
 
         app.add_flag("-e,--engine", [](i64) {
             cout << CG_ENGINE_VERSION << endl;
@@ -71,7 +73,7 @@ namespace Boot {
             exit(0);
         }
         catch (const CallForVersion&) {
-            cout << CG_SEMATIC_VERSION << endl;
+            cout << CG_SEMANTIC_VERSION << endl;
             exit(0);
         }
         catch (const ParseError& e) {
@@ -90,34 +92,47 @@ namespace Boot {
             exit(0);
         }
 
+        path workingDirectoryPath;
         if (workingDirectory.empty()) {
             const auto executablePath = getExecutableDirectory();
             if (isWritableDirectory(executablePath)) {
-                cout << "[CLI] No working directory specified, using executable directory: " << executablePath << endl;
-                workingDirectory = getU8String(executablePath);
+                cout << "[CLI] No working directory specified, using executable directory: " << getU8String(executablePath) << endl;
+                workingDirectoryPath = executablePath;
             }
             else {
                 cout << "[CLI] Executable directory is not writable. Trying to use PWD." << endl;
-                std::error_code ec;
+                error_code ec;
                 const path currentPath = current_path(ec);
                 if (ec || !isWritableDirectory(currentPath)) {
-                    cerr << "(Error) [CLI] Both executable directory and current working directory is not writable. CherryGrove needs to have a writable working directory. If you're using Linux or macOS, consider providing the working directory argument: `./CherryGrove <path-to-wd>`." << endl;
+                    cerr << "(Error) [CLI] Both executable directory and current working directory are not writable. CherryGrove needs to have a writable working directory. If you're using Linux or macOS, consider providing the working directory argument: `./CherryGrove <path-to-wd>`." << endl;
                     Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
                 }
-                cout << "[CLI] No working directory specified, using current working directory: " << currentPath << endl;
-                workingDirectory = getU8String(currentPath);
+                cout << "[CLI] No working directory specified, using current working directory: " << getU8String(currentPath) << endl;
+                workingDirectoryPath = currentPath;
             }
         }
-        else if (!isWritableDirectory(workingDirectory)) {
-            cerr << "(Error) [CLI] Specified working directory is not writable: " << workingDirectory << endl;
-            Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
+        else {
+            try { workingDirectoryPath = to_path(workingDirectory); }
+            catch (const exception& e) {
+                cerr << "(Error) [Boot] Invalid working directory path: " << workingDirectory << " (" << e.what() << ")" << endl;
+                Fatal::exit(Fatal::BOOT_INVALID_WORKING_DIR);
+            }
+            if (!isWritableDirectory(workingDirectoryPath)) {
+                cerr << "(Error) [CLI] Specified working directory is not writable: " << workingDirectory << endl;
+                Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
+            }
         }
 
-        path workingDirectoryPath(workingDirectory);
         if (!normalize(workingDirectoryPath)) {
-            cerr << "(Error) [Boot] Invalid working directory path: " << workingDirectoryPath << endl;
+            cerr << "(Error) [Boot] Invalid working directory path: " << getU8String(workingDirectoryPath) << endl;
             Fatal::exit(Fatal::BOOT_INVALID_WORKING_DIR);
         }
-        current_path(workingDirectoryPath);
+
+        error_code ec;
+        current_path(workingDirectoryPath, ec);
+        if (ec) {
+            cerr << "(Error) [Boot] Failed to set working directory path: " << getU8String(workingDirectoryPath) << " (" << ec.message() << ")" << endl;
+            Fatal::exit(Fatal::BOOT_SET_WORKING_DIR_FAILED);
+        }
     }
 }

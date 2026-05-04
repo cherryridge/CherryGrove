@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <imgui.h>
 
 #include "../../graphics/gui/util.hpp"

@@ -1,4 +1,4 @@
-﻿{
+{
     "version": 3,
     "cmakeMinimumRequired": {"major": 4, "minor": 0},
     "configurePresets": [
@@ -58,7 +58,8 @@
             "cacheVariables": {
                 "CMAKE_SYSTEM_NAME": "Darwin",
                 "CMAKE_C_COMPILER": "clang",
-                "CMAKE_CXX_COMPILER": "clang++"
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_OBJC_COMPILER": "/usr/bin/clang"
             }
         },
         {
@@ -85,7 +86,9 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebug",
-                "CMAKE_SYSTEM_PROCESSOR": "ARM64"
+                "CMAKE_SYSTEM_PROCESSOR": "ARM64",
+                "CMAKE_C_COMPILER_TARGET": "arm64-pc-windows-msvc",
+                "CMAKE_CXX_COMPILER_TARGET": "arm64-pc-windows-msvc"
             }
         },
         {
@@ -94,7 +97,9 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded",
-                "CMAKE_SYSTEM_PROCESSOR": "ARM64"
+                "CMAKE_SYSTEM_PROCESSOR": "ARM64",
+                "CMAKE_C_COMPILER_TARGET": "arm64-pc-windows-msvc",
+                "CMAKE_CXX_COMPILER_TARGET": "arm64-pc-windows-msvc"
             }
         },
         {
@@ -170,7 +175,8 @@
             "inherits": "macos-base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_SYSTEM_PROCESSOR": "x86_64"
+                "CMAKE_SYSTEM_PROCESSOR": "x86_64",
+                "CMAKE_OSX_ARCHITECTURES": "x86_64"
             }
         },
         {
@@ -178,7 +184,8 @@
             "inherits": "macos-base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_SYSTEM_PROCESSOR": "x86_64"
+                "CMAKE_SYSTEM_PROCESSOR": "x86_64",
+                "CMAKE_OSX_ARCHITECTURES": "x86_64"
             }
         },
         {

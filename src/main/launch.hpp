@@ -1,11 +1,11 @@
-﻿#pragma once
+#pragma once
 #include <filesystem>
 #include <iostream>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
-#include "../boot/ConfigProvider.hpp"
 #include "../boot/SessionLock.hpp"
+#include "../boot/setWorkingDirectory.hpp"
 #include "../debug/Fatal.hpp"
 #include "../globalState.hpp"
 #include "../graphics/controller.hpp"
@@ -16,11 +16,12 @@
 #include "../sound/Sound.hpp"
 #include "../pack/Pack.hpp"
 #include "../util/BitField.hpp"
+#include "../util/os/filesystem.hpp"
 #include "../window.hpp"
 #include "hold.hpp"
 
 namespace Main {
-    using std::move, std::cout, std::endl, std::filesystem::current_path, Util::BitField;
+    using std::move, std::cout, std::endl, std::filesystem::current_path, Util::BitField, Util::OS::getU8String;
 
     inline Boot::SessionLock sessionLock;
 
@@ -29,7 +30,7 @@ namespace Main {
     inline void launch(int argc, char** argv) noexcept {
     //Get working directory
         Boot::setWorkingDirectory(argc, argv);
-        cout << "Working directory: " << current_path() << endl;
+        cout << "Working directory: " << getU8String(current_path()) << endl;
 
     //Working directory lock (RAII)
         sessionLock = move(Boot::SessionLock("cg.lock"));
@@ -68,8 +69,10 @@ namespace Main {
         Sound::init();
 
         {//Debug: Play a.ogg
-            auto handle = Sound::addSound("tests/a.ogg", true, true, 1.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
-            static_cast<void>(Sound::play(handle, {0.0, 0.0, 0.0}));
+            Util::Promise<Sound::SoundHandle> p;
+            Sound::addSound(&p, "tests/a.ogg", true, true, 1.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
+            const auto handle = p.wait();
+            Sound::play(nullptr, handle, {0.0, 0.0, 0.0});
         }
 
         lout << "Initializing graphics..." << endl;

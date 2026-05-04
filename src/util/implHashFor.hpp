@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #define IMPL_HASH_FOR(ns, type, _seed, ...) \
 namespace ns { \

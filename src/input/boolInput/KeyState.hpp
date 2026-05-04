@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <ostream>
 
 #include "../../debug/Logger.hpp"

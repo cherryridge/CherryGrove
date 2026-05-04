@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "../../util/SlotTable.hpp"
 #include "TextureInfo.hpp"

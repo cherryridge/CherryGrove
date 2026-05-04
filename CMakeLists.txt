@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION "4.0")
+cmake_minimum_required(VERSION "4.0")
 
 project("CherryGrove")
 
@@ -9,9 +9,17 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY FALSE)
 set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY FALSE)
 set(CMAKE_SUPPRESS_REGENERATION ON CACHE BOOL "" FORCE)
+if(UNIX AND NOT APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
+    set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> qcT <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcT <TARGET> <LINK_FLAGS> <OBJECTS>")
+endif()
+if(APPLE)
+    enable_language(OBJC)
+endif()
 #----------------------------------
 
 #--------------Tweaks--------------
@@ -101,11 +109,29 @@ endfunction()
 #----------------------------------
 
 #------------Dep:Prebuilt----------
+set(CG_PREBUILT_ARCH_SOURCE "")
+if(CMAKE_CXX_COMPILER_TARGET)
+    set(CG_PREBUILT_ARCH_SOURCE "${CMAKE_CXX_COMPILER_TARGET}")
+elseif(CMAKE_C_COMPILER_TARGET)
+    set(CG_PREBUILT_ARCH_SOURCE "${CMAKE_C_COMPILER_TARGET}")
+else()
+    set(CG_PREBUILT_ARCH_SOURCE "${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+string(TOLOWER "${CG_PREBUILT_ARCH_SOURCE}" CG_PREBUILT_ARCH_SOURCE)
+if(CG_PREBUILT_ARCH_SOURCE MATCHES "^(amd64|x64|x86_64)(-|$)")
+    set(CG_PREBUILT_ARCH_TAG "x64")
+elseif(CG_PREBUILT_ARCH_SOURCE MATCHES "^(arm64|aarch64)(-|$)")
+    set(CG_PREBUILT_ARCH_TAG "arm64")
+else()
+    message(FATAL_ERROR "Unsupported target architecture for prebuilt libraries: ${CG_PREBUILT_ARCH_SOURCE}")
+endif()
+message(STATUS "Detected target architecture for prebuilt libraries: ${CG_PREBUILT_ARCH_TAG}")
+
 set(BGFX_BGFX_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bgfx$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 set(BGFX_BX_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bx$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 set(BGFX_BIMG_LIB "${CMAKE_SOURCE_DIR}/libs/bgfx/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>bimg$<IF:$<CONFIG:Debug>,Debug,Release>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 
-set(SOLOUD_LIB "${CMAKE_SOURCE_DIR}/libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>soloud_static_x64$<$<CONFIG:Debug>:_d>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
+set(SOLOUD_LIB "${CMAKE_SOURCE_DIR}/libs/soloud/$<IF:$<CONFIG:Debug>,debug,release>/$<$<NOT:$<PLATFORM_ID:Windows>>:lib>soloud_static_${CG_PREBUILT_ARCH_TAG}$<$<CONFIG:Debug>:_d>$<IF:$<PLATFORM_ID:Windows>,.lib,.a>")
 
 set(V8_LIB "${CMAKE_SOURCE_DIR}/libs/v8/$<IF:$<CONFIG:Debug>,debug,release>/$<IF:$<PLATFORM_ID:Windows>,v8_monolith.lib,libv8_monolith.a>")
 
@@ -157,7 +183,7 @@ set(LUAU_BUILD_TESTS  OFF CACHE BOOL "")
 set(LUAU_BUILD_WEB    OFF CACHE BOOL "")
 set(LUAU_STATIC_CRT   ON  CACHE BOOL "")
 set(LUAU_BUILD_SHARED OFF CACHE BOOL "")
-add_subdirectory("libs/luau")
+add_subdirectory("libs/luau" EXCLUDE_FROM_ALL)
 
 #-----Enjoy the legacy of RocksDB! 100+ Lines just to make it happy and not destroy everything.-----
 
@@ -209,6 +235,7 @@ set(WITH_TESTS                  OFF CACHE BOOL "")
 set(WITH_BENCHMARK_TOOLS        OFF CACHE BOOL "")
 set(WITH_TOOLS                  OFF CACHE BOOL "")
 set(WITH_CORE_TOOLS             OFF CACHE BOOL "")
+set(WITH_TRACE_TOOLS            OFF CACHE BOOL "")
 set(WITH_ALL_TESTS              OFF CACHE BOOL "")
 # OK. They just DONT CARE about whether the main project needs lz4 or other compression library.
 # THEY JUST LINK THEIRS PRIVATELY. ALWAYS.
@@ -251,7 +278,14 @@ endif()
 
 #-----Did you enjoy it?-----
 
+set(FLECS_STATIC ON  CACHE BOOL "")
+set(FLECS_SHARED OFF CACHE BOOL "")
+set(FLECS_PIC    ON  CACHE BOOL "")
+set(FLECS_TESTS  OFF CACHE BOOL "")
+add_subdirectory("libs/flecs")
+
 set(FT_DISABLE_ZLIB OFF CACHE BOOL "")
+set(FT_DISABLE_BROTLI ON CACHE BOOL "")
 add_subdirectory("libs/freetype")
 
 set(SDL_SHARED        OFF CACHE BOOL "")
@@ -290,10 +324,8 @@ add_subdirectory("libs/sdl_image")
 
 #------------Dep:Internal----------
 set(CGNBT_HAS_BOOST  ON CACHE BOOL "")
-set(CGNBT_HAS_PHYSFS ON CACHE BOOL "")
 set(CGNBT_HAS_ZSTD   ON CACHE BOOL "")
 set(CGNBT_BOOST_DIRECTORY  "${CMAKE_SOURCE_DIR}/libs/boost"  CACHE STRING "")
-set(CGNBT_PHYSFS_DIRECTORY "${CMAKE_SOURCE_DIR}/libs/physfs" CACHE STRING "")
 set(CGNBT_ZSTD_DIRECTORY   "${CMAKE_SOURCE_DIR}/libs/zstd"   CACHE STRING "")
 set(CGNBT_BUILD_TESTS OFF CACHE BOOL "")
 add_subdirectory("libs/cgnbt")
@@ -348,7 +380,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/boost/uuid/include"
 
     "libs/cli11/include"
-    "libs/entt/single_include"
+    "libs/flecs/include"
     "libs/function2/include"
     "libs/glaze/include"
     "libs/glm"
@@ -376,12 +408,15 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ScopedFlags
 
-    physfs-static
-    Luau.Compiler
-    Luau.VM
-    libzstd_static
-    rocksdb
+    flecs_static
     freetype
+    libzstd_static
+    Luau.CodeGen
+    Luau.Compiler
+    Luau.Require
+    Luau.VM
+    physfs-static
+    rocksdb
     SDL3-static
     SDL3_image-static
 
@@ -421,10 +456,8 @@ elseif(UNIX AND NOT APPLE)
     find_package(ALSA REQUIRED)
     find_package(PkgConfig REQUIRED)
     find_package(Threads REQUIRED)
-    pkg_check_modules(JACK REQUIRED jack)
     target_link_libraries(${PROJECT_NAME} PRIVATE
         ${ALSA_LIBRARIES}
-        ${JACK_LIBRARIES}
         Threads::Threads
         dl
         atomic
@@ -505,5 +538,9 @@ add_custom_target(compile_shaders
     VERBATIM
     COMMAND_EXPAND_LISTS
 )
-add_dependencies(${PROJECT_NAME} compile_shaders)
+
+option(CG_COMPILE_SHADERS "Compile shaders as part of the main build. If turned off, shaders will not be compiled automatically and you need to put the shaders in, or the compilation will fail." ON)
+if(CG_COMPILE_SHADERS)
+    add_dependencies(${PROJECT_NAME} compile_shaders)
+endif()
 #----------------------------------

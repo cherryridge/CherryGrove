@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string>
 #include <boost/container_hash/hash.hpp>
 #include <boost/uuid.hpp>

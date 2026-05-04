@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - stable
+  workflow_dispatch:
+
+jobs:
+  compile-shaders:
+    name: Compile Shaders
+    uses: ./.github/workflows/compile-shaders.yml
+
+  release-linux:
+    name: Release Linux
+    needs: compile-shaders
+    uses: ./.github/workflows/release-linux.yml
+
+  release-windows:
+    name: Release Windows
+    needs: compile-shaders
+    uses: ./.github/workflows/release-windows.yml
+
+  release-macos:
+    name: Release macOS
+    needs: compile-shaders
+    uses: ./.github/workflows/release-macos.yml

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: ./get_deps.sh [7z_path]
+# Usage: ./fetch_prebuilt_libs.sh [7z_path] [arch]
 SEVEN_ZIP="${1:-7z}"
+SPECIFIED_ARCH="${2:-}"
 
 # --- Detect OS ---
 case "${OSTYPE:-$(uname | tr '[:upper:]' '[:lower:]')}" in
@@ -13,13 +14,20 @@ case "${OSTYPE:-$(uname | tr '[:upper:]' '[:lower:]')}" in
 esac
 
 # --- Detect Arch ---
-uname_m="$(uname -m | tr '[:upper:]' '[:lower:]')"
-case "$uname_m" in
-    x86_64|amd64) arch_tag="x64"   ;;
-    aarch64|arm64) arch_tag="arm64" ;;
-    i386|i686) echo "x86 is not supported." >&2; exit 1 ;;
-    *) echo "Architecture not detected: $uname_m" >&2; exit 1 ;;
-esac
+if [[ -n "$SPECIFIED_ARCH" ]]; then
+    case "$SPECIFIED_ARCH" in
+        x64|arm64) arch_tag="$SPECIFIED_ARCH" ;;
+        *) echo "Invalid architecture specified: $SPECIFIED_ARCH. Valid values are 'x64' and 'arm64'." >&2; exit 1 ;;
+    esac
+else
+    uname_m="$(uname -m | tr '[:upper:]' '[:lower:]')"
+    case "$uname_m" in
+        x86_64|amd64) arch_tag="x64"   ;;
+        aarch64|arm64) arch_tag="arm64" ;;
+        i386|i686) echo "x86 is not supported." >&2; exit 1 ;;
+        *) echo "Architecture not detected: $uname_m" >&2; exit 1 ;;
+    esac
+fi
 
 # --- Tool checks ---
 command -v curl >/dev/null 2>&1 || { echo "curl is required." >&2; exit 1; }
@@ -28,6 +36,10 @@ command -v "$SEVEN_ZIP" >/dev/null 2>&1 || { echo "7z not found at '$SEVEN_ZIP'.
 
 ua="bash-github-latest-release"
 api_ver="2022-11-28"
+auth_header=()
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    auth_header=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+fi
 
 download_library() {
     local name="$1"
@@ -35,7 +47,7 @@ download_library() {
     local api="https://api.github.com/repos/${repo}/releases/latest"
     echo "Downloading ${name} for ${os_tag} ${arch_tag}..."
     # Fetch release JSON
-    json="$(curl -fsSL -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: ${api_ver}" -A "$ua" "$api")" || { echo "Failed to query $api" >&2; return 1; }
+    json="$(curl -fsSL --retry 10 --retry-delay 5 --retry-all-errors -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: ${api_ver}" -A "$ua" "${auth_header[@]}" "$api")" || { echo "Failed to query $api" >&2; return 1; }
 
     # Pick matching assets by filename
     # Example match: "*linux_x64_debug.7z"
@@ -56,9 +68,9 @@ download_library() {
     file_dbg="$(basename "$url_dbg")"
     file_rel="$(basename "$url_rel")"
     echo "Downloading $file_dbg ..."
-    curl -fL -A "$ua" -o "$file_dbg" "$url_dbg"
+    curl -fL --retry 10 --retry-delay 5 --retry-all-errors -A "$ua" "${auth_header[@]}" -o "$file_dbg" "$url_dbg"
     echo "Downloading $file_rel ..."
-    curl -fL -A "$ua" -o "$file_rel" "$url_rel"
+    curl -fL --retry 10 --retry-delay 5 --retry-all-errors -A "$ua" "${auth_header[@]}" -o "$file_rel" "$url_rel"
 
     # Clean destinations except .gitignore
     script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"

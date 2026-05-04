@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <compare>
 #include <memory>
 #include <vector>

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "frontend/lua/UmiLua.hpp"
 #include "frontend/js/UmiJS.hpp"
 #include "frontend/wasm/UmiWASM.hpp"

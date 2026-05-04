@@ -1,15 +1,16 @@
-﻿#pragma once
+#pragma once
 #include <atomic>
 #include <vector>
 
 #include "../util/SlotTable.hpp"
 #include "Action.hpp"
-#include "InputHandler.hpp"
+#include "actionIds.hpp"
 #include "types.hpp"
 
-namespace InputHandler {
+namespace InputHandler::utils {
     typedef uint8_t u8;
     typedef uint32_t u32;
+    typedef uint64_t u64;
     using std::atomic, std::atomic_thread_fence, std::memory_order_acquire, std::memory_order_relaxed, std::memory_order_release, std::vector, Util::SlotTable;
 
     //SeqLock-based snapshot: single writer, multiple readers.

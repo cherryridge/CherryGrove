@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string_view>
 #include <function2/function2.hpp>
 #include <imgui.h>

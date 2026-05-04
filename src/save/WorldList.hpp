@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <ctime>
 #include <filesystem>
 #include <string>

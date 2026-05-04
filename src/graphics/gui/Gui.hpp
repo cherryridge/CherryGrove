@@ -1,5 +1,4 @@
-﻿#pragma once
-#include <cstdint>
+#pragma once
 #include <mutex>
 #include <backends/imgui_impl_sdl3.h>
 #include <boost/unordered/unordered_flat_map.hpp>
@@ -15,6 +14,7 @@
 #include "../../intrinsics/guis/MainMenu.hpp"
 #include "../../intrinsics/guis/Version.hpp"
 #include "../../sound/Sound.hpp"
+#include "../../util/Promise.hpp"
 #include "../../window.hpp"
 #include "../backend/imgui_impl_bgfx.hpp"
 #include "../renderer/definitions.hpp"
@@ -22,7 +22,6 @@
 #include "Intrinsics.hpp"
 
 namespace Gui {
-    typedef uint8_t u8;
     typedef int32_t i32;
     using std::mutex, std::scoped_lock, boost::unordered_flat_map, boost::unordered_flat_set, fu2::function_view, Sound::SoundHandle;
 
@@ -68,7 +67,11 @@ namespace Gui {
             lerr << "Failed to initialize ImGui for bgfx!" << endl;
             Fatal::exit(Fatal::IMGUI_INITIALIZATION_FAILED);
         }
-        click = Sound::addSound("assets/sounds/click1.ogg", false, true, 2.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
+        {
+            ::Util::Promise<Sound::SoundHandle> p;
+            Sound::addSound(&p, "assets/sounds/click1.ogg", false, true, 2.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
+            click = p.wait();
+        }
         //Register them manually!
         guiRegistry.emplace(Intrinsics::MainMenu, MainMenu::render);
         guiRegistry.emplace(Intrinsics::Copyright, Copyright::render);

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 namespace UmiJS {
     //"hello cherrygrove from v8"

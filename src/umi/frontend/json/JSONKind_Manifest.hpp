@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "../../../pack/v1.hpp"
 #include "../../../util/json/formatVersion.hpp"

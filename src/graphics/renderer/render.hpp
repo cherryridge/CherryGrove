@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <array>
 #include <atomic>
 #include <bgfx/bgfx.h>
@@ -27,7 +27,7 @@ namespace Renderer {
         //Render blocks from chunk meshes
             //todo: get chunks around player (settings.renderDistance) and group the `ChunkMesh`.
             const auto renderDistance = Settings::getSettings().graphics.renderDistance;
-            const auto playerPos = Simulation::registry.get<Components::EntityCoordinates>(Simulation::playerEntity);
+            const auto& playerPos = Simulation::playerEntity.get<Components::EntityCoordinates>();
         //Render entities
             
             //bgfx::submit();

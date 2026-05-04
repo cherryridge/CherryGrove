@@ -1,5 +1,4 @@
-﻿#pragma once
-#include <atomic>
+#pragma once
 #include <glm/glm.hpp>
 #include <soloud/soloud_wav.h>
 #include <soloud/soloud_wavstream.h>
@@ -7,12 +6,13 @@
 #include "../intrinsics/components/Coordinates.hpp"
 #include "../intrinsics/components/Rotation.hpp"
 #include "../intrinsics/components/Velocity.hpp"
+#include "../util/Promise.hpp"
 #include "enums.hpp"
 #include "types.hpp"
 
 namespace Sound {
     typedef uint32_t u32;
-    using std::atomic, std::move, glm::vec3, SoLoud::Wav, SoLoud::WavStream;
+    using std::move, glm::vec3, SoLoud::Wav, SoLoud::WavStream, Util::Promise;
 
     //todo: Actually use the `fastPlay` parameter: Obviously it's not being used yet.
     //This flag is provided for high performance small sounds that need to be played with minimal latency, such as UI sound effects.
@@ -23,22 +23,19 @@ namespace Sound {
         Attenuation attn;
         InaudibleBehavior iabh;
         float volume, maxDistance, minDistance, dopplerFactor, rolloff;
-        SoundHandle& result;
-        atomic<bool>& finished;
+        Promise<SoundHandle>* promise;
         bool soundSpeedDelay, fastPlay;
 
-        //F**k C++
-        AddSource(const char* filePath, bool isStream, bool is2D, Attenuation attn, InaudibleBehavior iabh, float volume, float maxDistance, float minDistance, float dopplerFactor, float rolloff, SoundHandle& result, atomic<bool>& finished, bool soundSpeedDelay, bool fastPlay) noexcept : filePath(filePath), isStream(isStream), is2D(is2D), attn(attn), iabh(iabh), volume(volume), maxDistance(maxDistance), minDistance(minDistance), dopplerFactor(dopplerFactor), rolloff(rolloff), result(result), finished(finished), soundSpeedDelay(soundSpeedDelay), fastPlay(fastPlay) {}
+        AddSource(const char* filePath, bool isStream, bool is2D, Attenuation attn, InaudibleBehavior iabh, float volume, float maxDistance, float minDistance, float dopplerFactor, float rolloff, Promise<SoundHandle>* promise, bool soundSpeedDelay, bool fastPlay) noexcept : filePath(filePath), isStream(isStream), is2D(is2D), attn(attn), iabh(iabh), volume(volume), maxDistance(maxDistance), minDistance(minDistance), dopplerFactor(dopplerFactor), rolloff(rolloff), promise(promise), soundSpeedDelay(soundSpeedDelay), fastPlay(fastPlay) {}
         AddSource(const AddSource&) noexcept = default;
         ~AddSource() = default;
     };
 
     struct DeleteSource {
         SoundHandle h;
-        bool& success;
-        atomic<bool>& finished;
-        
-        DeleteSource(SoundHandle h, bool& success, atomic<bool>& finished) noexcept : h(h), success(success), finished(finished) {}
+        Promise<bool>* promise;
+
+        DeleteSource(SoundHandle h, Promise<bool>* promise) noexcept : h(h), promise(promise) {}
         DeleteSource(const DeleteSource&) noexcept = default;
         ~DeleteSource() = default;
     };
@@ -48,47 +45,43 @@ namespace Sound {
         vec3 position, velocity;
         float iniProgress, pitch, playSpeed;
         u32 playCount;
-        PlayHandle& result;
-        atomic<bool>& finished;
+        Promise<PlayHandle>* promise;
 
-        Play(SoundHandle soundHandle, const Components::EntityCoordinates& position, const Components::Velocity& velocity, float iniProgress, float pitch, float playSpeed, PlayHandle& result, atomic<bool>& finished, u32 playCount) noexcept : soundHandle(soundHandle), position(position.x, position.y, position.z), velocity(velocity.dx, velocity.dy, velocity.dz), iniProgress(iniProgress), pitch(pitch), playSpeed(playSpeed), playCount(playCount), result(result), finished(finished) {}
+        Play(SoundHandle soundHandle, const Components::EntityCoordinates& position, const Components::Velocity& velocity, float iniProgress, float pitch, float playSpeed, Promise<PlayHandle>* promise, u32 playCount) noexcept : soundHandle(soundHandle), position(position.x, position.y, position.z), velocity(velocity.dx, velocity.dy, velocity.dz), iniProgress(iniProgress), pitch(pitch), playSpeed(playSpeed), playCount(playCount), promise(promise) {}
         Play(const Play&) noexcept = default;
         ~Play() = default;
     };
 
     struct Pause {
         PlayHandle h;
-        bool& success;
-        atomic<bool>& finished;
+        Promise<bool>* promise;
 
-        Pause(PlayHandle h, bool& success, atomic<bool>& finished) noexcept : h(h), success(success), finished(finished) {}
+        Pause(PlayHandle h, Promise<bool>* promise) noexcept : h(h), promise(promise) {}
         Pause(const Pause&) noexcept = default;
         ~Pause() = default;
     };
 
     struct Resume {
         PlayHandle h;
-        bool& success;
-        atomic<bool>& finished;
+        Promise<bool>* promise;
         float progress;
 
-        Resume(PlayHandle h, bool& success, atomic<bool>& finished, float progress) noexcept : h(h), success(success), finished(finished), progress(progress) {}
+        Resume(PlayHandle h, Promise<bool>* promise, float progress) noexcept : h(h), promise(promise), progress(progress) {}
         Resume(const Resume&) noexcept = default;
         ~Resume() = default;
     };
 
     struct Stop {
         PlayHandle h;
-        bool& success;
-        atomic<bool>& finished;
+        Promise<bool>* promise;
 
-        Stop(PlayHandle h, bool& success, atomic<bool>& finished) noexcept : h(h), success(success), finished(finished) {}
+        Stop(PlayHandle h, Promise<bool>* promise) noexcept : h(h), promise(promise) {}
         Stop(const Stop&) noexcept = default;
         ~Stop() = default;
     };
 
     struct GlobalPosition {
-        const Components::EntityCoordinates& position;
+        Components::EntityCoordinates position;
 
         GlobalPosition(const Components::EntityCoordinates& position) noexcept : position(position) {}
         GlobalPosition(const GlobalPosition&) noexcept = default;
@@ -96,7 +89,7 @@ namespace Sound {
     };
 
     struct GlobalRotation {
-        const Components::Rotation& rotation;
+        Components::Rotation rotation;
 
         GlobalRotation(const Components::Rotation& rotation) noexcept : rotation(rotation) {}
         GlobalRotation(const GlobalRotation&) noexcept = default;
@@ -104,7 +97,7 @@ namespace Sound {
     };
 
     struct GlobalVelocity {
-        const Components::Velocity& velocity;
+        Components::Velocity velocity;
 
         GlobalVelocity(const Components::Velocity& velocity) noexcept : velocity(velocity) {}
         GlobalVelocity(const GlobalVelocity&) noexcept = default;
@@ -113,22 +106,20 @@ namespace Sound {
 
     struct SourcePosition {
         PlayHandle h;
-        const Components::EntityCoordinates& position;
-        bool& success;
-        atomic<bool>& finished;
+        Components::EntityCoordinates position;
+        Promise<bool>* promise;
 
-        SourcePosition(PlayHandle h, const Components::EntityCoordinates& position, bool& success, atomic<bool>& finished) noexcept : h(h), position(position), success(success), finished(finished) {}
+        SourcePosition(PlayHandle h, const Components::EntityCoordinates& position, Promise<bool>* promise) noexcept : h(h), position(position), promise(promise) {}
         SourcePosition(const SourcePosition&) noexcept = default;
         ~SourcePosition() = default;
     };
 
     struct SourceVelocity {
         PlayHandle h;
-        const Components::Velocity& velocity;
-        bool& success;
-        atomic<bool>& finished;
+        Components::Velocity velocity;
+        Promise<bool>* promise;
 
-        SourceVelocity(PlayHandle h, const Components::Velocity& velocity, bool& success, atomic<bool>& finished) noexcept : h(h), velocity(velocity), success(success), finished(finished) {}
+        SourceVelocity(PlayHandle h, const Components::Velocity& velocity, Promise<bool>* promise) noexcept : h(h), velocity(velocity), promise(promise) {}
         SourceVelocity(const SourceVelocity&) noexcept = default;
         ~SourceVelocity() = default;
     };
