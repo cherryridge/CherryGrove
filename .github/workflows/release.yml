@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - stable
+      - nightly
   workflow_dispatch:
 
 jobs:
