@@ -69,10 +69,10 @@ namespace TexturePool {
         }
     }
 
-    template <bool physfs, FilePath PathType>
+    template <FilePath PathType>
     [[nodiscard]] inline bool addTexture(PathType&& path_, TextureHandle& result, bool linear) noexcept {
         vector<u8> fileData;
-        if (!readFile<physfs>(forward<PathType>(path_), fileData)) {
+        if (!readFile(forward<PathType>(path_), fileData)) {
             lerr << "[TexturePool] Failed to read texture file: " << path_ << "." << endl;
             return false;
         }

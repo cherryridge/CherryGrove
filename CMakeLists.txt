@@ -156,28 +156,6 @@ add_custom_target(fetch_prebuilt_libs
 #----------------------------------
 
 #------------Dep:3rdparty----------
-set(PHYSFS_ARCHIVE_ZIP         ON  CACHE BOOL "")
-set(PHYSFS_ARCHIVE_7Z          ON  CACHE BOOL "")
-set(PHYSFS_ARCHIVE_GRP         OFF CACHE BOOL "")
-set(PHYSFS_ARCHIVE_WAD         OFF CACHE BOOL "")
-set(PHYSFS_ARCHIVE_CSM         OFF CACHE BOOL "")
-set(PHYSFS_ARCHIVE_HOG         OFF CACHE BOOL "")
-set(PHYSFS_ARCHIVE_MVL         OFF CACHE BOOL "")
-set(PHYSFS_ARCHIVE_QPAK        OFF CACHE BOOL "")
-set(PHYSFS_ARCHIVE_SL          OFF CACHE BOOL "")
-set(PHYSFS_ARCHIVE_ISO9660     OFF CACHE BOOL "")
-set(PHYSFS_ARCHIVE_VDF         OFF CACHE BOOL "")
-set(PHYSFS_ARCHIVE_LECARCHIVES OFF CACHE BOOL "")
-set(PHYSFS_BUILD_STATIC        ON  CACHE BOOL "")
-set(PHYSFS_BUILD_SHARED        OFF CACHE BOOL "")
-set(PHYSFS_BUILD_TEST          OFF CACHE BOOL "")
-set(PHYSFS_DISABLE_INSTALL     ON  CACHE BOOL "")
-set(PHYSFS_BUILD_DOCS          OFF CACHE BOOL "")
-if(UNIX)
-    set(PHYSFS_TARGETNAME_DIST "physfs-dist-please-do-not-collide-with-anything-ok" CACHE STRING "")
-endif()
-add_subdirectory("libs/physfs")
-
 set(LUAU_BUILD_CLI    OFF CACHE BOOL "")
 set(LUAU_BUILD_TESTS  OFF CACHE BOOL "")
 set(LUAU_BUILD_WEB    OFF CACHE BOOL "")
@@ -185,11 +163,10 @@ set(LUAU_STATIC_CRT   ON  CACHE BOOL "")
 set(LUAU_BUILD_SHARED OFF CACHE BOOL "")
 add_subdirectory("libs/luau" EXCLUDE_FROM_ALL)
 
-#-----Enjoy the legacy of RocksDB! 100+ Lines just to make it happy and not destroy everything.-----
-
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 set(LZ4_BUILD_CLI     OFF CACHE BOOL "")
 add_subdirectory("libs/lz4/build/cmake")
+
 set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "")
 set(BUILD_TESTING       OFF CACHE BOOL "")
 set(ZSTD_BUILD_STATIC   ON  CACHE BOOL "")
@@ -198,6 +175,18 @@ if(MSVC OR CMAKE_CXX_SIMULATE_ID MATCHES "MSVC")
     set(ZSTD_USE_STATIC_RUNTIME ON CACHE BOOL "")
 endif()
 add_subdirectory("libs/zstd/build/cmake")
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+set(XZ_TOOL_XZ        OFF CACHE BOOL "")
+set(XZ_TOOL_XZDEC     OFF CACHE BOOL "")
+set(XZ_TOOL_LZMADEC   OFF CACHE BOOL "")
+set(XZ_TOOL_LZMAINFO  OFF CACHE BOOL "")
+set(XZ_DOC            OFF CACHE BOOL "")
+set(XZ_TOOL_SCRIPTS   OFF CACHE BOOL "")
+set(BUILD_TESTING     OFF CACHE BOOL "")
+add_subdirectory("libs/xz")
+
+#-----Enjoy the legacy of RocksDB! 100+ Lines just to make it happy and not destroy everything.-----
 if(WIN32)
     set(CG_LZ4_LIBRARY "${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/lz4.lib")
     set(CG_ZSTD_LIBRARY "${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib")
@@ -275,8 +264,39 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIAN
         endif()
     endforeach()
 endif()
-
 #-----Did you enjoy it?-----
+
+set(ENABLE_ZLIB         ON   CACHE BOOL   "")
+set(ENABLE_LZMA         ON   CACHE BOOL   "")
+set(ENABLE_BZip2        OFF  CACHE BOOL   "")
+set(ENABLE_LZ4          ON   CACHE BOOL   "")
+set(ENABLE_LZO          OFF  CACHE BOOL   "")
+set(ENABLE_ZSTD         ON   CACHE BOOL   "")
+set(ENABLE_LIBB2        OFF  CACHE BOOL   "")
+set(ENABLE_LIBXML2      OFF  CACHE BOOL   "")
+set(ENABLE_EXPAT        OFF  CACHE BOOL   "")
+set(ENABLE_OPENSSL      OFF  CACHE BOOL   "")
+set(ENABLE_MBEDTLS      OFF  CACHE BOOL   "")
+set(ENABLE_NETTLE       OFF  CACHE BOOL   "")
+set(ENABLE_LibGCC       OFF  CACHE BOOL   "")
+set(ENABLE_CNG          OFF  CACHE BOOL   "")
+set(ENABLE_ICONV        OFF  CACHE BOOL   "")
+set(ENABLE_PCREPOSIX    OFF  CACHE BOOL   "")
+set(ENABLE_PCRE2POSIX   OFF  CACHE BOOL   "")
+set(ENABLE_ACL          OFF  CACHE BOOL   "")
+set(ENABLE_XATTR        OFF  CACHE BOOL   "")
+set(POSIX_REGEX_LIB     NONE CACHE STRING "")
+set(ENABLE_TAR          OFF  CACHE BOOL   "")
+set(ENABLE_CPIO         OFF  CACHE BOOL   "")
+set(ENABLE_CAT          OFF  CACHE BOOL   "")
+set(ENABLE_UNZIP        OFF  CACHE BOOL   "")
+set(ENABLE_TEST         OFF  CACHE BOOL   "")
+set(ENABLE_INSTALL      OFF  CACHE BOOL   "")
+set(ENABLE_COVERAGE     OFF  CACHE BOOL   "")
+set(ENABLE_WERROR       OFF  CACHE BOOL   "")
+set(BUILD_SHARED_LIBS   OFF  CACHE BOOL   "")
+set(MSVC_USE_STATIC_CRT ON   CACHE BOOL   "")
+add_subdirectory("libs/libarchive" EXCLUDE_FROM_ALL)
 
 set(FLECS_STATIC ON  CACHE BOOL "")
 set(FLECS_SHARED OFF CACHE BOOL "")
@@ -300,25 +320,25 @@ set(SDLIMAGE_BACKEND_STB ON  CACHE BOOL "")
 set(SDLIMAGE_STRICT      ON  CACHE BOOL "")
 set(SDLIMAGE_VENDORED    ON  CACHE BOOL "")
 set(SDLIMAGE_DEPS_SHARED OFF CACHE BOOL "")
-set(SDLIMAGE_ANI        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_AVIF       OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_BMP        ON  CACHE BOOL "" FORCE)
-set(SDLIMAGE_GIF        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_JPG        ON  CACHE BOOL "" FORCE)
-set(SDLIMAGE_JXL        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_LBM        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_PCX        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_PNG        ON  CACHE BOOL "" FORCE)
-set(SDLIMAGE_PNG_SHARED OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_PNM        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_QOI        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_SVG        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_TGA        ON  CACHE BOOL "" FORCE)
-set(SDLIMAGE_TIF        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_WEBP       OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_XCF        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_XPM        OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_XV         OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_ANI         OFF CACHE BOOL "")
+set(SDLIMAGE_AVIF        OFF CACHE BOOL "")
+set(SDLIMAGE_BMP         ON  CACHE BOOL "")
+set(SDLIMAGE_GIF         OFF CACHE BOOL "")
+set(SDLIMAGE_JPG         ON  CACHE BOOL "")
+set(SDLIMAGE_JXL         OFF CACHE BOOL "")
+set(SDLIMAGE_LBM         OFF CACHE BOOL "")
+set(SDLIMAGE_PCX         OFF CACHE BOOL "")
+set(SDLIMAGE_PNG         ON  CACHE BOOL "")
+set(SDLIMAGE_PNG_SHARED  OFF CACHE BOOL "")
+set(SDLIMAGE_PNM         OFF CACHE BOOL "")
+set(SDLIMAGE_QOI         OFF CACHE BOOL "")
+set(SDLIMAGE_SVG         OFF CACHE BOOL "")
+set(SDLIMAGE_TGA         ON  CACHE BOOL "")
+set(SDLIMAGE_TIF         OFF CACHE BOOL "")
+set(SDLIMAGE_WEBP        OFF CACHE BOOL "")
+set(SDLIMAGE_XCF         OFF CACHE BOOL "")
+set(SDLIMAGE_XPM         OFF CACHE BOOL "")
+set(SDLIMAGE_XV          OFF CACHE BOOL "")
 add_subdirectory("libs/sdl_image")
 #----------------------------------
 
@@ -380,16 +400,20 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/boost/uuid/include"
 
     "libs/cli11/include"
-    "libs/flecs/include"
     "libs/function2/include"
     "libs/glaze/include"
     "libs/glm"
-
-    "libs/physfs/src"
+    
+    "libs/luau/CodeGen/include"
     "libs/luau/Compiler/include"
+    "libs/luau/Require/include"
     "libs/luau/VM/include"
+    "libs/lz4/lib"
     "libs/zstd/lib"
+    "libs/xz/src/liblzma/api"
     "libs/rocksdb/include"
+    "libs/libarchive/libarchive"
+    "libs/flecs/include"
     "libs/freetype/include"
     "libs/sdl/include"
     "libs/sdl_image/include"
@@ -408,15 +432,17 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ScopedFlags
 
-    flecs_static
-    freetype
-    libzstd_static
     Luau.CodeGen
     Luau.Compiler
     Luau.Require
     Luau.VM
-    physfs-static
+    lz4_static
+    libzstd_static
+    liblzma
     rocksdb
+    archive_static
+    flecs_static
+    freetype
     SDL3-static
     SDL3_image-static
 

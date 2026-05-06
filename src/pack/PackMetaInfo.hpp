@@ -9,6 +9,6 @@ namespace Pack {
     struct PackMetaInfo {
         Latest<Manifest> manifest;
         string pathStr;
-        bool physfs, disabled;
+        bool disabled;
     };
 }

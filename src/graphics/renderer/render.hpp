@@ -7,7 +7,6 @@
 #include "../../intrinsics/systems/Rotation.hpp"
 #include "../../settings/Settings.hpp"
 #include "../../simulation/playerEntity.hpp"
-#include "../../simulation/registries.hpp"
 #include "../../simulation/Simulation.hpp"
 #include "definitions.hpp"
 #include "size.hpp"

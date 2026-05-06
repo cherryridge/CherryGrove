@@ -106,10 +106,6 @@
 	path = libs/lz4
 	url = https://github.com/lz4/lz4
 
-[submodule "libs/physfs"]
-	path = libs/physfs
-	url = https://github.com/icculus/physfs
-
 [submodule "libs/rocksdb"]
 	path = libs/rocksdb
 	url = https://github.com/facebook/rocksdb
@@ -137,3 +133,6 @@
 [submodule "src/graphics/backend"]
 	path = src/graphics/backend
 	url = https://github.com/cherryridge/imgui_impl_bgfx
+[submodule "libs/xz"]
+	path = libs/xz
+	url = https://github.com/tukaani-project/xz

@@ -50,7 +50,7 @@ namespace Boot {
 
         invokeExistingInstance: {
             vector<u8> fileData;
-            if (readFile<false>(lockFilePath, fileData) && fileData.size() >= sizeof(u32)) {
+            if (readFile(lockFilePath, fileData) && fileData.size() >= sizeof(u32)) {
                 u32 pid;
                 memcpy(&pid, fileData.data(), sizeof(u32));
             #if CG_PLATFORM_WINDOWS

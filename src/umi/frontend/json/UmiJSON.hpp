@@ -16,10 +16,10 @@ namespace UmiJSON {
     template <JSONKind kind>
     [[nodiscard]] inline bool readJSON(const span<const u8> data, typename KindMeta<kind>::LatestType& result) noexcept { return KindMeta<kind>::read(data, result); }
 
-    template <JSONKind kind, bool physfs, FilePath PathType>
+    template <JSONKind kind, FilePath PathType>
     [[nodiscard]] inline bool readJSONFromFile(PathType&& path, typename KindMeta<kind>::LatestType& result) noexcept {
         vector<u8> data;
-        if (!readFile<physfs>(path, data)) {
+        if (!readFile(path, data)) {
             lerr << "[Umi] Failed to read in JSON file: " << path << "\n";
             return false;
         }

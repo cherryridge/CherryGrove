@@ -18,13 +18,6 @@ namespace Pack {
     using std::filesystem::current_path, std::string, boost::unordered_flat_map, Util::OS::getU8String, Util::Json::Latest, Util::Json::JSONKind::Settings;
 
     inline void init() noexcept {
-        if (!PHYSFS_init(getU8String(current_path()).c_str())) {
-            lerr << "[Pack] Failed to initialize PhysFS: " << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()) << endl;
-            Fatal::exit(Fatal::FILESYSTEM_CANNOT_INIT_PHYSFS);
-        }
-        //Just use additional packs/roots instead of symlinking all your packs to `/packs`. It's much safer.
-        PHYSFS_permitSymbolicLinks(false);
-
         const Latest<Settings>::Packs& packSettings = Settings::getSettings().packs;
         for (u64 i = 0; i < packSettings.knownPacks.size(); i++) detail::knownPacks.emplace(packSettings.knownPacks[i].id.value(), packSettings.knownPacks[i]);
 
@@ -48,6 +41,5 @@ namespace Pack {
 
     inline void shutdown() noexcept {
         Umi::shutdown();
-        PHYSFS_deinit();
     }
 }

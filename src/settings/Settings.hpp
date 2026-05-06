@@ -24,7 +24,7 @@ namespace Settings {
 
     //note: Maybe pre-logger function.
     [[nodiscard]] inline bool loadSettings() noexcept {
-        if (exists(detail::SETTINGS_FILENAME) && is_regular_file(detail::SETTINGS_FILENAME)) return UmiJSON::readJSONFromFile<Settings, false>(detail::SETTINGS_FILENAME, detail::data);
+        if (exists(detail::SETTINGS_FILENAME) && is_regular_file(detail::SETTINGS_FILENAME)) return UmiJSON::readJSONFromFile<Settings>(detail::SETTINGS_FILENAME, detail::data);
         else {
             vector<u8> defaultData;
             if (!Util::Json::writeJSON(detail::data, defaultData)) {

@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <boost/unordered/unordered_flat_map.hpp>
-#include <physfs.h>
 
 #include "../debug/Logger.hpp"
 #include "../umi/frontend/json/UmiJSON.hpp"
@@ -14,11 +13,6 @@
 
 namespace Pack {
     using std::move, std::string, std::vector, std::filesystem::path, std::filesystem::directory_iterator, std::filesystem::is_directory, std::filesystem::exists, Util::OS::normalize, Util::OS::getU8String, boost::unordered_flat_map, Util::Json::Latest, Util::Json::JSONKind::Manifest;
-
-    namespace detail {
-        inline constexpr const char* PACK_MOUNT_PHYSFS_ROOT = "packs/";
-        inline constexpr const char* PACK_TEMP_PHYSFS_ROOT = "temp/";
-    }
 
     inline void tryAddingPack(const PackMetaInfo& info) noexcept {
         const auto itRegistry = detail::registry.find(info.manifest.id);
@@ -50,29 +44,7 @@ namespace Pack {
                 lout << "[Pack] Ignoring non-archive file: " << packPath << endl;
                 return false;
             }
-            if (!PHYSFS_mount(pathStr.c_str(), detail::PACK_TEMP_PHYSFS_ROOT, false)) {
-                lerr << "[Pack] Failed to mount archive: " << packPath << ", error: " << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()) << endl;
-                return false;
-            }
-            const auto manifestStr = string(detail::PACK_TEMP_PHYSFS_ROOT) + "/manifest.json";
-            if (!PHYSFS_exists(manifestStr.c_str())) {
-                lout << "[Pack] No manifest.json found in " << packPath << ", skipping." << endl;
-                PHYSFS_unmount(detail::PACK_TEMP_PHYSFS_ROOT);
-                return false;
-            }
-            Latest<Manifest> temp;
-            if (!UmiJSON::readJSONFromFile<Manifest, true>(manifestStr, temp)) {
-                lerr << "[Pack] Failed to parse manifest.json in " << packPath << ", skipping." << endl;
-                PHYSFS_unmount(detail::PACK_TEMP_PHYSFS_ROOT);
-                return false;
-            }
-            result = {
-                .manifest = move(temp),
-                .pathStr = pathStr,
-                .physfs = true,
-                .disabled = false
-            };
-            PHYSFS_unmount(detail::PACK_TEMP_PHYSFS_ROOT);
+            //todo: use libarchive.
             return true;
         }
         else if (is_directory(packPath)) {
@@ -82,14 +54,13 @@ namespace Pack {
                 return false;
             }
             Latest<Manifest> temp;
-            if (!UmiJSON::readJSONFromFile<Manifest, false>(packPath / "manifest.json", temp)) {
+            if (!UmiJSON::readJSONFromFile<Manifest>(packPath / "manifest.json", temp)) {
                 lerr << "[Pack] Failed to parse manifest.json in " << packPath << ", skipping." << endl;
                 return false;
             }
             result = {
                 .manifest = move(temp),
                 .pathStr = getU8String(packPath),
-                .physfs = false,
                 .disabled = false
             };
             return true;

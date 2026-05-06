@@ -7,6 +7,7 @@
 #include "../util/concurrentQueue.hpp"
 #include "boolInput/boolInput.hpp"
 #include "config.hpp"
+#include "fileDrop/fileDrop.hpp"
 #include "gamepad/gamepad.hpp"
 #include "inputPipeline.hpp"
 #include "mouseMove/mouseMove.hpp"
@@ -55,6 +56,10 @@ namespace InputHandler {
             for (u64 j = 0; j < events.actualSize; j++) {
                 const SDL_Event& event = events.events[j];
                 switch (event.type) {
+                //File drop events
+                    case SDL_EVENT_DROP_FILE:
+                        FileDrop::processTrigger(event);
+                        break;
                 //Device events
                     case SDL_EVENT_GAMEPAD_ADDED:
                     case SDL_EVENT_JOYSTICK_BATTERY_UPDATED:

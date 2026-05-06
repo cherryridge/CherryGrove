@@ -13,7 +13,7 @@ namespace TexturePool::internal {
 
     inline void readFromIntrinsicFiles() noexcept {
         vector<u8> fileData;
-        if (!Util::OS::readFile<false>("assets/textures/toobig.png", fileData)) {
+        if (!Util::OS::readFile("assets/textures/toobig.png", fileData)) {
             lerr << "[TexturePool] Failed to read toobig.png." << endl;
             Fatal::exit(Fatal::TEXTUREPOOL_INITIALIZATION_FAILED);
         }
@@ -21,7 +21,7 @@ namespace TexturePool::internal {
             lerr << "[TexturePool] Failed to load toobig.png." << endl;
             Fatal::exit(Fatal::TEXTUREPOOL_INITIALIZATION_FAILED);
         }
-        if (!Util::OS::readFile<false>("assets/textures/missing.png", fileData)) {
+        if (!Util::OS::readFile("assets/textures/missing.png", fileData)) {
             lerr << "[TexturePool] Failed to read missing.png." << endl;
             Fatal::exit(Fatal::TEXTUREPOOL_INITIALIZATION_FAILED);
         }

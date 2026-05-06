@@ -30,14 +30,12 @@ namespace Fatal {
     //Pack/Pack runtime fatal error: 3001-4000
 
     //InputHandler: 4001-5000
-    
 
     //Misc: 5001-6000
-    
-    //File System/Physfs: 6001-7000
+
+    //File System/libarchive: 6001-7000
     DEF FILESYSTEM_NO_WRITE_PERMISSION                         = 6001;
     DEF FILESYSTEM_CANNOT_GET_EXECUTABLE_PATH                  = 6002;
-    DEF FILESYSTEM_CANNOT_INIT_PHYSFS                          = 6003;
     
     //Boot: 7001-8000
     DEF BOOT_MULTIPLE_INSTANCES                                = 7001;

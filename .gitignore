@@ -12,6 +12,7 @@ Thumbs.db
 *.VC.db
 cpp.hint
 .idea/
+.claude/
 *.iws
 *.iml
 *.ipr

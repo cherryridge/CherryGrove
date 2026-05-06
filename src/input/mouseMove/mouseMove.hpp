@@ -79,7 +79,7 @@ namespace InputHandler::MouseMove {
             return;
         }
     #endif
-        EventwiseInfo_MM eventwiseInfo{
+        const EventwiseInfo_MM eventwiseInfo{
             .currentX = event.motion.x,
             .currentY = event.motion.y,
             .deltaX = event.motion.xrel,
@@ -92,7 +92,7 @@ namespace InputHandler::MouseMove {
     //threaded: Simulation thread
     inline void processPersist() noexcept {
         const auto pos = detail::lastMousePos.load(memory_order_acquire).pos;
-        EventwiseInfo_MM eventwiseInfo{
+        const EventwiseInfo_MM eventwiseInfo{
             .currentX = pos.x,
             .currentY = pos.y,
             .deltaX = 0,
