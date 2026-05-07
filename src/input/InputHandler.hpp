@@ -2,7 +2,7 @@
 #include <chrono>
 #include <SDL3/SDL.h>
 
-#include "../debug/Logger.hpp"
+#include "../debug/Logger.hpp" // IWYU pragma: keep
 #include "../settings/Settings.hpp"
 #include "../util/concurrentQueue.hpp"
 #include "boolInput/boolInput.hpp"

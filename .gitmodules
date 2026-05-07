@@ -122,6 +122,14 @@
 	path = libs/soloud/source
 	url = https://github.com/jarikomppa/soloud
 
+[submodule "libs/xz"]
+	path = libs/xz
+	url = https://github.com/tukaani-project/xz
+
+[submodule "libs/zlib-ng"]
+	path = libs/zlib-ng
+	url = https://github.com/zlib-ng/zlib-ng
+
 [submodule "libs/zstd"]
 	path = libs/zstd
 	url = https://github.com/facebook/zstd
@@ -133,6 +141,3 @@
 [submodule "src/graphics/backend"]
 	path = src/graphics/backend
 	url = https://github.com/cherryridge/imgui_impl_bgfx
-[submodule "libs/xz"]
-	path = libs/xz
-	url = https://github.com/tukaani-project/xz

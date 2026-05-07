@@ -13,7 +13,7 @@
 namespace Save {
     typedef uint8_t u8;
     typedef uint64_t u64;
-    using std::time_t, std::move, std::string, std::vector, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::filesystem::directory_iterator, std::filesystem::path, boost::unordered_flat_map, Util::OS::getU8String, Util::OS::readFile, Util::NBT::Latest_NBT, Util::NBT::NBTKind::WorldInfo;
+    using std::time_t, std::move, std::string, std::vector, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::filesystem::directory_iterator, std::filesystem::path, boost::unordered_flat_map, Util::OS::readFile, Util::NBT::Latest_NBT, Util::NBT::NBTKind::WorldInfo;
 
     namespace detail {
         inline vector<Latest_NBT<WorldInfo>> worldList;
@@ -34,7 +34,7 @@ namespace Save {
             lout << "[WorldList] Found directory: " << dirPath << endl;
             if (!exists(metaPath) || !is_regular_file(metaPath)) continue;
             metaPath = dirPath / "world.cgb";
-            if (!readFile<false>(metaPath, fileData)) {
+            if (!readFile(metaPath, fileData)) {
                 lout << "[WorldList] Failed to read `world.cgb` in " << dirPath << endl;
                 continue;
             }

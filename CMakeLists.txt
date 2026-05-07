@@ -12,7 +12,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_FIND_USE_PACKAGE_REGISTRY FALSE)
 set(CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY FALSE)
-set(CMAKE_SUPPRESS_REGENERATION ON CACHE BOOL "" FORCE)
+set(CMAKE_SUPPRESS_REGENERATION ON CACHE BOOL "")
 if(UNIX AND NOT APPLE AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)$")
     set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> qcT <TARGET> <LINK_FLAGS> <OBJECTS>")
     set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcT <TARGET> <LINK_FLAGS> <OBJECTS>")
@@ -34,7 +34,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR (CMAKE_CXX_COMPILER_ID STREQUAL "Cla
     )
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     # I got a linker error about "__setusermatherr is replaced" when I link using lld and I have no idea why. This is a black magic workaround that seems to work: use MSVC.
-    set(CMAKE_LINKER_TYPE "MSVC" CACHE STRING "" FORCE)
+    set(CMAKE_LINKER_TYPE "MSVC" CACHE STRING "")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
@@ -163,9 +163,23 @@ set(LUAU_STATIC_CRT   ON  CACHE BOOL "")
 set(LUAU_BUILD_SHARED OFF CACHE BOOL "")
 add_subdirectory("libs/luau" EXCLUDE_FROM_ALL)
 
+
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 set(LZ4_BUILD_CLI     OFF CACHE BOOL "")
-add_subdirectory("libs/lz4/build/cmake")
+add_subdirectory("libs/lz4/build/cmake" EXCLUDE_FROM_ALL)
+if(WIN32)
+    set(CG_LZ4_LIBRARY "${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/lz4.lib")
+else()
+    set(CG_LZ4_LIBRARY "${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/liblz4.a")
+endif()
+set(lz4_ROOT_DIR     "${CMAKE_SOURCE_DIR}/libs/lz4"     CACHE PATH     "")
+set(lz4_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/libs/lz4/lib" CACHE PATH     "")
+set(lz4_LIBRARIES    "${CG_LZ4_LIBRARY}"                CACHE FILEPATH "")
+set(ENV{LZ4_HOME} "${CMAKE_SOURCE_DIR}/libs/lz4")
+set(ENV{LZ4_INCLUDE} "${CMAKE_SOURCE_DIR}/libs/lz4/lib")
+set(ENV{LZ4_LIB_DEBUG} "${CG_LZ4_LIBRARY}")
+set(ENV{LZ4_LIB_RELEASE} "${CG_LZ4_LIBRARY}")
+
 
 set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "")
 set(BUILD_TESTING       OFF CACHE BOOL "")
@@ -174,7 +188,56 @@ set(ZSTD_BUILD_SHARED   OFF CACHE BOOL "")
 if(MSVC OR CMAKE_CXX_SIMULATE_ID MATCHES "MSVC")
     set(ZSTD_USE_STATIC_RUNTIME ON CACHE BOOL "")
 endif()
-add_subdirectory("libs/zstd/build/cmake")
+add_subdirectory("libs/zstd/build/cmake" EXCLUDE_FROM_ALL)
+if(WIN32)
+    set(CG_ZSTD_LIBRARY "${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib")
+else()
+    set(CG_ZSTD_LIBRARY "${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/libzstd.a")
+endif()
+set(zstd_ROOT_DIR    "${CMAKE_SOURCE_DIR}/libs/zstd"     CACHE PATH     "")
+set(ZSTD_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/zstd/lib" CACHE PATH     "")
+set(ZSTD_INCLUDE_DIRS "${ZSTD_INCLUDE_DIR}"              CACHE PATH     "")
+set(ZSTD_LIBRARY     "${CG_ZSTD_LIBRARY}"                CACHE FILEPATH "")
+set(ZSTD_LIBRARIES   "${CG_ZSTD_LIBRARY}"                CACHE FILEPATH "")
+if(WIN32)
+    set(ZSTD_LIBRARY_DEBUG "${CG_ZSTD_LIBRARY}" CACHE FILEPATH "")
+    set(ZSTD_LIBRARY_RELEASE "${CG_ZSTD_LIBRARY}" CACHE FILEPATH "")
+endif()
+set(ENV{ZSTD_HOME} "${CMAKE_SOURCE_DIR}/libs/zstd")
+set(ENV{ZSTD_INCLUDE} "${CMAKE_SOURCE_DIR}/libs/zstd/lib")
+set(ENV{ZSTD_LIB_DEBUG} "${CG_ZSTD_LIBRARY}")
+set(ENV{ZSTD_LIB_RELEASE} "${CG_ZSTD_LIBRARY}")
+
+
+set(BUILD_TESTING              OFF CACHE BOOL "")
+set(ZLIB_COMPAT                ON  CACHE BOOL "")
+set(ZLIB_ENABLE_TESTS          OFF CACHE BOOL "")
+set(ZLIBNG_ENABLE_TESTS        OFF CACHE BOOL "")
+set(WITH_GTEST                 OFF CACHE BOOL "")
+set(WITH_GZFILEOP              ON  CACHE BOOL "")
+set(ZLIB_BUILD_EXAMPLES        OFF CACHE BOOL "")
+set(WITH_RUNTIME_CPU_DETECTION ON  CACHE BOOL "")
+set(BUILD_SHARED_LIBS          OFF CACHE BOOL "")
+# Don't claim the `zlib`/`zlibstatic` target names — sdl_image's vendored zlib (pulled in by libpng) needs them.
+# We use ZLIB::ZLIB and the zlib-ng-static target directly instead.
+set(ZLIB_ALIASES               OFF CACHE BOOL "")
+add_subdirectory("libs/zlib-ng" EXCLUDE_FROM_ALL)
+# zlib-ng adds ZLIB_DEBUG in Debug builds, exporting z_error/z_verbose.
+# V8 statically includes zlib too, so keep those zlib debug globals private to V8.
+target_compile_options(zlib-ng PRIVATE $<$<CONFIG:Debug>:-UZLIB_DEBUG>)
+# Provide ZLIB::ZLIB so libpng (pulled in by sdl_image) and friends resolve to zlib-ng instead of sdl_image's bundled zlib.
+if(TARGET zlib-ng AND NOT TARGET ZLIB::ZLIB)
+    add_library(ZLIB::ZLIB ALIAS zlib-ng)
+endif()
+# Wire zlib-ng for downstream find_package(ZLIB) (libarchive, freetype, ...).
+# Use the target name so CMake resolves the per-config file path (zlibstatic.lib / zlibstaticd.lib) and creates a real build dependency.
+set(ZLIB_INCLUDE_DIR     "${CMAKE_BINARY_DIR}/libs/zlib-ng" CACHE PATH   "")
+set(ZLIB_INCLUDE_DIRS    "${ZLIB_INCLUDE_DIR}"              CACHE PATH   "")
+set(ZLIB_LIBRARY         zlib-ng                            CACHE STRING "")
+set(ZLIB_LIBRARIES       zlib-ng                            CACHE STRING "")
+set(ZLIB_LIBRARY_RELEASE zlib-ng                            CACHE STRING "")
+set(ZLIB_LIBRARY_DEBUG   zlib-ng                            CACHE STRING "")
+
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 set(XZ_TOOL_XZ        OFF CACHE BOOL "")
@@ -184,36 +247,10 @@ set(XZ_TOOL_LZMAINFO  OFF CACHE BOOL "")
 set(XZ_DOC            OFF CACHE BOOL "")
 set(XZ_TOOL_SCRIPTS   OFF CACHE BOOL "")
 set(BUILD_TESTING     OFF CACHE BOOL "")
-add_subdirectory("libs/xz")
+add_subdirectory("libs/xz" EXCLUDE_FROM_ALL)
+
 
 #-----Enjoy the legacy of RocksDB! 100+ Lines just to make it happy and not destroy everything.-----
-if(WIN32)
-    set(CG_LZ4_LIBRARY "${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/lz4.lib")
-    set(CG_ZSTD_LIBRARY "${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/zstd_static.lib")
-else()
-    set(CG_LZ4_LIBRARY "${CMAKE_BINARY_DIR}/libs/lz4/build/cmake/liblz4.a")
-    set(CG_ZSTD_LIBRARY "${CMAKE_BINARY_DIR}/libs/zstd/build/cmake/lib/libzstd.a")
-endif()
-set(lz4_ROOT_DIR     "${CMAKE_SOURCE_DIR}/libs/lz4"     CACHE PATH "" FORCE)
-set(lz4_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/libs/lz4/lib" CACHE PATH "" FORCE)
-set(lz4_LIBRARIES    "${CG_LZ4_LIBRARY}"                CACHE FILEPATH "" FORCE)
-set(zstd_ROOT_DIR    "${CMAKE_SOURCE_DIR}/libs/zstd"    CACHE PATH "" FORCE)
-set(ZSTD_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/libs/zstd/lib" CACHE PATH "" FORCE)
-set(ZSTD_INCLUDE_DIRS "${ZSTD_INCLUDE_DIR}"             CACHE PATH "" FORCE)
-set(ZSTD_LIBRARY     "${CG_ZSTD_LIBRARY}"               CACHE FILEPATH "" FORCE)
-set(ZSTD_LIBRARIES   "${CG_ZSTD_LIBRARY}"               CACHE FILEPATH "" FORCE)
-if(WIN32)
-    set(ZSTD_LIBRARY_DEBUG "${CG_ZSTD_LIBRARY}" CACHE FILEPATH "" FORCE)
-    set(ZSTD_LIBRARY_RELEASE "${CG_ZSTD_LIBRARY}" CACHE FILEPATH "" FORCE)
-endif()
-set(ENV{LZ4_HOME} "${CMAKE_SOURCE_DIR}/libs/lz4")
-set(ENV{LZ4_INCLUDE} "${CMAKE_SOURCE_DIR}/libs/lz4/lib")
-set(ENV{LZ4_LIB_DEBUG} "${CG_LZ4_LIBRARY}")
-set(ENV{LZ4_LIB_RELEASE} "${CG_LZ4_LIBRARY}")
-set(ENV{ZSTD_HOME} "${CMAKE_SOURCE_DIR}/libs/zstd")
-set(ENV{ZSTD_INCLUDE} "${CMAKE_SOURCE_DIR}/libs/zstd/lib")
-set(ENV{ZSTD_LIB_DEBUG} "${CG_ZSTD_LIBRARY}")
-set(ENV{ZSTD_LIB_RELEASE} "${CG_ZSTD_LIBRARY}")
 set(WITH_LZ4                    ON  CACHE BOOL "")
 set(WITH_ZSTD                   ON  CACHE BOOL "")
 set(WITH_WINDOWS_UTF8_FILENAMES ON  CACHE BOOL "")
@@ -266,6 +303,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIAN
 endif()
 #-----Did you enjoy it?-----
 
+
 set(ENABLE_ZLIB         ON   CACHE BOOL   "")
 set(ENABLE_LZMA         ON   CACHE BOOL   "")
 set(ENABLE_BZip2        OFF  CACHE BOOL   "")
@@ -298,15 +336,18 @@ set(BUILD_SHARED_LIBS   OFF  CACHE BOOL   "")
 set(MSVC_USE_STATIC_CRT ON   CACHE BOOL   "")
 add_subdirectory("libs/libarchive" EXCLUDE_FROM_ALL)
 
+
 set(FLECS_STATIC ON  CACHE BOOL "")
 set(FLECS_SHARED OFF CACHE BOOL "")
 set(FLECS_PIC    ON  CACHE BOOL "")
 set(FLECS_TESTS  OFF CACHE BOOL "")
 add_subdirectory("libs/flecs")
 
+
 set(FT_DISABLE_ZLIB OFF CACHE BOOL "")
 set(FT_DISABLE_BROTLI ON CACHE BOOL "")
 add_subdirectory("libs/freetype")
+
 
 set(SDL_SHARED        OFF CACHE BOOL "")
 set(SDL_STATIC        ON  CACHE BOOL "")
@@ -314,6 +355,7 @@ set(SDL_EXAMPLES      OFF CACHE BOOL "")
 set(SDL_TEST_LIBRARY  OFF CACHE BOOL "")
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 add_subdirectory("libs/sdl")
+
 
 set(SDL_DISABLE_INSTALL  ON  CACHE BOOL "")
 set(SDLIMAGE_BACKEND_STB ON  CACHE BOOL "")
@@ -339,6 +381,9 @@ set(SDLIMAGE_WEBP        OFF CACHE BOOL "")
 set(SDLIMAGE_XCF         OFF CACHE BOOL "")
 set(SDLIMAGE_XPM         OFF CACHE BOOL "")
 set(SDLIMAGE_XV          OFF CACHE BOOL "")
+# SDL_image's vendored zlib setup can overwrite ZLIB_INCLUDE_DIRS before libpng
+# generates pnglibconf.h, while PNG::PNG still compiles against ZLIB::ZLIB.
+set(PNG_LIBCONF_HEADER "${CMAKE_SOURCE_DIR}/libs/sdl_image/external/libpng/scripts/pnglibconf.h.prebuilt")
 add_subdirectory("libs/sdl_image")
 #----------------------------------
 
@@ -375,6 +420,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     BX_CONFIG_DEBUG=$<IF:$<CONFIG:Debug>,1,0>
     # Actual debug flag for CherryGrove
     $<IF:$<CONFIG:Debug>,CG_DEBUG,CG_RELEASE>
+    # Tell libarchive headers we're linking the static lib, otherwise they declare symbols as __declspec(dllimport)
+    LIBARCHIVE_STATIC
 )
 #----------------------------------
 
@@ -410,6 +457,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "libs/luau/VM/include"
     "libs/lz4/lib"
     "libs/zstd/lib"
+    "libs/zlib-ng"
     "libs/xz/src/liblzma/api"
     "libs/rocksdb/include"
     "libs/libarchive/libarchive"
@@ -438,6 +486,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Luau.VM
     lz4_static
     libzstd_static
+    zlib-ng-static
     liblzma
     rocksdb
     archive_static

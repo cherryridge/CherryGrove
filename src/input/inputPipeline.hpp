@@ -16,7 +16,7 @@ namespace InputHandler {
         u64 frameId;
         //Why not use `u64`? `SDL_Event` is already 8-byte aligned.
         u64 actualSize{0};
-        //note: This is changed from a vector so we have a heap allocation free event pipeline.
+        //note: This is changed from a vector so we have a heap-allocation free event pipeline.
         array<SDL_Event, MAXIMUM_INPUT_EVENTS_PER_FRAME> events;
     };
 

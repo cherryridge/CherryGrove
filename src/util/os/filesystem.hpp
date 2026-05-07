@@ -40,9 +40,19 @@ namespace Util::OS {
     #endif
     }
 
-    [[nodiscard]] inline bool isWritableDirectory(const path& p) noexcept {
+    [[nodiscard]] inline string getSecondExtension(const path& input) noexcept {
+        const string filename = getU8String(input.filename());
+        const auto lastDot = filename.rfind('.');
+        if (lastDot == string::npos) return "";
+        if (lastDot == 0) return filename;
+        const auto secondLastDot = filename.rfind('.', lastDot - 1);
+        if (secondLastDot == string::npos) return filename.substr(lastDot);
+        return filename.substr(secondLastDot);
+    }
+
+    [[nodiscard]] inline bool isWritableDirectory(const path& input) noexcept {
         error_code ec;
-        path path_ = p;
+        path path_ = input;
         if (!normalize(path_)) return false;
         const bool pathExists = exists(path_, ec);
         if (ec || !pathExists) return false;

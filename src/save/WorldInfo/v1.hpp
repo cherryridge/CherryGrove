@@ -28,7 +28,7 @@ namespace Save {
     typedef uint32_t u32;
     using boost::unordered_flat_map, NBT::memberOr, NBT::Types, Util::NBT::Latest_NBT, Util::NBT::NBTKind::WorldInfo;
 
-    [[nodiscard]] inline Latest_NBT<WorldInfo> parse_v1(const unordered_flat_map<string, NBT::Tag>& data) noexcept {
+    [[nodiscard]] inline WorldInfo_v1 parse_v1(const unordered_flat_map<string, NBT::Tag>& data) noexcept {
         return {
             .name = memberOr<Types::String>(data, "name", "Unnamed World"),
             .createdTime = memberOr<Types::IVarInt>(data, "createdTime", 0),

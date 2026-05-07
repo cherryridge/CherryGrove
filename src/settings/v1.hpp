@@ -5,7 +5,7 @@
 #include <glaze/glaze.hpp>
 
 #include "../pack/KnownPack.hpp"
-#include "../pack/PackOptionValue.hpp"
+#include "../pack/option/PackOptionValue.hpp"
 #include "base.hpp"
 #include "glaze/json/schema.hpp"
 

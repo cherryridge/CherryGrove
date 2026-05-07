@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <filesystem>
 #include <iostream>
 #include <ostream>
 #include <sstream>
@@ -10,6 +11,7 @@
 
 #include "../globalState.hpp"
 #include "../util/json/helpers.hpp"
+#include "../util/os/filesystem.hpp"
 #include "../util/os/thread.hpp"
 
 //Auto use magic variables
@@ -21,7 +23,7 @@ namespace Logger {
     typedef uint32_t u32;
     typedef uint64_t u64;
     //Warning: DO NOT put std::cout or std::cerr here, or we will eventually misuse them.
-    using std::atomic_flag, std::ostream, std::cout, std::cerr, std::is_function_v, std::ostringstream, std::memory_order_acquire, std::memory_order_release, std::forward, std::string, std::to_string, std::this_thread::yield;
+    using std::atomic_flag, std::ostream, std::cout, std::cerr, std::is_function_v, std::ostringstream, std::memory_order_acquire, std::memory_order_release, std::forward, std::string, std::to_string, std::this_thread::yield, std::filesystem::path, Util::OS::getU8String;
     using Manip = ostream& (*)(ostream&);
 
     enum struct LoggingMode : u8 { Stdout, Separate, File };
@@ -63,6 +65,12 @@ namespace Logger {
         template <typename T> requires (!is_function_v<T>)
         Logger& operator<<(const T& value) noexcept {
             buffer << value;
+            return *this;
+        }
+
+        //... So we won't get silently fucked if we ALWAYS accidentally forgot to wrap them in `Util::OS::getU8String()`.
+        Logger& operator<<(const path& value) noexcept {
+            buffer << getU8String(value);
             return *this;
         }
 
