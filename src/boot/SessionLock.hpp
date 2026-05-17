@@ -45,7 +45,7 @@ namespace Boot {
         }
         #endif
             Focus::connect(lockFileStr);
-            if (!writePidToLockFile()) Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
+            if (!writePidToLockFile()) Debug::exit(Debug::FILESYSTEM_NO_WRITE_PERMISSION);
             return;
 
         invokeExistingInstance: {
@@ -58,7 +58,7 @@ namespace Boot {
             #endif
             }
             Focus::sendMessage(lockFileStr);
-            Fatal::exit(Fatal::BOOT_MULTIPLE_INSTANCES);
+            Debug::exit(Debug::BOOT_MULTIPLE_INSTANCES);
         }
         }
 

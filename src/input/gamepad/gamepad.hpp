@@ -3,7 +3,7 @@
 #include <vector>
 #include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 
 namespace InputHandler::Gamepad {
     typedef int32_t i32;
@@ -52,7 +52,7 @@ namespace InputHandler::Gamepad {
             case SDL_EVENT_JOYSTICK_BATTERY_UPDATED: break;
             default:
             #if CG_DEBUG
-                lerr << "[InputHandler] This event type should not be routed to Gamepad::processDevice: " << event.type << endl;
+                lerr << "[InputHandler] This event type should not be routed to Gamepad::processDevice: " << event.type << nlaf;
             #endif
         }
     }

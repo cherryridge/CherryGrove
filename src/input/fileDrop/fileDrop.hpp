@@ -5,7 +5,7 @@
 #include <utility>
 #include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../util/os/archiveReader.hpp"
 #include "../../util/os/filesystem.hpp"
 
@@ -54,8 +54,8 @@ namespace InputHandler::FileDrop {
         else if (extension == ".cgr") processCGR(path_);
         else {
             const auto arType = getArType(path_);
-            if (arType == Util::OS::ArchiveType::NotASupportedArchive) lout << "Unidentified file type: " << path_ << endl;
-            else if (arType == Util::OS::ArchiveType::ExtensionDoesNotMatchContent) lerr << format("File extension {} does not match its content type {}.", extension, static_cast<u32>(to_underlying(arType))) << endl;
+            if (arType == Util::OS::ArchiveType::NotASupportedArchive) lout << "Unidentified file type: " << path_ << nlaf;
+            else if (arType == Util::OS::ArchiveType::ExtensionDoesNotMatchContent) lerr << format("File extension {} does not match its content type {}.", extension, static_cast<u32>(to_underlying(arType))) << nlaf;
             else processArchive(path_);
         }
     }

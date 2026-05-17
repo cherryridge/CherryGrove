@@ -4,7 +4,7 @@
 #include <vector>
 #include <glaze/glaze.hpp>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../concepts.hpp"
 #include "../os/filesystem.hpp"
 
@@ -46,7 +46,7 @@ namespace Util::Json {
     [[nodiscard]] inline bool readJSON(T& result, const span<const u8> data) noexcept {
         const auto error = read<detail::readOptions>(result, data);
         if (error) {
-            lerr << "[Util::Json] Failed to read JSON:\n" << format_error(error, data) << endl;
+            lerr << "[Util::Json] Failed to read JSON:\n" << format_error(error, data) << nlaf;
             return false;
         }
         else return true;
@@ -69,7 +69,7 @@ namespace Util::Json {
     [[nodiscard]] inline bool writeJSON(T&& data, vector<u8>& result) noexcept {
         const auto error = write<detail::writeOptions>(data, result);
         if (error) {
-            lerr << "[Util::Json] Failed to write JSON:\n" << format_error(error) << endl;
+            lerr << "[Util::Json] Failed to write JSON:\n" << format_error(error) << nlaf;
             return false;
         }
         return true;

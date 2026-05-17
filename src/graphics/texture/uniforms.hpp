@@ -2,7 +2,7 @@
 #include <bgfx/bgfx.h>
 
 #include "../../debug/Fatal.hpp"
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 
 namespace TexturePool::internal {
     inline bgfx::UniformHandle samplerUniform = BGFX_INVALID_HANDLE;
@@ -12,8 +12,8 @@ namespace TexturePool::internal {
         samplerUniform = bgfx::createUniform("s_texture", bgfx::UniformType::Sampler);
         uvRectUniform = bgfx::createUniform("u_uvRect", bgfx::UniformType::Vec4);
         if (!bgfx::isValid(samplerUniform) || !bgfx::isValid(uvRectUniform)) {
-            lerr << "[TexturePool] Failed to create uniforms." << endl;
-            Fatal::exit(Fatal::TEXTUREPOOL_INITIALIZATION_FAILED);
+            lerr << "[TexturePool] Failed to create uniforms." << nlaf;
+            Debug::exit(Debug::TEXTUREPOOL_INITIALIZATION_FAILED);
         }
     }
 

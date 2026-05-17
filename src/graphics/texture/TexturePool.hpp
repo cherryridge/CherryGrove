@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "../../debug/Fatal.hpp"
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../util/concepts.hpp"
 #include "../../util/os/filesystem.hpp"
 #include "atlasRegistry.hpp"
@@ -37,7 +37,7 @@ namespace TexturePool {
         const u32 maximumDimension = max(rawTexture.width, rawTexture.height);
 
         if (maximumDimension > 64) {
-            lout << "[TexturePool] Texture " << debug_texture_path << " is large (" << rawTexture.width << "x" << rawTexture.height << "). Using single texture atlas." << endl;
+            lout << "[TexturePool] Texture " << debug_texture_path << " is large (" << rawTexture.width << "x" << rawTexture.height << "). Using single texture atlas." << nlaf;
         }
 
         const TextureHandle tempHandle = internal::textureRegistry.emplace();
@@ -55,7 +55,7 @@ namespace TexturePool {
             else atlasHandle = internal::atlasRegistry.emplace(6, linear);
             auto& atlas = *internal::atlasRegistry.get(atlasHandle);
             if (!atlas.put(rawTexture, tempHandle, textureInfo.uvRect, textureInfo.bgfxTextureHandle)) {
-                lerr << "[TexturePool] Failed to add texture " << debug_texture_path << "." << endl;
+                lerr << "[TexturePool] Failed to add texture " << debug_texture_path << "." << nlaf;
                 return false;
             }
             result = tempHandle;
@@ -73,7 +73,7 @@ namespace TexturePool {
     [[nodiscard]] inline bool addTexture(PathType&& path_, TextureHandle& result, bool linear) noexcept {
         vector<u8> fileData;
         if (!readFile(forward<PathType>(path_), fileData)) {
-            lerr << "[TexturePool] Failed to read texture file: " << path_ << "." << endl;
+            lerr << "[TexturePool] Failed to read texture file: " << path_ << "." << nlaf;
             return false;
         }
         return addTexture(fileData, result, linear, path_);
@@ -82,7 +82,7 @@ namespace TexturePool {
     inline void useTexture(TextureHandle handle) noexcept {
         const auto* texture = internal::textureRegistry.get(handle);
         if (texture == nullptr) {
-            lerr << "[TexturePool] Invalid texture handle " << handle << "." << endl;
+            lerr << "[TexturePool] Invalid texture handle " << handle << "." << nlaf;
             return;
         }
         texture->use();
@@ -91,14 +91,14 @@ namespace TexturePool {
     [[nodiscard]] inline bool removeTexture(TextureHandle handle) noexcept {
         const auto* textureInfo = internal::textureRegistry.get(handle);
         if (textureInfo == nullptr) {
-            lerr << "[TexturePool] Invalid texture handle " << handle << "." << endl;
+            lerr << "[TexturePool] Invalid texture handle " << handle << "." << nlaf;
             return false;
         }
         for (auto& atlasEntry : internal::atlasRegistry) if (atlasEntry.remove(handle)) {
             static_cast<void>(internal::textureRegistry.destroy(handle));
             return true;
         }
-        lerr << "[TexturePool] Texture handle " << handle << " is found in the registry but not in any atlas. This should never happen!!" << endl;
-        Fatal::exit(Fatal::ISBH_TEXTUREPOOL_TEXTURE_NOT_IN_ATLAS);
+        lerr << "[TexturePool] Texture handle " << handle << " is found in the registry but not in any atlas. This should never happen!!" << nlaf;
+        Debug::exit(Debug::ISBH_TEXTUREPOOL_TEXTURE_NOT_IN_ATLAS);
     }
 }

@@ -3,7 +3,7 @@
 #include <thread>
 #include <flecs.h>
 
-#include "../debug/Logger.hpp"
+#include "../debug/loggers.hpp"
 #include "../graphics/gui/Gui.hpp"
 #include "../input/InputHandler.hpp"
 #include "../input/pointerLock.hpp"
@@ -95,8 +95,8 @@ namespace Simulation {
     }
 
     static void gameLoop() noexcept {
-        lout << "Game" << flush;
-        lout << "Hello from game loop!" << endl;
+        Debug::setThreadName("Simulation");
+        lout << "Hello from game loop!" << nlaf;
         while (gameStarted.load(memory_order_acquire)) {
             const auto startTime = steady_clock::now();
             if (!gamePaused.load(memory_order_acquire)) tick();
@@ -105,7 +105,7 @@ namespace Simulation {
             perf_MSPT.store(elapsedTime.count() / 1000.0f, memory_order_release);
             if (elapsedTime < 20000us) std::this_thread::sleep_for(20000us - elapsedTime);
         }
-        lout << "Game loop terminated!" << endl;
+        lout << "Game loop terminated!" << nlaf;
     }
 
     static void tick() noexcept {

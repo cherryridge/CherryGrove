@@ -2,7 +2,7 @@
 #include <atomic>
 #include <thread>
 
-#include "../debug/Logger.hpp"
+#include "../debug/loggers.hpp"
 #include "gui/Gui.hpp"
 #include "renderer/Renderer.hpp"
 #include "shader/ShaderPool.hpp"
@@ -18,7 +18,7 @@ namespace Graphics {
         inline thread graphicsThread;
 
         inline void shutdown() noexcept {
-            lout << "Terminating Graphics thread!" << endl;
+            lout << "Terminating Graphics thread!" << nlaf;
             initialized.store(false, memory_order_release);
             Gui::shutdown();
             TexturePool::shutdown();
@@ -28,8 +28,8 @@ namespace Graphics {
         }
 
         inline void init() noexcept {
-            lout << "Graphics" << flush;
-            lout << "Hello from the brand-new graphics thread!" << endl;
+            Debug::setThreadName("Graphics");
+            lout << "Hello from the brand-new graphics thread!" << nlaf;
             Renderer::init();
             ShaderPool::init();
             TexturePool::init();

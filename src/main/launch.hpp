@@ -6,7 +6,9 @@
 
 #include "../boot/SessionLock.hpp"
 #include "../boot/setWorkingDirectory.hpp"
+#include "../debug/controller.hpp"
 #include "../debug/Fatal.hpp"
+#include "../debug/loggers.hpp"
 #include "../globalState.hpp"
 #include "../graphics/controller.hpp"
 #include "../input/boolInput/boolInput.hpp"
@@ -21,7 +23,7 @@
 #include "hold.hpp"
 
 namespace Main {
-    using std::move, std::cout, std::endl, std::filesystem::current_path, Util::OS::getU8String;
+    using std::move, std::cout, std::cerr, std::endl, std::filesystem::current_path, Util::OS::getU8String;
 
     inline Boot::SessionLock sessionLock;
 
@@ -39,23 +41,23 @@ namespace Main {
     //Settings
         cout << "Reading settings..." << endl;
         if (!Settings::loadSettings()) {
-            lerr << "[Main] Failed to load settings!" << endl;
-            Fatal::exit(Fatal::SETTINGS_FAILED_TO_LOAD);
+            cerr << "[Main] Failed to load settings!" << endl;
+            Debug::exit(Debug::SETTINGS_FAILED_TO_LOAD);
         }
 
         const auto& settings = Settings::getSettings();
 
         cout << "Setting up logger..." << endl;
-        Logger::init(settings.debug.logging);
-        lout << "Main" << flush;
-        lout << "Hello from Logger!" << endl;
+        Debug::init(settings.debug.logging);
+        Debug::setThreadName("Main");
+        lout << "Hello from Logger!" << nlaf;
 
     //Mark the starting of CherryGrove
-        lout << "Launching CherryGrove..." << endl;
+        lout << "Launching CherryGrove..." << nlaf;
         GlobalState::setIsCGAlive(true);
 
     //Create Main Window
-        lout << "Setting up CherryGrove window & initializing input handler..." << endl;
+        lout << "Setting up CherryGrove window & initializing input handler..." << nlaf;
         Window::initMainWindow(settings.misc.windowTitleBase.c_str(), settings.graphics.windowWidth, settings.graphics.windowHeight, "assets/icons/CherryGrove-trs-64.png");
 
     //Initialize InputHandler
@@ -64,7 +66,7 @@ namespace Main {
     //Enter the multi-thread era as we are going to spawn the first thread.
         GlobalState::setMultiThreadEra(true);
 
-        lout << "Initializing SoLoud..." << endl;
+        lout << "Initializing SoLoud..." << nlaf;
         //This is synchronized, we will wait inside.
         Sound::init();
 
@@ -75,12 +77,12 @@ namespace Main {
             Sound::play(nullptr, handle, {0.0, 0.0, 0.0});
         }
 
-        lout << "Initializing graphics..." << endl;
+        lout << "Initializing graphics..." << nlaf;
         //Call this on the SDL/main thread before `bgfx::init` so bgfx uses this thread as its render thread.
         bgfx::renderFrame();
         Graphics::init();
 
-        lout << "Initializing pack manager..." << endl;
+        lout << "Initializing pack manager..." << nlaf;
         Pack::init();
 
     //Set up main menu

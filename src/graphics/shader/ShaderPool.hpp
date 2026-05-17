@@ -2,7 +2,7 @@
 #include <bgfx/bgfx.h>
 
 #include "../../debug/Fatal.hpp"
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../util/SlotTable.hpp"
 #include "ShaderDef.hpp"
 
@@ -47,21 +47,21 @@ namespace ShaderPool {
                     size = shaderDef.vulkan_size;
                     break;
                 default:
-                    lerr << "[ShaderPool] No valid render backends!" << endl;
-                    Fatal::exit(Fatal::BGFX_NO_VALID_RENDER_BACKEND);
+                    lerr << "[ShaderPool] No valid render backends!" << nlaf;
+                    Debug::exit(Debug::BGFX_NO_VALID_RENDER_BACKEND);
             }
         #if CG_DEBUG
             if (data == nullptr || size == 0) {
-                lerr << "[ShaderPool] Failed to load shader!" << endl;
-                Fatal::exit(Fatal::BGFX_CREATE_SHADER_FAILED);
+                lerr << "[ShaderPool] Failed to load shader!" << nlaf;
+                Debug::exit(Debug::BGFX_CREATE_SHADER_FAILED);
             }
         #endif
             const bgfx::Memory* memory = bgfx::alloc(size + 1);
             memory->data[memory->size - 1] = '\0';
             const auto handle = bgfx::createShader(memory);
             if (!bgfx::isValid(handle)) {
-                lerr << "[ShaderPool] Failed to create shader!" << endl;
-                Fatal::exit(Fatal::BGFX_CREATE_SHADER_FAILED);
+                lerr << "[ShaderPool] Failed to create shader!" << nlaf;
+                Debug::exit(Debug::BGFX_CREATE_SHADER_FAILED);
             }
             return handle;
         }
@@ -70,8 +70,8 @@ namespace ShaderPool {
             const auto vsh = loadShader(shaderSetDef.vs), fsh = loadShader(shaderSetDef.fs);
             const auto handle = bgfx::createProgram(vsh, fsh, true);
             if (!bgfx::isValid(handle)) {
-                lerr << "[ShaderPool] Failed to create shader program!" << endl;
-                Fatal::exit(Fatal::BGFX_CREATE_SHADER_FAILED);
+                lerr << "[ShaderPool] Failed to create shader program!" << nlaf;
+                Debug::exit(Debug::BGFX_CREATE_SHADER_FAILED);
             }
             return handle;
         }
@@ -91,8 +91,8 @@ namespace ShaderPool {
     [[nodiscard]] inline bgfx::ProgramHandle getShader(ShaderPoolHandle handle) noexcept {
         const auto* p = detail::registry.get(handle);
         if (p == nullptr) {
-            lerr << "[ShaderPool] Failed to get shader " << handle << "!" << endl;
-            Fatal::exit(Fatal::BGFX_GET_SHADER_FAILED);
+            lerr << "[ShaderPool] Failed to get shader " << handle << "!" << nlaf;
+            Debug::exit(Debug::BGFX_GET_SHADER_FAILED);
         }
         return *p;
     }

@@ -1,12 +1,10 @@
 #pragma once
 #include <filesystem>
-#include <format>
 #include <string>
 #include <utility>
 #include <vector>
-#include <boost/unordered/unordered_flat_map.hpp>
 
-#include "../debug/Logger.hpp"
+#include "../debug/loggers.hpp"
 #include "../umi/frontend/json/UmiJSON.hpp"
 #include "../util/os/archiveReader.hpp"
 #include "../util/os/filesystem.hpp"
@@ -15,7 +13,8 @@
 #include "registry.hpp"
 
 namespace Pack {
-    using std::move, std::string, std::vector, std::filesystem::path, std::filesystem::directory_iterator, std::filesystem::is_directory, std::filesystem::exists, std::to_underlying, std::format, boost::unordered_flat_map, Util::OS::u8, Util::OS::normalize, Util::OS::getU8String, Util::OS::ArchiveType, Util::OS::getArType, Util::OS::readFileFromAr, Util::OS::stripBOM, Util::Json::Latest, Util::Json::JSONKind::Manifest;
+    typedef uint8_t u8;
+    using std::move, std::string, std::vector, std::filesystem::path, std::filesystem::directory_iterator, std::filesystem::is_directory, std::filesystem::exists, Util::OS::normalize, Util::OS::getU8String, Util::OS::ArchiveType, Util::OS::getArType, Util::OS::readFileFromAr, Util::OS::stripBOM, Util::Json::Latest, Util::Json::JSONKind::Manifest;
 
     //Try to add a pack to the registry.
     //If a pack with the same ID already exists, skip adding and log an error.
@@ -24,14 +23,14 @@ namespace Pack {
     inline void tryAddingPack(const PackMetaInfo& info) noexcept {
         const auto itRegistry = detail::registry.find(info.manifest.id);
         if (itRegistry != detail::registry.end()) {
-            lerr << "[Pack] Pack with ID " << info.manifest.id.value() << " already exists in path " << itRegistry->second.pathStr << ", skipping adding the pack in path " << info.pathStr << ". Do not purposely clash pack IDs. If you want to overwrite a pack's behavior, use the same `nameSpace` and require yourself to load after the target pack." << endl;
+            lerr << "[Pack] Pack with ID " << info.manifest.id.value() << " already exists in path " << itRegistry->second.pathStr << ", skipping adding the pack in path " << info.pathStr << ". Do not purposely clash pack IDs. If you want to overwrite a pack's behavior, use the same `nameSpace` and require yourself to load after the target pack." << nlaf;
             return;
         }
         detail::registry.emplace(info.manifest.id.value(), info);
         auto itKnownPacks = detail::knownPacks.find(info.manifest.id);
         if (itKnownPacks != detail::knownPacks.end()) {
             if (itKnownPacks->second.version != info.manifest.version) {
-                lout << "[Pack] Pack " << info.manifest.id.value() << "'s version changed from " << itKnownPacks->second.version << " to " << info.manifest.version << ", todo: prepare for preparing migration." << endl;
+                lout << "[Pack] Pack " << info.manifest.id.value() << "'s version changed from " << itKnownPacks->second.version << " to " << info.manifest.version << ", todo: prepare for preparing migration." << nlaf;
             }
             itKnownPacks->second.version = info.manifest.version;
         }
@@ -40,29 +39,29 @@ namespace Pack {
             .version = info.manifest.version,
             .disabled = false
         });
-        lout << "[Pack] Added pack: " << info.manifest.name << ", ID: " << info.manifest.id.value() << ", version: " << info.manifest.version << endl;
+        lout << "[Pack] Added pack: " << info.manifest.name << ", ID: " << info.manifest.id.value() << ", version: " << info.manifest.version << ", path: " << info.pathStr << nlaf;
     }
 
     [[nodiscard]] inline bool parsePackManifest(const path& packPath, PackMetaInfo& result) noexcept {
         if (is_regular_file(packPath)) {
             const auto arType = getArType(packPath);
             if (arType == ArchiveType::NotASupportedArchive) {
-                lerr << "[Pack] File " << packPath << " is not a supported archive type, skipping." << endl;
+                lerr << "[Pack] File " << packPath << " is not a supported archive type, skipping." << nlaf;
                 return false;
             }
             else if (arType == ArchiveType::ExtensionDoesNotMatchContent) {
-                lerr << "[Pack] File" << packPath << "has an extension that does not match its content type, skipping." << endl;
+                lerr << "[Pack] File" << packPath << "has an extension that does not match its content type, skipping." << nlaf;
                 return false;
             }
             vector<u8> manifestData;
             if (!readFileFromAr(packPath, "manifest.json", manifestData)) {
-                lerr << "[Pack] Failed to read `manifest.json` from archive " << packPath << ", skipping." << endl;
+                lerr << "[Pack] Failed to read `manifest.json` from archive " << packPath << ", skipping." << nlaf;
                 return false;
             }
             stripBOM(manifestData);
             Latest<Manifest> temp;
             if (!UmiJSON::readJSON<Manifest>(manifestData, temp)) {
-                lerr << "[Pack] Failed to parse `manifest.json` in archive " << packPath << ", skipping." << endl;
+                lerr << "[Pack] Failed to parse `manifest.json` in archive " << packPath << ", skipping." << nlaf;
                 return false;
             }
             result = {
@@ -75,12 +74,12 @@ namespace Pack {
         else if (is_directory(packPath)) {
             const auto manifestPath = packPath / "manifest.json";
             if (!exists(manifestPath) || !is_regular_file(manifestPath)) {
-                lout << "[Pack] No `manifest.json` found in " << packPath << ", skipping." << endl;
+                lout << "[Pack] No `manifest.json` found in " << packPath << ", skipping." << nlaf;
                 return false;
             }
             Latest<Manifest> temp;
             if (!UmiJSON::readJSONFromFile<Manifest>(manifestPath, temp)) {
-                lerr << "[Pack] Failed to parse manifest.json in " << packPath << ", skipping." << endl;
+                lerr << "[Pack] Failed to parse manifest.json in " << packPath << ", skipping." << nlaf;
                 return false;
             }
             result = {
@@ -91,7 +90,7 @@ namespace Pack {
             return true;
         }
         else {
-            lout << "[Pack] Ignoring: " << packPath << endl;
+            lout << "[Pack] Ignoring: " << packPath << nlaf;
             return false;
         }
     }
@@ -99,13 +98,13 @@ namespace Pack {
     inline void getPacksFromPackRoot(const string& rootStr) noexcept {
         path rootPath(rootStr);
         if (exists(rootPath) && is_directory(rootPath) && normalize(rootPath)) {
-            lout << "[Pack] Traversing pack root: " << rootPath << endl;
+            lout << "[Pack] Traversing pack root: " << rootPath << nlaf;
             PackMetaInfo info;
             for(const auto& directoryEntry : directory_iterator(rootPath)) {
                 if (parsePackManifest(directoryEntry.path(), info)) tryAddingPack(info);
-                else lerr << "[Pack] Failed to parse pack: " << directoryEntry.path() << endl;
+                else lerr << "[Pack] Failed to parse pack: " << directoryEntry.path() << nlaf;
             }
         }
-        else lerr << "[Pack] Ignoring invalid pack root: " << rootStr << endl;
+        else lerr << "[Pack] Ignoring invalid pack root: " << rootStr << nlaf;
     }
 }

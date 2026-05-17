@@ -128,7 +128,7 @@ namespace Sound::detail {
                     break;
                 }
                 default: {
-                    lerr << "[Sound] WTF is command type " << static_cast<u8>(command.type) << "?" << endl;
+                    lerr << "[Sound] WTF is command type " << static_cast<u8>(command.type) << "?" << nlaf;
                     break;
                 }
             }

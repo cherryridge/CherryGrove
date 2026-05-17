@@ -78,7 +78,7 @@ namespace Boot {
         }
         catch (const ParseError& e) {
             cerr << "(Error) [CLI] Error occured during argument parsing: (" << e.get_exit_code() << ") " << e.get_name() << " " << e.what() << endl;
-            exit(Fatal::BOOT_INVALID_WORKING_DIR);
+            exit(Debug::BOOT_INVALID_WORKING_DIR);
         }
 
         if (generateKeyword == "schema") {
@@ -105,7 +105,7 @@ namespace Boot {
                 const path currentPath = current_path(ec);
                 if (ec || !isWritableDirectory(currentPath)) {
                     cerr << "(Error) [CLI] Both executable directory and current working directory are not writable. CherryGrove needs to have a writable working directory. If you're using Linux or macOS, consider providing the working directory argument: `./CherryGrove <path-to-wd>`." << endl;
-                    Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
+                    Debug::exit(Debug::FILESYSTEM_NO_WRITE_PERMISSION);
                 }
                 cout << "[CLI] No working directory specified, using current working directory: " << getU8String(currentPath) << endl;
                 workingDirectoryPath = currentPath;
@@ -115,24 +115,24 @@ namespace Boot {
             try { workingDirectoryPath = to_path(workingDirectory); }
             catch (const exception& e) {
                 cerr << "(Error) [Boot] Invalid working directory path: " << workingDirectory << " (" << e.what() << ")" << endl;
-                Fatal::exit(Fatal::BOOT_INVALID_WORKING_DIR);
+                Debug::exit(Debug::BOOT_INVALID_WORKING_DIR);
             }
             if (!isWritableDirectory(workingDirectoryPath)) {
                 cerr << "(Error) [CLI] Specified working directory is not writable: " << workingDirectory << endl;
-                Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
+                Debug::exit(Debug::FILESYSTEM_NO_WRITE_PERMISSION);
             }
         }
 
         if (!normalize(workingDirectoryPath)) {
             cerr << "(Error) [Boot] Invalid working directory path: " << getU8String(workingDirectoryPath) << endl;
-            Fatal::exit(Fatal::BOOT_INVALID_WORKING_DIR);
+            Debug::exit(Debug::BOOT_INVALID_WORKING_DIR);
         }
 
         error_code ec;
         current_path(workingDirectoryPath, ec);
         if (ec) {
             cerr << "(Error) [Boot] Failed to set working directory path: " << getU8String(workingDirectoryPath) << " (" << ec.message() << ")" << endl;
-            Fatal::exit(Fatal::BOOT_SET_WORKING_DIR_FAILED);
+            Debug::exit(Debug::BOOT_SET_WORKING_DIR_FAILED);
         }
     }
 }

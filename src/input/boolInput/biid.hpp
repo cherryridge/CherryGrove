@@ -2,7 +2,7 @@
 #include <limits>
 #include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../util/BijectorArray.hpp"
 
 namespace InputHandler::BoolInput {
@@ -218,7 +218,7 @@ namespace InputHandler::BoolInput {
     [[nodiscard]] inline constexpr u32 BIIDToRawCode(BoolInputID biid) noexcept {
         if (biid == INVALID_BIID) {
         #if CG_DEBUG
-            lerr << "[InputHandler] Passing invalid BIID to BIIDToRawCode!" << endl;
+            lerr << "[InputHandler] Passing invalid BIID to BIIDToRawCode!" << nlaf;
         #endif
             return INVALID_RAWCODE;
         }
@@ -235,7 +235,7 @@ namespace InputHandler::BoolInput {
     [[nodiscard]] inline constexpr BIInputSource BIIDToSource(BoolInputID biid) noexcept {
         if (biid == INVALID_BIID) {
         #if CG_DEBUG
-            lerr << "[InputHandler] Passing invalid BIID to BIIDToSource!" << endl;
+            lerr << "[InputHandler] Passing invalid BIID to BIIDToSource!" << nlaf;
         #endif
             return BIInputSource::Count;
         }

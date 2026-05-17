@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../util/SlotTable.hpp"
 #include "../actionIds.hpp"
 #include "../canDelete.hpp"
@@ -32,7 +32,7 @@ namespace InputHandler::MouseMove {
         if (info.allowedKinds.get(SubKind::Trigger)) insertSort(detail::sortedTrigger, detail::actionInfos, handle);
         if (info.allowedKinds.get(SubKind::Persist)) insertSort(detail::sortedPersist, detail::actionInfos, handle);
     #if CG_DEBUG
-        if (info.allowedKinds.none()) [[unlikely]] lerr << "[InputHandler::MouseMove] Action " << id << " is not listening to any SubKind. This action will never be triggered." << endl;
+        if (info.allowedKinds.none()) [[unlikely]] lerr << "[InputHandler::MouseMove] Action " << id << " is not listening to any SubKind. This action will never be triggered." << nlaf;
     #endif
         registerId(id, {InputKind::MouseMove, handle});
         return id;
@@ -75,7 +75,7 @@ namespace InputHandler::MouseMove {
     inline void processTrigger(const SDL_Event& event) noexcept {
     #if CG_DEBUG
         if (event.type != SDL_EVENT_MOUSE_MOTION) {
-            lerr << "[InputHandler::MouseMove] Unexpected event type: " << event.type << endl;
+            lerr << "[InputHandler::MouseMove] Unexpected event type: " << event.type << nlaf;
             return;
         }
     #endif

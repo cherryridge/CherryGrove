@@ -41,7 +41,7 @@ namespace InputHandler::internal {
     inline constexpr const char* NULLPTR_ERROR = "[InputHandler] Unexpected nullptr encountered!";
     #define ASSERT_NOT_NULLPTR(ptr, ret) \
     if ((ptr) == nullptr) { \
-        lerr << InputHandler::internal::NULLPTR_ERROR << endl; \
+        lerr << InputHandler::internal::NULLPTR_ERROR << nlaf; \
         return ret; \
     }
 }

@@ -15,7 +15,7 @@
 #endif
 #include <v8.h>
 
-#include "../../../debug/Logger.hpp"
+#include "../../../debug/loggers.hpp"
 #include "hello.hpp"
 
 namespace UmiJS {
@@ -53,9 +53,9 @@ namespace UmiJS {
                 v8::Local<v8::Script> script = v8::Script::Compile(context, local).ToLocalChecked();
                 v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
                 v8::String::Utf8Value utf8(isolate, result);
-                lout << *utf8 << endl;
+                lout << *utf8 << nlaf;
             }
-            else lerr << "[V8] JSFuck test failed!" << endl;
+            else lerr << "[V8] JSFuck test failed!" << nlaf;
         }
     }
 

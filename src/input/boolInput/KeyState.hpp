@@ -1,7 +1,7 @@
 #pragma once
 #include <ostream>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/implLShiftFor.hpp"
 #include "../../simulation/Time.hpp"
 
 namespace InputHandler::BoolInput {
@@ -70,13 +70,8 @@ namespace InputHandler::BoolInput {
         static void setRepeatTapGap(TimeUnit gap) noexcept { repeatTapGap = gap; }
         static void setComboMinTTL(TimeUnit ttl) noexcept { comboMinTTL = ttl; }
 
-        friend ostream& operator<<(ostream& os, const KeyState& s) noexcept {
-            os << "KeyState(phys=" << s.isPhysicalDown << " virt=" << s.isVirtualDown << ")";
-            return os;
-        }
-        friend Logger::Logger& operator<<(Logger::Logger& logger, const KeyState& s) noexcept {
-            logger << "KeyState(phys=" << s.isPhysicalDown << " virt=" << s.isVirtualDown << ")";
-            return logger;
-        }
+        IMPL_LSHIFT_FOR(KeyState,
+            output << "KeyState(phys=" << data.isPhysicalDown << " virt=" << data.isVirtualDown << ")";
+        )
     };
 }

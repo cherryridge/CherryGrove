@@ -6,6 +6,7 @@
 #include <SDL3/SDL.h>
 
 #include "../boot/focus/Focus.hpp"
+#include "../debug/loggers.hpp"
 #include "../globalState.hpp"
 #include "../input/inputPipeline.hpp"
 #include "../settings/Settings.hpp" // IWYU pragma: keep
@@ -58,7 +59,7 @@ namespace Main {
             taskStartTime = high_resolution_clock::now();
             for (u64 i = 0; i < maxTasks && high_resolution_clock::now() - taskStartTime < maxTaskTime; i++) if (runOnMainThread.dequeue(task)) task();
         #if CG_DEBUG
-            if (high_resolution_clock::now() - taskStartTime > maxTaskTime) lout << "Can't keep up! Main thread task list run for " << duration_cast<microseconds>(high_resolution_clock::now() - taskStartTime).count() << " / " << duration_cast<microseconds>(maxTaskTime).count() << "us" << endl;
+            if (high_resolution_clock::now() - taskStartTime > maxTaskTime) lout << "Can't keep up! Main thread task list run for " << duration_cast<microseconds>(high_resolution_clock::now() - taskStartTime).count() << " / " << duration_cast<microseconds>(maxTaskTime).count() << "us" << nlaf;
         #endif
         }
         stop: shutdown();

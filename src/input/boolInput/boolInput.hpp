@@ -6,7 +6,7 @@
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../simulation/Time.hpp"
 #include "../../util/SlotTable.hpp"
 #include "../actionIds.hpp"
@@ -57,7 +57,7 @@ namespace InputHandler::BoolInput {
     [[nodiscard]] inline ActionID add(BoolInputActionCallback cb, ActionPriority priority, const ActionwiseInfo_BI& info) noexcept {
         const ActionID id = getNextId();
     #if CG_DEBUG
-        if (info.allowedKinds.none()) [[unlikely]] lerr << "[InputHandler::BoolInput] Action " << id << " is not listening to any BoolInputKind. This action will never be triggered." << endl;
+        if (info.allowedKinds.none()) [[unlikely]] lerr << "[InputHandler::BoolInput] Action " << id << " is not listening to any BoolInputKind. This action will never be triggered." << nlaf;
     #endif
         const ActionHandle handle = detail::actionInfos.emplace(id, priority, cb, info);
         registerId(id, {InputKind::BoolInput, handle});
@@ -102,7 +102,7 @@ namespace InputHandler::BoolInput {
         if (bindingExists(handle, combo) || combo.keyCount() == 0) return false;
     #if CG_DEBUG
         if (combo.keyCount() == 0) {
-            lerr << "[InputHandler] Attempt to bind an unbound KeyCombo. This should have been prevented by the caller. ActionHandle: " << handle.value << endl;
+            lerr << "[InputHandler] Attempt to bind an unbound KeyCombo. This should have been prevented by the caller. ActionHandle: " << handle.value << nlaf;
             return false;
         }
     #endif
@@ -270,7 +270,7 @@ namespace InputHandler::BoolInput {
                 break;
             default:
             #if CG_DEBUG
-                lerr << "[InputHandler::BoolInput] Unexpected event type: " << event.type << endl;
+                lerr << "[InputHandler::BoolInput] Unexpected event type: " << event.type << nlaf;
             #endif
                 return;
         }
@@ -292,7 +292,7 @@ namespace InputHandler::BoolInput {
         #if CG_DEBUG
             ASSERT_NOT_NULLPTR(record, )
             if (record->combo.keyCount() == 0) {
-                lerr << "[InputHandler] BindingRecord with unbound KeyCombo found in BIIDtoBindings. Unbound KeyCombos should not enter the record slottable. BIID: " << biid << ", record index: " << i << endl;
+                lerr << "[InputHandler] BindingRecord with unbound KeyCombo found in BIIDtoBindings. Unbound KeyCombos should not enter the record slottable. BIID: " << biid << ", record index: " << i << nlaf;
                 return;
             }
         #endif
@@ -325,7 +325,7 @@ namespace InputHandler::BoolInput {
             #if CG_DEBUG
                 ASSERT_NOT_NULLPTR(record, )
                 if (record->combo.keyCount() == 0) {
-                    lerr << "[InputHandler] BindingRecord with unbound KeyCombo found in BIIDtoBindings. Unbound KeyCombos should not enter the record slottable. BIID: " << biid << ", record index: " << i << endl;
+                    lerr << "[InputHandler] BindingRecord with unbound KeyCombo found in BIIDtoBindings. Unbound KeyCombos should not enter the record slottable. BIID: " << biid << ", record index: " << i << nlaf;
                     return;
                 }
             #endif
@@ -366,7 +366,7 @@ namespace InputHandler::BoolInput {
                 break;
             default:
             #if CG_DEBUG
-                lerr << "[InputHandler] This event type should not be routed to BoolInput::processDevice: " << event.type << endl;
+                lerr << "[InputHandler] This event type should not be routed to BoolInput::processDevice: " << event.type << nlaf;
             #endif
                 break;
         }

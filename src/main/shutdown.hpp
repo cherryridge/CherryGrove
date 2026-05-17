@@ -2,6 +2,7 @@
 #include <atomic>
 #include <SDL3/SDL.h>
 
+#include "../debug/controller.hpp"
 #include "../pack/Pack.hpp"
 #include "../graphics/controller.hpp"
 #include "../input/InputHandler.hpp"
@@ -19,6 +20,6 @@ namespace Main {
         Sound::shutdown();
         InputHandler::shutdown();
         Window::shutdown();
-        Logger::shutdown();
+        Debug::shutdown();
     }
 }

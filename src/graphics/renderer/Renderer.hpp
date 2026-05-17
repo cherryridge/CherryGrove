@@ -6,7 +6,8 @@
 #include <bx/math.h>
 #include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/Fatal.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../window.hpp"
 #include "size.hpp"
 
@@ -38,9 +39,9 @@ namespace Renderer {
     #elif CG_PLATFORM_MACOS
         config.platformData.ndt = nullptr;
     #elif CG_PLATFORM_ANDROID
-        Fatal::exit(Fatal::MISC_UNSUPPORTED_PLATFORM);
+        Debug::exit(Debug::MISC_UNSUPPORTED_PLATFORM);
     #elif CG_PLATFORM_IOS
-        Fatal::exit(Fatal::MISC_UNSUPPORTED_PLATFORM);
+        Debug::exit(Debug::MISC_UNSUPPORTED_PLATFORM);
     #endif
         //Let bgfx select the rendering backend automatically.
         config.type = bgfx::RendererType::Count;
@@ -52,10 +53,10 @@ namespace Renderer {
         config.resolution.height = height;
         config.resolution.reset = BGFX_RESET_VSYNC;
         if (!bgfx::init(config)) {
-            lerr << "[Renderer] Failed to initialize bgfx!" << endl;
-            Fatal::exit(Fatal::BGFX_INITIALIZATION_FAILED);
+            lerr << "[Renderer] Failed to initialize bgfx!" << nlaf;
+            Debug::exit(Debug::BGFX_INITIALIZATION_FAILED);
         }
-        lout << "Using rendering backend: " << bgfx::getRendererName(bgfx::getRendererType()) << endl;
+        lout << "Using rendering backend: " << bgfx::getRendererName(bgfx::getRendererType()) << nlaf;
         vertexLayout.begin()
             .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
             .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)

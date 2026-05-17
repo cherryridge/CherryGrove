@@ -2,7 +2,7 @@
 #include <soloud/soloud_wav.h>
 #include <soloud/soloud_wavstream.h>
 
-#include "../debug/Logger.hpp"
+#include "../debug/loggers.hpp"
 #include "soLoudInstance.hpp"
 #include "types.hpp"
 
@@ -22,7 +22,7 @@ namespace Sound::detail {
                 new (&wavStream) WavStream();
                 auto result = wavStream.load(filePath);
                 if (result != SO_NO_ERROR) {
-                    lerr << "[Sound] Loading from file " << filePath << " failed: " << soLoudInstance->getErrorString(result) << endl;
+                    lerr << "[Sound] Loading from file " << filePath << " failed: " << soLoudInstance->getErrorString(result) << nlaf;
                     return;
                 }
                 active = true;
@@ -39,7 +39,7 @@ namespace Sound::detail {
                 new (&wav) Wav();
                 auto result = wav.load(filePath);
                 if (result != SO_NO_ERROR) {
-                    lerr << "[Sound] Loading from file " << filePath << " failed: " << soLoudInstance->getErrorString(result) << endl;
+                    lerr << "[Sound] Loading from file " << filePath << " failed: " << soLoudInstance->getErrorString(result) << nlaf;
                     return;
                 }
                 active = true;

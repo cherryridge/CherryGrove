@@ -1,7 +1,8 @@
 #pragma once
+#include <cstdint>
 #include <function2/function2.hpp>
 
-#include "../debug/Logger.hpp"
+#include "../debug/implLShiftFor.hpp"
 #include "../util/SlotTable.hpp"
 #include "types.hpp"
 
@@ -30,10 +31,11 @@ namespace InputHandler {
         Action<ActionwiseInfo, EventwiseInfo>& operator=(const Action<ActionwiseInfo, EventwiseInfo>&) noexcept = default;
         Action<ActionwiseInfo, EventwiseInfo>& operator=(Action<ActionwiseInfo, EventwiseInfo>&&) noexcept = default;
 
-        friend Logger::Logger& operator<<(Logger::Logger& os, const Action<ActionwiseInfo, EventwiseInfo>& data) noexcept {
-            os << "Action #" << data.actionId << " (priority " << data.priority << ", cb 0x" << reinterpret_cast<void*>(&data.callback) << ")";
-            return os;
-        }
+        using SpecializedAction = Action<ActionwiseInfo, EventwiseInfo>;
+
+        IMPL_LSHIFT_FOR(SpecializedAction,
+            output << "Action #" << data.actionId << " (priority " << data.priority << ", cb 0x" << reinterpret_cast<uintptr_t>(&data.callback) << ")";
+        )
     };
 
     inline constexpr ActionID INVALID_ACTION_ID = 0;

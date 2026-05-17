@@ -2,7 +2,7 @@
 #include <chrono>
 #include <SDL3/SDL.h>
 
-#include "../debug/Logger.hpp" // IWYU pragma: keep
+#include "../debug/loggers.hpp" // IWYU pragma: keep
 #include "../settings/Settings.hpp"
 #include "../util/concurrentQueue.hpp"
 #include "boolInput/boolInput.hpp"
@@ -99,7 +99,7 @@ namespace InputHandler {
                     case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
                     case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
                     #if CG_DEBUG
-                        lout << "Gamepad touch is not supported yet!" << endl;
+                        lout << "Gamepad touch is not supported yet!" << nlaf;
                     #endif
                         break;
                     case SDL_EVENT_FINGER_DOWN:
@@ -107,7 +107,7 @@ namespace InputHandler {
                     case SDL_EVENT_FINGER_CANCELED:
                     case SDL_EVENT_FINGER_MOTION:
                     #if CG_DEBUG
-                        lout << "Touch is not supported yet!" << endl;
+                        lout << "Touch is not supported yet!" << nlaf;
                     #endif
                         break;
                     case SDL_EVENT_PEN_DOWN:
@@ -115,19 +115,19 @@ namespace InputHandler {
                     case SDL_EVENT_PEN_MOTION:
                     case SDL_EVENT_PEN_AXIS:
                     #if CG_DEBUG
-                        lout << "Pen is not supported yet!" << endl;
+                        lout << "Pen is not supported yet!" << nlaf;
                     #endif
                         break;
                     default:
                     #if CG_DEBUG
-                        lout << "Got this event type, fyi: " << event.type << endl;
+                        lout << "Got this event type, fyi: " << event.type << nlaf;
                     #endif
                         break;
                 }
             }
         }
     #if CG_DEBUG
-        if (i == MAXIMUM_INPUT_EVENTS_PER_FRAME) lout << "[InputHandler] Maximum events per frame reached: " << MAXIMUM_INPUT_EVENTS_PER_FRAME << endl;
+        if (i == MAXIMUM_INPUT_EVENTS_PER_FRAME) lout << "[InputHandler] Maximum events per frame reached: " << MAXIMUM_INPUT_EVENTS_PER_FRAME << nlaf;
     #endif
     }
 

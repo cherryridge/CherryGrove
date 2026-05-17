@@ -1,26 +1,24 @@
-#include <atomic>
+#pragma once
 #include <ctime>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <iostream>
-#include <string>
 
-#include "../util/os/platform.hpp"
-#include "Logger.hpp"
+#include "AtomicizedOutput.hpp"
+#include "LoggingMode.hpp"
+#include "loggers.hpp"
 
-namespace Logger {
-    using std::atomic_flag, std::cout, std::cerr, std::ios, std::string, std::ofstream, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::format;
+namespace Debug {
+    typedef int64_t i64;
+    using std::cout, std::cerr, std::endl, std::ios, std::string, std::ofstream, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::format;
 
-    static ofstream logFile;
-    static atomic_flag logFileFlag{}, coutFlag{}, cerrFlag{};
+    namespace detail {
+        inline ofstream logFile;
+        inline AtomicizedOutput atomicLogFile{logFile};
+    }
 
-    thread_local std::ostringstream Logger::buffer;
-    thread_local std::string Logger::threadName;
-
-    Logger lout(&cout, &coutFlag), lerr(&cerr, &cerrFlag, "(Error)", true);
-
-    void init(LoggingMode mode) noexcept {
+    inline void init(LoggingMode mode) noexcept {
         switch(mode) {
             //The two logger object use stdout by default. Nothing to do here.
             case LoggingMode::Stdout: break;
@@ -44,8 +42,7 @@ namespace Logger {
                 break;
             #elif CG_PLATFORM_MACOS
                 break;
-            #elif CG_PLATFORM_ANDROID
-            #elif CG_PLATFORM_IOS
+            #elif CG_PLATFORM_ANDROID || CG_PLATFORM_IOS
                 cout << "We can't spawn console on mobile, falling back to file output." << endl;
                 [[fallthrough]];
             #endif
@@ -57,25 +54,25 @@ namespace Logger {
                 }
                 time_t timestamp;
                 time(&timestamp);
-                string logFileName = format("logs/CherryGrove-{}.log", timestamp);
-                logFile = ofstream(logFileName);
-                if (!logFile.is_open()) {
+                string logFileName = format("logs/CherryGrove-{}.log", static_cast<i64>(timestamp));
+                detail::logFile = ofstream(logFileName);
+                if (!detail::logFile.is_open()) {
                     cerr << "(Error)[Logger] Failed to open log file: " << logFileName << "\n";
                     //Refuse to redirect logs to prevent data loss.
                     return;
                 }
                 else {
                     cout << "Writing log to " << logFileName << "!" << endl;
-                    lout.redirect(&logFile, &logFileFlag);
-                    lerr.redirect(&logFile, &logFileFlag);
+                    lout.redirectOutput(&detail::atomicLogFile);
+                    lerr.redirectOutput(&detail::atomicLogFile);
                 }
                 break;
             }
         }
     }
 
-    void shutdown() noexcept {
-        lout << "Terminating logger!" << endl;
-        if (logFile.is_open()) logFile.close();
+    inline void shutdown() noexcept {
+        lout << "Terminating logger!" << nlaf;
+        if (detail::logFile.is_open()) detail::logFile.close();
     }
 }

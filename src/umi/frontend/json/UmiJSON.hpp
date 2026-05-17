@@ -2,7 +2,7 @@
 #include <span>
 #include <vector>
 
-#include "../../../debug/Logger.hpp"
+#include "../../../debug/loggers.hpp"
 #include "../../../util/concepts.hpp"
 #include "../../../util/json/formatVersion.hpp"
 #include "../../../util/os/filesystem.hpp"
@@ -20,7 +20,7 @@ namespace UmiJSON {
     [[nodiscard]] inline bool readJSONFromFile(PathType&& path, typename KindMeta<kind>::LatestType& result) noexcept {
         vector<u8> data;
         if (!readFile(path, data)) {
-            lerr << "[Umi] Failed to read in JSON file: " << path << "\n";
+            lerr << "[Umi] Failed to read in JSON file: " << path << nlaf;
             return false;
         }
         stripBOM(data);
@@ -34,7 +34,7 @@ namespace UmiJSON {
     [[nodiscard]] inline bool writeJSONToFile(const typename KindMeta<kind>::LatestType& input, PathType&& path, ExistBehavior existingBehavior) noexcept {
         vector<u8> data;
         if (!writeJSON<kind>(input, data)) {
-            lerr << "[Umi] Failed to write JSON data for file: " << path << "\n";
+            lerr << "[Umi] Failed to write JSON data for file: " << path << nlaf;
             return false;
         }
         return writeFile(path, data, existingBehavior);

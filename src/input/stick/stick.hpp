@@ -7,7 +7,7 @@
 #include <vector>
 #include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../util/SlotTable.hpp"
 #include "../actionIds.hpp"
 #include "../canDelete.hpp"
@@ -40,7 +40,7 @@ namespace InputHandler::Stick {
     [[nodiscard]] inline ActionID add(StickActionCallback cb, ActionPriority priority, const ActionwiseInfo_ST& info) noexcept {
         const ActionID id = getNextId();
     #if CG_DEBUG
-        if (info.triggerAxises.none()) [[unlikely]] lerr << "[InputHandler] Attempt to add a StickAction with no axis. This action will never be triggered. ActionID: " << id << endl;
+        if (info.triggerAxises.none()) [[unlikely]] lerr << "[InputHandler] Attempt to add a StickAction with no axis. This action will never be triggered. ActionID: " << id << nlaf;
     #endif
         const ActionHandle handle = detail::actionInfos.emplace(id, priority, cb, info);
         for (u8 axis = 0; axis < to_underlying(Axis::Count); axis++) if (info.triggerAxises.get(static_cast<Axis>(axis))) insertSort(detail::axisToHandle[axis], detail::actionInfos, handle);
@@ -108,7 +108,7 @@ namespace InputHandler::Stick {
     inline void processTrigger(const SDL_Event& event) noexcept {
     #if CG_DEBUG
         if (event.type != SDL_EVENT_GAMEPAD_AXIS_MOTION) [[unlikely]] {
-            lerr << "[InputHandler::Stick] Unexpected event type: " << event.type << endl;
+            lerr << "[InputHandler::Stick] Unexpected event type: " << event.type << nlaf;
             return;
         }
     #endif
@@ -195,7 +195,7 @@ namespace InputHandler::Stick {
     inline void processDevice(const SDL_Event& event) noexcept {
     #if CG_DEBUG
         if (event.type != SDL_EVENT_GAMEPAD_REMOVED) [[unlikely]] {
-            lerr << "[InputHandler::Stick] Unexpected event type: " << event.type << endl;
+            lerr << "[InputHandler::Stick] Unexpected event type: " << event.type << nlaf;
             return;
         }
     #endif

@@ -4,7 +4,7 @@
 #include <boost/unordered/unordered_flat_map.hpp>
 
 #include "../debug/Fatal.hpp"
-#include "../debug/Logger.hpp"
+#include "../debug/loggers.hpp"
 #include "../settings/pack.hpp"
 #include "../settings/Settings.hpp"
 #include "../umi/controller.hpp"
@@ -28,13 +28,13 @@ namespace Pack {
         PackMetaInfo info;
         for (u64 i = 0; i < packSettings.additionalPacks.size(); i++) {
             if (parsePackManifest(packSettings.additionalPacks[i], info)) tryAddingPack(info);
-            else lerr << "[Pack] Failed to parse pack: " << packSettings.additionalPacks[i] << endl;
+            else lerr << "[Pack] Failed to parse pack: " << packSettings.additionalPacks[i] << nlaf;
         }
-        lout << "[Pack] Found " << detail::registry.size() << " valid packs." << endl;
+        lout << "[Pack] Found " << detail::registry.size() << " valid packs." << nlaf;
 
         if (!Settings::updateKnownPacks(detail::knownPacks)) {
-            lerr << "[Pack] Failed to update known packs." << endl;
-            Fatal::exit(Fatal::SETTINGS_FAILED_TO_SAVE);
+            lerr << "[Pack] Failed to update known packs." << nlaf;
+            Debug::exit(Debug::SETTINGS_FAILED_TO_SAVE);
         }
 
         Umi::init();

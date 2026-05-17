@@ -16,13 +16,13 @@ namespace Sound::detail {
     inline constexpr const char* NOT_ACTIVE_STR = "[Sound] The play is not active!! Check it!!";
     #define ASSERT_ACTIVE \
     if (!active) { \
-        lerr << NOT_ACTIVE_STR << endl; \
+        lerr << NOT_ACTIVE_STR << nlaf; \
         return false; \
     }
     inline constexpr const char* NOT_PLAYING_STR = "[Sound] The play handle is invalid! Use `play` to start it first?";
     #define ASSERT_PLAYING \
     if (!soLoudInstance->isValidVoiceHandle(instanceHandle)) { \
-        lerr << NOT_PLAYING_STR << endl; \
+        lerr << NOT_PLAYING_STR << nlaf; \
         return false; \
     }
 
@@ -38,7 +38,7 @@ namespace Sound::detail {
         [[nodiscard]] PlayInfo(SoundHandle soundHandle, vec3 position, vec3 velocity, u32 playCount, float pitch, float playSpeed) noexcept : position(position), velocity(velocity), playCount(playCount), pitch(pitch), playSpeed(playSpeed) {
             soundRef = soundRegistry.getPtr(soundHandle);
             if (soundRef) active = true;
-            else lerr << "[Sound] For whatever reason the sound " << soundHandle.value << " is not found." << endl;
+            else lerr << "[Sound] For whatever reason the sound " << soundHandle.value << " is not found." << nlaf;
         }
 
         [[nodiscard]] bool play() noexcept {
@@ -59,7 +59,7 @@ namespace Sound::detail {
             ASSERT_ACTIVE
             ASSERT_PLAYING
             if (soLoudInstance->getPause(instanceHandle)) {
-                lerr << "[Sound] The play " << instanceHandle << " is already paused! Use `resume` to resume it!" << endl;
+                lerr << "[Sound] The play " << instanceHandle << " is already paused! Use `resume` to resume it!" << nlaf;
                 return false;
             }
             else soLoudInstance->setPause(instanceHandle, true);
@@ -99,7 +99,7 @@ namespace Sound::detail {
 
         ~PlayInfo() {
             if (soLoudInstance->isValidVoiceHandle(instanceHandle)) {
-                lerr << "[Sound] Struct is being destroyed before stopping: " << instanceHandle << "!" << endl;
+                lerr << "[Sound] Struct is being destroyed before stopping: " << instanceHandle << "!" << nlaf;
                 soLoudInstance->stop(instanceHandle);
             }
         }

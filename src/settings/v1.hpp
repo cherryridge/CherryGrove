@@ -4,6 +4,7 @@
 #include <vector>
 #include <glaze/glaze.hpp>
 
+#include "../debug/LoggingMode.hpp"
 #include "../pack/KnownPack.hpp"
 #include "../pack/option/PackOptionValue.hpp"
 #include "base.hpp"
@@ -191,7 +192,7 @@ namespace Settings {
     } input;
 
     JSON_STRUCT Debug {
-        Logger::LoggingMode logging{Logger::LoggingMode::File};
+        ::Debug::LoggingMode logging{::Debug::LoggingMode::File};
         //I don't know if this is a good idea but let's just try and see.
         u32 maxMainThreadTasksPerFrame{128};
         u32 maxMainThreadTaskTimeUs{2000};

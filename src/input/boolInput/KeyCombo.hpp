@@ -3,9 +3,9 @@
 #include <bit>
 #include <compare>
 #include <ostream>
-#include <glaze/glaze.hpp>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/implLShiftFor.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../util/implHashFor.hpp"
 #include "../../util/json/helpers.hpp"
 #include "biid.hpp"
@@ -38,7 +38,7 @@ namespace InputHandler::BoolInput {
         constexpr static const char* OUT_OF_BOUND_ERROR = "[InputHandler] Attempt to get/add/remove key with out-of-bound BIID: ";
         #define ASSERT_BIID_IN_BOUND(biid) \
         if (biid >= BIID_COUNT) { \
-            lerr << OUT_OF_BOUND_ERROR << biid << endl; \
+            lerr << OUT_OF_BOUND_ERROR << biid << nlaf; \
             return false; \
         }
 
@@ -163,14 +163,9 @@ namespace InputHandler::BoolInput {
             else return partial_ordering::unordered;
         }
 
-        friend ostream& operator<<(ostream& os, const KeyCombo& data) noexcept {
-            os << "KeyCombo(" << data.lower << ", " << data.middle << ", " << data.higher << ")";
-            return os;
-        }
-        friend Logger::Logger& operator<<(Logger::Logger& logger, const KeyCombo& data) noexcept {
-            logger << "KeyCombo(" << data.lower << ", " << data.middle << ", " << data.higher << ")";
-            return logger;
-        }
+        IMPL_LSHIFT_FOR(KeyCombo,
+            output << "KeyCombo(" << data.lower << ", " << data.middle << ", " << data.higher << ")";
+        )
 
         #undef ASSERT_BIID_IN_BOUND
     };

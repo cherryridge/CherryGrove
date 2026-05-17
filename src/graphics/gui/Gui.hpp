@@ -8,7 +8,7 @@
 #include <SDL3/SDL.h>
 
 #include "../../debug/Fatal.hpp"
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../intrinsics/guis/Copyright.hpp"
 #include "../../intrinsics/guis/DebugMenu.hpp"
 #include "../../intrinsics/guis/MainMenu.hpp"
@@ -64,8 +64,8 @@ namespace Gui {
                 .getNativeWindowHandle = Window::getNativeWindowHandle
             }
         })) {
-            lerr << "Failed to initialize ImGui for bgfx!" << endl;
-            Fatal::exit(Fatal::IMGUI_INITIALIZATION_FAILED);
+            lerr << "Failed to initialize ImGui for bgfx!" << nlaf;
+            Debug::exit(Debug::IMGUI_INITIALIZATION_FAILED);
         }
         {
             ::Util::Promise<Sound::SoundHandle> p;
@@ -95,7 +95,7 @@ namespace Gui {
         }
         for (const auto& gui : visibleGuisBuffer) {
             if (guiRegistry.find(gui) != guiRegistry.end()) guiRegistry[gui]();
-            else lerr << "[GUI] Did you forget to emplace the GUI: " << static_cast<i32>(gui) << "?" << endl;
+            else lerr << "[GUI] Did you forget to emplace the GUI: " << static_cast<i32>(gui) << "?" << nlaf;
         }
         ImGui::Render();
         ImGui_Implbgfx_RenderDrawData(ImGui::GetDrawData());

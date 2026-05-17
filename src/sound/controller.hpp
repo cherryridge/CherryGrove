@@ -8,7 +8,7 @@
 #include <soloud/soloud_audiosource.h>
 
 #include "../debug/Fatal.hpp"
-#include "../debug/Logger.hpp"
+#include "../debug/loggers.hpp"
 #include "hold.hpp"
 #include "soLoudInstance.hpp"
 
@@ -20,21 +20,21 @@ namespace Sound {
         inline atomic<bool> initialized{false};
 
         inline void shutdown() noexcept {
-            lout << "Terminating audio thread!" << endl;
+            lout << "Terminating audio thread!" << nlaf;
             initialized.store(false, memory_order_release);
             soLoudInstance->deinit();
         }
 
         inline void init() noexcept {
-            lout << "Audio" << flush;
-            lout << "Hello from audio thread!" << endl;
+            Debug::setThreadName("Audio");
+            lout << "Hello from audio thread!" << nlaf;
             soLoudInstance = make_unique<Soloud>();
             const auto code = soLoudInstance->init(Soloud::CLIP_ROUNDOFF, Soloud::AUTO);
             if (code != SoLoud::SO_NO_ERROR) {
-                lerr << "[Sound] SoLoud initialization failed after trying available backends: " << soLoudInstance->getErrorString(code) << endl;
-                Fatal::exit(Fatal::SOLOUD_INITIALIZATION_FAILED);
+                lerr << "[Sound] SoLoud initialization failed after trying available backends: " << soLoudInstance->getErrorString(code) << nlaf;
+                Debug::exit(Debug::SOLOUD_INITIALIZATION_FAILED);
             }
-            lout << "[Sound] Backend: " << soLoudInstance->getBackendString() << ", channels: " << soLoudInstance->getBackendChannels() << ", bufsize: " << soLoudInstance->getBackendBufferSize() << endl;
+            lout << "[Sound] Backend: " << soLoudInstance->getBackendString() << ", channels: " << soLoudInstance->getBackendChannels() << ", bufsize: " << soLoudInstance->getBackendBufferSize() << nlaf;
             initialized.store(true, memory_order_release);
             hold();
             shutdown();
@@ -44,7 +44,7 @@ namespace Sound {
     //threaded: Main Thread
     inline void init() noexcept {
         detail::audioThread = thread(detail::init);
-        while (!detail::initialized.load(memory_order_acquire)) yield();
+        while (!detail::initialized.load(memory_order_acquire));
     }
 
     //threaded: Main Thread

@@ -2,7 +2,7 @@
 #include <vector>
 #include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../util/SlotTable.hpp"
 #include "../actionIds.hpp"
 #include "../canDelete.hpp"
@@ -31,7 +31,7 @@ namespace InputHandler::Scroll {
         else if (info.directions.get(Direction::Vertical)) insertSort(detail::sortedVertical, detail::actionInfos, handle);
         else [[unlikely]] {
         #if CG_DEBUG
-            lerr << "[InputHandler::Scroll] Action " << id << " is not listening to any direction. This action will never be triggered." << endl;
+            lerr << "[InputHandler::Scroll] Action " << id << " is not listening to any direction. This action will never be triggered." << nlaf;
         #endif
         }
         insertSort(detail::sortedBoth, detail::actionInfos, handle);
@@ -77,7 +77,7 @@ namespace InputHandler::Scroll {
     inline void processTrigger(const SDL_Event& event) noexcept {
     #if CG_DEBUG
         if (event.type != SDL_EVENT_MOUSE_WHEEL) {
-            lerr << "[InputHandler::Scroll] Unexpected event type: " << event.type << endl;
+            lerr << "[InputHandler::Scroll] Unexpected event type: " << event.type << nlaf;
             return;
         }
     #endif
