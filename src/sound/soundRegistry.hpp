@@ -2,7 +2,7 @@
 
 #include "SlotTableForAudio.hpp"
 #include "SoundSource.hpp"
-#include "types.hpp"
+#include "typesAndConstants.hpp"
 
 namespace Sound::detail {
     inline SlotTableForAudio<SoundHandle, SoundSource> soundRegistry;

@@ -13,7 +13,7 @@ namespace Sound {
 
     inline constexpr float FLOAT_INFINITY = numeric_limits<float>::max();
     inline constexpr Components::EntityCoordinates DUMMY_COORD_2D = {0.0, 0.0, 0.0, 0ull};
-    
+
     //Order matching up with `SoLoud::AudioSource::ATTENUATION_MODELS`.
     enum struct Attenuation : u8 {
         //When: distance <= minDistance: 100%, distance >= maxDistance: 0%

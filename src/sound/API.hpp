@@ -7,7 +7,7 @@
 #include "../util/Promise.hpp"
 #include "command.hpp"
 #include "commandQueue.hpp"
-#include "types.hpp"
+#include "typesAndConstants.hpp"
 
 namespace Sound {
     typedef uint32_t u32;

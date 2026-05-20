@@ -5,7 +5,7 @@
 #include "../intrinsics/components/Rotation.hpp"
 #include "../intrinsics/components/Velocity.hpp"
 #include "../util/Promise.hpp"
-#include "types.hpp"
+#include "typesAndConstants.hpp"
 
 namespace Sound::detail {
     typedef uint32_t u32;

@@ -7,7 +7,7 @@
 
 #include "soundRegistry.hpp"
 #include "SoundSource.hpp"
-#include "types.hpp"
+#include "typesAndConstants.hpp"
 
 namespace Sound::detail {
     typedef uint32_t u32;
