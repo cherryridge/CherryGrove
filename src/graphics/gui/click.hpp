@@ -2,6 +2,6 @@
 
 #include "../../sound/typesAndConstants.hpp"
 
-namespace Gui {    
+namespace Gui {
     inline Sound::SoundHandle click;
 }
