@@ -4,7 +4,7 @@
 #include <imgui.h>
 
 #include "../../input/inputPipeline.hpp"
-#include "../../simulation/Simulation.hpp"
+#include "../../simulation/states.hpp"
 
 namespace Gui {
     typedef uint64_t u64;
@@ -20,7 +20,7 @@ namespace Gui {
                 InputHandler::FramedSDLEvents framedEvents;
                 //Discard the success flag because we've already peeked.
                 static_cast<void>(InputHandler::inputQueue_M2R.dequeue(framedEvents));
-                if (Simulation::gameStarted.load(memory_order_acquire)) {
+                if (Simulation::isSimStarted()) {
                     //This is not possible to deloop this variable because it's volatile relative to us and reference accessing is almost always optimized, so it's whatever.
                     const auto& io = ImGui::GetIO();
                     InputHandler::flagQueue_R2S.enqueue({framedEvents.frameId, io.WantCaptureMouse, io.WantCaptureKeyboard, io.WantTextInput, io.WantSetMousePos});

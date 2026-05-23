@@ -6,7 +6,7 @@
 #include "../pack/Pack.hpp"
 #include "../graphics/controller.hpp"
 #include "../input/InputHandler.hpp"
-#include "../simulation/Simulation.hpp"
+#include "../simulation/controller.hpp"
 #include "../sound/controller.hpp"
 #include "../window.hpp"
 
@@ -14,7 +14,7 @@ namespace Main {
     using std::memory_order_acquire;
 
     inline void shutdown() noexcept {
-        if (Simulation::gameStarted.load(memory_order_acquire)) Simulation::exit();
+        Simulation::shutdownThread();
         Pack::shutdown();
         Graphics::shutdown();
         Sound::shutdown();

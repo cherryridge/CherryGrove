@@ -7,8 +7,8 @@
 #include <SDL3/SDL.h>
 
 #include "../../debug/loggers.hpp"
-#include "../../simulation/Time.hpp"
 #include "../../util/SlotTable.hpp"
+#include "../../util/time.hpp"
 #include "../actionIds.hpp"
 #include "../canDelete.hpp"
 #include "../types.hpp"
@@ -22,7 +22,7 @@
 namespace InputHandler::BoolInput {
     typedef uint32_t u32;
     typedef uint64_t u64;
-    using std::lower_bound, std::array, std::atomic, std::vector, boost::unordered_flat_map, Simulation::TimeUnit, Util::SlotTable, InputHandler::internal::ActionLocation, InputHandler::internal::getLocation, InputHandler::internal::getNextId, InputHandler::internal::registerId, InputHandler::internal::unregisterId, InputHandler::utils::readSnapshot, InputHandler::utils::writeSnapshot, InputHandler::utils::process, InputHandler::utils::insertSort, InputHandler::utils::remove;
+    using std::lower_bound, std::array, std::atomic, std::vector, boost::unordered_flat_map, Util::TimeNs, Util::SlotTable, InputHandler::internal::ActionLocation, InputHandler::internal::getLocation, InputHandler::internal::getNextId, InputHandler::internal::registerId, InputHandler::internal::unregisterId, InputHandler::utils::readSnapshot, InputHandler::utils::writeSnapshot, InputHandler::utils::process, InputHandler::utils::insertSort, InputHandler::utils::remove;
 
     namespace detail {
         inline array<KeyState, BIID_COUNT> state{}, stateSnapshot{};
@@ -276,8 +276,8 @@ namespace InputHandler::BoolInput {
         }
         const BoolInputKind triggeredKind = down ? BoolInputKind::Down : BoolInputKind::Up;
 
-        if (down) detail::state[biid].onPhysicalPress(Simulation::now());
-        else detail::state[biid].onPhysicalRelease(Simulation::now());
+        if (down) detail::state[biid].onPhysicalPress(Util::now());
+        else detail::state[biid].onPhysicalRelease(Util::now());
 
         writeSnapshot(detail::state, detail::stateSnapshot, detail::snapshotSeq);
 
@@ -375,7 +375,7 @@ namespace InputHandler::BoolInput {
 //#region Misc
 
     //Currently not sure will be called by which thread :)
-    inline void updateArguments(TimeUnit repeatTapGap, TimeUnit comboMinTTL) noexcept {
+    inline void updateArguments(TimeNs repeatTapGap, TimeNs comboMinTTL) noexcept {
         KeyState::setRepeatTapGap(repeatTapGap);
         KeyState::setComboMinTTL(comboMinTTL);
     }

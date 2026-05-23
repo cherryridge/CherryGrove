@@ -15,6 +15,7 @@
 #include "../input/InputHandler.hpp"
 #include "../intrinsics/actions/Escape.hpp"
 #include "../settings/Settings.hpp"
+#include "../simulation/controller.hpp"
 #include "../sound/API.hpp"
 #include "../sound/controller.hpp"
 #include "../pack/Pack.hpp"
@@ -84,6 +85,9 @@ namespace Main {
 
         lout << "Initializing pack manager..." << nlaf;
         Pack::init();
+    
+    //Start Simulation thread
+        Simulation::initThread();
 
     //Set up main menu
         Gui::setVisibility(Gui::Intrinsics::MainMenu, true);
@@ -91,8 +95,10 @@ namespace Main {
         Gui::setVisibility(Gui::Intrinsics::Version, true);
 
     //Set up intrinsic inputs
-        static_cast<void>(InputHandler::BoolInput::add(IntrinsicInput::escapeCB, 10, {InputHandler::BoolInput::BoolInputKind::Down}));
+        const auto actionId = InputHandler::BoolInput::add(IntrinsicInput::escapeCB, 10, {InputHandler::BoolInput::BoolInputKind::Down});
+        static_cast<void>(InputHandler::BoolInput::addBinding(actionId, InputHandler::BoolInput::KeyCombo(InputHandler::BoolInput::BIInputSource::Keyboard, SDL_SCANCODE_ESCAPE)));
 
+    //Hold main thread
         hold();
     }
 }
