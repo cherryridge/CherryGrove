@@ -48,9 +48,7 @@ namespace InputHandler::utils {
         u8 currentFlags = 0;
         for (u64 i = 0; i < actions.size(); i++) {
             const auto* action = actionInfos.get(actions[i]);
-        #if CG_DEBUG
-            ASSERT_NOT_NULLPTR(action, )
-        #endif
+            ASSERT_NOT_NULLPTR(action, continue;)
             if (currentFlags & EVENT_CONTROL_FLAGS_STOP_AT_LOWER_PRIORITY && stopPriority != action->priority) break;
             action->callback(actionInfos, actions[i], eventwiseInfo, currentFlags);
             if (currentFlags & EVENT_CONTROL_FLAGS_STOP_IMMEDIATELY) break;
@@ -61,15 +59,11 @@ namespace InputHandler::utils {
     template <typename ActionwiseInfo, typename EventwiseInfo>
     inline void insertSort(vector<ActionHandle>& vec, const SlotTable<Action<ActionwiseInfo, EventwiseInfo>, ActionHandle>& actionInfos, ActionHandle newHandle) {
         const auto* newAction = actionInfos.get(newHandle);
-    #if CG_DEBUG
-        ASSERT_NOT_NULLPTR(newAction, )
-    #endif
+        ASSERT_NOT_NULLPTR(newAction, return;)
         auto it = vec.begin();
         for (; it != vec.end(); ++it) {
             const auto* action = actionInfos.get(*it);
-        #if CG_DEBUG
-            ASSERT_NOT_NULLPTR(action, )
-        #endif
+            ASSERT_NOT_NULLPTR(action, continue;)
             if (
                 newAction->priority > action->priority
              || (
@@ -85,9 +79,7 @@ namespace InputHandler::utils {
     inline void remove(vector<ActionHandle>& vec, const SlotTable<Action<ActionwiseInfo, EventwiseInfo>, ActionHandle>& actionInfos, ActionID id) {
         for (auto it = vec.begin(); it != vec.end(); ++it) {
             const auto* action = actionInfos.get(*it);
-        #if CG_DEBUG
-            ASSERT_NOT_NULLPTR(action, )
-        #endif
+            ASSERT_NOT_NULLPTR(action, continue;)
             if (action->actionId == id) {
                 vec.erase(it);
                 break;

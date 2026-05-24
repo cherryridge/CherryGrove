@@ -1,140 +1,82 @@
 #pragma once
 #include <atomic>
+#include <filesystem>
+#include <format>
 #include <iostream>
-#include <ostream>
-#include <sstream>
 #include <string>
-#include <thread>
 #include <type_traits>
-#include <glaze/glaze.hpp>
 
-#include "../globalState.hpp"
-#include "../util/json/helpers.hpp"
+#include "../util/os/filesystem.hpp"
 #include "../util/os/thread.hpp"
+#include "AtomicizedOutput.hpp"
+#include "manips.hpp"
+#include "threadLocals.hpp"
 
-//Auto use magic variables
-using std::endl, std::flush, std::ends;
-
-namespace Logger {
-    typedef uint8_t u8;
-    typedef uint16_t u16;
-    typedef uint32_t u32;
+namespace Debug {
     typedef uint64_t u64;
-    //Warning: DO NOT put std::cout or std::cerr here, or we will eventually misuse them.
-    using std::atomic_flag, std::ostream, std::cout, std::cerr, std::is_function_v, std::ostringstream, std::memory_order_acquire, std::memory_order_release, std::forward, std::string, std::to_string, std::this_thread::yield;
-    using Manip = ostream& (*)(ostream&);
+    using std::cout, std::cerr, std::endl, std::format, std::is_function_v, std::memory_order_relaxed, std::forward, std::string, std::filesystem::path, Util::OS::getU8String;
 
-    enum struct LoggingMode : u8 { Stdout, Separate, File };
-
-    void init(LoggingMode mode) noexcept;
-    void shutdown() noexcept;
-
+    //We've rewritten the Logger to allow arbitrary amount of Logger instances, but now every logger instance needs to have static lifetime duration to avoid vector index invalidation.
     struct Logger {
-        explicit Logger(ostream* output, atomic_flag* outputFlag, const string& title = "", bool immediateFlush = false) noexcept : title(title), output(output), outputFlag(outputFlag), immediateFlush(immediateFlush) {}
-
-        Logger& operator<<(Manip manip) noexcept {
-            if ((manip == static_cast<Manip>(endl) || manip == static_cast<Manip>(ends)) && !buffer.str().empty()) {
-                string temp;
-                if (!title.empty()) temp += title;
-                if (threadName != "") temp += threadName;
-                else temp += "[" + to_string(Util::getThreadId()) + "] ";
-                temp += buffer.str();
-                flushBuffer();
-                //Use `ends` for not adding a newline.
-                if (manip == static_cast<Manip>(endl)) temp += "\n";
-                while (outputFlag->test_and_set(memory_order_acquire)) yield();
-                *output << temp;
-                if (immediateFlush) output->flush();
-                outputFlag->clear(memory_order_release);
-            }
-            else if (manip == static_cast<Manip>(flush)) {
-                //Use instance << flush to delete the customized thread name.
-                if (buffer.str().empty()) threadName = "";
-                else {
-                    threadName = "[" + buffer.str() + "] ";
-                    flushBuffer();
-                }
-            }
-            //Don't react to other manipulation functions.
-            //else
-            return *this;
-        }
-
-        template <typename T> requires (!is_function_v<T>)
-        Logger& operator<<(const T& value) noexcept {
-            buffer << value;
-            return *this;
-        }
-
-        template <typename... Ts> requires (!is_function_v<Ts>, ...)
-        Logger& print(Ts&&... values) noexcept {
-            ((*this << forward<Ts>(values)), ...);
-            *this << endl;
-            return *this;
-        }
-
-        //Flushes the destination stream.
-        void operator()() const noexcept { output->flush(); }
-
-        void redirect(ostream* newOutput, atomic_flag* newOutputFlag) noexcept {
-            if (newOutput != nullptr) {
-                output->flush();
-                flushBuffer();
-                outputFlag = newOutputFlag;
-                output = newOutput;
-            }
-        }
-
     private:
-        const string title;
-        ostream* output{nullptr};
-        atomic_flag* outputFlag{nullptr};
-        //Whether to flush the destination stream after each endl, not the internal buffer. The internal buffer is always flushed after each endl.
-        const bool immediateFlush{false};
-        //We have to use `static` on buffer because C++ only allow thread_local entries with static or external linkage.
-        //And this implies we need to flush the buffer every time we finish one output, before releasing the flag.
-        static thread_local ostringstream buffer;
-        static thread_local string threadName;
+        AtomicizedOutput* output;
+        const string loggerName;
+        const u64 id;
 
-        void flushBuffer() noexcept {
-            buffer.str({});
-            buffer.clear();
+        void ensureBufferExists() noexcept {
+            if (detail::buffers.size() <= id) detail::buffers.resize(id + 1);
+        }
+
+    public:
+        explicit Logger(AtomicizedOutput* output, const string& loggerName = "") noexcept : output(output), loggerName(loggerName), id(detail::nextLoggerInstanceId.fetch_add(1, memory_order_relaxed)) {}
+
+        Logger(const Logger&) = delete;
+        Logger& operator=(const Logger&) = delete;
+
+        //... So we won't get silently fucked if we ALWAYS accidentally forgot to wrap them in `Util::OS::getU8String()`.
+        Logger& operator<(const path& filePath) noexcept {
+            *this << getU8String(filePath);
+            return *this;
+        }
+
+        Logger& operator<<(detail::Manip manip) noexcept {
+            ensureBufferExists();
+            if (output == nullptr) return *this;
+            if (manip == detail::nlaf || manip == detail::newLineOnly) detail::buffers[id] << "\n";
+            if ((manip == detail::nlaf || manip == detail::flushOnly) && !detail::buffers[id].str().empty()) {
+                string temp;
+                if (!loggerName.empty()) temp += format("({}) ", loggerName);
+                if (!detail::threadName.empty()) temp += format("[{}] ", detail::threadName);
+                else temp += format("[{}] ", Util::getThreadId());
+                temp += detail::buffers[id].str();
+                detail::buffers[id].str({});
+                detail::buffers[id].clear();
+                *output << temp;
+                output->flush();
+            }
+        #if CG_DEBUG
+            if (manip != detail::nlaf && manip != detail::newLineOnly && manip != detail::flushOnly) *this << "[Logger] Warning: Unrecognized manipulator function! Check `manips.hpp`." << detail::nlaf;
+        #endif
+            return *this;
+        }
+
+        template <typename T>
+        Logger& operator<<(T&& value) noexcept {
+            ensureBufferExists();
+            if (output == nullptr) return *this;
+            detail::buffers[id] << value;
+            return *this;
+        }
+
+        //This doesn't flush anything. Everything is still buffered until you use `nlaf` or `flushOnly`.
+        void redirectOutput(AtomicizedOutput* newOutput) noexcept { output = newOutput; }
+
+        Logger& operator()(auto&&... values) noexcept {
+            ensureBufferExists();
+            if (output == nullptr) return *this;
+            ((*this << forward<decltype(values)>(values)), ...);
+            *this << detail::nlaf;
+            return *this;
         }
     };
-
-    extern Logger lout, lerr;
-
-    template <typename... Ts>
-    inline void LOGGER_DYNAMIC_OUT(Ts&&... ts) noexcept {
-        if (GlobalState::multiThreadEra()) {
-            ((lout << forward<Ts>(ts)), ...);
-            lout << endl;
-        }
-        else {
-            ((cout << forward<Ts>(ts)), ...);
-            cout << endl;
-        }
-    }
-
-    template <typename... Ts>
-    inline void LOGGER_DYNAMIC_ERR(Ts&&... ts) noexcept {
-        if (GlobalState::multiThreadEra()) {
-            ((lerr << forward<Ts>(ts)), ...);
-            lerr << endl;
-        }
-        else {
-            cerr << "(Error) ";
-            ((cerr << forward<Ts>(ts)), ...);
-            cerr << endl;
-        }
-    }
 }
-
-
-GLAZE_ENUM_START(Logger::LoggingMode)
-    GLAZE_ENUM("stdout", Stdout),
-    GLAZE_ENUM("separate", Separate),
-    GLAZE_ENUM("file", File)
-GLAZE_ENUM_END
-
-using Logger::lout, Logger::lerr;

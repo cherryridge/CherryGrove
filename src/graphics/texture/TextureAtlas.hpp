@@ -6,7 +6,7 @@
 #include <bgfx/bgfx.h>
 
 #include "../../debug/Fatal.hpp"
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "intrinsicData.hpp"
 #include "RawTexture.hpp"
 #include "TextureInfo.hpp"
@@ -59,8 +59,8 @@ namespace TexturePool::internal {
             );
 
             if (!bgfx::isValid(internalHandle)) {
-                lerr << "[TexturePool] Failed to create atlas texture. This is fatal." << endl;
-                Fatal::exit(Fatal::TEXTUREPOOL_ATLAS_CREATION_FAILED);
+                lerr << "[TexturePool] Failed to create atlas texture. This is fatal." << nlaf;
+                Debug::exit(Debug::TEXTUREPOOL_ATLAS_CREATION_FAILED);
             }
 
             data.resize(static_cast<u64>(bgfxMaxTextureSize) * (1ull << slotSizeMag) * 4);
@@ -70,7 +70,7 @@ namespace TexturePool::internal {
             queryMaxTextureSize();
 
             const bool tooBig = rawTexture_.width > bgfxMaxTextureSize || rawTexture_.height > bgfxMaxTextureSize;
-            if (tooBig) lerr << "[TexturePool] Failed to create single texture atlas: the provided texture is too big to fit in the maximum texture size of the device." << endl;
+            if (tooBig) lerr << "[TexturePool] Failed to create single texture atlas: the provided texture is too big to fit in the maximum texture size of the device." << nlaf;
             const auto& rawTexture = tooBig ? rawTexture_toobig_png : rawTexture_;
 
             internalHandle = bgfx::createTexture2D(
@@ -82,8 +82,8 @@ namespace TexturePool::internal {
             );
 
             if (!bgfx::isValid(internalHandle)) {
-                lerr << "[TexturePool] Failed to create atlas texture. This is fatal." << endl;
-                Fatal::exit(Fatal::TEXTUREPOOL_ATLAS_CREATION_FAILED);
+                lerr << "[TexturePool] Failed to create atlas texture. This is fatal." << nlaf;
+                Debug::exit(Debug::TEXTUREPOOL_ATLAS_CREATION_FAILED);
             }
 
             residentTextures.emplace_back(handle, 0);
@@ -95,22 +95,22 @@ namespace TexturePool::internal {
         //Upon failed placement, the caller should allocate a new atlas in the registry.
         [[nodiscard]] bool put(const RawTexture& rawTexture, TextureHandle handle, UVRect& res_UVRect, bgfx::TextureHandle& res_bgfxHandle) noexcept {
             if (singleTexture) {
-                lerr << "[TexturePool] Failed to put texture: this is a single texture atlas!" << endl;
+                lerr << "[TexturePool] Failed to put texture: this is a single texture atlas!" << nlaf;
                 return false;
             }
             if (contains(handle)) {
-                lerr << "[TexturePool] Failed to put texture: the provided handle is already in this atlas." << endl;
+                lerr << "[TexturePool] Failed to put texture: the provided handle is already in this atlas." << nlaf;
                 return false;
             }
             if (rawTexture.width > (1ull << slotSizeMag) || rawTexture.height > (1ull << slotSizeMag)) {
-                lout << "[TexturePool] Texture is too big (" << rawTexture.width << "x" << rawTexture.height << ") to fit in this atlas (slot size: " << (1ull << slotSizeMag) << "x" << (1ull << slotSizeMag) << ")." << endl;
+                lout << "[TexturePool] Texture is too big (" << rawTexture.width << "x" << rawTexture.height << ") to fit in this atlas (slot size: " << (1ull << slotSizeMag) << "x" << (1ull << slotSizeMag) << ")." << nlaf;
                 return false;
             }
 
             u32 index;
             if (freeIndexes.empty()) {
                 if (getTextureCount() == getCapacity() && !grow()) {
-                    lerr << "[TexturePool] Failed to put texture: atlas is full and cannot grow." << endl;
+                    lerr << "[TexturePool] Failed to put texture: atlas is full and cannot grow." << nlaf;
                     return false;
                 }
                 index = getTextureCount();
@@ -161,7 +161,7 @@ namespace TexturePool::internal {
         //It checks if the handle exists. There is no need to call `contains` before `remove`.
         [[nodiscard]] bool remove(const TextureHandle& handle) noexcept {
             if (singleTexture) {
-                lerr << "[TexturePool] Failed to remove texture: this is a single texture atlas! Drop the atlas itself from the registry instead." << endl;
+                lerr << "[TexturePool] Failed to remove texture: this is a single texture atlas! Drop the atlas itself from the registry instead." << nlaf;
                 return false;
             }
             const auto it = lower_bound(residentTextures.begin(), residentTextures.end(), handle);
@@ -189,23 +189,23 @@ namespace TexturePool::internal {
             if (bgfxMaxTextureSize == 0) {
                 const auto* caps = bgfx::getCaps();
                 if (caps == nullptr) {
-                    lerr << "[TexturePool] Failed to query bgfx caps." << endl;
-                    Fatal::exit(Fatal::TEXTUREPOOL_INITIALIZATION_FAILED);
+                    lerr << "[TexturePool] Failed to query bgfx caps." << nlaf;
+                    Debug::exit(Debug::TEXTUREPOOL_INITIALIZATION_FAILED);
                 }
                 bgfxMaxTextureSize = caps->limits.maxTextureSize;
-                lout << "[TexturePool] Queried maximum texture size: " << bgfxMaxTextureSize << "." << endl;
+                lout << "[TexturePool] Queried maximum texture size: " << bgfxMaxTextureSize << "." << nlaf;
             }
         }
 
         [[nodiscard]] bool grow() noexcept {
             if (singleTexture) {
-                lerr << "[TexturePool] Failed to grow atlas: single texture atlas!" << endl;
+                lerr << "[TexturePool] Failed to grow atlas: single texture atlas!" << nlaf;
                 return false;
             }
 
             const u32 maxVSlots = bgfxMaxTextureSize >> slotSizeMag;
             if (vSlots >= maxVSlots) {
-                lerr << "[TexturePool] Failed to grow atlas: already at maximum capacity." << endl;
+                lerr << "[TexturePool] Failed to grow atlas: already at maximum capacity." << nlaf;
                 return false;
             }
 
@@ -227,8 +227,8 @@ namespace TexturePool::internal {
             );
 
             if (!bgfx::isValid(internalHandle)) {
-                lerr << "[TexturePool] Failed to grow atlas: texture creation failed. This is fatal." << endl;
-                Fatal::exit(Fatal::TEXTUREPOOL_ATLAS_CREATION_FAILED);
+                lerr << "[TexturePool] Failed to grow atlas: texture creation failed. This is fatal." << nlaf;
+                Debug::exit(Debug::TEXTUREPOOL_ATLAS_CREATION_FAILED);
             }
 
             // Re-upload existing pixel data to the new texture.

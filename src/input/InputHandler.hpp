@@ -2,16 +2,19 @@
 #include <chrono>
 #include <SDL3/SDL.h>
 
-#include "../debug/Logger.hpp"
+#include "../debug/loggers.hpp" // IWYU pragma: keep
 #include "../settings/Settings.hpp"
 #include "../util/concurrentQueue.hpp"
 #include "boolInput/boolInput.hpp"
 #include "config.hpp"
+#include "fileDrop/fileDrop.hpp"
 #include "gamepad/gamepad.hpp"
 #include "inputPipeline.hpp"
 #include "mouseMove/mouseMove.hpp"
 #include "scroll/scroll.hpp"
 #include "stick/stick.hpp"
+
+//important: note: threaded: Now every function in the whole InputHandler namespace is called from the Simulation thread. There is no code in this namespace that is called from the main thread, so no need for synchronization primitives here. The main thread interacts by posting tasks to the Simulation thread.
 
 namespace InputHandler {
     typedef uint64_t u64;
@@ -19,7 +22,6 @@ namespace InputHandler {
 
 //#region: Lifecycle
 
-    //threaded: Main Thread
     inline void init() noexcept {
         Gamepad::init();
         const auto& settings = Settings::getSettings();
@@ -28,7 +30,6 @@ namespace InputHandler {
         //todo: query settings for bindings.
     }
 
-    //threaded: Main Thread
     inline void shutdown() noexcept { Gamepad::shutdown(); }
 
 //#endregion
@@ -39,7 +40,6 @@ namespace InputHandler {
         inline FramedImGuiFlags cachedFlags{};
     }
 
-    //threaded: Simulation thread
     //Router for different event types.
     inline void processTrigger() noexcept {
         FramedSDLEvents events;
@@ -55,6 +55,10 @@ namespace InputHandler {
             for (u64 j = 0; j < events.actualSize; j++) {
                 const SDL_Event& event = events.events[j];
                 switch (event.type) {
+                //File drop events
+                    case SDL_EVENT_DROP_FILE:
+                        FileDrop::processTrigger(event);
+                        break;
                 //Device events
                     case SDL_EVENT_GAMEPAD_ADDED:
                     case SDL_EVENT_JOYSTICK_BATTERY_UPDATED:
@@ -94,7 +98,7 @@ namespace InputHandler {
                     case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
                     case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
                     #if CG_DEBUG
-                        lout << "Gamepad touch is not supported yet!" << endl;
+                        lout << "Gamepad touch is not supported yet!" << nlaf;
                     #endif
                         break;
                     case SDL_EVENT_FINGER_DOWN:
@@ -102,7 +106,7 @@ namespace InputHandler {
                     case SDL_EVENT_FINGER_CANCELED:
                     case SDL_EVENT_FINGER_MOTION:
                     #if CG_DEBUG
-                        lout << "Touch is not supported yet!" << endl;
+                        lout << "Touch is not supported yet!" << nlaf;
                     #endif
                         break;
                     case SDL_EVENT_PEN_DOWN:
@@ -110,23 +114,22 @@ namespace InputHandler {
                     case SDL_EVENT_PEN_MOTION:
                     case SDL_EVENT_PEN_AXIS:
                     #if CG_DEBUG
-                        lout << "Pen is not supported yet!" << endl;
+                        lout << "Pen is not supported yet!" << nlaf;
                     #endif
                         break;
                     default:
                     #if CG_DEBUG
-                        lout << "Got this event type, fyi: " << event.type << endl;
+                        lout << "Got this event type, fyi: " << event.type << nlaf;
                     #endif
                         break;
                 }
             }
         }
     #if CG_DEBUG
-        if (i == MAXIMUM_INPUT_EVENTS_PER_FRAME) lout << "[InputHandler] Maximum events per frame reached: " << MAXIMUM_INPUT_EVENTS_PER_FRAME << endl;
+        if (i == MAXIMUM_INPUT_EVENTS_PER_FRAME) lout << "[InputHandler] Maximum events per frame reached: " << MAXIMUM_INPUT_EVENTS_PER_FRAME << nlaf;
     #endif
     }
 
-    //threaded: Simulation thread
     inline void processPersist() noexcept {
         BoolInput::processPersist();
         MouseMove::processPersist();

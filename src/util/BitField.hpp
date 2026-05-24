@@ -32,7 +32,7 @@ namespace Util {
         explicit BitField() noexcept = default;
 
         template <typename... Flags> requires (sizeof...(Flags) > 0) && (Equal<Flags, EnumType> && ...)
-        [[nodiscard]] explicit BitField(Flags&&... flags) noexcept {
+        [[nodiscard]] BitField(Flags&&... flags) noexcept {
             (set(flags), ...);
         }
 

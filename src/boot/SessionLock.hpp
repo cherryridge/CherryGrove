@@ -45,12 +45,12 @@ namespace Boot {
         }
         #endif
             Focus::connect(lockFileStr);
-            if (!writePidToLockFile()) Fatal::exit(Fatal::FILESYSTEM_NO_WRITE_PERMISSION);
+            if (!writePidToLockFile()) Debug::exit(Debug::FILESYSTEM_NO_WRITE_PERMISSION);
             return;
 
         invokeExistingInstance: {
             vector<u8> fileData;
-            if (readFile<false>(lockFilePath, fileData) && fileData.size() >= sizeof(u32)) {
+            if (readFile(lockFilePath, fileData) && fileData.size() >= sizeof(u32)) {
                 u32 pid;
                 memcpy(&pid, fileData.data(), sizeof(u32));
             #if CG_PLATFORM_WINDOWS
@@ -58,7 +58,7 @@ namespace Boot {
             #endif
             }
             Focus::sendMessage(lockFileStr);
-            Fatal::exit(Fatal::BOOT_MULTIPLE_INSTANCES);
+            Debug::exit(Debug::BOOT_MULTIPLE_INSTANCES);
         }
         }
 

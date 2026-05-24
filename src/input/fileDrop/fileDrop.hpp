@@ -1,51 +1,62 @@
 #pragma once
 #include <filesystem>
+#include <format>
 #include <string>
+#include <utility>
+#include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
+#include "../../util/os/archiveReader.hpp"
 #include "../../util/os/filesystem.hpp"
 
-//todo: Implement this as an input component.
+//1. If it contains `world.cgb` -> WORLD
+//2. If it contains `manifest.json` -> PACK, tmb no one ever clashes this
+//3. Abstract!!
+//  a. WORLD: simulation can CRUD + `open` `close` -> worlds must be IMPORTED (i.e. COPIED) as a FOLDER, we're not modifying a fucking archive!
+//  b. PACK: "pack" can get entrypoint file + "extension" and `open` `close
+//  c. How about exploring?
 
-namespace FileDrop {
-    typedef int32_t i32;
-    using std::filesystem::path, std::string, Util::OS::getU8String;
+namespace InputHandler::FileDrop {
+    typedef uint32_t u32;
+    using std::filesystem::path, std::format, std::string, std::to_underlying, Util::OS::getU8String, Util::OS::getArType;
 
     //CherryGrove World
-    inline void processCGW(const path& _path) noexcept {
+    inline void processCGW(const path& path_) noexcept {
         
     }
 
     //May be world or pack
-    inline void processFolder(const path& _path) noexcept {
+    inline void processFolder(const path& path_) noexcept {
 
     }
 
     //May be world or pack
-    inline void processZip(const path& _path) noexcept {
+    inline void processArchive(const path& path_) noexcept {
 
     }
 
     //CherryGrove Pack
-    inline void processCGP(const path& _path) noexcept {
+    inline void processCGP(const path& path_) noexcept {
 
     }
 
     //CherryGrove Relocatable Gamesave
-    inline void processCGR(const path& _path) noexcept {
+    inline void processCGR(const path& path_) noexcept {
 
     }
 
-    inline void processFile(i32 count, const char** paths) noexcept {
-        for (i32 i = 0; i < count; i++) {
-            const path _path(paths[i]);
-            const auto extension = getU8String(_path.extension());
-            if      (extension == ".cgw") processCGW(_path);
-            else if (extension == ".cgp") processCGP(_path);
-            else if (extension == ".cgr") processCGR(_path);
-            else if (extension == ".zip") processZip(_path);
-            else if (is_directory(_path)) processFolder(_path);
-            else lout << "Unidentified file type: " << paths[i] << endl;
+    inline void processTrigger(const SDL_Event& event) noexcept {
+        const path path_(event.drop.data);
+        if (is_directory(path_)) processFolder(path_);
+        const auto extension = getU8String(path_.extension());
+        if      (extension == ".cgw") processCGW(path_);
+        else if (extension == ".cgp") processCGP(path_);
+        else if (extension == ".cgr") processCGR(path_);
+        else {
+            const auto arType = getArType(path_);
+            if (arType == Util::OS::ArchiveType::NotASupportedArchive) lout << "Unidentified file type: " << path_ << nlaf;
+            else if (arType == Util::OS::ArchiveType::ExtensionDoesNotMatchContent) lerr << format("File extension {} does not match its content type {}.", extension, static_cast<u32>(to_underlying(arType))) << nlaf;
+            else processArchive(path_);
         }
     }
 }

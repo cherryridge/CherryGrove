@@ -15,8 +15,4 @@ namespace Umi {
         UmiJS::shutdown();
         UmiLua::shutdown();
     }
-
-    inline void loadPacks() noexcept {
-        
-    }
 }

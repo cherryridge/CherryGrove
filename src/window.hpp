@@ -4,7 +4,7 @@
 #include <SDL3_image/SDL_image.h>
 
 #include "debug/Fatal.hpp"
-#include "debug/Logger.hpp"
+#include "debug/loggers.hpp"
 #include "util/os/platform.hpp"
 
 namespace Window {
@@ -16,19 +16,19 @@ namespace Window {
     //note: Pre multithread era.
     inline void initMainWindow(const char* title, int width, int height, const char* iconPath) noexcept {
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
-            lerr << "[Window] Failed to set up SDL!" << endl;
-            Fatal::exit(Fatal::SDL_INITIALIZATION_FAILED);
+            lerr << "[Window] Failed to set up SDL!" << nlaf;
+            Debug::exit(Debug::SDL_INITIALIZATION_FAILED);
         }
         detail::mainWindow = SDL_CreateWindow(title, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_HIGH_PIXEL_DENSITY);
         if (detail::mainWindow == nullptr) {
-            lerr << "[Window] Failed to create main window: " << SDL_GetError() << endl;
+            lerr << "[Window] Failed to create main window: " << SDL_GetError() << nlaf;
             SDL_Quit();
-            Fatal::exit(Fatal::SDL_CREATE_WINDOW_FAILED);
+            Debug::exit(Debug::SDL_CREATE_WINDOW_FAILED);
         }
         if (iconPath != nullptr) {
             auto* icon = IMG_Load(iconPath);
             if (icon != nullptr) SDL_SetWindowIcon(detail::mainWindow, icon);
-            else lerr << "[Window] Failed to load icon from " << iconPath << "!" << endl;
+            else lerr << "[Window] Failed to load icon from " << iconPath << "!" << nlaf;
             SDL_DestroySurface(icon);
         }
     }
@@ -64,10 +64,10 @@ namespace Window {
     #elif CG_PLATFORM_MACOS
         return SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);
     #elif CG_PLATFORM_ANDROID
-        Fatal::exit(Fatal::MISC_UNSUPPORTED_PLATFORM);
+        Debug::exit(Debug::MISC_UNSUPPORTED_PLATFORM);
         return SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_ANDROID_WINDOW_POINTER, nullptr);
     #elif CG_PLATFORM_IOS
-        Fatal::exit(Fatal::MISC_UNSUPPORTED_PLATFORM);
+        Debug::exit(Debug::MISC_UNSUPPORTED_PLATFORM);
         return SDL_GetPointerProperty(properties, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);
     #endif
     }
@@ -77,7 +77,7 @@ namespace Window {
         reinterpret_cast<uintptr_t>(viewport.PlatformHandle));
         SDL_Window* window = SDL_GetWindowFromID(windowId);
         if (window == nullptr) {
-            lerr << "[Window] Failed to get SDL_Window from viewport: " << SDL_GetError() << endl;
+            lerr << "[Window] Failed to get SDL_Window from viewport: " << SDL_GetError() << nlaf;
             return nullptr;
         }
         return getPlatformHandle(window);

@@ -13,6 +13,10 @@ namespace Components {
         [[nodiscard]] bool operator==(const EntityCoordinates& other) const noexcept {
             return x == other.x && y == other.y && z == other.z && dimension == other.dimension;
         }
+
+        [[nodiscard]] glm::vec3 getGLMVec3() const noexcept {
+            return glm::vec3(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+        }
     };
 
     struct EntityCoordinates2 {

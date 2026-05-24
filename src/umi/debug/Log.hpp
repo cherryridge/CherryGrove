@@ -1,7 +1,7 @@
 #pragma once
 #include <string_view>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 
 namespace Umi {
     using std::string_view;

@@ -1,27 +1,30 @@
 #pragma once
 #include <filesystem>
 #include <iostream>
-#include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
+#include <thread>
+#include <bgfx/bgfx.h>
 
 #include "../boot/SessionLock.hpp"
 #include "../boot/setWorkingDirectory.hpp"
+#include "../debug/controller.hpp"
 #include "../debug/Fatal.hpp"
+#include "../debug/loggers.hpp"
 #include "../globalState.hpp"
 #include "../graphics/controller.hpp"
 #include "../input/boolInput/boolInput.hpp"
-#include "../input/InputHandler.hpp"
 #include "../intrinsics/actions/Escape.hpp"
 #include "../settings/Settings.hpp"
-#include "../sound/Sound.hpp"
-#include "../pack/Pack.hpp"
-#include "../util/BitField.hpp"
+#include "../simulation/controller.hpp"
+#include "../simulation/runOnSimThread.hpp"
+#include "../sound/API.hpp"
+#include "../sound/controller.hpp"
 #include "../util/os/filesystem.hpp"
 #include "../window.hpp"
 #include "hold.hpp"
 
 namespace Main {
-    using std::move, std::cout, std::endl, std::filesystem::current_path, Util::BitField, Util::OS::getU8String;
+    typedef uint64_t u64;
+    using std::move, std::cout, std::cerr, std::endl, std::filesystem::current_path, std::this_thread::yield, Util::OS::getU8String;
 
     inline Boot::SessionLock sessionLock;
 
@@ -39,49 +42,48 @@ namespace Main {
     //Settings
         cout << "Reading settings..." << endl;
         if (!Settings::loadSettings()) {
-            lerr << "[Main] Failed to load settings!" << endl;
-            Fatal::exit(Fatal::SETTINGS_FAILED_TO_LOAD);
+            cerr << "[Main] Failed to load settings!" << endl;
+            Debug::exit(Debug::SETTINGS_FAILED_TO_LOAD);
         }
 
         const auto& settings = Settings::getSettings();
 
         cout << "Setting up logger..." << endl;
-        Logger::init(settings.debug.logging);
-        lout << "Main" << flush;
-        lout << "Hello from Logger!" << endl;
+        Debug::init(settings.debug.logging);
+        Debug::setThreadName("Main");
+        lout << "Hello from Logger!" << nlaf;
 
     //Mark the starting of CherryGrove
-        lout << "Launching CherryGrove..." << endl;
+        lout << "Launching CherryGrove..." << nlaf;
         GlobalState::setIsCGAlive(true);
 
     //Create Main Window
-        lout << "Setting up CherryGrove window & initializing input handler..." << endl;
+        lout << "Setting up CherryGrove window & initializing input handler..." << nlaf;
         Window::initMainWindow(settings.misc.windowTitleBase.c_str(), settings.graphics.windowWidth, settings.graphics.windowHeight, "assets/icons/CherryGrove-trs-64.png");
 
-    //Initialize InputHandler
-        InputHandler::init();
-
-    //Enter the multi-thread era as we are going to spawn the first thread.
+    //Enter the multi-thread era.
         GlobalState::setMultiThreadEra(true);
 
-        lout << "Initializing SoLoud..." << endl;
-        //This is synchronized, we will wait inside.
+    //Start Simulation thread
+        lout << "Initializing simulation..." << nlaf;
+        Simulation::initThread();
+
+    //Start Sound thread
+        lout << "Initializing sound..." << nlaf;
         Sound::init();
 
-        {//Debug: Play a.ogg
-            Util::Promise<Sound::SoundHandle> p;
-            Sound::addSound(&p, "tests/a.ogg", true, true, 1.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
-            const auto handle = p.wait();
-            Sound::play(nullptr, handle, {0.0, 0.0, 0.0});
-        }
-
-        lout << "Initializing graphics..." << endl;
-        //Call this on the SDL/main thread before `bgfx::init` so bgfx uses this thread as its render thread.
-        bgfx::renderFrame();
+    //Start Graphics thread
+        lout << "Initializing graphics..." << nlaf;
         Graphics::init();
 
-        lout << "Initializing pack manager..." << endl;
-        Pack::init();
+    //Wait for all threads to initialize. Main thread has the responsibility of pumping the render thread until it's initialized.
+        while (!Simulation::isInitialized() || !Graphics::isInitialized() || !Sound::isInitialized()) bgfx::renderFrame();
+
+    //Play `a.ogg`
+        Util::Promise<Sound::SoundHandle> promise;
+        Sound::addSound(&promise, "tests/a.ogg", true, true, 1.0f, Sound::FLOAT_INFINITY, Sound::FLOAT_INFINITY);
+        const auto handle = promise.wait();
+        Sound::play(nullptr, handle, {0.0, 0.0, 0.0});
 
     //Set up main menu
         Gui::setVisibility(Gui::Intrinsics::MainMenu, true);
@@ -89,10 +91,15 @@ namespace Main {
         Gui::setVisibility(Gui::Intrinsics::Version, true);
 
     //Set up intrinsic inputs
-        static_cast<void>(InputHandler::BoolInput::add(IntrinsicInput::escapeCB, 10, {
-            .allowedKinds = BitField<InputHandler::BoolInput::BoolInputKind, InputHandler::BoolInput::BoolInputKind::Count>(InputHandler::BoolInput::BoolInputKind::Down)
-        }));
+        Simulation::runOnSimThread([] () noexcept {
+            using namespace IntrinsicInput;
+            using namespace InputHandler::BoolInput;
 
+            const auto actionId = add(escapeCB, 10, {BoolInputKind::Down});
+            static_cast<void>(addBinding(actionId, KeyCombo(BIInputSource::Keyboard, SDL_SCANCODE_ESCAPE)));
+        });
+
+    //Hold main thread
         hold();
     }
 }

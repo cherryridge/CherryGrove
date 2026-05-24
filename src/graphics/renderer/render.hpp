@@ -7,8 +7,7 @@
 #include "../../intrinsics/systems/Rotation.hpp"
 #include "../../settings/Settings.hpp"
 #include "../../simulation/playerEntity.hpp"
-#include "../../simulation/registries.hpp"
-#include "../../simulation/Simulation.hpp"
+#include "../../simulation/states.hpp"
 #include "definitions.hpp"
 #include "size.hpp"
 
@@ -19,7 +18,7 @@ namespace Renderer {
         array<float, 16> view, proj;
         bgfx::setViewClear(VIEWID_GAME, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x5BD093FF); //"CherryGrove Green"
         bgfx::setViewRect(VIEWID_GAME, 0, 0, internal::windowInfoCache.width, internal::windowInfoCache.height);
-        if (Simulation::gameStarted.load(memory_order_acquire)) {
+        if (Simulation::isSimStarted()) {
         //Prepare render environment
             static_cast<void>(Systems::getViewMtx(Simulation::playerEntity, view));
             static_cast<void>(Systems::getProjMtx(Simulation::playerEntity, internal::windowInfoCache.aspectRatio, proj));
@@ -31,6 +30,7 @@ namespace Renderer {
         //Render entities
             
             //bgfx::submit();
+            bgfx::touch(VIEWID_GAME);
         }
         else bgfx::touch(VIEWID_GAME);
         bgfx::frame();

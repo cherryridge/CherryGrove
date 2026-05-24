@@ -1,8 +1,18 @@
 #pragma once
-#include <cstdint>
+#include <limits>
+
+#include "../intrinsics/components/Coordinates.hpp"
+#include "../util/SlotTable.hpp"
 
 namespace Sound {
     typedef uint8_t u8;
+    using Util::GenerationalHandle, std::numeric_limits;
+
+    MAKE_DISTINCT_HANDLE(SoundHandle)
+    MAKE_DISTINCT_HANDLE(PlayHandle)
+
+    inline constexpr float FLOAT_INFINITY = numeric_limits<float>::max();
+    inline constexpr Components::EntityCoordinates DUMMY_COORD_2D = {0.0, 0.0, 0.0, 0ull};
 
     //Order matching up with `SoLoud::AudioSource::ATTENUATION_MODELS`.
     enum struct Attenuation : u8 {

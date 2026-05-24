@@ -106,9 +106,9 @@
 	path = libs/lz4
 	url = https://github.com/lz4/lz4
 
-[submodule "libs/physfs"]
-	path = libs/physfs
-	url = https://github.com/icculus/physfs
+[submodule "libs/quickjs"]
+	path = libs/quickjs
+	url = https://github.com/quickjs-ng/quickjs
 
 [submodule "libs/rocksdb"]
 	path = libs/rocksdb
@@ -125,6 +125,14 @@
 [submodule "libs/soloud/source"]
 	path = libs/soloud/source
 	url = https://github.com/jarikomppa/soloud
+
+[submodule "libs/xz"]
+	path = libs/xz
+	url = https://github.com/tukaani-project/xz
+
+[submodule "libs/zlib-ng"]
+	path = libs/zlib-ng
+	url = https://github.com/zlib-ng/zlib-ng
 
 [submodule "libs/zstd"]
 	path = libs/zstd

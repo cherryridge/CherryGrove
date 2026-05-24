@@ -7,7 +7,7 @@
 #include <vector>
 #include <SDL3/SDL.h>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/loggers.hpp"
 #include "../../util/SlotTable.hpp"
 #include "../actionIds.hpp"
 #include "../canDelete.hpp"
@@ -39,9 +39,7 @@ namespace InputHandler::Stick {
 
     [[nodiscard]] inline ActionID add(StickActionCallback cb, ActionPriority priority, const ActionwiseInfo_ST& info) noexcept {
         const ActionID id = getNextId();
-    #if CG_DEBUG
-        if (info.triggerAxises.none()) [[unlikely]] lerr << "[InputHandler] Attempt to add a StickAction with no axis. This action will never be triggered. ActionID: " << id << endl;
-    #endif
+        if (info.triggerAxises.none()) [[unlikely]] lerr << "[InputHandler] Attempt to add a StickAction with no axis. This action will never be triggered. ActionID: " << id << nlaf;
         const ActionHandle handle = detail::actionInfos.emplace(id, priority, cb, info);
         for (u8 axis = 0; axis < to_underlying(Axis::Count); axis++) if (info.triggerAxises.get(static_cast<Axis>(axis))) insertSort(detail::axisToHandle[axis], detail::actionInfos, handle);
         if (info.allowedKinds.get(Subkind::Persist)) insertSort(detail::persistHandles, detail::actionInfos, handle);
@@ -50,31 +48,42 @@ namespace InputHandler::Stick {
     }
 
     [[nodiscard]] inline bool remove(ActionID id) noexcept {
-    #if CG_DEBUG
         ASSERT_CAN_DELETE(id, false)
-    #endif
         ActionLocation location;
         if (!getLocation(id, location, InputKind::StickMove)) return false;
+
         const auto* actionInfo = detail::actionInfos.get(location.actionHandle);
-        if (actionInfo == nullptr) return false;
-        const auto triggerAxises = actionInfo->actionwiseInfo.triggerAxises;
-        const bool hasPersist = actionInfo->actionwiseInfo.allowedKinds.get(Subkind::Persist);
+        ASSERT_NOT_NULLPTR(actionInfo, return false;)
+
+        for (u8 axis = 0; axis < to_underlying(Axis::Count); axis++) {
+            if (actionInfo->actionwiseInfo.triggerAxises.get(static_cast<Axis>(axis))) {
+                for (u64 i = 0; i < detail::axisToHandle[axis].size(); i++) {
+                    if (detail::axisToHandle[axis][i] == location.actionHandle) {
+                        detail::axisToHandle[axis].erase(detail::axisToHandle[axis].begin() + i);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (actionInfo->actionwiseInfo.allowedKinds.get(Subkind::Persist)) {
+            for (u64 i = 0; i < detail::persistHandles.size(); i++) {
+                if (detail::persistHandles[i] == location.actionHandle) {
+                    detail::persistHandles.erase(detail::persistHandles.begin() + i);
+                    break;
+                }
+            }
+        }
+
         static_cast<void>(detail::actionInfos.destroy(location.actionHandle));
-        for (u8 axis = 0; axis < to_underlying(Axis::Count); axis++) if (triggerAxises.get(static_cast<Axis>(axis))) for (u64 i = 0; i < detail::axisToHandle[axis].size(); i++) if (detail::axisToHandle[axis][i] == location.actionHandle) {
-            detail::axisToHandle[axis].erase(detail::axisToHandle[axis].begin() + i);
-            break;
-        }
-        if (hasPersist) for (u64 i = 0; i < detail::persistHandles.size(); i++) if (detail::persistHandles[i] == location.actionHandle) {
-            detail::persistHandles.erase(detail::persistHandles.begin() + i);
-            break;
-        }
+
         unregisterId(id);
         return true;
     }
 
     [[nodiscard]] inline bool get(ActionHandle handle, StickAction& result) noexcept {
         const StickAction* actionInfo = detail::actionInfos.get(handle);
-        if (actionInfo == nullptr) return false;
+        ASSERT_NOT_NULLPTR(actionInfo, return false;)
         result = *actionInfo;
         return true;
     }
@@ -104,14 +113,11 @@ namespace InputHandler::Stick {
         }
     }
 
-    //threaded: Simulation thread
     inline void processTrigger(const SDL_Event& event) noexcept {
-    #if CG_DEBUG
         if (event.type != SDL_EVENT_GAMEPAD_AXIS_MOTION) [[unlikely]] {
-            lerr << "[InputHandler::Stick] Unexpected event type: " << event.type << endl;
+            lerr << "[InputHandler::Stick] Unexpected event type: " << event.type << nlaf;
             return;
         }
-    #endif
         // For sticks, axisIndex is the X-component base index of the pair (passed to _regulate2D, which reads axisIndex and axisIndex+1).
         // For triggers, axisIndex is the state array index of the trigger itself (== to_underlying(axis)).
         Axis axis;
@@ -168,16 +174,13 @@ namespace InputHandler::Stick {
         vector<ActionHandle> triggerKindHandles;
         for (u64 i = 0; i < detail::axisToHandle[to_underlying(axis)].size(); i++) {
             const auto* actionInfo = detail::actionInfos.get(detail::axisToHandle[to_underlying(axis)][i]);
-        #if CG_DEBUG
-            ASSERT_NOT_NULLPTR(actionInfo, )
-        #endif
+            ASSERT_NOT_NULLPTR(actionInfo, continue;)
             if (actionInfo->actionwiseInfo.allowedKinds.get(InputHandler::Stick::Subkind::Trigger)) triggerKindHandles.push_back(detail::axisToHandle[to_underlying(axis)][i]);
         }
 
         process(detail::actionInfos, triggerKindHandles, eventwiseInfo);
     }
 
-    //threaded: Simulation thread
     inline void processPersist() noexcept {
         const auto [leftStickX, leftStickY] = detail::regulate2D(0, 0);
         const auto [rightStickX, rightStickY] = detail::regulate2D(2, 2);
@@ -191,14 +194,11 @@ namespace InputHandler::Stick {
         process(detail::actionInfos, detail::persistHandles, eventwiseInfo);
     }
 
-    //threaded: Simulation thread
     inline void processDevice(const SDL_Event& event) noexcept {
-    #if CG_DEBUG
         if (event.type != SDL_EVENT_GAMEPAD_REMOVED) [[unlikely]] {
-            lerr << "[InputHandler::Stick] Unexpected event type: " << event.type << endl;
+            lerr << "[InputHandler::Stick] Unexpected event type: " << event.type << nlaf;
             return;
         }
-    #endif
         detail::state.fill(0);
         writeSnapshot(detail::state, detail::stateSnapshot, detail::snapshotSeq);
     }

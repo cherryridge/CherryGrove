@@ -7,7 +7,7 @@
 #include "../util/concepts.hpp"
 #include "../util/SlotTable.hpp"
 
-namespace Sound {
+namespace Sound::detail {
     typedef uint8_t u8;
     typedef uint32_t u32;
     using std::memory_order_relaxed, std::memory_order_acquire, std::memory_order_release, std::atomic_ref, std::shared_ptr, std::pair, std::vector, std::move, std::forward, std::make_shared, Util::DistinctHandleOf, Util::GenerationalHandle;

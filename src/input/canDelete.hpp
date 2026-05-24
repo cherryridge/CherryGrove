@@ -14,7 +14,7 @@ namespace InputHandler {
 
     #define ASSERT_CAN_DELETE(id, ret) \
     if (!InputHandler::getCanDelete()) { \
-        lerr << "[InputHandler] Deletion attempted while deletion is not allowed. ActionID: " << id << endl; \
+        lerr << "[InputHandler] Deletion attempted while deletion is not allowed. ActionID: " << id << nlaf; \
         return ret; \
     }
 }

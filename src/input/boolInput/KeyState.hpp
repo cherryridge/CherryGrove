@@ -1,12 +1,12 @@
 #pragma once
 #include <ostream>
 
-#include "../../debug/Logger.hpp"
-#include "../../simulation/Time.hpp"
+#include "../../debug/implLShiftFor.hpp"
+#include "../../util/time.hpp"
 
 namespace InputHandler::BoolInput {
     typedef uint64_t u64;
-    using Simulation::TimePoint, Simulation::TimeUnit, std::ostream;
+    using Util::TimePoint, Util::TimeNs, std::ostream;
 
     //Dual-layer per-key state tracker.
     //Physical layer: Exact hardware state for edge-triggered events and double-tap detection.
@@ -63,20 +63,15 @@ namespace InputHandler::BoolInput {
         }
 
     private:
-        inline static TimeUnit repeatTapGap, comboMinTTL;
+        inline static TimeNs repeatTapGap, comboMinTTL;
     public:
-        [[nodiscard]] static TimeUnit getRepeatTapGap() noexcept { return repeatTapGap; }
-        [[nodiscard]] static TimeUnit getComboMinTTL() noexcept { return comboMinTTL; }
-        static void setRepeatTapGap(TimeUnit gap) noexcept { repeatTapGap = gap; }
-        static void setComboMinTTL(TimeUnit ttl) noexcept { comboMinTTL = ttl; }
+        [[nodiscard]] static TimeNs getRepeatTapGap() noexcept { return repeatTapGap; }
+        [[nodiscard]] static TimeNs getComboMinTTL() noexcept { return comboMinTTL; }
+        static void setRepeatTapGap(TimeNs gap) noexcept { repeatTapGap = gap; }
+        static void setComboMinTTL(TimeNs ttl) noexcept { comboMinTTL = ttl; }
 
-        friend ostream& operator<<(ostream& os, const KeyState& s) noexcept {
-            os << "KeyState(phys=" << s.isPhysicalDown << " virt=" << s.isVirtualDown << ")";
-            return os;
-        }
-        friend Logger::Logger& operator<<(Logger::Logger& logger, const KeyState& s) noexcept {
-            logger << "KeyState(phys=" << s.isPhysicalDown << " virt=" << s.isVirtualDown << ")";
-            return logger;
-        }
+        IMPL_LSHIFT_FOR(KeyState,
+            output << "KeyState(phys=" << data.isPhysicalDown << " virt=" << data.isVirtualDown << ")";
+        )
     };
 }

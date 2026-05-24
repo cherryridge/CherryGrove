@@ -1,13 +1,14 @@
 文件夹介绍：
-assets：存放 CherryGrove 基本运行所需要的文件的目录，包括字体、Logo 等。不是用来放置内容包的，不要随意修改。
+assets：存放 CherryGrove 基本运行所需要的文件的目录，包括字体、Logo 等。不是用来放置内容包的，不要随意修改，可能导致 CherryGrove 无法启动。
+cache：存放 CherryGrove 运行时产生的缓存文件。可以不定时在 CherryGrove 关闭时删除以节省空间。
 captures：存放屏幕截图和屏幕录制的目录。
 logs：存放 CherryGrove 运行日志的目录。如果遇到错误，这些文件或许有发现 bug 的线索。
-packs：存放内容包的目录。允许放入文件夹、.zip 压缩包或者 .7z 压缩包。放入文件夹时，请保证在文件夹中直接包含内容包的 manifest.json；放入压缩包时，请保证在压缩包根目录下有内容包的 manifest.json，否则内容包将无法被识别。
+packs：存放内容包的目录。允许放入文件夹或者支持的压缩包。放入文件夹时，请保证在文件夹中直接包含内容包的 manifest.json；放入压缩包时，请保证在压缩包根目录下有内容包的 manifest.json，否则内容包将无法被识别。
 saves：存放存档的目录。
 
 文件介绍：
-CherryGrove.exe：CherryGrove 软件。
-settings.json：CherryGrove 的主设置文件，可以在了解具体情况时修改。
+CherryGrove.exe：CherryGrove 软件本体。
+settings.json：CherryGrove 的设置文件，可以在了解具体情况时修改。
 unins000.dat、unins000.exe：卸载 CherryGrove 需要的数据和程序。双击打开程序以卸载 CherryGrove。不要随意修改。
 必读信息.txt：本文件。
 许可证.txt：随附的一份使用条款文件。

@@ -1,5 +1,6 @@
 #pragma once
 
+//Use `seed` to reference to the seed.
 #define IMPL_HASH_FOR(ns, type, _seed, ...) \
 namespace ns { \
     [[nodiscard]] inline size_t hash_value(const type& input) noexcept { \

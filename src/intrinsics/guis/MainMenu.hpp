@@ -1,18 +1,15 @@
 #pragma once
-#include <string_view>
 #include <imgui.h>
 
-#include "../../simulation/Simulation.hpp"
-#include "../../sound/Sound.hpp"
 #include "../../globalState.hpp"
 #include "../../graphics/gui/click.hpp"
 #include "../../graphics/gui/util.hpp"
+#include "../../simulation/states.hpp"
+#include "../../sound/API.hpp"
 
 namespace Gui::MainMenu {
-    using std::string_view;
-
     inline void render() noexcept {
-        Gui::Util::centerWindow("MainMenu", true);
+        Gui::Util::centerWindow("MainMenu", true, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoNav);
         {
             ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0], 28.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 80.0f));
@@ -26,7 +23,7 @@ namespace Gui::MainMenu {
             ImVec2 btnSize(240.0f, 80.0f);
             Gui::Util::centerButton("存档", btnSize, []() noexcept {
                 static_cast<void>(Sound::play(nullptr, Gui::click, Sound::DUMMY_COORD_2D));
-                Simulation::start();
+                Simulation::signalStart();
             });
             Gui::Util::centerButton("内容包", btnSize, []() noexcept {
                 static_cast<void>(Sound::play(nullptr, Gui::click, Sound::DUMMY_COORD_2D));

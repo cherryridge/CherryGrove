@@ -2,8 +2,8 @@
 #include <string>
 #include <boost/container_hash/hash.hpp>
 
-#include "../util/implHashFor.hpp"
-#include "../util/string.hpp"
+#include "../../util/implHashFor.hpp"
+#include "../../util/lexical.hpp"
 
 namespace Components {
     using std::string;

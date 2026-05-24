@@ -2,11 +2,11 @@
 #include <soloud/soloud_wav.h>
 #include <soloud/soloud_wavstream.h>
 
-#include "../debug/Logger.hpp"
-#include "enums.hpp"
-#include "externs/soLoudInstance.hpp"
+#include "../debug/loggers.hpp"
+#include "soLoudInstance.hpp"
+#include "typesAndConstants.hpp"
 
-namespace Sound {
+namespace Sound::detail {
     typedef uint32_t u32;
     using std::move, SoLoud::Wav, SoLoud::WavStream, SoLoud::SO_NO_ERROR;
 
@@ -22,7 +22,7 @@ namespace Sound {
                 new (&wavStream) WavStream();
                 auto result = wavStream.load(filePath);
                 if (result != SO_NO_ERROR) {
-                    lerr << "[Sound] Loading from file " << filePath << " failed: " << soLoudInstance->getErrorString(result) << endl;
+                    lerr << "[Sound] Loading from file " << filePath << " failed: " << soLoudInstance->getErrorString(result) << nlaf;
                     return;
                 }
                 active = true;
@@ -39,7 +39,7 @@ namespace Sound {
                 new (&wav) Wav();
                 auto result = wav.load(filePath);
                 if (result != SO_NO_ERROR) {
-                    lerr << "[Sound] Loading from file " << filePath << " failed: " << soLoudInstance->getErrorString(result) << endl;
+                    lerr << "[Sound] Loading from file " << filePath << " failed: " << soLoudInstance->getErrorString(result) << nlaf;
                     return;
                 }
                 active = true;

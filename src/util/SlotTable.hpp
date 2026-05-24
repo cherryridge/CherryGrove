@@ -4,7 +4,7 @@
 #include <vector>
 #include <ostream>
 
-#include "../debug/Logger.hpp"
+#include "../debug/implLShiftFor.hpp"
 #include "concepts.hpp"
 
 namespace Util {
@@ -38,15 +38,9 @@ namespace Util {
 
         [[nodiscard]] constexpr explicit operator u64() const noexcept { return (static_cast<u64>(generation) << 32) | index; }
 
-        friend Logger::Logger& operator<<(Logger::Logger& os, const GenerationalHandle& data) noexcept {
-            os << "GenerationalHandle (idx " << data.index << ", gen " << data.generation << ")";
-            return os;
-        }
-
-        friend ostream& operator<<(ostream& os, const GenerationalHandle& data) noexcept {
-            os << "GenerationalHandle (idx " << data.index << ", gen " << data.generation << ")";
-            return os;
-        }
+        IMPL_LSHIFT_FOR(GenerationalHandle,
+            output << "GenerationalHandle (idx " << data.index << ", gen " << data.generation << ")";
+        )
     };
 
     #define MAKE_DISTINCT_HANDLE(type) \
@@ -55,14 +49,9 @@ namespace Util {
         bool operator==(const type& other) const noexcept { return value == other.value; } \
         std::strong_ordering operator<=>(const Util::GenerationalHandle& other) const noexcept { return value <=> other; } \
         std::strong_ordering operator<=>(const type& other) const noexcept { return value <=> other.value; } \
-        friend Logger::Logger& operator<<(Logger::Logger& os, const type& data) noexcept { \
-            os << #type << " (idx " << data.value.getIndex() << ", gen " << data.value.getGeneration() << ")"; \
-            return os; \
-        } \
-        friend std::ostream& operator<<(std::ostream& os, const type& data) noexcept { \
-            os << #type << " (idx " << data.value.getIndex() << ", gen " << data.value.getGeneration() << ")"; \
-            return os; \
-        } \
+        IMPL_LSHIFT_FOR(type, \
+            output << #type << " (idx " << data.value.getIndex() << ", gen " << data.value.getGeneration() << ")"; \
+        ) \
     };
 
     //Use SlotTable with `HandleType` as plain `GenerationalHandle` is deprecated and should be replaced by distinct handles for better type safety.

@@ -5,7 +5,7 @@
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <wasmtime.hh>
 
-#include "../../../debug/Logger.hpp"
+#include "../../../debug/loggers.hpp"
 
 namespace UmiWASM {
     typedef uint8_t u8;
@@ -23,26 +23,26 @@ namespace UmiWASM {
     inline void init() noexcept {
         auto res = wasmtime::Module::compile(engine, WASMTIME_TEST);
         if (!res) {
-            lerr << "[Wasmtime] Compilation error occured!" << endl;
+            lerr << "[Wasmtime] Compilation error occured!" << nlaf;
             return;
         }
         wasmtime::Store store(engine);
         wasmtime::Module module = res.unwrap();
         auto instance_res = wasmtime::Instance::create(store, module, {});
         if (!instance_res) {
-            lerr << "[Wasmtime] Instantiation error occured!" << endl;
+            lerr << "[Wasmtime] Instantiation error occured!" << nlaf;
             return;
         }
         wasmtime::Instance instance = instance_res.unwrap();
         wasmtime::Func add = get<wasmtime::Func>(*instance.get(store, "add"));
         auto result_res = add.call(store, {35, 7});
         if (!result_res) {
-            lerr << "[Wasmtime] Function call error occured!" << endl;
+            lerr << "[Wasmtime] Function call error occured!" << nlaf;
             return;
         }
         vector<wasmtime::Val> results = result_res.unwrap();
-        if (results.size() == 1 && results[0].kind() == wasmtime::ValKind::I32) lout << "[Wasmtime] 35 + 7 = " << results[0].i32() << endl;
-        else lerr << "[Wasmtime] Function call returned wrong result!" << endl;
+        if (results.size() == 1 && results[0].kind() == wasmtime::ValKind::I32) lout << "[Wasmtime] 35 + 7 = " << results[0].i32() << nlaf;
+        else lerr << "[Wasmtime] Function call returned wrong result!" << nlaf;
     }
 
     inline void shutdown() noexcept {}

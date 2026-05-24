@@ -5,14 +5,13 @@
 #include <span>
 #include <string>
 #include <vector>
-#include <physfs.h>
 
 #include "../concepts.hpp"
 
 namespace Util::OS {
     typedef uint8_t u8;
     typedef uint64_t u64;
-    using std::chrono::steady_clock, std::to_string, std::filesystem::path, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::absolute, std::filesystem::remove, std::error_code, std::ifstream, std::span, std::ofstream, std::streamsize, std::vector;
+    using std::chrono::steady_clock, std::to_string, std::filesystem::path, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::absolute, std::filesystem::remove, std::ios, std::error_code, std::ifstream, std::span, std::ofstream, std::streamsize, std::vector;
 
     [[nodiscard]] inline bool normalize(path& p) noexcept {
         error_code ec;
@@ -41,9 +40,19 @@ namespace Util::OS {
     #endif
     }
 
-    [[nodiscard]] inline bool isWritableDirectory(const path& p) noexcept {
+    [[nodiscard]] inline string getSecondExtension(const path& input) noexcept {
+        const string filename = getU8String(input.filename());
+        const auto lastDot = filename.rfind('.');
+        if (lastDot == string::npos) return "";
+        if (lastDot == 0) return filename;
+        const auto secondLastDot = filename.rfind('.', lastDot - 1);
+        if (secondLastDot == string::npos) return filename.substr(lastDot);
+        return filename.substr(secondLastDot);
+    }
+
+    [[nodiscard]] inline bool isWritableDirectory(const path& input) noexcept {
         error_code ec;
-        path path_ = p;
+        path path_ = input;
         if (!normalize(path_)) return false;
         const bool pathExists = exists(path_, ec);
         if (ec || !pathExists) return false;
@@ -55,7 +64,7 @@ namespace Util::OS {
             const bool probeExists = exists(probePath, ec);
             if (ec) return false;
             if (probeExists) continue;
-            ofstream probe(probePath, std::ios::binary | std::ios::out | std::ios::noreplace);
+            ofstream probe(probePath, ios::binary | ios::out | ios::noreplace);
             if (!probe.is_open()) {
                 const bool collision = exists(probePath, ec);
                 if (!ec && collision) continue;
@@ -72,47 +81,17 @@ namespace Util::OS {
         return false;
     }
 
-    template <bool physfs, FilePath PathType>
+    template <FilePath PathType>
     [[nodiscard]] inline bool readFile(PathType&& path_, vector<u8>& result) noexcept {
-        if constexpr (physfs) {
-            if (!PHYSFS_isInit()) return false;
-
-            PHYSFS_File* file;
-            static_assert(!Equal<PathType, path>, "Path type is not supported for PhysFS. You've probably made a mistake.");
-            if constexpr (Equal<PathType, string>) file = PHYSFS_openRead(path_.c_str());
-            else if constexpr (Equal<PathType, string_view>) file = PHYSFS_openRead(string(path_).c_str());
-            //const char*
-            else file = PHYSFS_openRead(path_);
-            if (!file) return false;
-
-            const PHYSFS_sint64 fileSize = PHYSFS_fileLength(file);
-            if (fileSize < 0) {
-                PHYSFS_close(file);
-                return false;
-            }
-            result.resize(static_cast<u64>(fileSize));
-
-            if (PHYSFS_readBytes(file, result.data(), fileSize) < fileSize) {
-                PHYSFS_close(file);
-                return false;
-            }
-
-            PHYSFS_close(file);
-            return true;
-        }
-        else {
-            ifstream file(path_, std::ios::binary | std::ios::ate);
-            if (!file.is_open()) return false;
-
-            const streamsize fileSize = file.tellg();
-            if (fileSize < 0) return false;
-            file.seekg(0, std::ios::beg);
-            if (!file.good()) return false;
-            result.resize(static_cast<u64>(fileSize));
-
-            if (!file.read(reinterpret_cast<char*>(result.data()), fileSize)) return false;
-            return true;
-        }
+        ifstream file(path_, ios::binary | ios::ate);
+        if (!file.is_open()) return false;
+        const streamsize fileSize = file.tellg();
+        if (fileSize < 0) return false;
+        file.seekg(0, ios::beg);
+        if (!file.good()) return false;
+        result.resize(static_cast<u64>(fileSize));
+        if (!file.read(reinterpret_cast<char*>(result.data()), fileSize)) return false;
+        return true;
     }
 
     //warning: Make sure you passed in the whole file's data. Passing in a slice of the file's data may cause issues or even vulnerabilities if there is a BOM in the file and the slice starts after the BOM.
@@ -125,11 +104,10 @@ namespace Util::OS {
         Fail, Overwrite, Append
     };
 
-    //note: It's decided that Physfs will only be used for reading, not writing. So there is no `physfs` template parameter for `writeFile`.
     template <FilePath PathType>
     [[nodiscard]] inline bool writeFile(PathType&& path_, const span<const u8> data, ExistBehavior existBehavior = ExistBehavior::Fail) noexcept {
         if (existBehavior == ExistBehavior::Fail && exists(path_)) return false;
-        ofstream file(path_, std::ios::binary | (existBehavior == ExistBehavior::Append ? std::ios::app : std::ios::trunc));
+        ofstream file(path_, ios::binary | (existBehavior == ExistBehavior::Append ? ios::app : ios::trunc));
         if (!file.is_open()) return false;
         if (!file.write(reinterpret_cast<const char*>(data.data()), static_cast<streamsize>(data.size()))) {
             file.close();

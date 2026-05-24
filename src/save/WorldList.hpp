@@ -4,24 +4,19 @@
 #include <string>
 #include <vector>
 #include <boost/unordered/unordered_flat_map.hpp>
-
 #include <nbt/nbt.hpp>
 
-#include "../debug/Logger.hpp"
+#include "../debug/loggers.hpp"
 #include "../util/os/filesystem.hpp"
+#include "WorldInfo/v1.hpp"
 
 namespace Save {
-    typedef uint32_t u32;
-    using std::time_t, std::string, std::vector, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::filesystem::directory_iterator, std::filesystem::path, boost::unordered_flat_map, Util::OS::getU8String;
-
-    struct WorldInfo {
-        string folderName, name;
-        time_t createdTime, lastModifiedTime;
-        u32 engineVersion;
-    };
+    typedef uint8_t u8;
+    typedef uint64_t u64;
+    using std::time_t, std::move, std::string, std::vector, std::filesystem::exists, std::filesystem::is_directory, std::filesystem::create_directory, std::filesystem::directory_iterator, std::filesystem::path, boost::unordered_flat_map, Util::OS::readFile, Util::NBT::Latest_NBT, Util::NBT::NBTKind::WorldInfo;
 
     namespace detail {
-        inline vector<WorldInfo> worldList;
+        inline vector<Latest_NBT<WorldInfo>> worldList;
     }
 
     inline void refreshWorldList(const char* rootDir) noexcept {
@@ -29,19 +24,36 @@ namespace Save {
             create_directory(rootDir);
             return;
         }
-        lout << "[WorldList] Loading saves!" << endl;
+        lout << "[WorldList] Loading saves!" << nlaf;
+        vector<u8> fileData;
+        unordered_flat_map<string, NBT::Tag> result;
+        path dirPath, metaPath;
         for (const auto& directory : directory_iterator(rootDir)) {
-            const auto& dirPath = directory.path();
+            dirPath = directory.path();
             if (is_regular_file(dirPath)) continue;
-            lout << "[WorldList] found directory: " << dirPath << endl;
-            const path metaPath = dirPath / "world.cgb";
+            lout << "[WorldList] Found directory: " << dirPath << nlaf;
             if (!exists(metaPath) || !is_regular_file(metaPath)) continue;
-            unordered_flat_map<string, NBT::Tag> result;
-            if (!NBT::read(getU8String(metaPath).c_str(), result)) {
-                lout << "[WorldList] failed to read world.cgb in " << dirPath << endl;
+            metaPath = dirPath / "world.cgb";
+            if (!readFile(metaPath, fileData)) {
+                lout << "[WorldList] Failed to read `world.cgb` in " << dirPath << nlaf;
                 continue;
             }
-            //todo: Resolve `world.cgb` structure properly
+            if (!NBT::readData(fileData, result)) {
+                lout << "[WorldList] Failed to read `world.cgb` in " << dirPath << nlaf;
+                continue;
+            }
+            const u64 fv = NBT::memberOr<Types::UVarInt>(result, "formatVersion", 0);
+            switch (fv) {
+                case 1: {
+                    const auto info = parse_v1(result);
+                    lout << "[WorldList] Loaded world: " << info.name << nlaf;
+                    detail::worldList.push_back(move(info));
+                    break;
+                }
+                default:
+                    lerr << "[WorldList] Unknown formatVersion " << fv << " in " << dirPath << nlaf;
+                    break;
+            }
         }
     }
 }

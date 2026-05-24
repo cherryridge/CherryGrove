@@ -4,7 +4,7 @@
 #include <utility>
 #include <glaze/glaze.hpp>
 
-#include "../../debug/Logger.hpp"
+#include "../../debug/dynamicLoggers.hpp"
 #include "../../settings/JSONKind_Settings.hpp" // IWYU pragma: keep
 #include "../../umi/frontend/json/UmiJSON.hpp" // IWYU pragma: keep
 #include "../os/filesystem.hpp"
@@ -13,7 +13,7 @@
 
 namespace Util::Json {
     typedef uint8_t u8;
-    using std::span, std::string, std::move, glz::write_json_schema, Util::OS::writeFile, Util::OS::ExistBehavior, Logger::LOGGER_DYNAMIC_ERR, Logger::LOGGER_DYNAMIC_OUT;
+    using std::span, std::string, std::move, glz::write_json_schema, Util::OS::writeFile, Util::OS::ExistBehavior, Debug::LOGGER_DYNAMIC_ERR, Debug::LOGGER_DYNAMIC_OUT;
 
     namespace detail {
         //This is not only for `u64` or number related schemas. The `_u64` actually means Glaze will store numeric values as `u64` internally, but it can be used for any schema. The default behavior for Glaze is to store numbers as `double`, which will cause precision loss for large integers.

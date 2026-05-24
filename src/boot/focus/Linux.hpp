@@ -36,7 +36,7 @@ namespace Boot::Focus {
             detail::semaphoreName.clear();
             return;
         }
-        while (sem_trywait(detail::semaphore) == 0) {}
+        while (sem_trywait(detail::semaphore) == 0);
     }
 
     inline void disconnect() noexcept {
@@ -51,7 +51,7 @@ namespace Boot::Focus {
         if (detail::semaphore == SEM_FAILED) return;
         if (sem_trywait(detail::semaphore) != 0) return;
         detail::raiseCurrentWindow();
-        while (sem_trywait(detail::semaphore) == 0) {}
+        while (sem_trywait(detail::semaphore) == 0);
     }
 
     inline void sendMessage(const string_view lockFilePath) noexcept {
