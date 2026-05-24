@@ -75,7 +75,7 @@ jobs:
           }
 
       - name: Upload shaders
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: CherryGrove-shaders
           path: out/windows-x64-release/shaders/*

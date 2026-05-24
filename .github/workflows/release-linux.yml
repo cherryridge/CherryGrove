@@ -77,7 +77,7 @@ jobs:
         run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=/usr/bin/gperf -DCG_COMPILE_SHADERS=OFF
 
       - name: Download shaders
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: CherryGrove-shaders
           path: out/${{matrix.preset}}/shaders
@@ -86,7 +86,7 @@ jobs:
         run: cmake --build --preset ${{matrix.preset}} --verbose --parallel
 
       - name: Upload executable
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: CherryGrove-linux-${{matrix.arch}}-release-executable
           path: out/${{matrix.preset}}/CherryGrove
@@ -110,13 +110,13 @@ jobs:
           sudo apt install -y --no-install-recommends ca-certificates file tar wget
 
       - name: Download x64 executable
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: CherryGrove-linux-x64-release-executable
           path: out/linux-x64-release
 
       - name: Download arm64 executable
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8.0.1
         with:
           name: CherryGrove-linux-arm64-release-executable
           path: out/linux-arm64-release
@@ -129,7 +129,7 @@ jobs:
           ./pack.sh
 
       - name: Upload packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: CherryGrove-linux-release
           path: |
