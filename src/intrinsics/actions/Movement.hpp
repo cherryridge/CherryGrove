@@ -2,7 +2,7 @@
 
 #include "../../input/Action.hpp"
 #include "../../input/boolInput/BIAction.hpp"
-#include "../../simulation/playerEntity.hpp"
+#include "../../simulation/tick/playerEntity.hpp"
 #include "../../util/SlotTable.hpp"
 #include "../systems/fly.hpp"
 #include "../systems/Rotation.hpp"

@@ -11,7 +11,7 @@
 #include "../intrinsics/components/Coordinates.hpp"
 #include "../intrinsics/components/EntityMovementProperties.hpp"
 #include "../intrinsics/components/Rotation.hpp"
-#include "registries.hpp"
+#include "tick/world.hpp"
 
 namespace Simulation::TemporaryCode {
     using InputHandler::BoolInput::BoolInputKind, InputHandler::MouseMove::SubKind;
@@ -40,7 +40,7 @@ namespace Simulation::TemporaryCode {
         Gui::setVisibility(Gui::Intrinsics::Version, false);
         Gui::setVisibility(Gui::Intrinsics::DebugMenu, true);
 
-        playerEntity = registry.entity()
+        playerEntity = world.entity()
             .set<Components::Camera>({60.0f})
             .set<Components::EntityCoordinates>({-0.2, -0.5, 1.0, 0u})
             .set<Components::EntityMovementProperties>({true, true, true, 1.0f, 0.2f, 0.5f})
@@ -63,7 +63,7 @@ namespace Simulation::TemporaryCode {
         static_cast<void>(InputHandler::MouseMove::remove(moveCamera));
         InputHandler::setPointerLocked(false);
 
-        registry.reset();
+        world.reset();
         playerEntity = flecs::entity();
     }
 }

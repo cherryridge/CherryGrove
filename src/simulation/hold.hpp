@@ -8,7 +8,7 @@
 #include "runOnSimThread.hpp"
 #include "states.hpp"
 #include "temporary.hpp"
-#include "tick.hpp"
+#include "tick/tick.hpp"
 
 namespace Simulation::internal {
     using std::memory_order_acquire, std::memory_order_release, std::this_thread::sleep_for;

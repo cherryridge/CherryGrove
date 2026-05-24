@@ -13,6 +13,6 @@ namespace Simulation {
         CHUNK_BLOCK_COUNT = CHUNK_LAYER_BLOCK_COUNT * CHUNK_SIZE;
 
     struct Chunk {
-        vector<BlockID>
+        
     };
 }

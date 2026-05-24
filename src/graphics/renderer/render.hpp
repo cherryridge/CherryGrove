@@ -6,8 +6,8 @@
 #include "../../intrinsics/systems/Camera.hpp"
 #include "../../intrinsics/systems/Rotation.hpp"
 #include "../../settings/Settings.hpp"
-#include "../../simulation/playerEntity.hpp"
 #include "../../simulation/states.hpp"
+#include "../../simulation/tick/playerEntity.hpp"
 #include "definitions.hpp"
 #include "size.hpp"
 

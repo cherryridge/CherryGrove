@@ -3,7 +3,7 @@
 #include "../../input/Action.hpp"
 #include "../../input/mouseMove/MMAction.hpp"
 #include "../../settings/Settings.hpp"
-#include "../../simulation/playerEntity.hpp"
+#include "../../simulation/tick/playerEntity.hpp"
 #include "../systems/Rotation.hpp"
 
 namespace IntrinsicInput {

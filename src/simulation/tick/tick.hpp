@@ -1,7 +1,7 @@
 #pragma once
 #include <thread>
 
-#include "../util/time.hpp"
+#include "../../util/time.hpp"
 
 namespace Simulation::internal {
     using std::this_thread::sleep_for;

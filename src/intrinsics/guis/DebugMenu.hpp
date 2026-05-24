@@ -4,8 +4,8 @@
 #include <imgui.h>
 
 #include "../../graphics/gui/util.hpp"
-#include "../../simulation/playerEntity.hpp"
 #include "../../simulation/states.hpp"
+#include "../../simulation/tick/playerEntity.hpp"
 #include "../components/Coordinates.hpp"
 #include "../components/Rotation.hpp"
 
