@@ -34,7 +34,6 @@ namespace InputHandler::Gamepad {
 
     inline void shutdown() noexcept { detail::gamepads.clear(); }
 
-    //threaded: Simulation thread
     inline void processDevice(const SDL_Event& event) noexcept {
         switch (event.type) {
             case SDL_EVENT_GAMEPAD_ADDED: {
@@ -51,9 +50,7 @@ namespace InputHandler::Gamepad {
             //This device event does not have a gamepad conterpart and we probably need to use it later.
             case SDL_EVENT_JOYSTICK_BATTERY_UPDATED: break;
             default:
-            #if CG_DEBUG
                 lerr << "[InputHandler] This event type should not be routed to Gamepad::processDevice: " << event.type << nlaf;
-            #endif
         }
     }
 }

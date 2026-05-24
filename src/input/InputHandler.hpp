@@ -14,13 +14,14 @@
 #include "scroll/scroll.hpp"
 #include "stick/stick.hpp"
 
+//important: note: threaded: Now every function in the whole InputHandler namespace is called from the Simulation thread. There is no code in this namespace that is called from the main thread, so no need for synchronization primitives here. The main thread interacts by posting tasks to the Simulation thread.
+
 namespace InputHandler {
     typedef uint64_t u64;
     using std::chrono::milliseconds, Util::SPSCQueue;
 
 //#region: Lifecycle
 
-    //threaded: Main Thread
     inline void init() noexcept {
         Gamepad::init();
         const auto& settings = Settings::getSettings();
@@ -29,7 +30,6 @@ namespace InputHandler {
         //todo: query settings for bindings.
     }
 
-    //threaded: Main Thread
     inline void shutdown() noexcept { Gamepad::shutdown(); }
 
 //#endregion
@@ -40,7 +40,6 @@ namespace InputHandler {
         inline FramedImGuiFlags cachedFlags{};
     }
 
-    //threaded: Simulation thread
     //Router for different event types.
     inline void processTrigger() noexcept {
         FramedSDLEvents events;
@@ -131,7 +130,6 @@ namespace InputHandler {
     #endif
     }
 
-    //threaded: Simulation thread
     inline void processPersist() noexcept {
         BoolInput::processPersist();
         MouseMove::processPersist();

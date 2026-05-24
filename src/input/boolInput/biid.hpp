@@ -217,9 +217,7 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] inline constexpr u32 BIIDToRawCode(BoolInputID biid) noexcept {
         if (biid == INVALID_BIID) {
-        #if CG_DEBUG
             lerr << "[InputHandler] Passing invalid BIID to BIIDToRawCode!" << nlaf;
-        #endif
             return INVALID_RAWCODE;
         }
         switch (static_cast<BIInputSource>(detail::BIIDtoSourcedCode.to(biid) >> 12)) {
@@ -234,9 +232,7 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] inline constexpr BIInputSource BIIDToSource(BoolInputID biid) noexcept {
         if (biid == INVALID_BIID) {
-        #if CG_DEBUG
             lerr << "[InputHandler] Passing invalid BIID to BIIDToSource!" << nlaf;
-        #endif
             return BIInputSource::Count;
         }
         return static_cast<BIInputSource>(detail::BIIDtoSourcedCode.to(biid) >> 12);

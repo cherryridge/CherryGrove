@@ -13,38 +13,38 @@ namespace Gui::Util {
         debugTransparent{0.0f, 0.0f, 0.0f, 0.2f};
 
     namespace detail {
-        inline void windowBase(string_view id, bool styled) noexcept {
+        inline void windowBase(string_view id, bool styled, ImGuiWindowFlags flags) noexcept {
             if (styled) {
                 ImGui::PushStyleColor(ImGuiCol_WindowBg, transparent);
                 ImGui::PushStyleColor(ImGuiCol_Border, transparent);
             }
             ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
-            ImGui::Begin(id.data(), NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize);
+            ImGui::Begin(id.data(), NULL, flags);
             auto drawList = ImGui::GetWindowDrawList();
             drawList->PushClipRectFullScreen();
         }
     }
 
-    inline void tlWindow(string_view id, bool styled) noexcept {
-        detail::windowBase(id, styled);
+    inline void tlWindow(string_view id, bool styled, ImGuiWindowFlags flags) noexcept {
+        detail::windowBase(id, styled, flags);
         const auto mainPos = ImGui::GetMainViewport()->Pos;
         ImGui::SetWindowPos(mainPos);
     }
 
-    inline void blWindow(string_view id, bool styled) noexcept {
-        detail::windowBase(id, styled);
+    inline void blWindow(string_view id, bool styled, ImGuiWindowFlags flags) noexcept {
+        detail::windowBase(id, styled, flags);
         const auto winSize = ImGui::GetWindowSize(), mainPos = ImGui::GetMainViewport()->Pos, mainSize = ImGui::GetMainViewport()->Size;
         ImGui::SetWindowPos(ImVec2(mainPos.x, mainPos.y + mainSize.y - winSize.y));
     }
 
-    inline void brWindow(string_view id, bool styled) noexcept {
-        detail::windowBase(id, styled);
+    inline void brWindow(string_view id, bool styled, ImGuiWindowFlags flags) noexcept {
+        detail::windowBase(id, styled, flags);
         const auto winSize = ImGui::GetWindowSize(), mainPos = ImGui::GetMainViewport()->Pos, mainSize = ImGui::GetMainViewport()->Size;
         ImGui::SetWindowPos(ImVec2(mainPos.x + mainSize.x - winSize.x, mainPos.y + mainSize.y - winSize.y));
     }
 
-    inline void centerWindow(string_view id, bool styled) noexcept {
-        detail::windowBase(id, styled);
+    inline void centerWindow(string_view id, bool styled, ImGuiWindowFlags flags) noexcept {
+        detail::windowBase(id, styled, flags);
         const auto winSize = ImGui::GetWindowSize(), mainPos = ImGui::GetMainViewport()->Pos, mainSize = ImGui::GetMainViewport()->Size;
         ImGui::SetWindowPos(ImVec2(mainPos.x + (mainSize.x - winSize.x) / 2.0f, mainPos.y + (mainSize.y - winSize.y) / 2.0f));
     }

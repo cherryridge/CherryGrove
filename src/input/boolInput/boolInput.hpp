@@ -56,9 +56,7 @@ namespace InputHandler::BoolInput {
     //There is no guarantee that any of the action's property isn't duplicated anywhere. Implement it in UMI.
     [[nodiscard]] inline ActionID add(BoolInputActionCallback cb, ActionPriority priority, const ActionwiseInfo_BI& info) noexcept {
         const ActionID id = getNextId();
-    #if CG_DEBUG
         if (info.allowedKinds.none()) [[unlikely]] lerr << "[InputHandler::BoolInput] Action " << id << " is not listening to any BoolInputKind. This action will never be triggered." << nlaf;
-    #endif
         const ActionHandle handle = detail::actionInfos.emplace(id, priority, cb, info);
         registerId(id, {InputKind::BoolInput, handle});
         return id;
@@ -67,9 +65,7 @@ namespace InputHandler::BoolInput {
     //There is no guarantee that global InputHandler deletion is allowed because performance issues of loading an atomic bool every fucking time. Please make sure to enable deletion before calling this function, or very bad things can and will happen.
     //note: This function cannot be overloaded with `ActionHandle` because we need to unregister the action ID in global InputHandler.
     [[nodiscard]] inline bool remove(ActionID id) noexcept {
-    #if CG_DEBUG
         ASSERT_CAN_DELETE(id, false)
-    #endif
         ActionLocation location;
         if (!getLocation(id, location, InputKind::BoolInput)) return false;
         if (!detail::actionInfos.destroy(location.actionHandle)) return false;
@@ -80,7 +76,7 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] inline bool get(ActionHandle handle, BoolInputAction& result) noexcept {
         const BoolInputAction* actionInfo = detail::actionInfos.get(handle);
-        if (actionInfo == nullptr) return false;
+        ASSERT_NOT_NULLPTR(actionInfo, return false;)
         result = *actionInfo;
         return true;
     }
@@ -100,12 +96,12 @@ namespace InputHandler::BoolInput {
         //Check for duplicate bindings. We allow multiple same bindings on different actions, but not on the same action, because it will fire the same callback twice for no reason.
         //Unbound combos are disallowed to be added.
         if (bindingExists(handle, combo) || combo.keyCount() == 0) return false;
-    #if CG_DEBUG
+
         if (combo.keyCount() == 0) {
             lerr << "[InputHandler] Attempt to bind an unbound KeyCombo. This should have been prevented by the caller. ActionHandle: " << handle.value << nlaf;
             return false;
         }
-    #endif
+
         const BindingHandle bindingHandle = detail::bindings.emplace(handle, combo);
         const auto* actionInfo = detail::actionInfos.get(handle);
         for (BoolInputID i = 0; i < BIID_COUNT; i++) if (combo.hasKey(i)) {
@@ -134,9 +130,7 @@ namespace InputHandler::BoolInput {
         for (BoolInputID i = 0; i < BIID_COUNT; i++) if (combo.hasKey(i)) {
             for (u64 j = 0; j < detail::BIIDtoBindings[i].size(); j++) {
                 const BindingRecord* record = detail::bindings.get(detail::BIIDtoBindings[i][j]);
-            #if CG_DEBUG
-                ASSERT_NOT_NULLPTR(record, false)
-            #endif
+                ASSERT_NOT_NULLPTR(record, return false;)
                 if (record->actionHandle == handle && record->combo == combo) return true;
             }
             //If the combo has a key that is not bound to the action, then the binding definitely doesn't exist. No need to check other keys.
@@ -174,9 +168,7 @@ namespace InputHandler::BoolInput {
         for (BoolInputID i = 0; i < BIID_COUNT; i++) if (combo.hasKey(i)) {
             for (u64 j = 0; j < detail::BIIDtoBindings[i].size(); j++) {
                 const BindingRecord* record = detail::bindings.get(detail::BIIDtoBindings[i][j]);
-            #if CG_DEBUG
-                ASSERT_NOT_NULLPTR(record, false)
-            #endif
+                ASSERT_NOT_NULLPTR(record, return false;)
                 if (record->actionHandle == handle && record->combo == combo) {
                     detail::removeBinding(detail::BIIDtoBindings[i][j]);
                     return true;
@@ -218,14 +210,10 @@ namespace InputHandler::BoolInput {
             bool found = false;
             for (u64 j = 0; j < detail::BIIDtoBindings[i].size(); j++) {
                 const BindingRecord* record = detail::bindings.get(detail::BIIDtoBindings[i][j]);
-            #if CG_DEBUG
-                ASSERT_NOT_NULLPTR(record, false)
-            #endif
+                ASSERT_NOT_NULLPTR(record, return false;)
                 if (record->combo == combo) {
                     const BoolInputAction* action = detail::actionInfos.get(record->actionHandle);
-                #if CG_DEBUG
-                    ASSERT_NOT_NULLPTR(action, false)
-                #endif
+                    ASSERT_NOT_NULLPTR(action, return false;)
                     if (!found) found = true;
                     result.push_back(*action);
                 }
@@ -239,7 +227,6 @@ namespace InputHandler::BoolInput {
 
 //#region Event Processing
 
-    //threaded: Simulation thread
     inline void processTrigger(const SDL_Event& event) noexcept {
         BoolInputID biid;
         bool down = true;
@@ -269,9 +256,7 @@ namespace InputHandler::BoolInput {
                 down = false;
                 break;
             default:
-            #if CG_DEBUG
                 lerr << "[InputHandler::BoolInput] Unexpected event type: " << event.type << nlaf;
-            #endif
                 return;
         }
         const BoolInputKind triggeredKind = down ? BoolInputKind::Down : BoolInputKind::Up;
@@ -289,17 +274,13 @@ namespace InputHandler::BoolInput {
         unordered_flat_map<KeyCombo, vector<ActionHandle>> comboGroups;
         for (u64 i = 0; i < detail::BIIDtoBindings[biid].size(); i++) {
             const BindingRecord* record = detail::bindings.get(detail::BIIDtoBindings[biid][i]);
-        #if CG_DEBUG
-            ASSERT_NOT_NULLPTR(record, )
+            ASSERT_NOT_NULLPTR(record, return;)
             if (record->combo.keyCount() == 0) {
                 lerr << "[InputHandler] BindingRecord with unbound KeyCombo found in BIIDtoBindings. Unbound KeyCombos should not enter the record slottable. BIID: " << biid << ", record index: " << i << nlaf;
                 return;
             }
-        #endif
             const BoolInputAction* actionInfo = detail::actionInfos.get(record->actionHandle);
-        #if CG_DEBUG
-            ASSERT_NOT_NULLPTR(actionInfo, )
-        #endif
+            ASSERT_NOT_NULLPTR(actionInfo, return;)
             //We've sorted the binding handles in the BIIDtoBindings according to the actions behind, so we saved the time of sorting here.
             //Ordered splices of sorted sequences are still sorted, regardless of the order of the splices.
             if (currentCombo >= record->combo && actionInfo->actionwiseInfo.allowedKinds.get(triggeredKind)) comboGroups[record->combo].push_back(record->actionHandle);
@@ -313,8 +294,11 @@ namespace InputHandler::BoolInput {
         });
     }
 
-    //threaded: Simulation thread
     inline void processPersist() noexcept {
+        const TimePoint now = Util::now();
+        for (BoolInputID i = 0; i < BIID_COUNT; i++) detail::state[i].tryExpireVirtual(now);
+        writeSnapshot(detail::state, detail::stateSnapshot, detail::snapshotSeq);
+
         const KeyCombo currentCombo = detail::getCurrentCombo();
         if (currentCombo.keyCount() == 0) return;
 
@@ -322,17 +306,13 @@ namespace InputHandler::BoolInput {
         for (BoolInputID biid = 0; biid < BIID_COUNT; biid++) if (currentCombo.hasKey(biid)) {
             for (u64 i = 0; i < detail::BIIDtoBindings[biid].size(); i++) {
                 const BindingRecord* record = detail::bindings.get(detail::BIIDtoBindings[biid][i]);
-            #if CG_DEBUG
-                ASSERT_NOT_NULLPTR(record, )
+                ASSERT_NOT_NULLPTR(record, continue;)
                 if (record->combo.keyCount() == 0) {
                     lerr << "[InputHandler] BindingRecord with unbound KeyCombo found in BIIDtoBindings. Unbound KeyCombos should not enter the record slottable. BIID: " << biid << ", record index: " << i << nlaf;
                     return;
                 }
-            #endif
                 const BoolInputAction* actionInfo = detail::actionInfos.get(record->actionHandle);
-            #if CG_DEBUG
-                ASSERT_NOT_NULLPTR(actionInfo, )
-            #endif
+                ASSERT_NOT_NULLPTR(actionInfo, continue;)
                 //We used an even smarter trick: make every combo only added through the lowest key in the combo. This way we don't need to worry about duplicating actions and every actions in one combo is still sorted, because they are originated from the same BIIDtoBindings list, which is sorted.
                 //Also, the first key check comes before because it's more likely to fail and is more performant.
                 if (record->combo.firstKey() == biid && currentCombo >= record->combo && actionInfo->actionwiseInfo.allowedKinds.get(BoolInputKind::Persist)) comboGroups2[record->combo].push_back(record->actionHandle);
@@ -351,7 +331,6 @@ namespace InputHandler::BoolInput {
         inline void resetRange(BoolInputID start, BoolInputID end) noexcept { for (BoolInputID i = start; i <= end; i++) state[i].reset(); }
     }
 
-    //threaded: Simulation thread
     //We don't reset internal states on device addition, only on removal.
     inline void processDevice(const SDL_Event& event) noexcept {
         switch (event.type) {
@@ -365,9 +344,7 @@ namespace InputHandler::BoolInput {
                 detail::resetRange(BIID_GAMEPAD_START, BIID_GAMEPAD_END);
                 break;
             default:
-            #if CG_DEBUG
                 lerr << "[InputHandler] This event type should not be routed to BoolInput::processDevice: " << event.type << nlaf;
-            #endif
                 break;
         }
     }

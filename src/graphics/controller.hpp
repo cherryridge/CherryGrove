@@ -11,7 +11,7 @@
 
 namespace Graphics {
     typedef uint64_t u64;
-    using std::atomic, std::memory_order_release, std::memory_order_acquire, std::thread;
+    using std::atomic, std::memory_order_release, std::memory_order_acquire, std::thread, std::this_thread::yield;
 
     namespace detail {
         inline atomic<bool> initialized{false}, shutdownComplete{false};
@@ -42,8 +42,13 @@ namespace Graphics {
 
     //threaded: Main Thread
     inline void init() noexcept {
+        //Call this on the SDL/main thread before `bgfx::init` so bgfx uses this thread as its render thread.
+        bgfx::renderFrame();
         detail::graphicsThread = thread(detail::init);
-        while (!detail::initialized.load(memory_order_acquire)) bgfx::renderFrame();
+    }
+
+    [[nodiscard]] inline bool isInitialized() noexcept {
+        return detail::initialized.load(memory_order_acquire);
     }
 
     //threaded: Main Thread

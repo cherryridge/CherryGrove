@@ -31,32 +31,31 @@ namespace InputHandler::MouseMove {
         const ActionHandle handle = detail::actionInfos.emplace(id, priority, cb, info);
         if (info.allowedKinds.get(SubKind::Trigger)) insertSort(detail::sortedTrigger, detail::actionInfos, handle);
         if (info.allowedKinds.get(SubKind::Persist)) insertSort(detail::sortedPersist, detail::actionInfos, handle);
-    #if CG_DEBUG
         if (info.allowedKinds.none()) [[unlikely]] lerr << "[InputHandler::MouseMove] Action " << id << " is not listening to any SubKind. This action will never be triggered." << nlaf;
-    #endif
         registerId(id, {InputKind::MouseMove, handle});
         return id;
     }
 
     [[nodiscard]] inline bool remove(ActionID id) noexcept {
-    #if CG_DEBUG
         ASSERT_CAN_DELETE(id, false)
-    #endif
         ActionLocation location;
         if (!getLocation(id, location, InputKind::MouseMove)) return false;
+
         const auto* actionInfo = detail::actionInfos.get(location.actionHandle);
-        if (actionInfo == nullptr) return false;
-        const auto allowedKinds = actionInfo->actionwiseInfo.allowedKinds;
+        ASSERT_NOT_NULLPTR(actionInfo, return false;)
+
+        if (actionInfo->actionwiseInfo.allowedKinds.get(SubKind::Trigger)) remove(detail::sortedTrigger, detail::actionInfos, id);
+        if (actionInfo->actionwiseInfo.allowedKinds.get(SubKind::Persist)) remove(detail::sortedPersist, detail::actionInfos, id);
+
         static_cast<void>(detail::actionInfos.destroy(location.actionHandle));
-        if (allowedKinds.get(SubKind::Trigger)) remove(detail::sortedTrigger, detail::actionInfos, id);
-        if (allowedKinds.get(SubKind::Persist)) remove(detail::sortedPersist, detail::actionInfos, id);
+
         unregisterId(id);
         return true;
     }
 
     [[nodiscard]] inline bool get(ActionHandle handle, MouseMoveAction& result) noexcept {
         const MouseMoveAction* actionInfo = detail::actionInfos.get(handle);
-        if (actionInfo == nullptr) return false;
+        ASSERT_NOT_NULLPTR(actionInfo, return false;)
         result = *actionInfo;
         return true;
     }
@@ -71,14 +70,11 @@ namespace InputHandler::MouseMove {
 
 //#region Event Processing
 
-    //threaded: Simulation thread
     inline void processTrigger(const SDL_Event& event) noexcept {
-    #if CG_DEBUG
         if (event.type != SDL_EVENT_MOUSE_MOTION) {
             lerr << "[InputHandler::MouseMove] Unexpected event type: " << event.type << nlaf;
             return;
         }
-    #endif
         const EventwiseInfo_MM eventwiseInfo{
             .currentX = event.motion.x,
             .currentY = event.motion.y,
@@ -89,7 +85,6 @@ namespace InputHandler::MouseMove {
         process(detail::actionInfos, detail::sortedTrigger, eventwiseInfo);
     }
 
-    //threaded: Simulation thread
     inline void processPersist() noexcept {
         const auto pos = detail::lastMousePos.load(memory_order_acquire).pos;
         const EventwiseInfo_MM eventwiseInfo{

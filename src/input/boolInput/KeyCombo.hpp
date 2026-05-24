@@ -43,9 +43,7 @@ namespace InputHandler::BoolInput {
         }
 
         [[nodiscard]] bool hasKey(BoolInputID biid) const noexcept {
-            #if CG_DEBUG
-                ASSERT_BIID_IN_BOUND(biid)
-            #endif
+            ASSERT_BIID_IN_BOUND(biid)
             if (biid < 64) return (lower & (1ull << biid)) != 0;
             else if (biid < 128) return (middle & (1ull << (biid - 64))) != 0;
             else if (biid < 192) return (higher & (1ull << (biid - 128))) != 0;
@@ -57,9 +55,7 @@ namespace InputHandler::BoolInput {
         //This function just adds the key and returns whether the key already exists.
         //This function is not [[nodiscard]] to silence excessive warnings.
         bool addKey(BoolInputID biid) noexcept {
-            #if CG_DEBUG
-                ASSERT_BIID_IN_BOUND(biid)
-            #endif
+            ASSERT_BIID_IN_BOUND(biid)
             const bool result = hasKey(biid);
             if (biid < 64) lower |= (1ull << biid);
             else if (biid < 128) middle |= (1ull << (biid - 64));
@@ -69,9 +65,7 @@ namespace InputHandler::BoolInput {
         }
         //This function returns whether a success addition is made.
         [[nodiscard]] bool addKey_strict(BoolInputID biid) noexcept {
-            #if CG_DEBUG
-                ASSERT_BIID_IN_BOUND(biid)
-            #endif
+            ASSERT_BIID_IN_BOUND(biid)
             if (hasKey(biid)) return false;
             if (biid < 64) lower |= (1ull << biid);
             else if (biid < 128) middle |= (1ull << (biid - 64));
@@ -83,9 +77,7 @@ namespace InputHandler::BoolInput {
         //This function just removes the key and returns whether the key has existed.
         //This function is not [[nodiscard]] to silence excessive warnings.
         bool removeKey(BoolInputID biid) noexcept {
-            #if CG_DEBUG
-                ASSERT_BIID_IN_BOUND(biid)
-            #endif
+            ASSERT_BIID_IN_BOUND(biid)
             const bool result = hasKey(biid);
             if (biid < 64) lower &= ~(1ull << biid);
             else if (biid < 128) middle &= ~(1ull << (biid - 64));
@@ -95,9 +87,7 @@ namespace InputHandler::BoolInput {
         }
         //This function returns whether a success removal is made.
         [[nodiscard]] bool removeKey_strict(BoolInputID biid) noexcept {
-            #if CG_DEBUG
-                ASSERT_BIID_IN_BOUND(biid)
-            #endif
+            ASSERT_BIID_IN_BOUND(biid)
             if (!hasKey(biid)) return false;
             if (biid < 64) lower &= ~(1ull << biid);
             else if (biid < 128) middle &= ~(1ull << (biid - 64));

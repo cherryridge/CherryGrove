@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/unordered/unordered_flat_map.hpp>
 
+#include "../debug/loggers.hpp" // IWYU pragma: keep
 #include "Action.hpp"
 #include "InputKind.hpp"
 #include "types.hpp"
@@ -39,9 +40,9 @@ namespace InputHandler::internal {
     }
 
     inline constexpr const char* NULLPTR_ERROR = "[InputHandler] Unexpected nullptr encountered!";
-    #define ASSERT_NOT_NULLPTR(ptr, ret) \
+    #define ASSERT_NOT_NULLPTR(ptr, doSomething) \
     if ((ptr) == nullptr) { \
         lerr << InputHandler::internal::NULLPTR_ERROR << nlaf; \
-        return ret; \
+        doSomething \
     }
 }

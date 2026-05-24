@@ -30,6 +30,7 @@ namespace Renderer {
         //Render entities
             
             //bgfx::submit();
+            bgfx::touch(VIEWID_GAME);
         }
         else bgfx::touch(VIEWID_GAME);
         bgfx::frame();

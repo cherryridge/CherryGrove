@@ -44,7 +44,10 @@ namespace Sound {
     //threaded: Main Thread
     inline void init() noexcept {
         detail::audioThread = thread(detail::init);
-        while (!detail::initialized.load(memory_order_acquire));
+    }
+
+    [[nodiscard]] inline bool isInitialized() noexcept {
+        return detail::initialized.load(memory_order_acquire);
     }
 
     //threaded: Main Thread

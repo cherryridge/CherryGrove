@@ -177,9 +177,7 @@ namespace InputHandler::BoolInput {
 
     [[nodiscard]] inline const char* getBoolInputName(BoolInputID biid) noexcept {
         if (biid >= BIID_COUNT) {
-        #if CG_DEBUG
-            lerr << "[InputHandler] Out-of-bound BIID in getBoolInputName: " << biid << endl;
-        #endif
+            lerr << "[InputHandler] Out-of-bound BIID in getBoolInputName: " << biid << nlaf;
             return "InvalidInput";
         }
         switch (BIIDToSource(biid)) {
@@ -199,9 +197,7 @@ namespace InputHandler::BoolInput {
                 return result;
             }
             default:
-            #if CG_DEBUG
-                lerr << "[InputHandler] Unrecognized BIInputSource in getBoolInputName: " << static_cast<u8>(BIIDToSource(biid)) << endl;
-            #endif
+                lerr << "[InputHandler] Unrecognized BIInputSource in getBoolInputName: " << static_cast<u8>(BIIDToSource(biid)) << nlaf;
                 return "InvalidInput";
         }
     }

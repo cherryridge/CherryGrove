@@ -9,7 +9,7 @@
 
 namespace Gui::MainMenu {
     inline void render() noexcept {
-        Gui::Util::centerWindow("MainMenu", true);
+        Gui::Util::centerWindow("MainMenu", true, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoNav);
         {
             ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0], 28.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 80.0f));

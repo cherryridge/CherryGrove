@@ -1,35 +1,28 @@
 #pragma once
 #include <atomic>
 #include <bgfx/bgfx.h>
-#include <function2/function2.hpp>
 #include <SDL3/SDL.h>
 
 #include "../boot/focus/Focus.hpp"
 #include "../globalState.hpp"
 #include "../input/inputPipeline.hpp"
 #include "../settings/Settings.hpp"
-#include "../util/concurrentQueue.hpp"
-#include "../util/time.hpp"
 #include "../window.hpp"
+#include "runOnMainThread.hpp"
 #include "shutdown.hpp"
 
 namespace Main {
     typedef uint64_t u64;
-    using std::memory_order_relaxed, std::memory_order_acquire, fu2::function_view, Util::MPSCQueue, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
-
-    inline MPSCQueue<function_view<void()>> runOnMainThread;
+    using std::memory_order_relaxed, std::memory_order_acquire, InputHandler::MAXIMUM_INPUT_EVENTS_PER_FRAME;
 
     //threaded: Main loop.
     inline void hold() noexcept {
-        const u64
-            maxTasks = Settings::getSettings().debug.maxMainThreadTasksPerFrame,
-            maxTaskTimeUs = Settings::getSettings().debug.maxMainThreadTaskTimeUs,
-            maxRenderWaitTimeMs = Settings::getSettings().debug.maxMainThreadRenderWaitTimeMs;
+        const auto& debug = Settings::getSettings().debug;
+        const u64 maxRenderWaitTimeMs = debug.maxMainThreadRenderWaitTimeMs;
+        internal::setTaskProcessLimits(debug.maxMainThreadTasksPerFrame, debug.maxMainThreadTaskTimeUs);
 
-        Util::TimePoint taskStartTime;
         SDL_Event event;
         InputHandler::FramedSDLEvents frame;
-        function_view<void()> task;
 
         while (GlobalState::isCGAlive()) {
         //Check for focus messages
@@ -55,9 +48,8 @@ namespace Main {
         //Render bgfx frame
             bgfx::renderFrame(maxRenderWaitTimeMs);
     
-        //Drain `runOnMainThread` MPSCQueue
-            taskStartTime = Util::now();
-            for (u64 i = 0; i < maxTasks && Util::timeDiffUs(taskStartTime, Util::now()) < maxTaskTimeUs; i++) if (runOnMainThread.dequeue(task)) task();
+        //Process main thread tasks
+            internal::processTasks();
         }
         stop: shutdown();
     }
