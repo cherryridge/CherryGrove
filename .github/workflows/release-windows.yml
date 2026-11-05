@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -54,7 +54,7 @@ jobs:
         run: cmake --preset ${{matrix.preset}} -DGPERF_EXECUTABLE=C:/msys64/usr/bin/gperf.exe -DCG_COMPILE_SHADERS=OFF
 
       - name: Download shaders
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8
         with:
           name: CherryGrove-shaders
           path: out/${{matrix.preset}}/shaders
@@ -76,7 +76,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -100,13 +100,13 @@ jobs:
           Add-Content -LiteralPath $env:GITHUB_PATH -Value $innoSetupPath
 
       - name: Download x64 executable
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8
         with:
           name: CherryGrove-windows-x64-release-executable
           path: out/windows-x64-release
 
       - name: Download arm64 executable
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8
         with:
           name: CherryGrove-windows-arm64-release-executable
           path: out/windows-arm64-release
