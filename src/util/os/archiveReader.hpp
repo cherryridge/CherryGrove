@@ -8,6 +8,7 @@
 #include <archive_entry.h>
 
 #include "filesystem.hpp"
+#include "platform.hpp"
 
 namespace Util::OS {
     using std::array, std::filesystem::path, std::filesystem::is_regular_file, std::filesystem::exists, std::string, std::string_view, std::vector;
@@ -48,8 +49,12 @@ namespace Util::OS {
         archive_read_support_format_all(a);
         archive_read_support_format_raw(a);
         archive_read_support_filter_all(a);
+    #if CG_PLATFORM_WINDOWS
+        if (archive_read_open_filename_w(a, input.c_str(), 10240) != ARCHIVE_OK) {
+    #else
         const string filename = getU8String(input);
         if (archive_read_open_filename(a, filename.c_str(), 10240) != ARCHIVE_OK) {
+    #endif
             archive_read_free(a);
             return NotASupportedArchive;
         }
@@ -118,8 +123,12 @@ namespace Util::OS {
         archive_read_support_format_all(a);
         archive_read_support_format_raw(a);
         archive_read_support_filter_all(a);
-        const string path_ = getU8String(input);
-        if (archive_read_open_filename(a, path_.c_str(), 10240) != ARCHIVE_OK) {
+    #if CG_PLATFORM_WINDOWS
+        if (archive_read_open_filename_w(a, input.c_str(), 10240) != ARCHIVE_OK) {
+    #else
+        const string u8path = getU8String(input);
+        if (archive_read_open_filename(a, u8path.c_str(), 10240) != ARCHIVE_OK) {
+    #endif
             archive_read_free(a);
             return false;
         }
