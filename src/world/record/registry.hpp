@@ -2,13 +2,16 @@
 #include <vector>
 
 #include "RecordDesc.hpp"
+#include "../../util/SlotTable.hpp"
+#include "../../util/RuntimeBijection.hpp"
 
 namespace World::Record {
-    using std::vector;
+    using std::vector, Util::SlotTable, Util::RuntimeBijection;
+
+    MAKE_DISTINCT_HANDLE(SchemaHandle)
 
     namespace detail {
-        inline vector<RecordDesc> registry;
-    }
+        inline SlotTable<RecordDesc, SchemaHandle> schemaRegistry;
 
-    
+    }
 }
