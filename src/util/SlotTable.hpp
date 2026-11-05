@@ -54,15 +54,15 @@ namespace Util {
         ) \
     };
 
-    //Use SlotTable with `HandleType` as plain `GenerationalHandle` is deprecated and should be replaced by distinct handles for better type safety.
-    template <typename EntryType, typename HandleType> requires EqualStrict<HandleType, GenerationalHandle> || DistinctHandleOf<HandleType, GenerationalHandle>
+    //note: `HandleType` must be a distinct handle made with `MAKE_DISTINCT_HANDLE`. Plain `GenerationalHandle` is rejected for type safety.
+    template <typename EntryType, typename HandleType> requires DistinctHandleOf<HandleType, GenerationalHandle>
     struct SlotTable {
     private:
         struct Entry {
             EntryType data;
             //0 is reserved for tombstone. Odd is occupied, even is free.
             //We're using copy assignment operator to actually destroy things on emplace instead of destroying them on destroy though. This has nothing to do with generation counting.
-            //The default value of `1` makes every slot start as occupied, which is a good default. But you can safely ignore it, since we will assign a value to generation on every path.
+            //The default value of `1` makes every slot start as occupied, since we will *always* assign a value to a new one on every path.
             u32 generation{1};
         };
 
@@ -70,13 +70,11 @@ namespace Util {
         vector<u32> freeList;
 
         [[nodiscard]] constexpr static GenerationalHandle getHandle(HandleType handle) noexcept {
-            if constexpr (EqualStrict<HandleType, GenerationalHandle>) return handle;
-            else return handle.value;
+            return handle.value;
         }
 
         [[nodiscard]] constexpr static HandleType wrapHandle(GenerationalHandle handle) noexcept {
-            if constexpr (EqualStrict<HandleType, GenerationalHandle>) return handle;
-            else return HandleType{
+            return HandleType{
                 .value = handle
             };
         }

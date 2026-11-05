@@ -11,5 +11,6 @@ namespace Pack::detail {
     inline unordered_flat_map<uuid_JSON, PackMetaInfo> packInfo;
     inline unordered_flat_map<uuid_JSON, KnownPack> knownPacks;
 
-    inline unordered_flat_map<string, vector<uuid_JSON>> shadowingInfo; //nameSpace -> pack UUID in linear topology order
+    //nameSpace -> pack UUID in linear topology order
+    inline unordered_flat_map<string, vector<uuid_JSON>> shadowingInfo;
 }

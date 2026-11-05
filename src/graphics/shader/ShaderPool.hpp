@@ -10,7 +10,7 @@ namespace ShaderPool {
     typedef uint8_t u8;
     using Util::SlotTable;
 
-    MAKE_DISTINCT_HANDLE(ShaderPoolHandle);
+    MAKE_DISTINCT_HANDLE(ShaderPoolHandle)
 
     namespace detail {
         inline SlotTable<bgfx::ProgramHandle, ShaderPoolHandle> registry;
